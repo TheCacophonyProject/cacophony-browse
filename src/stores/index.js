@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import User from './User.store'
-//import actions from './actions'
+import User from './modules/User.store.js'
+//import actions from './actions' TODO: Clean up imports
 //import mutations from './mutations'
 //import getters from './getters'
 

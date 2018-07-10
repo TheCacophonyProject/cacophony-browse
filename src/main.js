@@ -8,6 +8,8 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 const router = createRouter()
 
+Vue.use(BootstrapVue);
+
 new Vue({
   el: '#app',
   store,
@@ -15,4 +17,3 @@ new Vue({
   render: h => h(App)
 })
 
-Vue.use(BootstrapVue);

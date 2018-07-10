@@ -6,7 +6,7 @@
 
 export default {
 	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'audio-bait',
+	name: 'audio-bait-view',
 	// https://vuejs.org/v2/style-guide/#Component-data-essential
 	data () {
 		return {
