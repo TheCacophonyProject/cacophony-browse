@@ -10,10 +10,13 @@ const router = createRouter()
 
 Vue.use(BootstrapVue);
 
+// https://vue-multiselect.js.org
+import Multiselect from 'vue-multiselect'
+Vue.component('multiselect', Multiselect)
+
 new Vue({
   el: '#app',
   store,
   router,
   render: h => h(App)
 })
-

@@ -1,8 +1,14 @@
 <template>
-	<h1>Recordings</h1>
+	<b-container>
+		<QueryRecordings heading="Search Video Recordings"/>
+
+
+	</b-container>
 </template>
 
 <script>
+
+import QueryRecordings from '../components/QueryRecordings/QueryRecordings.vue'
 
 export default {
 	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
@@ -16,6 +22,15 @@ export default {
 	computed: {
 	},
 	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {}
+	props: {},
+	components: {QueryRecordings}
 }
 </script>
+
+<style>
+.scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}
+</style>
