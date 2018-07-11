@@ -43,6 +43,20 @@ const actions = {
 	LOGOUT (context) {
 		context.commit('invalidateLogin')
 		api.user.logout()
+	},
+	REGISTER (context, payload) {
+		return new Promise((resolve, reject) => {
+			api.user.register(payload.username, payload.password)
+				.then(response => response.json())
+				.then((json) => {
+					if(!json.success) {
+						reject(json)
+					}
+					api.user.persistUser(json.userData.username,json.token)
+					context.commit('receiveLogin', json)
+					resolve(json)
+				})
+		})
 	}
 }
 
