@@ -1,13 +1,15 @@
 <template>
 	<div>
-		<div class="hero" />
-		<div class="container-fluid">
+		<Hero/>
+		<b-container>
 			Home
-		</div>
+		</b-container>
 	</div>
 </template>
 
 <script>
+
+import Hero from '../components/Hero.vue'
 
 	export default {
 		// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
@@ -19,30 +21,9 @@
 		// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
 		computed:{},
 		// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-		props:{}
-	}
-</script>
-<style>
-	.hero {
-		background-image: url('../assets/hero/hero-theory.jpg');
-		background-position: center;
-		background-repeat: no-repeat;
-		background-color: transparent;
-		position: relative;
-		margin-top: -15px;
-		margin-bottom: 15px;
-	}
-
-	/* Mobiles */
-	.hero {
-		height: 200px;
-	}
-
-	/* Large screens */
-	@media only screen and (min-width: 768px) {
-		.hero {
-			height: 360px;
+		props:{},
+		components: {
+			Hero
 		}
 	}
-
-</style>
+</script>

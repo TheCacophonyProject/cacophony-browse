@@ -1,5 +1,5 @@
 <template>
-	<b-container>
+	<b-container class="col-md-6 col-lg-5">
 		<h1>Register</h1>
 
 		<b-form @submit="onSubmit">
