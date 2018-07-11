@@ -2,7 +2,20 @@
 	<div>
 		<Hero/>
 		<b-container>
-			Home
+			<h1>{{ greeting }}</h1>
+			<dl>
+				<dt>Username</dt>
+				<dd id="username"></dd>
+				<dt>First name</dt>
+				<dd id="firstname"></dd>
+				<dt>Last name</dt>
+				<dd id="lastname"></dd>
+				<dt>Email</dt>
+				<dd id="email"></dd>
+				<dt>Your groups</dt>
+				<dd id="groups"></dd>
+			</dl>
+			<input class="btn btn-secondary" id="new-group" type="button" value="New Group" v-on:click="newGroup" />
 		</b-container>
 	</div>
 </template>
@@ -19,7 +32,11 @@ import Hero from '../components/Hero.vue'
 			return {}
 		},
 		// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-		computed:{},
+		computed:{
+			greeting: function () {
+				return "Kia ora " + this.$store.state.User.userData.username
+			}
+		},
 		// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
 		props:{},
 		components: {
