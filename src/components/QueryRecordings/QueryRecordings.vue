@@ -26,36 +26,17 @@
         <SelectDate title="To Date" v-model="toDate"/>
       </b-col>
       <b-col cols="12">
-        <b-button block variant="primary">Search</b-button>
+        <b-button
+        v-on:click="buildQuery"
+        block
+        variant="primary">Search</b-button>
       </b-col>
-      <h4>Selected options</h4>
-      <ul>
-        <li>
-          Duration low: {{ duration.low }}
-        </li>
-        <li>
-          Duration high: {{ duration.high }}
-        </li>
-        <li>
-          Devices: {{ devices }}
-        </li>
-        <li>
-          Animals: {{ animals }}
-        </li>
-        <li>
-          From Date: {{ fromDate }}
-        </li>
-        <li>
-          To Date: {{ toDate }}
-        </li>
-        <li>
-          Tag Types: {{ tagTypes }}
-        </li>
-        <li>
-          Duration Value: {{ duration }}
-        </li>
-      </ul>
-
+      <b-col cols="12">
+        <h4>Query</h4>
+        <div>
+          {{ query }}
+        </div>
+      </b-col>
     </b-form-row>
 </template>
 
@@ -85,18 +66,11 @@ export default {
       fromDate: null,
       toDate: null,
       tagTypes: null,
-      enlargeText: 1
+      query: null
 		}
 	},
 	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
 	computed: {
-    durationLow: function () {
-      // return "low"
-      return this.durationValue //.split(",")[0]
-    },
-    durationHigh: function () {
-      return this.durationValue //.split(",")[1]
-    },
 	},
 	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
 	props: {
@@ -106,6 +80,38 @@ export default {
     updateTagType(tagType) {
       this.tagtype = tagType
       console.log('update tag type') //eslint-disable-line
+    },
+    buildQuery() {
+      let query = {type: 'thermalRaw'}
+      // Add devices
+      if (this.devices.length !== 0) {
+        query.DeviceId = []
+        for (let device of this.devices) {
+          query.DeviceId.push(device.id)
+        }
+      }
+      // Add duration
+      if (this.duration.low || this.duration.high) {
+        query.duration = {}
+      }
+      if (this.duration.low) {
+        query.duration["$gt"] = this.duration.low
+      }
+      if (this.duration.high) {
+        query.duration["$lt"] = this.duration.high
+      }
+      // Add date
+      if (this.fromDate || this.toDate ) {
+        query.recordingDateTime = {};
+      }
+      if (this.fromDate) {
+        query.recordingDateTime["$gt"] = this.fromDate;
+      }
+      if (this.toDate) {
+        query.recordingDateTime["$lt"] = this.toDate;
+      }
+
+      this.query = query
     }
   }
 }
