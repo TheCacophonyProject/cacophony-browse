@@ -1,49 +1,31 @@
 <template>
-
-	<nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between">
-
-		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-		<router-link class="navbar-brand" to="/" alt="home">
-			<img src="../assets/titlebar.png"/>
-		</router-link>
-		<div v-if="isLoggedIn" class="collapse navbar-collapse" id="navbarToggler">
-
-			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-				<li class="nav-item">
-					<router-link class="nav-link" to="/audio">Audio</router-link>
-				</li>
-				<li class="nav-item">
-					<router-link class="nav-link" to="/audiobait">Audio Bait</router-link>
-				</li>
-				<li class="nav-item">
-					<router-link class="nav-link" to="/recordings">Recordings</router-link>
-				</li>
-				<li class="nav-item">
-					<router-link class="nav-link" to="/groups">Groups</router-link>
-				</li>
-				<li class="nav-item">
-					<router-link class="nav-link" to="/devices">Devices</router-link>
-				</li>
-			</ul>
-			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-				<li class="nav-item"><span class="nav-link">Hello {{userName}}</span></li>
-				<li class="nav-item"><a class="nav-link" v-on:click="logout">Logout</a></li>
-			</ul>
-		</div>
-		<div v-if="!isLoggedIn" class="collapse navbar-collapse" id="navbarToggler">{{userName}}
-			<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-				<li class="nav-item">
-					<router-link class="nav-link" to="/login">Login</router-link>
-				</li>
-				<li class="nav-item">
-					<router-link class="nav-link" to="/register">Register</router-link>
-				</li>
-			</ul>
-		</div>
-
-	</nav>
+	<div>
+		<b-navbar toggleable="lg">
+			<b-navbar-brand>
+				<router-link class="navbar-brand" to="/" alt="home">
+					<img src="../assets/titlebar.png"/>
+				</router-link>
+			</b-navbar-brand>
+			<b-navbar-toggle target="navbarToggler"></b-navbar-toggle>
+			<b-collapse is-nav id="navbarToggler">
+				<b-navbar-nav v-if="isLoggedIn">
+					<b-nav-item to="/audio">Audio</b-nav-item>
+					<b-nav-item to="/audiobait">Audio Bait</b-nav-item>
+					<b-nav-item to="/recordings">Recordings</b-nav-item>
+					<b-nav-item to="/groups">Groups</b-nav-item>
+					<b-nav-item to="/devices">Devices</b-nav-item>
+				</b-navbar-nav>
+				<b-navbar-nav class="ml-auto" v-if="isLoggedIn">
+					<b-nav-text>Hello {{userName}}</b-nav-text>
+					<b-nav-item v-on:click="logout">Logout</b-nav-item>
+				</b-navbar-nav>
+				<b-navbar-nav class="ml-auto" v-if="!isLoggedIn">
+					<b-nav-item to="/login">Login</b-nav-item>
+					<b-nav-item to="/register">Register</b-nav-item>
+				</b-navbar-nav>
+			</b-collapse>
+		</b-navbar>
+	</div>
 </template>
 
 <script>
@@ -76,5 +58,12 @@
 <style>
 	.navbar {
 		border-top: solid 12px green;
+		border-bottom: solid 1px green;
+		margin-bottom: 15px;
 	}
+
+	.active {
+  background-color: #e7e7e7;
+  color: #555;
+}
 </style>
