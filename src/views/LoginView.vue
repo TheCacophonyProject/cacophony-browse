@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<b-container>
 		<h1>Login</h1>
 
 		<b-form @submit="onSubmit">
@@ -20,7 +20,7 @@
 
 		</b-form>
 
-	</div>
+	</b-container>
 </template>
 
 <script>
