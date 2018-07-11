@@ -29,6 +29,8 @@
 		background-repeat: no-repeat;
 		background-color: transparent;
 		position: relative;
+		margin-top: -15px;
+		margin-bottom: 15px;
 	}
 
 	/* Mobiles */
