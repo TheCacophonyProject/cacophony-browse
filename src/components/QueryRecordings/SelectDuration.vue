@@ -5,12 +5,14 @@
       <b-form-input
       type="number"
       min="0"
+      v-bind:max="value.high"
       class="form-control col-4"
       v-bind:value="value.low"
       v-on:change="updateLow"/>
       <label class="col-4 text-center col-form-label">to</label>
       <b-form-input
       type="number"
+      v-bind:min="value.low"
       class="form-control col-4"
       v-bind:value="value.high"
       v-on:change="updateHigh"/>
