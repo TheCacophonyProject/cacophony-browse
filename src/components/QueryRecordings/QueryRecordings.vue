@@ -31,12 +31,6 @@
         block
         variant="primary">Search</b-button>
       </b-col>
-      <b-col cols="12">
-        <h4>Query</h4>
-        <div>
-          {{ query }}
-        </div>
-      </b-col>
     </b-form-row>
 </template>
 
@@ -49,14 +43,14 @@ import SelectDuration from './SelectDuration.vue'
 import SelectDate from './SelectDate.vue'
 
 export default {
-	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'query-recordings',
+  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
+  name: 'query-recordings',
   components: {
     SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate
   },
-	// https://vuejs.org/v2/style-guide/#Component-data-essential
-	data () {
-		return {
+  // https://vuejs.org/v2/style-guide/#Component-data-essential
+  data () {
+    return {
       duration: {
         low: "0",
         high: null
@@ -65,22 +59,18 @@ export default {
       animals: [],
       fromDate: null,
       toDate: null,
-      tagTypes: null,
-      query: null
-		}
-	},
-	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-	computed: {
-	},
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {
-    heading: String
+      tagTypes: null
+    }
+  },
+  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
+  computed: {
+  },
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props: {
+    heading: String,
+    value: Object
   },
   methods: {
-    updateTagType(tagType) {
-      this.tagtype = tagType
-      console.log('update tag type') //eslint-disable-line
-    },
     buildQuery() {
       let query = {type: 'thermalRaw'}
       // Add devices
@@ -110,8 +100,8 @@ export default {
       if (this.toDate) {
         query.recordingDateTime["$lt"] = this.toDate;
       }
-
-      this.query = query
+      this.$emit('input', query)
+      this.$emit('getRecordings')
     }
   }
 }
