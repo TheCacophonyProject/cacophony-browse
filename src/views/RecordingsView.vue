@@ -116,7 +116,6 @@ export default {
 						this.count = json.count
 						json.rows.map((row) => {
 							this.tableItems.push({
-								view_link: this.parseViewLink(row.id),
 								id: row.id,
 								devicename: row.Device.devicename,
 								groupname: row.Group.groupname,
@@ -160,10 +159,6 @@ export default {
 		parseProcessingState(result) {
 			let string = result.toLowerCase();
 			return string.charAt(0).toUpperCase() + string.slice(1);
-		},
-		parseViewLink(id) {
-			id
-			return "(view link here)"
 		}
 	}
 }

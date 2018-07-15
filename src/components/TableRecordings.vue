@@ -5,7 +5,15 @@
   responsive
   v-bind:items="items"
   v-bind:fields="fields"
-  class="recording-table"></b-table>
+  class="recording-table">
+    <template slot="view" slot-scope="row">
+      <b-button
+      v-bind:to="'/view/' + row.item.id"
+      target="_blank">
+        View
+      </b-button>
+    </template>
+  </b-table>
 </template>
 
 <script>
@@ -18,7 +26,7 @@ export default {
     return {
       fields: [
         {
-          key: 'view_link',
+          key: 'view',
           label: 'View'
         },
         {
