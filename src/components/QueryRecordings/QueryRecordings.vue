@@ -101,7 +101,7 @@ export default {
         query.recordingDateTime["$lt"] = this.toDate;
       }
       this.$emit('input', query)
-      this.$emit('getRecordings')
+      this.$emit('searchButton')
     }
   }
 }

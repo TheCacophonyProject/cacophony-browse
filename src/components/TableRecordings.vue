@@ -4,7 +4,8 @@
   hover
   responsive
   v-bind:items="items"
-  v-bind:fields="fields"></b-table>
+  v-bind:fields="fields"
+  class="recording-table"></b-table>
 </template>
 
 <script>
@@ -65,3 +66,11 @@ props: {
 },
 }
 </script>
+
+<style scoped>
+
+.recording-table {
+  padding-top: 15px
+}
+
+</style>

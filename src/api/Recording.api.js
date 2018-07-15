@@ -7,7 +7,6 @@ export default {
 
 function recording(token, limit, offset, tagMode, tags, query) {
 	let url = getRecordingURL(query, limit, offset, tagMode)
-	console.log(url)//eslint-disable-line
 	return fetch(
 		url,
 		{

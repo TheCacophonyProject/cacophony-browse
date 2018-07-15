@@ -1,12 +1,54 @@
 <template>
-	<b-container>
-		<QueryRecordings
-		heading="Search Video Recordings"
-		v-model="query"
-		v-on:getRecordings="getRecordings"/>
-		<TableRecordings v-bind:items="tableItems"/>
+	<div>
+		<b-container>
+			<QueryRecordings
+			heading="Search Video Recordings"
+			v-model="query"
+			v-on:searchButton="searchButton"/>
 
-	</b-container>
+			<b-form-row class="information-line">
+				<b-col lg="4">
+					<b-form-text>
+						<h5 v-if="count" style="text-align: center;">
+							{{count}} matches found (total)
+						</h5>
+					</b-form-text>
+				</b-col>
+				<b-col md="6" lg="4">
+					<b-pagination
+					v-bind:total-rows="count"
+					v-model="currentPage"
+					v-bind:per-page="perPage"
+					v-on:input="pagination"
+					class="pagination-buttons"
+					align="center"
+					v-bind:limit="7"
+					v-if="count > perPage" />
+				</b-col>
+				<b-col md="6" lg="4">
+					<b-form-group>
+						<b-form-select
+						v-model="perPage"
+						v-on:input="pagination"
+						style="text-align: center;"
+						v-bind:options="perPageOptions"
+						/>
+					</b-form-group>
+				</b-col>
+			</b-form-row>
+
+		</b-container>
+		<TableRecordings v-bind:items="tableItems"/>
+		<b-pagination
+		v-bind:total-rows="count"
+		v-model="currentPage"
+		v-bind:per-page="perPage"
+		v-on:input="pagination"
+		class="pagination-buttons"
+		align="center"
+		v-bind:limit="7"
+		v-if="count > perPage" />
+	</div>
 </template>
 
 <script>
@@ -23,7 +65,17 @@ export default {
 		return {
 			query: {},
 			recordings: [],
-			tableItems: []
+			tableItems: [],
+			count: null,
+			currentPage: null,
+			perPage: 100,
+			perPageOptions: [
+				{value:10, text: "10 per page"},
+				{value:50, text: "50 per page"},
+				{value:100, text: "100 per page"},
+				{value:500, text: "500 per page"},
+				{value:1000, text: "1000 per page"}
+			]
 		}
 	},
 	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -33,13 +85,26 @@ export default {
 	props: {},
 	components: {QueryRecordings, TableRecordings},
 	methods: {
+		searchButton() {
+			// Loading wheel here
+			this.currentPage = 1
+			this.getRecordings()
+		},
+		pagination() {
+			this.getRecordings()
+		},
 		getRecordings() {
+			// Remove previous values
+			this.recordings = []
+			this.tableItems = []
+			// Extract query options
 			let token = this.$store.state.User.JWT
-			let limit = 100
-			let offset = 0
+			let limit = this.perPage
+			let offset = (this.currentPage - 1) * limit
 			let tagMode = 'any'
 			let tags = {}
 			let query = this.query
+			// Call API and process results
 			return new Promise((resolve, reject) => {
 				api.recording.recording(token, limit, offset, tagMode, tags, query)
 				.then(response => response.json())
@@ -48,6 +113,7 @@ export default {
 						reject(json)
 					} else {
 						this.recordings = json.rows
+						this.count = json.count
 						json.rows.map((row) => {
 							this.tableItems.push({
 								view_link: this.parseViewLink(row.id),
@@ -63,7 +129,6 @@ export default {
 								processing_state: this.parseProcessingState(row.processingState)
 							})
 						})
-						console.log(json.rows) //eslint-disable-line
 					}
 				})
 			})
@@ -104,10 +169,10 @@ export default {
 }
 </script>
 
-<style>
-.scrollable-menu {
-    height: auto;
-    max-height: 200px;
-    overflow-x: hidden;
+<style scoped>
+
+.information-line {
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
 </style>
