@@ -9,8 +9,8 @@
 			<b-form-row class="information-line">
 				<b-col lg="4">
 					<b-form-text>
-						<h5 v-if="count" style="text-align: center;">
-							{{count}} matches found (total)
+						<h5 v-if="countMessage" style="text-align: center;">
+							{{ countMessage }}
 						</h5>
 					</b-form-text>
 				</b-col>
@@ -22,7 +22,7 @@
 					v-on:input="pagination"
 					class="pagination-buttons"
 					align="center"
-					v-bind:limit="7"
+					v-bind:limit="limitPaginationButtons"
 					v-if="count > perPage" />
 				</b-col>
 				<b-col md="6" lg="4">
@@ -46,7 +46,7 @@
 		v-on:input="pagination"
 		class="pagination-buttons"
 		align="center"
-		v-bind:limit="7"
+		v-bind:limit="limitPaginationButtons"
 		v-if="count > perPage" />
 	</div>
 </template>
@@ -67,8 +67,10 @@ export default {
 			recordings: [],
 			tableItems: [],
 			count: null,
+			countMessage: null,
 			currentPage: null,
 			perPage: 100,
+			limitPaginationButtons: 5,
 			perPageOptions: [
 				{value:10, text: "10 per page"},
 				{value:50, text: "50 per page"},
@@ -87,6 +89,7 @@ export default {
 	methods: {
 		searchButton() {
 			// Loading wheel here
+			this.countMessage = ""
 			this.currentPage = 1
 			this.getRecordings()
 		},
@@ -114,6 +117,11 @@ export default {
 					} else {
 						this.recordings = json.rows
 						this.count = json.count
+						if (json.count > 0) {
+						this.countMessage = `${json.count} matches found (total)`
+						} else if (json.count === 0) {
+						this.countMessage = 'No matches'
+						}
 						json.rows.map((row) => {
 							this.tableItems.push({
 								id: row.id,
