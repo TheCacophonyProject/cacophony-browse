@@ -109,7 +109,7 @@ export default {
 			let query = this.query
 			// Call API and process results
 			return new Promise((resolve, reject) => {
-				api.recording.recording(token, limit, offset, tagMode, tags, query)
+				api.recording.query(token, limit, offset, tagMode, tags, query)
 				.then(response => response.json())
 				.then((json) => {
 					if(!json.success) {

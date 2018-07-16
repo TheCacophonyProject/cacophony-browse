@@ -8,7 +8,7 @@
   class="recording-table">
     <template slot="view" slot-scope="row">
       <b-button
-      v-bind:to="'/view/' + row.item.id"
+      v-bind:to="'/video/' + row.item.id"
       target="_blank">
         View
       </b-button>

@@ -10,6 +10,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RecordingsView from '../views/RecordingsView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import VideoView from '../views/VideoView.vue'
 
 Vue.use(Router)
 
@@ -27,7 +28,8 @@ export function createRouter() {
 			{path:'/', name: 'home', component:HomeView, meta: {requiresAuth: true}},
 			{path:'/login', name: 'login', component:LoginView},
 			{path:'/recordings',component:RecordingsView, meta: {requiresAuth: true}},
-			{path:'/register',component:RegisterView}
+			{path:'/register',component:RegisterView},
+			{path:'/video/:id',component:VideoView}
 		]
 	})
 
