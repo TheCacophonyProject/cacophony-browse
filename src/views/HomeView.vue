@@ -1,13 +1,28 @@
 <template>
 	<div>
-		<div class="hero" />
-		<div class="container-fluid">
-			Home
-		</div>
+		<Hero/>
+		<b-container>
+			<h1>{{ greeting }}</h1>
+			<dl>
+				<dt>Username</dt>
+				<dd id="username"></dd>
+				<dt>First name</dt>
+				<dd id="firstname"></dd>
+				<dt>Last name</dt>
+				<dd id="lastname"></dd>
+				<dt>Email</dt>
+				<dd id="email"></dd>
+				<dt>Your groups</dt>
+				<dd id="groups"></dd>
+			</dl>
+			<input class="btn btn-secondary" id="new-group" type="button" value="New Group" v-on:click="newGroup" />
+		</b-container>
 	</div>
 </template>
 
 <script>
+
+import Hero from '../components/Hero.vue'
 
 	export default {
 		// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
@@ -17,32 +32,15 @@
 			return {}
 		},
 		// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-		computed:{},
+		computed:{
+			greeting: function () {
+				return "Kia ora " + this.$store.state.User.userData.username
+			}
+		},
 		// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-		props:{}
-	}
-</script>
-<style>
-	.hero {
-		background-image: url('../assets/hero/hero-theory.jpg');
-		background-position: center;
-		background-repeat: no-repeat;
-		background-color: transparent;
-		position: relative;
-		margin-top: -15px;
-		margin-bottom: 15px;
-	}
-
-	/* Mobiles */
-	.hero {
-		height: 200px;
-	}
-
-	/* Large screens */
-	@media only screen and (min-width: 768px) {
-		.hero {
-			height: 360px;
+		props:{},
+		components: {
+			Hero
 		}
 	}
-
-</style>
+</script>
