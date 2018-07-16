@@ -1,14 +1,14 @@
 <template>
-	<div id="app">
-		<navbar></navbar>
-		<router-view class="view"></router-view>
-	</div>
+  <div id="app">
+    <navbar/>
+    <router-view class="view"/>
+  </div>
 </template>
 
 <script>
 	import NavBar from './components/NavBar.vue'
 	export default {
-		name:'app',
+		name:'App',
 		components:{'navbar':NavBar},
 		data () {
 			return {

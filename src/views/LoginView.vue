@@ -1,29 +1,37 @@
 <template>
-	<div>
-		<Hero />
-		<b-container class="col-md-6 col-lg-5">
-			<h1>Login</h1>
+  <div>
+    <Hero />
+    <b-container class="col-md-6 col-lg-5">
+      <h1>Login</h1>
 
-			<b-form @submit="onSubmit">
+      <b-form @submit="onSubmit">
 
-				<b-form-group
-				label="Username"
-				label-for="input-username">
-				<b-form-input type="text" id="input-username" v-model="username"></b-form-input>
-				</b-form-group>
+        <b-form-group
+          label="Username"
+          label-for="input-username">
+          <b-form-input 
+            id="input-username" 
+            v-model="username" 
+            type="text"/>
+        </b-form-group>
 
-				<b-form-group
-				label="Password"
-				label-for="input-password">
-				<b-form-input type="password" id="input-password" v-model="password"></b-form-input>
-				</b-form-group>
+        <b-form-group
+          label="Password"
+          label-for="input-password">
+          <b-form-input 
+            id="input-password" 
+            v-model="password" 
+            type="password"/>
+        </b-form-group>
 
-				<b-button type="submit" variant="primary">Sign in</b-button>
+        <b-button 
+          type="submit" 
+          variant="primary">Sign in</b-button>
 
-			</b-form>
+      </b-form>
 
-		</b-container>
-	</div>
+    </b-container>
+  </div>
 </template>
 
 <script>
@@ -32,7 +40,12 @@ import Hero from '../components/Hero.vue'
 
 	export default {
 		// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-		name:'login-view',
+		name:'LoginView',
+		components: {
+			"Hero": Hero
+		},
+		// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+		props:{},
 		// https://vuejs.org/v2/style-guide/#Component-data-essential
 		data () {
 			return {
@@ -42,8 +55,6 @@ import Hero from '../components/Hero.vue'
 		},
 		// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
 		computed:{},
-		// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-		props:{},
 		methods:{
 			onSubmit (evt) {
 				evt.preventDefault();
@@ -56,9 +67,6 @@ import Hero from '../components/Hero.vue'
 
 			}
 		},
-		components: {
-			"Hero": Hero
-		}
 	}
 
 

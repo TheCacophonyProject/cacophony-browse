@@ -2,14 +2,14 @@
   <b-form-group>
     <label>Device</label>
     <multiselect
-      v-bind:value="value"
-      v-on:input="$emit('input', $event)"
-      v-bind:options="options"
-      v-bind:multiple="true"
-      v-bind:placeholder="placeholder"
+      :value="value"
+      :options="options"
+      :multiple="true"
+      :placeholder="placeholder"
       track-by="id"
       label="name"
-      ></multiselect>
+      @input="$emit('input', $event)"
+    />
   </b-form-group>
 </template>
 
@@ -19,7 +19,14 @@ import api from '../../api/index'
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'device-select',
+  name: 'DeviceSelect',
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props: {
+    value: {
+      type: Array,
+      required: true
+    }
+  },
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
@@ -37,8 +44,6 @@ export default {
       }
     }
   },
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-  props: {value: Array},
   created: function () {
     this.allDevices()
   },

@@ -1,15 +1,17 @@
 <template>
   <b-table
-  striped
-  hover
-  responsive
-  v-bind:items="items"
-  v-bind:fields="fields"
-  class="recording-table">
-    <template slot="view" slot-scope="row">
+    :items="items"
+    :fields="fields"
+    striped
+    hover
+    responsive
+    class="recording-table">
+    <template
+      slot="view"
+      slot-scope="row">
       <b-button
-      v-bind:to="'/video/' + row.item.id"
-      target="_blank">
+        :to="'/video/' + row.item.id"
+        target="_blank">
         View
       </b-button>
     </template>
@@ -20,7 +22,14 @@
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'table-recordings',
+  name: 'TableRecordings',
+// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+props: {
+  items: {
+    type: Array,
+    required: true
+  }
+},
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
@@ -67,10 +76,6 @@ export default {
 
 // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
 computed: {
-},
-// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-props: {
-  items: Array
 },
 }
 </script>

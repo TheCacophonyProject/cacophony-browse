@@ -2,11 +2,11 @@
   <b-form-group>
     <label>Animals</label>
     <multiselect
-      v-bind:value="value"
-      v-on:input="$emit('input', $event)"
-      v-bind:options="options"
-      v-bind:multiple="true"
-      v-bind:placeholder="placeholder"></multiselect>
+      :value="value"
+      :options="options"
+      :multiple="true"
+      :placeholder="placeholder"
+      @input="$emit('input', $event)"/>
   </b-form-group>
 </template>
 
@@ -14,7 +14,14 @@
 
 export default {
 	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'animal-select',
+	name: 'AnimalSelect',
+	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+	props: {
+    value: {
+      type: Array,
+      required: true
+    }
+  },
 	// https://vuejs.org/v2/style-guide/#Component-data-essential
 	data () {
 		return {
@@ -53,8 +60,6 @@ export default {
       }
     }
 	},
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {value: Array}
 }
 
 </script>

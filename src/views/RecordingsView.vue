@@ -1,54 +1,60 @@
 <template>
-	<div>
-		<b-container>
-			<QueryRecordings
-			heading="Search Video Recordings"
-			v-model="query"
-			v-on:searchButton="searchButton"/>
+  <div>
+    <b-container>
+      <QueryRecordings
+        v-model="query"
+        heading="Search Video Recordings"
+        @searchButton="searchButton"/>
 
-			<b-form-row class="information-line">
-				<b-col lg="4">
-					<b-form-text>
-						<h5 v-if="countMessage" style="text-align: center;">
-							{{ countMessage }}
-						</h5>
-					</b-form-text>
-				</b-col>
-				<b-col md="6" lg="4">
-					<b-pagination
-					v-bind:total-rows="count"
-					v-model="currentPage"
-					v-bind:per-page="perPage"
-					v-on:input="pagination"
-					class="pagination-buttons"
-					align="center"
-					v-bind:limit="limitPaginationButtons"
-					v-if="count > perPage" />
-				</b-col>
-				<b-col md="6" lg="4">
-					<b-form-group>
-						<b-form-select
-						v-model="perPage"
-						v-on:input="pagination"
-						style="text-align: center;"
-						v-bind:options="perPageOptions"
-						/>
-					</b-form-group>
-				</b-col>
-			</b-form-row>
+      <b-form-row class="information-line">
+        <b-col lg="4">
+          <b-form-text>
+            <h5 
+              v-if="countMessage" 
+              style="text-align: center;">
+              {{ countMessage }}
+            </h5>
+          </b-form-text>
+        </b-col>
+        <b-col 
+          md="6" 
+          lg="4">
+          <b-pagination
+            v-if="count > perPage"
+            :total-rows="count"
+            v-model="currentPage"
+            :per-page="perPage"
+            :limit="limitPaginationButtons"
+            class="pagination-buttons"
+            align="center"
+            @input="pagination" />
+        </b-col>
+        <b-col 
+          md="6" 
+          lg="4">
+          <b-form-group>
+            <b-form-select
+              v-model="perPage"
+              :options="perPageOptions"
+              style="text-align: center;"
+              @input="pagination"
+            />
+          </b-form-group>
+        </b-col>
+      </b-form-row>
 
-		</b-container>
-		<TableRecordings v-bind:items="tableItems"/>
-		<b-pagination
-		v-bind:total-rows="count"
-		v-model="currentPage"
-		v-bind:per-page="perPage"
-		v-on:input="pagination"
-		class="pagination-buttons"
-		align="center"
-		v-bind:limit="limitPaginationButtons"
-		v-if="count > perPage" />
-	</div>
+    </b-container>
+    <TableRecordings :items="tableItems"/>
+    <b-pagination
+      v-if="count > perPage"
+      :total-rows="count"
+      v-model="currentPage"
+      :per-page="perPage"
+      :limit="limitPaginationButtons"
+      class="pagination-buttons"
+      align="center"
+      @input="pagination" />
+  </div>
 </template>
 
 <script>
@@ -59,7 +65,10 @@ import api from '../api/index'
 
 export default {
 	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'recordings-view',
+	name: 'RecordingsView',
+	components: {QueryRecordings, TableRecordings},
+	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+	props: {},
 	// https://vuejs.org/v2/style-guide/#Component-data-essential
 	data () {
 		return {
@@ -83,9 +92,6 @@ export default {
 	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
 	computed: {
 	},
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {},
-	components: {QueryRecordings, TableRecordings},
 	methods: {
 		searchButton() {
 			// Loading wheel here

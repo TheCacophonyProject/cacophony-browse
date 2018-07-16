@@ -1,51 +1,53 @@
 <template>
-	<b-container class="col-md-6 col-lg-5">
-		<h1>Register</h1>
+  <b-container class="col-md-6 col-lg-5">
+    <h1>Register</h1>
 
-		<b-form @submit="onSubmit">
+    <b-form @submit="onSubmit">
 
-			<b-form-group
-				label="Username"
-				label-for="input-username"
-				v-bind:state="usernameState"
-				v-bind:invalid-feedback="invalidUsername"
-			>
-				<b-form-input
-					id="input-username"
-					type="text"
-					v-model="username"
-					autofocus
-					v-bind:state="usernameState"
-				></b-form-input>
-			</b-form-group>
+      <b-form-group
+        :state="usernameState"
+        :invalid-feedback="invalidUsername"
+        label="Username"
+        label-for="input-username"
+      >
+        <b-form-input
+          id="input-username"
+          v-model="username"
+          :state="usernameState"
+          type="text"
+          autofocus
+        />
+      </b-form-group>
 
-			<b-form-group
-					label="Password"
-					label-for="input-password"
-					v-bind:state="passwordState"
-					v-bind:invalid-feedback="invalidPassword"
-					>
-				<b-form-input
-					type="password"
-					v-model="password"
-					v-bind:state="passwordState"></b-form-input>
-			</b-form-group>
+      <b-form-group
+        :state="passwordState"
+        :invalid-feedback="invalidPassword"
+        label="Password"
+        label-for="input-password"
+      >
+        <b-form-input
+          v-model="password"
+          :state="passwordState"
+          type="password"/>
+      </b-form-group>
 
-			<b-form-group
-					label="Retype password"
-					label-for="input-password-retype"
-					v-bind:state="retypeState"
-					v-bind:invalid-feedback="invalidRetype">
-				<b-form-input
-					type="password"
-					v-model="passwordRetype"
-					v-bind:state="retypeState"></b-form-input>
-			</b-form-group>
+      <b-form-group
+        :state="retypeState"
+        :invalid-feedback="invalidRetype"
+        label="Retype password"
+        label-for="input-password-retype">
+        <b-form-input
+          v-model="passwordRetype"
+          :state="retypeState"
+          type="password"/>
+      </b-form-group>
 
-			<b-button type="submit" variant="primary">Register</b-button>
+      <b-button 
+        type="submit" 
+        variant="primary">Register</b-button>
 
-		</b-form>
-	</b-container>
+    </b-form>
+  </b-container>
 </template>
 
 <script>
@@ -56,7 +58,9 @@ let passwordLength = 8;
 
 export default {
 	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'register-view',
+	name: 'RegisterView',
+	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+	props: {},
 	// https://vuejs.org/v2/style-guide/#Component-data-essential
 	data () {
 		return {
@@ -106,8 +110,6 @@ export default {
 			return "Must match"
 		}
 	},
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {},
 	methods: {
 		onSubmit (evt) {
 			evt.preventDefault();

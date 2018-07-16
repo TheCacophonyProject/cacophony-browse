@@ -1,17 +1,17 @@
 <template>
-	<b-container>
-		<h1>View Recording</h1>
-		<h4>'{{recording.Device.devicename}}' - {{date}}, {{time}}</h4>
-		<video
-		controls
-		autoplay
-		height="auto"
-		max-width="100%"
-		class="video">
-			<source v-bind:src="fileSource" />
-			Sorry, your browser does not support video playback.
-		</video>
-	</b-container>
+  <b-container>
+    <h1>View Recording</h1>
+    <h4>'{{ recording.Device.devicename }}' - {{ date }}, {{ time }}</h4>
+    <video
+      controls
+      autoplay
+      height="auto"
+      max-width="100%"
+      class="video">
+      <source :src="fileSource" >
+      Sorry, your browser does not support video playback.
+    </video>
+  </b-container>
 </template>
 
 <script>
@@ -21,7 +21,9 @@ import { Config } from '../../app.config' // eslint-disable-line
 
 export default {
 	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'groups-view',
+	name: 'GroupsView',
+	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+	props: {},
 	// https://vuejs.org/v2/style-guide/#Component-data-essential
 	data () {
 		return {
@@ -47,8 +49,6 @@ export default {
 			return `${Config.api}` + "/api/v1/signedUrl?jwt=" + this.downloadRawJWT
 		}
 	},
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {},
 	created: function() {
 			let token = this.$store.state.User.JWT
 			return new Promise((resolve, reject) => {
