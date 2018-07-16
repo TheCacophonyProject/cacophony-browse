@@ -23,41 +23,41 @@
 <script>
 
 export default {
-	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'DurationSlider',
+  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
+  name: 'DurationSlider',
   components: {
   },
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props: {
     value: {
       type: Object,
       required: true
     }
   },
-	// https://vuejs.org/v2/style-guide/#Component-data-essential
-	data () {
-		return {
-		}
-	},
-	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-	computed: {
-	},
+  // https://vuejs.org/v2/style-guide/#Component-data-essential
+  data () {
+    return {
+    };
+  },
+  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
+  computed: {
+  },
   methods: {
     updateHigh: function () {
       let newValue = {
         high: event.target.value,
         low: this.value.low
-      }
-      this.$emit('input', newValue)
+      };
+      this.$emit('input', newValue);
     },
     updateLow: function () {
       let newValue = {
         high: this.value.high,
         low: event.target.value
-      }
-      this.$emit('input', newValue)
+      };
+      this.$emit('input', newValue);
     }
   }
-}
+};
 
 </script>

@@ -28,10 +28,10 @@ export default {
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
-    }
+    };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
   },
-}
+};
 </script>

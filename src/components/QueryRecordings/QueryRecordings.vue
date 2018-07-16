@@ -52,11 +52,11 @@
 
 <script>
 
-import SelectDevice from './SelectDevice.vue'
-import SelectTagTypes from './SelectTagTypes.vue'
-import SelectAnimal from './SelectAnimal.vue'
-import SelectDuration from './SelectDuration.vue'
-import SelectDate from './SelectDate.vue'
+import SelectDevice from './SelectDevice.vue';
+import SelectTagTypes from './SelectTagTypes.vue';
+import SelectAnimal from './SelectAnimal.vue';
+import SelectDuration from './SelectDuration.vue';
+import SelectDate from './SelectDate.vue';
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
@@ -87,30 +87,30 @@ export default {
       fromDate: null,
       toDate: null,
       tagTypes: null
-    }
+    };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
   },
   methods: {
     buildQuery() {
-      let query = {type: 'thermalRaw'}
+      let query = {type: 'thermalRaw'};
       // Add devices
       if (this.devices.length !== 0) {
-        query.DeviceId = []
+        query.DeviceId = [];
         for (let device of this.devices) {
-          query.DeviceId.push(device.id)
+          query.DeviceId.push(device.id);
         }
       }
       // Add duration
       if (this.duration.low || this.duration.high) {
-        query.duration = {}
+        query.duration = {};
       }
       if (this.duration.low) {
-        query.duration["$gt"] = this.duration.low
+        query.duration["$gt"] = this.duration.low;
       }
       if (this.duration.high) {
-        query.duration["$lt"] = this.duration.high
+        query.duration["$lt"] = this.duration.high;
       }
       // Add date
       if (this.fromDate || this.toDate ) {
@@ -122,10 +122,10 @@ export default {
       if (this.toDate) {
         query.recordingDateTime["$lt"] = this.toDate;
       }
-      this.$emit('input', query)
-      this.$emit('searchButton')
+      this.$emit('input', query);
+      this.$emit('searchButton');
     }
   }
-}
+};
 
 </script>

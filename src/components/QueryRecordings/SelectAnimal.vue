@@ -13,18 +13,18 @@
 <script>
 
 export default {
-	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'AnimalSelect',
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {
+  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
+  name: 'AnimalSelect',
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props: {
     value: {
       type: Array,
       required: true
     }
   },
-	// https://vuejs.org/v2/style-guide/#Component-data-essential
-	data () {
-		return {
+  // https://vuejs.org/v2/style-guide/#Component-data-essential
+  data () {
+    return {
       thisvalue: ["interesting", "possum"],
       options: [
         "interesting",
@@ -48,19 +48,19 @@ export default {
         "false-positive",
         "unidentified",
       ]
-		}
-	},
-	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-	computed: {
+    };
+  },
+  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
+  computed: {
     placeholder: function () {
       if (this.value.length > 0) {
-        return "add more animals"
+        return "add more animals";
       } else {
-        return "all animals"
+        return "all animals";
       }
     }
-	},
-}
+  },
+};
 
 </script>
 

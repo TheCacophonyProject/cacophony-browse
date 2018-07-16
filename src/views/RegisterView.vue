@@ -57,73 +57,73 @@ let usernameLength = 5;
 let passwordLength = 8;
 
 export default {
-	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'RegisterView',
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {},
-	// https://vuejs.org/v2/style-guide/#Component-data-essential
-	data () {
-		return {
-			username: '',
-			password: '',
-			passwordRetype: ''
-		}
-	},
-	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-	computed: {
-		usernameState () {
-			if (this.username.length === 0) {
-				// Empty field
-				return null
-			} else {
-				// Username length requirement is made up... need to check API for actual requirement
-				return usernamePattern.test(this.username) && this.username.length > usernameLength
-			}
-		},
-		invalidUsername () {
-			if (this.username.length <= usernameLength) {
-				return "Not long enough"
-			} else {
-				return "Only letters and numbers"
-			}
-		},
-		passwordState () {
-			if (this.password.length === 0) {
-				// Empty field
-				return null
-			} else {
-				return this.password.length > passwordLength
-			}
-		},
-		invalidPassword () {
-			return "Not long enough"
-		},
-		retypeState () {
-			if (this.passwordRetype.length === 0) {
-				// Empty field
-				return null
-			} else {
-				return this.password === this.passwordRetype
-			}
-		},
-		invalidRetype () {
-			return "Must match"
-		}
-	},
-	methods: {
-		onSubmit (evt) {
-			evt.preventDefault();
-			if (this.usernameState && this.passwordState && this.retypeState) {
-				this.$store.dispatch('User/REGISTER', {
-					username: this.username,
-					password: this.password
-				}).then(() => {
-					this.$router.push('/')
-				})
-			} else {
+  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
+  name: 'RegisterView',
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props: {},
+  // https://vuejs.org/v2/style-guide/#Component-data-essential
+  data () {
+    return {
+      username: '',
+      password: '',
+      passwordRetype: ''
+    };
+  },
+  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
+  computed: {
+    usernameState () {
+      if (this.username.length === 0) {
+        // Empty field
+        return null;
+      } else {
+        // Username length requirement is made up... need to check API for actual requirement
+        return usernamePattern.test(this.username) && this.username.length > usernameLength;
+      }
+    },
+    invalidUsername () {
+      if (this.username.length <= usernameLength) {
+        return "Not long enough";
+      } else {
+        return "Only letters and numbers";
+      }
+    },
+    passwordState () {
+      if (this.password.length === 0) {
+        // Empty field
+        return null;
+      } else {
+        return this.password.length > passwordLength;
+      }
+    },
+    invalidPassword () {
+      return "Not long enough";
+    },
+    retypeState () {
+      if (this.passwordRetype.length === 0) {
+        // Empty field
+        return null;
+      } else {
+        return this.password === this.passwordRetype;
+      }
+    },
+    invalidRetype () {
+      return "Must match";
+    }
+  },
+  methods: {
+    onSubmit (evt) {
+      evt.preventDefault();
+      if (this.usernameState && this.passwordState && this.retypeState) {
+        this.$store.dispatch('User/REGISTER', {
+          username: this.username,
+          password: this.password
+        }).then(() => {
+          this.$router.push('/');
+        });
+      } else {
 				console.log("invalid form") //eslint-disable-line
-			}
-		}
-	}
-}
+      }
+    }
+  }
+};
 </script>

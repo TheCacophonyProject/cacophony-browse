@@ -5,7 +5,14 @@ module.exports = {
 		'plugin:vue/recommended'
 	],
 	rules: {
-		// override/add rules settings here, such as:
-		// 'vue/no-unused-vars': 'error'
+		'indent': ['error', 2],
+		'linebreak-style': ['error', 'unix'],
+		'quotes': 'off',
+		'semi': ['error', 'always'],
+		'curly': ['error', 'all'],
+		'no-console': ['warn'],
+		'no-undef': ['error'],
+		'no-unused-vars': ['error'],
+		'brace-style': ['error']
 	}
 }

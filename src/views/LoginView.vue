@@ -36,38 +36,38 @@
 
 <script>
 
-import Hero from '../components/Hero.vue'
+import Hero from '../components/Hero.vue';
 
-	export default {
-		// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-		name:'LoginView',
-		components: {
-			"Hero": Hero
-		},
-		// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-		props:{},
-		// https://vuejs.org/v2/style-guide/#Component-data-essential
-		data () {
-			return {
-				username: '',
-				password: ''
-			}
-		},
-		// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-		computed:{},
-		methods:{
-			onSubmit (evt) {
-				evt.preventDefault();
-				this.$store.dispatch('User/LOGIN', {
-					username: this.username,
-					password: this.password
-				}).then(() => {
-					this.$router.go('home')
-				})
+export default {
+  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
+  name:'LoginView',
+  components: {
+    "Hero": Hero
+  },
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props:{},
+  // https://vuejs.org/v2/style-guide/#Component-data-essential
+  data () {
+    return {
+      username: '',
+      password: ''
+    };
+  },
+  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
+  computed:{},
+  methods:{
+    onSubmit (evt) {
+      evt.preventDefault();
+      this.$store.dispatch('User/LOGIN', {
+        username: this.username,
+        password: this.password
+      }).then(() => {
+        this.$router.go('home');
+      });
 
-			}
-		},
-	}
+    }
+  },
+};
 
 
 </script>

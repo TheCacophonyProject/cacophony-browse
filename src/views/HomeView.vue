@@ -27,25 +27,25 @@
 
 <script>
 
-import Hero from '../components/Hero.vue'
+import Hero from '../components/Hero.vue';
 
-	export default {
-		// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-		name:'HomeView',
-		components: {
-			Hero
-		},
-		// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-		props:{},
-		// https://vuejs.org/v2/style-guide/#Component-data-essential
-		data () {
-			return {}
-		},
-		// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-		computed:{
-			greeting: function () {
-				return "Kia ora " + this.$store.state.User.userData.username
-			}
-		},
-	}
+export default {
+  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
+  name:'HomeView',
+  components: {
+    Hero
+  },
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props:{},
+  // https://vuejs.org/v2/style-guide/#Component-data-essential
+  data () {
+    return {};
+  },
+  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
+  computed:{
+    greeting: function () {
+      return "Kia ora " + this.$store.state.User.userData.username;
+    }
+  },
+};
 </script>
