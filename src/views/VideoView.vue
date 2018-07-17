@@ -1,16 +1,35 @@
 <template>
 	<b-container>
-		<h1>View Recording</h1>
-		<h4>'{{recording.Device.devicename}}' - {{date}}, {{time}}</h4>
-		<video
-		controls
-		autoplay
-		height="auto"
-		max-width="100%"
-		class="video">
-			<source v-bind:src="fileSource" />
-			Sorry, your browser does not support video playback.
-		</video>
+		<b-row>
+			<b-col cols="12">
+				<h1>View Recording</h1>
+				<h4>'{{recording.Device.devicename}}' - {{date}}, {{time}}</h4>
+			</b-col>
+
+			<b-col cols="12" lg="8">
+				<video
+				controls
+				autoplay
+				height="auto"
+				max-width="100%"
+				class="video">
+				<source v-bind:src="fileSource" />
+				Sorry, your browser does not support video playback.
+			</video>
+			<QuickTag />
+			<PrevNext />
+			<ObservedAnimals v-bind:items="items"/>
+			</b-col>
+
+			<b-col cols="12" lg="4">
+				<VideoProperties />
+				<VideoHelp class="mt-2" />
+			</b-col>
+
+			<b-col cols="12">
+				<AddObservation v-show="manualAdd" />
+			</b-col>
+		</b-row>
 	</b-container>
 </template>
 
@@ -18,16 +37,30 @@
 
 import api from '../api/index'
 import { Config } from '../../app.config' // eslint-disable-line
+import QuickTag from '../components/Video/QuickTag.vue'
+import PrevNext from '../components/Video/PrevNext.vue'
+import AddObservation from '../components/Video/AddObservation.vue'
+import ObservedAnimals from '../components/Video/ObservedAnimals.vue'
+import VideoProperties from '../components/Video/VideoProperties.vue'
+import VideoHelp from '../components/Video/VideoHelp.vue'
 
 export default {
 	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'groups-view',
+	name: 'video-view',
+	components: {QuickTag, PrevNext, AddObservation, ObservedAnimals, VideoProperties, VideoHelp},
 	// https://vuejs.org/v2/style-guide/#Component-data-essential
 	data () {
 		return {
 			downloadFileJWT: null,
 			downloadRawJWT: null,
-			recording: {}
+			recording: {},
+			items: [
+				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
+				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
+				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
+				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
+			],
+			manualAdd: false
 		}
 	},
 	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -70,7 +103,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 
 .video {
 	max-width: 100%;
