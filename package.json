@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "lint-fix": "eslint ./src --fix --ext .js,.vue"
   },
   "dependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
