@@ -1,5 +1,5 @@
 <template>
-	<b-container>
+	<b-container v-if="recording">
 		<b-row>
 			<b-col cols="12">
 				<h1>View Recording</h1>
@@ -22,7 +22,9 @@
 			</b-col>
 
 			<b-col cols="12" lg="4">
-				<VideoProperties />
+				<VideoProperties
+				v-bind:processingState="processingState"
+				v-bind:comment="recording.comment" />
 				<VideoHelp class="mt-2" />
 			</b-col>
 
@@ -53,14 +55,14 @@ export default {
 		return {
 			downloadFileJWT: null,
 			downloadRawJWT: null,
-			recording: {},
+			recording: null,
 			items: [
 				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
 				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
 				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
 				{animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
 			],
-			manualAdd: false
+			manualAdd: true
 		}
 	},
 	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -78,6 +80,11 @@ export default {
 		},
 		rawSource: function () {
 			return `${Config.api}` + "/api/v1/signedUrl?jwt=" + this.downloadRawJWT
+		},
+		processingState: function () {
+			let text = this.recording.processingState.toLowerCase();
+			text = text.slice(0,1).toUpperCase() + text.slice(1)
+			return text
 		}
 	},
 	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential

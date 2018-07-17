@@ -30,20 +30,20 @@
           <b-form-group label="Start time:" horizontal>
             <b-form-row>
               <b-input class="col m-1" v-model="startTime" v-bind:state="startTimeState" placeholder="min:sec" />
-              <b-button class="col-md-2 m-1" onclick="goToStartTime(this)">start</b-button>
-              <b-button class="col-md-2 m-1" onclick="setStartTimeAsCurrentTime()">current</b-button>
+              <b-button class="col-md-3 m-1" onclick="goToStartTime(this)">go to start time</b-button>
+              <b-button class="col-md-3 m-1" onclick="setStartTimeAsCurrentTime()">set to current time</b-button>
             </b-form-row>
           </b-form-group>
 
           <b-form-group label="End time:" horizontal>
             <b-form-row>
               <b-input class="col m-1" v-model="endTime" v-bind:state="endTimeState" placeholder="min:sec" />
-              <b-button class="col-md-2 m-1" onclick="goToStartTime(this)">end</b-button>
-              <b-button class="col-md-2 m-1" onclick="setStartTimeAsCurrentTime()">current</b-button>
+              <b-button class="col-md-3 m-1" onclick="goToStartTime(this)">go to end time</b-button>
+              <b-button class="col-md-3 m-1" onclick="setStartTimeAsCurrentTime()">set to current time</b-button>
             </b-form-row>
           </b-form-group>
 
-      <b-button block="true" variant="primary" onclick="tags.new()">Add new tag</b-button>
+      <b-button v-bind:block="true" variant="primary" onclick="tags.new()">Add new tag</b-button>
     </b-form>
   </div>
 </template>

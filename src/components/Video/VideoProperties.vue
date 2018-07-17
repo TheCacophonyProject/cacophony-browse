@@ -3,21 +3,19 @@
     <h3>Video properties</h3>
     <b-form>
       <b-form-group label="Processing:" horizontal>
-        <b-input value="Finished" disabled />
+        <b-input v-bind:value="processingState" disabled />
       </b-form-group>
 
       <b-form-group label="Comment" horizontal>
         <b-form-row class="m-0">
-          <b-form-textarea class="col">
-            Comment
-          </b-form-textarea>
+          <b-form-textarea class="col" v-bind:value="comment" />
           <div class="col-md-1" />
           <b-button class="col-md-3">Save Comment</b-button>
         </b-form-row>
       </b-form-group>
 
       <b-form-group>
-        <b-button block variant="danger">Delete Video</b-button>
+        <b-button v-bind:block="true" variant="danger">Delete Video</b-button>
       </b-form-group>
 
     </b-form>
@@ -45,7 +43,16 @@ export default {
 
 	},
 	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {}
+	props: {
+    processingState: {
+      type: String,
+      default: "incomplete"
+    },
+    comment: {
+      type: String,
+      default: ""
+    }
+  }
 }
 </script>
 
