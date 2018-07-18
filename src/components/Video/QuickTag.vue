@@ -4,52 +4,52 @@
       class="tag-button"
       title="Mark as possum"
       src="../../assets/video/possum.png"
-      @click="tags.quickNew('possum')" >
+      @click="quickTag('possum')" >
     <img
       class="tag-button"
       title="Mark as stoat"
       src="../../assets/video/stoat.png"
-      @click="tags.quickNew('stoat')" >
+      @click="quickTag('stoat')" >
     <img
       class="tag-button"
       title="Mark as rat"
       src="../../assets/video/rat.png"
-      @click="tags.quickNew('rat')" >
+      @click="quickTag('rat')" >
     <img
       class="tag-button"
       title="Mark as hedgehog"
       src="../../assets/video/hedgehog.png"
-      @click="tags.quickNew('hedgehog')" >
+      @click="quickTag('hedgehog')" >
     <img
       class="tag-button"
       title="Mark as cat"
       src="../../assets/video/cat.png"
-      @click="tags.quickNew('cat')" >
+      @click="quickTag('cat')" >
     <img
       class="tag-button"
       title="Mark as human"
       src="../../assets/video/human.png"
-      @click="tags.quickNew('human')" >
+      @click="quickTag('human')" >
     <img
       class="tag-button"
       title="Mark as bird"
       src="../../assets/video/bird.png"
-      @click="tags.quickNew('bird')" >
+      @click="quickTag('bird')" >
     <img
       class="tag-button"
       title="Mark as kiwi"
       src="../../assets/video/kiwi.png"
-      @click="tags.quickNew('bird/kiwi')" >
+      @click="quickTag('bird/kiwi')" >
     <img
       class="tag-button"
       title="Mark as unidentified (meaning the type of animal is unclear)"
       src="../../assets/video/unknown.png"
-      @click="tags.quickNew('unidentified')" >
+      @click="quickTag('unidentified')" >
     <img
       class="tag-button"
       title="Mark as false positive (meaning there is no animal present)"
       src="../../assets/video/none.png"
-      @click="falsePositive()" >
+      @click="$emit('addTag', {event: 'false positive'})" >
     <img
       class="tag-button"
       title="Open form to add other animal and/or extra details"
@@ -75,6 +75,14 @@ export default {
   computed: {
 
   },
+  methods: {
+    quickTag(animal) {
+      let tag = {};
+      tag.animal = animal;
+      tag.confidence = 0.6;
+      this.$emit('addTag', tag);
+    }
+  }
 };
 </script>
 

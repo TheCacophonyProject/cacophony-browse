@@ -6,25 +6,26 @@
         <h4>'{{ recording.Device.devicename }}' - {{ date }}, {{ time }}</h4>
       </b-col>
 
-      <b-col 
-        cols="12" 
+      <b-col
+        cols="12"
         lg="8">
         <video
           controls
           autoplay
-          height="auto"
           max-width="100%"
+          width="640"
+          height="auto"
           class="video">
           <source :src="fileSource" >
           Sorry, your browser does not support video playback.
         </video>
-        <QuickTag />
+        <QuickTag @addTag="addTag($event)"/>
         <PrevNext />
-        <ObservedAnimals :items="items"/>
+        <ObservedAnimals :items="tagItems"/>
       </b-col>
 
-      <b-col 
-        cols="12" 
+      <b-col
+        cols="12"
         lg="4">
         <VideoProperties
           :processing-state="processingState"
@@ -62,13 +63,7 @@ export default {
       downloadFileJWT: null,
       downloadRawJWT: null,
       recording: null,
-      items: [
-        {animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
-        {animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
-        {animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
-        {animal: 'dog', confidence: 0.6, who: 'Arthur', when: 'Today'},
-      ],
-      manualAdd: true
+      manualAdd: false
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -91,25 +86,71 @@ export default {
       let text = this.recording.processingState.toLowerCase();
       text = text.slice(0,1).toUpperCase() + text.slice(1);
       return text;
+    },
+    tagItems: function () {
+      let tags = this.recording.Tags;
+      let tagItems = [];
+      tags.map((tag) => {
+        let tagItem = {};
+        if (tag.animal) {
+          tagItem.animal = tag.animal;
+        } else {
+          tagItem.animal = "none";
+        }
+        tagItem.event = tag.event;
+        if (tag.confidence) {
+          tagItem.confidence = tag.confidence.toFixed(2);
+        }
+        if (tag.automatic) {
+          tagItem.who = "Cacophony AI";
+        } else {
+          tagItem.who = tag.taggerId;
+        }
+        tagItem.when = new Date(tag.createdAt).toLocaleString();
+        tagItem.tag = tag;
+        tagItems.push(tagItem);
+      });
+      return tagItems;
     }
   },
   created: function() {
-    let token = this.$store.state.User.JWT;
-    return new Promise((resolve, reject) => {
-      api.recording.id(this.$route.params.id, token)
-        .then(response => response.json())
-        .then((json) => {
-          if(!json.success) {
-            reject(json);
-          } else {
-            this.downloadFileJWT = json.downloadFileJWT;
-            this.downloadRawJWT = json.downloadRawJWT;
-            this.recording = json.recording;
-						console.log(json)//eslint-disable-line
-          }
-        });
-    });
-
+    this.getRecordingDetails();
+  },
+  methods: {
+    getRecordingDetails() {
+      let token = this.$store.state.User.JWT;
+      return new Promise((resolve, reject) => {
+        api.recording.id(this.$route.params.id, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              this.downloadFileJWT = json.downloadFileJWT;
+              this.downloadRawJWT = json.downloadRawJWT;
+              this.recording = json.recording;
+              console.log(json);
+            }
+          });
+      });
+    },
+    addTag(tag) {
+      let token = this.$store.state.User.JWT;
+      let id = Number(this.$route.params.id);
+      return new Promise((resolve, reject) => {
+        api.tag.addTag(tag, id, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              console.log('New tag added:', json);
+              this.getRecordingDetails();
+              resolve(json);
+            }
+          });
+      });
+    }
   }
 };
 </script>
