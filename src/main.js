@@ -21,6 +21,11 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 library.add(faTrash);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
+// Multi-select
+// https://vue-multiselect.js.org
+import Multiselect from 'vue-multiselect';
+Vue.component('multiselect', Multiselect);
+
 // https://router.vuejs.org/
 import { createRouter } from './router';
 const router = createRouter();
