@@ -2,20 +2,30 @@
   <div>
     <h3>Video properties</h3>
     <b-form>
-      <b-form-group label="Processing:" horizontal>
-        <b-input v-bind:value="processingState" disabled />
+      <b-form-group 
+        label="Processing:" 
+        horizontal>
+        <b-input 
+          :value="processingState" 
+          disabled />
       </b-form-group>
 
-      <b-form-group label="Comment" horizontal>
+      <b-form-group 
+        label="Comment" 
+        horizontal>
         <b-form-row class="m-0">
-          <b-form-textarea class="col" v-bind:value="comment" />
+          <b-form-textarea 
+            :value="comment" 
+            class="col" />
           <div class="col-md-1" />
           <b-button class="col-md-3">Save Comment</b-button>
         </b-form-row>
       </b-form-group>
 
       <b-form-group>
-        <b-button v-bind:block="true" variant="danger">Delete Video</b-button>
+        <b-button 
+          :block="true" 
+          variant="danger">Delete Video</b-button>
       </b-form-group>
 
     </b-form>
@@ -30,20 +40,10 @@
 <script>
 
 export default {
-	// https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-	name: 'video-properties',
-	// https://vuejs.org/v2/style-guide/#Component-data-essential
-	data () {
-		return {
-
-		}
-	},
-	// https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-	computed: {
-
-	},
-	// https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-	props: {
+  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
+  name: 'VideoProperties',
+  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  props: {
     processingState: {
       type: String,
       default: "incomplete"
@@ -52,8 +52,18 @@ export default {
       type: String,
       default: ""
     }
-  }
-}
+  },
+  // https://vuejs.org/v2/style-guide/#Component-data-essential
+  data () {
+    return {
+
+    };
+  },
+  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
+  computed: {
+
+  },
+};
 </script>
 
 <style scoped>
