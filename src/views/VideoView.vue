@@ -136,7 +136,6 @@ export default {
               this.downloadFileJWT = json.downloadFileJWT;
               this.downloadRawJWT = json.downloadRawJWT;
               this.recording = json.recording;
-              console.log('Recording details loaded:', json);
             }
           });
       });
@@ -151,7 +150,6 @@ export default {
             if(!json.success) {
               reject(json);
             } else {
-              console.log('New tag added:', json);
               this.getRecordingDetails();
               resolve(json);
             }
@@ -167,7 +165,6 @@ export default {
             if(!json.success) {
               reject(json);
             } else {
-              console.log('Tag removed:', json);
               this.getRecordingDetails();
               resolve(json);
             }
