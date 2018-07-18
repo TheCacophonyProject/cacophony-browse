@@ -10,6 +10,7 @@
         cols="12"
         lg="8">
         <video
+          :key="recording.id"
           controls
           autoplay
           max-width="100%"
@@ -22,7 +23,7 @@
         <QuickTag
           @addTag="addTag($event)"
           @displayAddObservation="manualAdd = true"/>
-        <PrevNext />
+        <PrevNext :recording="recording" />
         <ObservedAnimals
           :items="tagItems"
           @deleteTag="deleteTag($event)"/>
@@ -118,6 +119,11 @@ export default {
         tagItems.push(tagItem);
       });
       return tagItems;
+    }
+  },
+  watch: {
+    '$route' () {
+      this.getRecordingDetails();
     }
   },
   created: function() {
