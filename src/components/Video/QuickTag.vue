@@ -54,7 +54,7 @@
       class="tag-button"
       title="Open form to add other animal and/or extra details"
       src="../../assets/video/plus.png"
-      @click="toggleTaggingDetails()" >
+      @click="$emit('displayAddObservation')" >
   </div>
 </template>
 

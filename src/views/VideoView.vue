@@ -19,7 +19,9 @@
           <source :src="fileSource" >
           Sorry, your browser does not support video playback.
         </video>
-        <QuickTag @addTag="addTag($event)"/>
+        <QuickTag
+          @addTag="addTag($event)"
+          @displayAddObservation="manualAdd = true"/>
         <PrevNext />
         <ObservedAnimals
           :items="tagItems"
@@ -36,7 +38,9 @@
       </b-col>
 
       <b-col cols="12">
-        <AddObservation v-show="manualAdd" />
+        <AddObservation
+          v-show="manualAdd"
+        />
       </b-col>
     </b-row>
   </b-container>
