@@ -2,7 +2,7 @@
   <b-form-group>
     <label>{{ title }}</label>
     <input
-      :value="myvalue"
+      :value="value"
       type="date"
       class="form-control"
       @input="$emit('input', $event.target.value)">
@@ -13,14 +13,14 @@
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'AnimalSelect',
+  name: 'SelectDate',
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     title: {
       type: String,
       default: "Select date"
     },
-    myvalue: {
+    value: {
       type: String,
       required: true
     }

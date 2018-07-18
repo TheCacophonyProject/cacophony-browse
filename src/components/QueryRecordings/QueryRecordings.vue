@@ -84,9 +84,9 @@ export default {
       },
       devices: [],
       animals: [],
-      fromDate: null,
-      toDate: null,
-      tagTypes: null
+      fromDate: "",
+      toDate: "",
+      tagTypes: {}
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
