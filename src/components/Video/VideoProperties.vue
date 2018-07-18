@@ -39,8 +39,12 @@
     </b-form>
 
     <h3>Download Files</h3>
-    <b-button>Download Raw</b-button>
-    <b-button>Download File</b-button>
+    <b-button
+      :href="downloadRawUrl"
+      target="_blank">Download Raw</b-button>
+    <b-button
+      :href="downloadFileUrl"
+      target="_blank">Download File</b-button>
 
   </div>
 </template>
@@ -48,6 +52,7 @@
 <script>
 
 import api from '../../api/index';
+import { Config } from '../../../app.config';
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
@@ -61,6 +66,14 @@ export default {
     value: {
       type: String,
       default: ""
+    },
+    downloadRaw: {
+      type: String,
+      default: ""
+    },
+    downloadFile: {
+      type: String,
+      default: ""
     }
   },
   // https://vuejs.org/v2/style-guide/#Component-data-essential
@@ -71,7 +84,12 @@ export default {
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
-
+    downloadRawUrl: function () {
+      return `${Config.api}/api/v1/signedUrl?jwt=${this.downloadRaw}`;
+    },
+    downloadFileUrl: function () {
+      return `${Config.api}/api/v1/signedUrl?jwt=${this.downloadFile}`;
+    }
   },
   methods: {
     updateComment() {

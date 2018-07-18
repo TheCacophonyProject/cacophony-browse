@@ -34,7 +34,9 @@
         lg="4">
         <VideoProperties
           :processing-state="processingState"
-          v-model="recording.comment" />
+          v-model="recording.comment"
+          :download-raw="downloadRawJWT"
+          :download-file="downloadFileJWT"/>
         <VideoHelp class="mt-2" />
       </b-col>
 
