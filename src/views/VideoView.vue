@@ -103,6 +103,7 @@ export default {
         }
         if (tag.automatic) {
           tagItem.who = "Cacophony AI";
+          tagItem['_rowVariant'] = 'warning';
         } else {
           tagItem.who = tag.taggerId;
         }
