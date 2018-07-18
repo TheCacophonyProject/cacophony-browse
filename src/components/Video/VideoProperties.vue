@@ -2,29 +2,37 @@
   <div>
     <h3>Video properties</h3>
     <b-form>
-      <b-form-group 
-        label="Processing:" 
+      <b-form-group
+        label="Processing:"
         horizontal>
-        <b-input 
-          :value="processingState" 
+        <b-input
+          :value="processingState"
           disabled />
       </b-form-group>
 
-      <b-form-group 
-        label="Comment" 
+      <b-form-group
+        label="Comment"
         horizontal>
         <b-form-row class="m-0">
-          <b-form-textarea 
-            :value="comment" 
-            class="col" />
+          <b-form-textarea
+            :value="value"
+            class="col"
+            @input="$emit('input', $event)" />
           <div class="col-md-1" />
-          <b-button class="col-md-3">Save Comment</b-button>
+          <b-button
+            class="col-md-3"
+            @click="updateComment">Save Comment</b-button>
         </b-form-row>
       </b-form-group>
+      <b-alert
+        :show="showAlert"
+        variant="success"
+        dismissible
+        @dismissed="showAlert=false">Comment saved.</b-alert>
 
       <b-form-group>
-        <b-button 
-          :block="true" 
+        <b-button
+          :block="true"
           variant="danger">Delete Video</b-button>
       </b-form-group>
 
@@ -39,6 +47,8 @@
 
 <script>
 
+import api from '../../api/index';
+
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'VideoProperties',
@@ -48,7 +58,7 @@ export default {
       type: String,
       default: "incomplete"
     },
-    comment: {
+    value: {
       type: String,
       default: ""
     }
@@ -56,13 +66,30 @@ export default {
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
-
+      showAlert: false
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
 
   },
+  methods: {
+    updateComment() {
+      let token = this.$store.state.User.JWT;
+      return new Promise((resolve, reject) => {
+        api.recording.comment(this.value, this.$route.params.id, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              this.showAlert = true;
+              resolve(json);
+            }
+          });
+      });
+    }
+  }
 };
 </script>
 

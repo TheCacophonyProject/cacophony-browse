@@ -34,7 +34,7 @@
         lg="4">
         <VideoProperties
           :processing-state="processingState"
-          :comment="recording.comment" />
+          v-model="recording.comment" />
         <VideoHelp class="mt-2" />
       </b-col>
 
