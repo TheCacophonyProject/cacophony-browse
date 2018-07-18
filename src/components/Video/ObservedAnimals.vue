@@ -23,7 +23,9 @@
         slot-scope="row">
         <font-awesome-icon
           icon="trash"
-          size="2x"/>
+          size="2x"
+          style="cursor: pointer;"
+          @click="$emit('deleteTag', row.item.tag.id)"/>
       </template>
     </b-table>
   </div>

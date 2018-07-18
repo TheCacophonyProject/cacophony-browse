@@ -21,7 +21,9 @@
         </video>
         <QuickTag @addTag="addTag($event)"/>
         <PrevNext />
-        <ObservedAnimals :items="tagItems"/>
+        <ObservedAnimals
+          :items="tagItems"
+          @deleteTag="deleteTag($event)"/>
       </b-col>
 
       <b-col
@@ -130,7 +132,7 @@ export default {
               this.downloadFileJWT = json.downloadFileJWT;
               this.downloadRawJWT = json.downloadRawJWT;
               this.recording = json.recording;
-              console.log(json);
+              console.log('Recording details loaded:', json);
             }
           });
       });
@@ -146,6 +148,22 @@ export default {
               reject(json);
             } else {
               console.log('New tag added:', json);
+              this.getRecordingDetails();
+              resolve(json);
+            }
+          });
+      });
+    },
+    deleteTag(tagId) {
+      let token = this.$store.state.User.JWT;
+      return new Promise((resolve, reject) => {
+        api.tag.deleteTag(tagId, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              console.log('Tag removed:', json);
               this.getRecordingDetails();
               resolve(json);
             }
