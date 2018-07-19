@@ -25,16 +25,22 @@
         </b-form-row>
       </b-form-group>
       <b-alert
-        :show="showAlert"
+        :show="showCommentAlert"
         variant="success"
         dismissible
-        @dismissed="showAlert=false">Comment saved.</b-alert>
+        @dismissed="showCommentAlert=false">Comment saved.</b-alert>
 
       <b-form-group>
         <b-button
           :block="true"
-          variant="danger">Delete Video</b-button>
+          variant="danger"
+          @click="deleteRecording()">Delete Video</b-button>
       </b-form-group>
+      <b-alert
+        :show="showDeleteAlert"
+        variant="success"
+        dismissible
+        @dismissed="showDeleteAlert=false">Recording deleted.</b-alert>
 
     </b-form>
 
@@ -79,7 +85,8 @@ export default {
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
-      showAlert: false
+      showCommentAlert: false,
+      showDeleteAlert: false
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -101,7 +108,23 @@ export default {
             if(!json.success) {
               reject(json);
             } else {
-              this.showAlert = true;
+              this.showCommentAlert = true;
+              resolve(json);
+            }
+          });
+      });
+    },
+    deleteRecording() {
+      let token = this.$store.state.User.JWT;
+      return new Promise((resolve, reject) => {
+        api.recording.del(this.$route.params.id, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              this.showDeleteAlert = true;
+              this.$emit('nextRecording');
               resolve(json);
             }
           });

@@ -21,9 +21,22 @@
           Sorry, your browser does not support video playback.
         </video>
         <QuickTag
+          v-show="!showAddObservation"
           @addTag="addTag($event)"
-          @displayAddObservation="manualAdd = true"/>
-        <PrevNext :recording="recording" />
+          @displayAddObservation="showAddObservation = true"/>
+        <AddObservation
+          v-show="showAddObservation"
+          @addTag="addTag($event)"
+          @hideAddObservations="showAddObservation = false"
+        />
+        <PrevNext
+          :recording="recording"
+          @nextRecording="nextRecording($event.direction, $event.tagMode, $event.tags)"/>
+        <b-alert
+          :show="showAlert"
+          :variant="alertVariant"
+          dismissible
+          @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
         <ObservedAnimals
           :items="tagItems"
           @deleteTag="deleteTag($event)"/>
@@ -36,15 +49,12 @@
           :processing-state="processingState"
           v-model="recording.comment"
           :download-raw="downloadRawJWT"
-          :download-file="downloadFileJWT"/>
+          :download-file="downloadFileJWT"
+          @nextRecording="nextRecording('next', 'any')"/>
         <VideoHelp class="mt-2" />
       </b-col>
 
-      <b-col cols="12">
-        <AddObservation
-          v-show="manualAdd"
-        />
-      </b-col>
+      <b-col cols="12"/>
     </b-row>
   </b-container>
 </template>
@@ -72,7 +82,10 @@ export default {
       downloadFileJWT: null,
       downloadRawJWT: null,
       recording: null,
-      manualAdd: false
+      showAddObservation: false,
+      showAlert: false,
+      alertMessage: "",
+      alertVariant: ""
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -149,6 +162,7 @@ export default {
       });
     },
     addTag(tag) {
+      console.log('tag is', tag);
       let token = this.$store.state.User.JWT;
       let id = Number(this.$route.params.id);
       return new Promise((resolve, reject) => {
@@ -158,6 +172,9 @@ export default {
             if(!json.success) {
               reject(json);
             } else {
+              this.showAlert = true;
+              this.alertMessage = "Tag added.";
+              this.alertVariant = "success";
               this.getRecordingDetails();
               resolve(json);
             }
@@ -174,6 +191,56 @@ export default {
               reject(json);
             } else {
               this.getRecordingDetails();
+              this.showAlert = true;
+              this.alertMessage = 'Tag deleted';
+              this.alertVariant = 'success';
+              resolve(json);
+            }
+          });
+      });
+    },
+    nextRecording(direction, tagMode, tags) {
+      var query = {
+        DeviceId: this.recording.Device.id,
+      };
+      let order;
+      switch (direction) {
+      case "next":
+        query.recordingDateTime = {gt: this.recording.recordingDateTime};
+        order = "ASC";
+        break;
+      case "previous":
+        query.recordingDateTime = {lt: this.recording.recordingDateTime};
+        order = "DESC";
+        break;
+      default:
+        throw `invalid direction: '${direction}'`;
+      }
+
+      if (!tags) {
+        tags = null;
+      }
+
+
+      let token = this.$store.state.User.JWT;
+      let limit = 1;
+      let offset = 0;
+      let orderJSON = JSON.stringify([["recordingDateTime", order]]);
+
+      return new Promise((resolve, reject) => {
+        api.recording.query(token, limit, offset, tagMode, tags, query, orderJSON)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              if (json.rows.length == 0) {
+                this.showAlert = true;
+                this.alertMessage = `No ${direction} recording for this device.`;
+                this.alertVariant = 'warning';
+                return;
+              }
+              this.$router.push({path: `/video/${json.rows[0].id}`});
               resolve(json);
             }
           });

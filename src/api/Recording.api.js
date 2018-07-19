@@ -2,7 +2,7 @@ import fetch from 'cross-fetch';
 import { Config } from '../../app.config' // eslint-disable-line
 
 export default {
-  query, id, comment
+  query, id, comment, del
 };
 
 let recordingApi = '/api/v1/recordings';
@@ -64,6 +64,19 @@ function comment(comment, id, token) {
       mode: 'cors',
       cache: "no-cache",
       body: body
+    }
+  );
+}
+
+function del(id, token) {
+  let url = `${Config.api}${recordingApi}/${id}`;
+  return fetch(
+    url,
+    {
+      method:"DELETE",
+      headers: {'Authorization': token},
+      mode: 'cors',
+      cache: "no-cache"
     }
   );
 }

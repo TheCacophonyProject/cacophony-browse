@@ -3,95 +3,101 @@
     <h3>Add animal observation</h3>
     <b-form>
 
-      <b-form-group 
-        label="Animal:" 
+      <b-form-group
+        label="Animal:"
         horizontal>
-        <b-form-select 
-          v-model="animalTag" 
+        <b-form-select
+          v-model="animalTag"
           :options="animalOptions" />
       </b-form-group>
 
-      <b-form-group 
-        label="Number:" 
+      <b-form-group
+        label="Number:"
         horizontal>
-        <b-input 
-          v-model="number" 
+        <b-input
+          v-model="number"
           type="number" />
       </b-form-group>
 
-      <b-form-group 
-        label="Event:" 
+      <b-form-group
+        label="Event:"
         horizontal>
-        <b-form-select 
-          v-model="event" 
+        <b-form-select
+          v-model="event"
           :options="eventOptions" />
       </b-form-group>
 
-      <b-form-group 
-        label="Confidence:" 
+      <b-form-group
+        label="Confidence:"
         horizontal>
-        <b-form-radio-group 
-          v-model="confidence" 
+        <b-form-radio-group
+          v-model="confidence"
           :options="confidenceOptions" />
       </b-form-group>
 
-      <b-form-group 
-        label="Age:" 
+      <b-form-group
+        label="Age:"
         horizontal>
-        <b-input 
-          v-model="age" 
-          :state="ageState" 
+        <b-input
+          v-model="age"
+          :state="ageState"
           placeholder="Years:Months"/>
       </b-form-group>
 
-      <b-form-group 
-        label="Trap type:" 
+      <b-form-group
+        label="Trap type:"
         horizontal>
-        <b-form-select 
-          v-model="trap" 
+        <b-form-select
+          v-model="trap"
           :options="trapOptions" />
       </b-form-group>
 
-      <b-form-group 
-        label="Start time:" 
+      <b-form-group
+        label="Start time:"
         horizontal>
         <b-form-row>
-          <b-input 
-            v-model="startTime" 
-            :state="startTimeState" 
-            class="col m-1" 
+          <b-input
+            v-model="startTime"
+            :state="startTimeState"
+            class="col m-1"
             placeholder="min:sec" />
-          <b-button 
-            class="col-md-3 m-1" 
+          <b-button
+            class="col-md-3 m-1"
             onclick="goToStartTime(this)">go to start time</b-button>
-          <b-button 
-            class="col-md-3 m-1" 
+          <b-button
+            class="col-md-3 m-1"
             onclick="setStartTimeAsCurrentTime()">set to current time</b-button>
         </b-form-row>
       </b-form-group>
 
-      <b-form-group 
-        label="End time:" 
+      <b-form-group
+        label="End time:"
         horizontal>
         <b-form-row>
-          <b-input 
-            v-model="endTime" 
-            :state="endTimeState" 
-            class="col m-1" 
+          <b-input
+            v-model="endTime"
+            :state="endTimeState"
+            class="col m-1"
             placeholder="min:sec" />
-          <b-button 
-            class="col-md-3 m-1" 
+          <b-button
+            class="col-md-3 m-1"
             onclick="goToStartTime(this)">go to end time</b-button>
-          <b-button 
-            class="col-md-3 m-1" 
+          <b-button
+            class="col-md-3 m-1"
             onclick="setStartTimeAsCurrentTime()">set to current time</b-button>
         </b-form-row>
       </b-form-group>
 
-      <b-button 
-        :block="true" 
-        variant="primary" 
-        onclick="tags.new()">Add new tag</b-button>
+      <b-button
+        :block="true"
+        variant="primary"
+        @click="addManualTag()">Add new tag</b-button>
+      <b-alert
+        :show="showAlert"
+        variant="warning"
+        dismissible
+        class="mt-2"
+        @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
     </b-form>
   </div>
 </template>
@@ -128,7 +134,9 @@ export default {
         "Good Nature possums", "Good nature rat", "Short live capture", "Long live capture", "Timms", "Doc 200", "Trapinator", "Rat poison station", "other"
       ],
       startTime: null,
-      endTime: null
+      endTime: null,
+      showAlert: false,
+      alertMessage: ""
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -156,8 +164,70 @@ export default {
       } else {
         return null;
       }
-    }
+    },
+    duration () {
+      if (this.endTime == null || this.startTime == null) {
+        return null;
+      }
+
+      let endTime = this.parseTimeString(this.endTime);
+      let startTime = this.parseTimeString(this.startTime);
+      let duration = endTime - startTime;
+
+      if (duration <= 0) {
+        throw { message: "Negative duration. (Start time is after end time!)" };
+      }
+      return duration;
+    },
+    ageMonths: function () {
+      if (this.age) {
+        let ageString = this.age;
+        let ageYears = parseInt(ageString.split(':')[0]);
+        let ageMonths = parseInt(ageString.split(':')[1]);
+        return ageYears * 12 + ageMonths;
+      } else {
+        return null;
+      }
+    },
   },
+  methods: {
+    addManualTag() {
+      if (this.ageState === false || this.startTimeState === false || this.endTimeState === false) {
+        this.showAlert = true;
+        this.alertMessage = "Invalid form.";
+        return;
+      } else {
+        let tag = {};
+        try {
+          tag.animal = this.animalTag;
+          tag.number = this.number;
+          tag.event = this.event;
+          tag.confidence = this.confidence;
+          tag.age = this.ageMonths;
+          if (this.startTime) {
+            tag.startTime = this.parseTimeString(this.startTime);
+          }
+          tag.duration = this.duration;
+          tag.trapType = this.trap;
+
+          // save user tag defaults.
+          // user.setTagDefault('tagAnimalInput', tag.animal);
+          // user.setTagDefault('tagEventInput', tag.event);
+          // user.setTagDefault('tagTrapTypeInput', tag.trapType);
+        } catch (err) {
+          this.showAlert = true;
+          this.alertMessage = err.message;
+          return;
+        }
+        this.$emit('addTag', tag);
+        this.$emit('hideAddObservations');
+      }
+    },
+    parseTimeString (timeString) {
+      let timeArray = timeString.split(':');
+      return timeArray[0] * 60 + timeArray[1];
+    }
+  }
 };
 </script>
 
