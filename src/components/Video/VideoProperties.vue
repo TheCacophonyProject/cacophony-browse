@@ -61,9 +61,7 @@ import api from '../../api/index';
 import { Config } from '../../../app.config';
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'VideoProperties',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     processingState: {
       type: String,
@@ -82,14 +80,12 @@ export default {
       default: ""
     }
   },
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       showCommentAlert: false,
       showDeleteAlert: false
     };
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
     downloadRawUrl: function () {
       return `${Config.api}/api/v1/signedUrl?jwt=${this.downloadRaw}`;

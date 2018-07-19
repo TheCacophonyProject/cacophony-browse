@@ -13,16 +13,13 @@
 <script>
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'AnimalSelect',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     value: {
       type: Array,
       required: true
     }
   },
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       thisvalue: ["interesting", "possum"],
@@ -50,7 +47,6 @@ export default {
       ]
     };
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
     placeholder: function () {
       if (this.value.length > 0) {

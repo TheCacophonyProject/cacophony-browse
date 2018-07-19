@@ -12,9 +12,7 @@
 <script>
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'SelectDate',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     title: {
       type: String,
@@ -24,14 +22,6 @@ export default {
       type: String,
       required: true
     }
-  },
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
-  data () {
-    return {
-    };
-  },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
-  },
+  }
 };
 </script>

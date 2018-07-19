@@ -105,16 +105,13 @@
 <script>
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'AddObservation',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     currentVideoTime: {
       type: Number,
       default: 0
     }
   },
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       animalTag: null,
@@ -144,7 +141,6 @@ export default {
       alertMessage: ""
     };
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
     ageState () {
       let pattern = /(\d)?(\d):(\d)?(\d)/;

@@ -9,15 +9,15 @@
       <b-form-row class="information-line">
         <b-col lg="4">
           <b-form-text>
-            <h5 
-              v-if="countMessage" 
+            <h5
+              v-if="countMessage"
               style="text-align: center;">
               {{ countMessage }}
             </h5>
           </b-form-text>
         </b-col>
-        <b-col 
-          md="6" 
+        <b-col
+          md="6"
           lg="4">
           <b-pagination
             v-if="count > perPage"
@@ -29,8 +29,8 @@
             align="center"
             @input="pagination" />
         </b-col>
-        <b-col 
-          md="6" 
+        <b-col
+          md="6"
           lg="4">
           <b-form-group>
             <b-form-select
@@ -64,12 +64,9 @@ import TableRecordings from '../components/TableRecordings.vue';
 import api from '../api/index';
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'RecordingsView',
   components: {QueryRecordings, TableRecordings},
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       query: {},
@@ -88,9 +85,6 @@ export default {
         {value:1000, text: "1000 per page"}
       ]
     };
-  },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
   },
   methods: {
     searchButton() {

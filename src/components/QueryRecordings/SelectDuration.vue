@@ -23,24 +23,14 @@
 <script>
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'DurationSlider',
   components: {
   },
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     value: {
       type: Object,
       required: true
     }
-  },
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
-  data () {
-    return {
-    };
-  },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
   },
   methods: {
     updateHigh: function () {

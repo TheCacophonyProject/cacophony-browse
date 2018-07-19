@@ -36,16 +36,13 @@
 /* global require */
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'ObservedAnimals',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     items: {
       type: Array,
       required: true
     }
   },
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       fields: [
@@ -59,7 +56,6 @@ export default {
       ]
     };
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
   },
   methods: {

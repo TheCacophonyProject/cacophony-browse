@@ -75,12 +75,9 @@ import VideoProperties from '../components/Video/VideoProperties.vue';
 import VideoHelp from '../components/Video/VideoHelp.vue';
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'VideoView',
   components: {QuickTag, PrevNext, AddObservation, ObservedAnimals, VideoProperties, VideoHelp},
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       downloadFileJWT: null,
@@ -93,7 +90,6 @@ export default {
       currentVideoTime: 0
     };
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
     date: function () {
       let date = new Date(this.recording.recordingDateTime);
@@ -224,7 +220,6 @@ export default {
       if (!tags) {
         tags = null;
       }
-
 
       let token = this.$store.state.User.JWT;
       let limit = 1;

@@ -3,11 +3,11 @@
     <h3>Help</h3>
     <b-row>
       <b-col cols="4">
-        <img 
-          class="img-button" 
+        <img
+          class="img-button"
           src="../../assets/video/previous.png" >
-        <img 
-          class="img-button" 
+        <img
+          class="img-button"
           src="../../assets/video/next.png" >
       </b-col>
       <b-col cols="8">
@@ -15,11 +15,11 @@
       </b-col>
 
       <b-col cols="4">
-        <img 
-          class="img-button" 
+        <img
+          class="img-button"
           src="../../assets/video/previous-no-human.png" >
-        <img 
-          class="img-button" 
+        <img
+          class="img-button"
           src="../../assets/video/next-no-human.png" >
       </b-col>
       <b-col cols="8">
@@ -27,11 +27,11 @@
       </b-col>
 
       <b-col cols="4">
-        <img 
-          class="img-button" 
+        <img
+          class="img-button"
           src="../../assets/video/previous-interesting.png" >
-        <img 
-          class="img-button" 
+        <img
+          class="img-button"
           src="../../assets/video/next-interesting.png" >
       </b-col>
       <b-col cols="8">
@@ -44,20 +44,7 @@
 <script>
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'VideoHelp',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-  props: {},
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
-  data () {
-    return {
-
-    };
-  },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
-
-  },
+  name: 'VideoHelp'
 };
 </script>
 
