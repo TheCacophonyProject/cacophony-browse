@@ -11,7 +11,7 @@
       <template
         slot="animalImage"
         slot-scope="row">
-        <span v-html="animalImage(row.item.animal, row.item.event)"/>
+        <span v-html="animalImage(row.item.animal)"/>
       </template>
       <template
         slot="additionalInfo"
@@ -63,45 +63,23 @@ export default {
   computed: {
   },
   methods: {
-    animalImage: function (animal, event) {
+    animalImage: function (animal) {
       // Struggling to get images to show correctly so using work-around
-      // suggeested at bottom of this page
+      // suggested at bottom of this page.
+      // TODO implement alternative that doesn't use 'require' in this manner
       // https://bootstrap-vue.js.org/docs/reference/images/
-      let humanLink = require('../../assets/video/human.png');
-      let possumLink = require('../../assets/video/possum.png');
-      let noneLink = require('../../assets/video/none.png');
-      let stoatLink = require('../../assets/video/stoat.png');
-      let ratLink = require('../../assets/video/rat.png');
-      let hedgehogLink = require('../../assets/video/hedgehog.png');
-      let catLink = require('../../assets/video/cat.png');
-      let birdLink = require('../../assets/video/bird.png');
-      let kiwiLink = require('../../assets/video/kiwi.png');
-
-      if (animal == 'none' && event == 'false positive') {
-        return `<img class="animal-image" src="${noneLink}" />`;
+      let image = null;
+      if (animal == 'none') {
+        image = 'none.png';
+      } else if (animal == 'bird/kiwi') {
+        image = 'kiwi.png';
+      } else if (animal == 'unidentified') {
+        image = 'none.png';
+      } else {
+        image = animal + '.png';
       }
-      switch(animal) {
-      case "possum":
-        return `<img class="animal-image" src="${possumLink}" />`;
-      case "stoat":
-        return `<img class="animal-image" src="${stoatLink}" />`;
-      case "rat":
-        return `<img class="animal-image" src="${ratLink}" />`;
-      case "hedgehog":
-        return `<img class="animal-image" src="${hedgehogLink}" />`;
-      case "cat":
-        return `<img class="animal-image" src="${catLink}" />`;
-      case "human":
-        return `<img class="animal-image" src="${humanLink}" />`;
-      case "bird":
-        return `<img class="animal-image" src="${birdLink}" />`;
-      case "bird/kiwi":
-        return `<img class="animal-image" src="${kiwiLink}" />`;
-      case "unidentified":
-        return `<img class="animal-image" src="${noneLink}" />`;
-      default:
-        return null;
-      }
+      let link = require('../../assets/video/' + image);
+      return `<img class="animal-image" src="${link}" />`;
     },
     additionalInfo: function (tag) {
       let string = "";

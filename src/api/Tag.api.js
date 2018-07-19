@@ -5,7 +5,7 @@ export default {
   addTag, deleteTag
 };
 
-let tagApi = '/api/v1/tags';
+const tagApi = '/api/v1/tags';
 
 function addTag(tag, id, token) {
   let url = `${Config.api}` + tagApi;

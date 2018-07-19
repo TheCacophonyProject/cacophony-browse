@@ -5,7 +5,7 @@ export default {
   query, id, comment, del
 };
 
-let recordingApi = '/api/v1/recordings';
+const recordingApi = '/api/v1/recordings';
 
 function query(token, limit, offset, tagMode, tags, query, order) {
   let url = getRecordingURL(query, limit, offset, tagMode, order);
