@@ -63,7 +63,7 @@
             placeholder="min:sec" />
           <b-button
             class="col-md-3 m-1"
-            onclick="goToStartTime(this)">go to start time</b-button>
+            @click="setCurrentVideoTime('start')">go to start time</b-button>
           <b-button
             class="col-md-3 m-1"
             @click="setTimeAsCurrentTime('startTime')">set to current time</b-button>
@@ -81,7 +81,7 @@
             placeholder="min:sec" />
           <b-button
             class="col-md-3 m-1"
-            onclick="goToStartTime(this)">go to end time</b-button>
+            @click="setCurrentVideoTime('end')">go to end time</b-button>
           <b-button
             class="col-md-3 m-1"
             @click="setTimeAsCurrentTime('endTime')">set to current time</b-button>
@@ -230,7 +230,10 @@ export default {
     },
     parseTimeString (timeString) {
       let timeArray = timeString.split(':');
-      return timeArray[0] * 60 + timeArray[1];
+      let minutes = parseInt(timeArray[0]);
+      let seconds = parseInt(timeArray[1]);
+      return minutes * 60 + seconds;
+    },
     setTimeAsCurrentTime(type) {
       this.$emit('get-current-video-time');
       this.$nextTick(function () {
@@ -246,6 +249,18 @@ export default {
         }
         this[type] = timeString;
       });
+    },
+    setCurrentVideoTime(type) {
+      let timeString;
+      if (type === 'start' && this.startTime) {
+        timeString = this.startTime;
+      } else if (type === 'end' && this.endTime) {
+        timeString = this.endTime;
+      } else {
+        throw `Error with ${type} time.`;
+      }
+      let time = this.parseTimeString(timeString);
+      this.$emit('set-current-video-time', time);
     }
   }
 };

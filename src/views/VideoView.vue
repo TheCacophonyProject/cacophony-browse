@@ -29,6 +29,7 @@
           v-show="showAddObservation"
           :current-video-time="currentVideoTime"
           @get-current-video-time="getCurrentVideoTime()"
+          @set-current-video-time="setCurrentVideoTime($event)"
           @addTag="addTag($event)"
           @hideAddObservations="showAddObservation = false"
         />
@@ -251,6 +252,9 @@ export default {
     },
     getCurrentVideoTime() {
       this.currentVideoTime = this.$refs.videoPlayer.currentTime;
+    },
+    setCurrentVideoTime(time) {
+      this.$refs.videoPlayer.currentTime = time;
     }
   }
 };
