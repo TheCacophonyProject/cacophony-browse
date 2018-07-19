@@ -10,6 +10,7 @@
         cols="12"
         lg="8">
         <video
+          ref="videoPlayer"
           :key="recording.id"
           controls
           autoplay
@@ -26,6 +27,8 @@
           @displayAddObservation="showAddObservation = true"/>
         <AddObservation
           v-show="showAddObservation"
+          :current-video-time="currentVideoTime"
+          @get-current-video-time="getCurrentVideoTime()"
           @addTag="addTag($event)"
           @hideAddObservations="showAddObservation = false"
         />
@@ -85,7 +88,8 @@ export default {
       showAddObservation: false,
       showAlert: false,
       alertMessage: "",
-      alertVariant: ""
+      alertVariant: "",
+      currentVideoTime: 0
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -162,7 +166,6 @@ export default {
       });
     },
     addTag(tag) {
-      console.log('tag is', tag);
       let token = this.$store.state.User.JWT;
       let id = Number(this.$route.params.id);
       return new Promise((resolve, reject) => {
@@ -245,6 +248,9 @@ export default {
             }
           });
       });
+    },
+    getCurrentVideoTime() {
+      this.currentVideoTime = this.$refs.videoPlayer.currentTime;
     }
   }
 };

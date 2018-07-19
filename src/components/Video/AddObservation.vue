@@ -66,7 +66,7 @@
             onclick="goToStartTime(this)">go to start time</b-button>
           <b-button
             class="col-md-3 m-1"
-            onclick="setStartTimeAsCurrentTime()">set to current time</b-button>
+            @click="setTimeAsCurrentTime('startTime')">set to current time</b-button>
         </b-form-row>
       </b-form-group>
 
@@ -84,7 +84,7 @@
             onclick="goToStartTime(this)">go to end time</b-button>
           <b-button
             class="col-md-3 m-1"
-            onclick="setStartTimeAsCurrentTime()">set to current time</b-button>
+            @click="setTimeAsCurrentTime('endTime')">set to current time</b-button>
         </b-form-row>
       </b-form-group>
 
@@ -108,7 +108,12 @@ export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'AddObservation',
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
-  props: {},
+  props: {
+    currentVideoTime: {
+      type: Number,
+      default: 0
+    }
+  },
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
@@ -179,7 +184,7 @@ export default {
       }
       return duration;
     },
-    ageMonths: function () {
+    ageMonths () {
       if (this.age) {
         let ageString = this.age;
         let ageYears = parseInt(ageString.split(':')[0]);
@@ -226,6 +231,21 @@ export default {
     parseTimeString (timeString) {
       let timeArray = timeString.split(':');
       return timeArray[0] * 60 + timeArray[1];
+    setTimeAsCurrentTime(type) {
+      this.$emit('get-current-video-time');
+      this.$nextTick(function () {
+        let currentTime = this.currentVideoTime;
+        let timeString = "";
+        if (currentTime > 60) {
+          let minutes = Math.trunc(currentTime / 60);
+          let seconds = Math.trunc(currentTime % 60);
+          timeString = `${minutes}:${("0" + seconds).slice(-2)}`;
+        } else {
+          let seconds = Math.trunc(currentTime);
+          timeString = `0:${("0" + seconds).slice(-2)}`;
+        }
+        this[type] = timeString;
+      });
     }
   }
 };
