@@ -66,32 +66,13 @@ const mutations = {
     state.JWT = "";
   },
   rejectLogin (state, data) {
-    state.JWT = '',
+    state.JWT = '';
     state.errorMessage = data.messages || data.message;
   },
   receiveLogin (state, data) {
     state.JWT = data.token;
     state.userData= data.userData;
   }
-//	pushProductToCart (state, { id }) {
-//		state.items.push({
-//			id,
-//			quantity: 1
-//		})
-//	},
-//
-//	incrementItemQuantity (state, { id }) {
-//		const cartItem = state.items.find(item => item.id === id)
-//		cartItem.quantity++
-//	},
-//
-//	setCartItems (state, { items }) {
-//		state.items = items
-//	},
-//
-//	setCheckoutStatus (state, status) {
-//		state.checkoutStatus = status
-//	}
 };
 
 export default {

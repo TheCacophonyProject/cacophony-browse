@@ -5,6 +5,13 @@
       <h1>Login</h1>
 
       <b-form @submit="onSubmit">
+        <b-alert
+          :show="!!errorMessage"
+          variant="danger"
+          dismissible
+          @dismissed="errorMessage=undefined">
+          {{ errorMessage }}
+        </b-alert>
 
         <b-form-group
           label="Username"
@@ -24,9 +31,10 @@
             type="password"/>
         </b-form-group>
 
-        <b-button 
-          type="submit" 
-          variant="primary">Sign in</b-button>
+        <b-button
+          type="submit"
+          variant="primary">Sign in
+        </b-button>
 
       </b-form>
 
@@ -50,7 +58,8 @@ export default {
   data () {
     return {
       username: '',
-      password: ''
+      password: '',
+      errorMessage: null
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -58,15 +67,28 @@ export default {
   methods:{
     onSubmit (evt) {
       evt.preventDefault();
-      this.$store.dispatch('User/LOGIN', {
-        username: this.username,
-        password: this.password
-      }).then(() => {
-        this.$router.go('home');
-      });
-
+      if (this.username && this.password) {
+        this.$store.dispatch('User/LOGIN', {
+          username: this.username,
+          password: this.password
+        }).then(() => {
+          this.$router.go('home');
+        }).catch((errors) => {
+          this.errorMessage = errors;
+          setTimeout(() => {
+            return this.errorMessage = false, 3000;
+          }
+          );
+        });
+      } else {
+        this.errorMessage = "Username & password are required";
+        setTimeout(() => {
+          return this.errorMessage = false, 3000;
+        }
+        );
+      }
     }
-  },
+  }
 };
 
 
