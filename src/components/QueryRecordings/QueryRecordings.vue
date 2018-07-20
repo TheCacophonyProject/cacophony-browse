@@ -59,12 +59,10 @@ import SelectDuration from './SelectDuration.vue';
 import SelectDate from './SelectDate.vue';
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'QueryRecordings',
   components: {
     SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate
   },
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {
     heading: {
       type: String,
@@ -75,7 +73,6 @@ export default {
       required: true
     }
   },
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       duration: {
@@ -84,13 +81,10 @@ export default {
       },
       devices: [],
       animals: [],
-      fromDate: null,
-      toDate: null,
-      tagTypes: null
+      fromDate: "",
+      toDate: "",
+      tagTypes: {}
     };
-  },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
   },
   methods: {
     buildQuery() {

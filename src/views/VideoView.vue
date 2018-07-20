@@ -1,16 +1,65 @@
 <template>
-  <b-container>
-    <h1>View Recording</h1>
-    <h4>'{{ recording.Device.devicename }}' - {{ date }}, {{ time }}</h4>
-    <video
-      controls
-      autoplay
-      height="auto"
-      max-width="100%"
-      class="video">
-      <source :src="fileSource" >
-      Sorry, your browser does not support video playback.
-    </video>
+  <b-container v-if="recording">
+    <b-row>
+      <b-col cols="12">
+        <h1>View Recording</h1>
+        <h4>'{{ recording.Device.devicename }}' - {{ date }}, {{ time }}</h4>
+      </b-col>
+
+      <b-col
+        cols="12"
+        lg="8">
+        <video
+          ref="videoPlayer"
+          :key="recording.id"
+          controls
+          autoplay
+          max-width="100%"
+          width="640"
+          height="auto"
+          class="video">
+          <source :src="fileSource" >
+          Sorry, your browser does not support video playback.
+        </video>
+        <QuickTag
+          v-show="!showAddObservation"
+          @addTag="addTag($event)"
+          @displayAddObservation="showAddObservation = true"/>
+        <AddObservation
+          v-show="showAddObservation"
+          :current-video-time="currentVideoTime"
+          @get-current-video-time="getCurrentVideoTime()"
+          @set-current-video-time="setCurrentVideoTime($event)"
+          @addTag="addTag($event)"
+          @hideAddObservations="showAddObservation = false"
+        />
+        <PrevNext
+          :recording="recording"
+          @nextRecording="nextRecording($event.direction, $event.tagMode, $event.tags)"/>
+        <b-alert
+          :show="showAlert"
+          :variant="alertVariant"
+          dismissible
+          @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
+        <ObservedAnimals
+          :items="tagItems"
+          @deleteTag="deleteTag($event)"/>
+      </b-col>
+
+      <b-col
+        cols="12"
+        lg="4">
+        <VideoProperties
+          :processing-state="processingState"
+          v-model="recording.comment"
+          :download-raw="downloadRawJWT"
+          :download-file="downloadFileJWT"
+          @nextRecording="nextRecording('next', 'any')"/>
+        <VideoHelp class="mt-2" />
+      </b-col>
+
+      <b-col cols="12"/>
+    </b-row>
   </b-container>
 </template>
 
@@ -18,21 +67,29 @@
 
 import api from '../api/index';
 import { Config } from '../../app.config' // eslint-disable-line
+import QuickTag from '../components/Video/QuickTag.vue';
+import PrevNext from '../components/Video/PrevNext.vue';
+import AddObservation from '../components/Video/AddObservation.vue';
+import ObservedAnimals from '../components/Video/ObservedAnimals.vue';
+import VideoProperties from '../components/Video/VideoProperties.vue';
+import VideoHelp from '../components/Video/VideoHelp.vue';
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'GroupsView',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  name: 'VideoView',
+  components: {QuickTag, PrevNext, AddObservation, ObservedAnimals, VideoProperties, VideoHelp},
   props: {},
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data () {
     return {
       downloadFileJWT: null,
       downloadRawJWT: null,
-      recording: {}
+      recording: null,
+      showAddObservation: false,
+      showAlert: false,
+      alertMessage: "",
+      alertVariant: "",
+      currentVideoTime: 0
     };
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
     date: function () {
       let date = new Date(this.recording.recordingDateTime);
@@ -47,30 +104,158 @@ export default {
     },
     rawSource: function () {
       return `${Config.api}` + "/api/v1/signedUrl?jwt=" + this.downloadRawJWT;
+    },
+    processingState: function () {
+      let text = this.recording.processingState.toLowerCase();
+      text = text.slice(0,1).toUpperCase() + text.slice(1);
+      return text;
+    },
+    tagItems: function () {
+      let tags = this.recording.Tags;
+      let tagItems = [];
+      tags.map((tag) => {
+        let tagItem = {};
+        if (tag.animal) {
+          tagItem.animal = tag.animal;
+        } else {
+          tagItem.animal = "none";
+        }
+        tagItem.event = tag.event;
+        if (tag.confidence) {
+          tagItem.confidence = tag.confidence.toFixed(2);
+        }
+        if (tag.automatic) {
+          tagItem.who = "Cacophony AI";
+          tagItem['_rowVariant'] = 'warning';
+        } else {
+          tagItem.who = tag.taggerId;
+        }
+        tagItem.when = new Date(tag.createdAt).toLocaleString();
+        tagItem.tag = tag;
+        tagItems.push(tagItem);
+      });
+      return tagItems;
+    }
+  },
+  watch: {
+    '$route' () {
+      this.getRecordingDetails();
     }
   },
   created: function() {
-    let token = this.$store.state.User.JWT;
-    return new Promise((resolve, reject) => {
-      api.recording.id(this.$route.params.id, token)
-        .then(response => response.json())
-        .then((json) => {
-          if(!json.success) {
-            reject(json);
-          } else {
-            this.downloadFileJWT = json.downloadFileJWT;
-            this.downloadRawJWT = json.downloadRawJWT;
-            this.recording = json.recording;
-						console.log(json)//eslint-disable-line
-          }
-        });
-    });
+    this.getRecordingDetails();
+  },
+  methods: {
+    getRecordingDetails() {
+      let token = this.$store.state.User.JWT;
+      return new Promise((resolve, reject) => {
+        api.recording.id(this.$route.params.id, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              this.downloadFileJWT = json.downloadFileJWT;
+              this.downloadRawJWT = json.downloadRawJWT;
+              this.recording = json.recording;
+            }
+          });
+      });
+    },
+    addTag(tag) {
+      let token = this.$store.state.User.JWT;
+      let id = Number(this.$route.params.id);
+      return new Promise((resolve, reject) => {
+        api.tag.addTag(tag, id, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              this.showAlert = true;
+              this.alertMessage = "Tag added.";
+              this.alertVariant = "success";
+              this.getRecordingDetails();
+              resolve(json);
+            }
+          });
+      });
+    },
+    deleteTag(tagId) {
+      let token = this.$store.state.User.JWT;
+      return new Promise((resolve, reject) => {
+        api.tag.deleteTag(tagId, token)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              this.getRecordingDetails();
+              this.showAlert = true;
+              this.alertMessage = 'Tag deleted';
+              this.alertVariant = 'success';
+              resolve(json);
+            }
+          });
+      });
+    },
+    nextRecording(direction, tagMode, tags) {
+      var query = {
+        DeviceId: this.recording.Device.id,
+      };
+      let order;
+      switch (direction) {
+      case "next":
+        query.recordingDateTime = {gt: this.recording.recordingDateTime};
+        order = "ASC";
+        break;
+      case "previous":
+        query.recordingDateTime = {lt: this.recording.recordingDateTime};
+        order = "DESC";
+        break;
+      default:
+        throw `invalid direction: '${direction}'`;
+      }
 
+      if (!tags) {
+        tags = null;
+      }
+
+      let token = this.$store.state.User.JWT;
+      let limit = 1;
+      let offset = 0;
+      let orderJSON = JSON.stringify([["recordingDateTime", order]]);
+
+      return new Promise((resolve, reject) => {
+        api.recording.query(token, limit, offset, tagMode, tags, query, orderJSON)
+          .then(response => response.json())
+          .then((json) => {
+            if(!json.success) {
+              reject(json);
+            } else {
+              if (json.rows.length == 0) {
+                this.showAlert = true;
+                this.alertMessage = `No ${direction} recording for this device.`;
+                this.alertVariant = 'warning';
+                return;
+              }
+              this.$router.push({path: `/video/${json.rows[0].id}`});
+              resolve(json);
+            }
+          });
+      });
+    },
+    getCurrentVideoTime() {
+      this.currentVideoTime = this.$refs.videoPlayer.currentTime;
+    },
+    setCurrentVideoTime(time) {
+      this.$refs.videoPlayer.currentTime = time;
+    }
   }
 };
 </script>
 
-<style scoped>
+<style>
 
 .video {
 	max-width: 100%;
