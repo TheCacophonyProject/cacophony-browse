@@ -3,7 +3,7 @@ import Router from 'vue-router';
 
 import AudioBaitView from '../views/AudioBaitView.vue';
 import AudioView from '../views/AudioView.vue';
-import DevicesView from '../views/DevicesView';
+import DevicesView from '../views/DevicesView.vue';
 import ErrorView from '../views/ErrorView.vue';
 import GroupsView from '../views/GroupsView.vue';
 import GroupView from '../views/GroupView.vue';

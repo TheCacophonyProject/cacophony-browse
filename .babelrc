@@ -1,4 +1,10 @@
 {
 	"presets": ["env"],
-	"plugins": ["transform-object-rest-spread"]
+	"plugins": [
+			["transform-runtime", {
+				"polyfill": false,
+				"regenerator": true
+			}
+		]
+	]
 }

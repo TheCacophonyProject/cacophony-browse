@@ -1,0 +1,22 @@
+/*eslint-disable*/
+let api;
+
+switch(process.env.NODE_ENV) {
+  case 'production':
+    api = "http://0.0.0.0";
+    break;
+  case 'development':
+    api = "http://0.0.0.0";
+    break;
+  case 'test':
+    api = "http://mocked-api-path";
+    break;
+  default:
+    api = "http://0.0.0.0";
+}
+
+module.exports = {
+  'Config': {
+    api
+  }
+}
