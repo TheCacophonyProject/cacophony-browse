@@ -1,7 +1,0 @@
-module.exports = {
-	'Config': JSON.stringify(process.env.NODE_ENV === 'production' ? {
-		api: "https://TODO:"
-	} : {
-		api: "http://path.to.cocophony-api"
-	})
-}

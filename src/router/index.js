@@ -3,9 +3,10 @@ import Router from 'vue-router';
 
 import AudioBaitView from '../views/AudioBaitView.vue';
 import AudioView from '../views/AudioView.vue';
-import DevicesView from '../views/DevicesView';
+import DevicesView from '../views/DevicesView.vue';
 import ErrorView from '../views/ErrorView.vue';
 import GroupsView from '../views/GroupsView.vue';
+import GroupView from '../views/GroupView.vue';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import RecordingsView from '../views/RecordingsView.vue';
@@ -25,6 +26,7 @@ export function createRouter() {
       {path:'/devices',component:DevicesView, meta: {requiresAuth: true}},
       {path:'/error',component:ErrorView, meta: {requiresAuth: true}},
       {path:'/groups',component:GroupsView, meta: {requiresAuth: true}},
+      {path: '/groups/:groupname', name: 'groups', component: GroupView, meta: {requiresAuth: true}},
       {path:'/', name: 'home', component:HomeView, meta: {requiresAuth: true}},
       {path:'/login', name: 'login', component:LoginView},
       {path:'/recordings',component:RecordingsView, meta: {requiresAuth: true}},

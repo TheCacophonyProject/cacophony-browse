@@ -31,9 +31,6 @@ function logout(){
   localStorage.setItem('JWT', '');
 }
 function register(username, password) {
-
-  //{"errorType":"validation","message":"username: username in use","errors":{"username":{"location":"body","param":"username","value":"asdfsadf","msg":"username in use"}}}
-
   let body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   return fetch(
     `${Config.api}/api/v1/Users`,
