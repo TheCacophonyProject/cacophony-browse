@@ -1,8 +1,11 @@
 import crossFetch from 'cross-fetch'; // mocked __mocks__/cross-fetch.js
 import recordingApi from './Recording.api';
 import {LocalStorageMock} from '../tests/testUtils';
+import { Config } from '../../app.config' // eslint-disable-line
 
 global.localStorage = new LocalStorageMock();
+
+const recordingApiUrl = '/api/v1/recordings';
 
 describe('query calls recordings api via fetch', () => {
   const testToken = 'testJWT';
@@ -19,11 +22,16 @@ describe('query calls recordings api via fetch', () => {
       limit: testLimit,
       offset: testOffset
     }
+    let queryString = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+    }).join('&');
+    let url = `${Config.api}` + recordingApiUrl + "?" + queryString;
+
     await recordingApi.query(testToken, params)
 
     const calls = crossFetch.default.mock.calls;
     expect(calls).toHaveLength(1);
-    // expect(calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings?where=${testWhere}&limit=${testLimit}&offset=${testOffset}`);
+    expect(calls[0][0]).toBe(url);
     expect(calls[0][1].method).toBe('GET');
     expect(calls[0][1].headers['Authorization']).toBe(testToken);
     expect(Object.entries(calls[0][1].headers)).toHaveLength(1);
@@ -38,11 +46,16 @@ describe('query calls recordings api via fetch', () => {
       order: testOrder,
       tags: testTags
     }
+    let queryString = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+    }).join('&');
+    let url = `${Config.api}` + recordingApiUrl + "?" + queryString;
+
     await recordingApi.query(testToken, params)
 
     const calls = crossFetch.default.mock.calls;
     expect(calls).toHaveLength(1);
-    // expect(calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings?where=${testWhere}&limit=${testLimit}&offset=${testOffset}`);
+    expect(calls[0][0]).toBe(url);
     expect(calls[0][1].method).toBe('GET');
     expect(calls[0][1].headers['Authorization']).toBe(testToken);
     expect(Object.entries(calls[0][1].headers)).toHaveLength(1);
