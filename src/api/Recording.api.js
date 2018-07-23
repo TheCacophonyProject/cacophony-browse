@@ -7,8 +7,10 @@ export default {
 
 const recordingApi = '/api/v1/recordings';
 
-function query(token, limit, offset, tagMode, tags, query, order) {
-  let url = getRecordingURL(query, limit, offset, tagMode, order);
+function query(token, params) {
+  // Params must include where (stringified JSON), limit, offset
+  // Params can also include tagMode, tags, order
+  let url = getRecordingURL(params);
   return fetch(
     url,
     {
@@ -20,17 +22,8 @@ function query(token, limit, offset, tagMode, tags, query, order) {
   );
 }
 
-function getRecordingURL(query, limit, offset, tagMode, order) {
+function getRecordingURL(params) {
   // Create query string to add to api url
-  let params = {
-    where: JSON.stringify(query),
-    limit: limit,
-    offset: offset,
-    tagMode: tagMode
-  };
-  if (order) {
-    params.order = order;
-  }
   let queryString = Object.keys(params).map((key) => {
     return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
   }).join('&');
