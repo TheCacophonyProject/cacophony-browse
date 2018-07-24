@@ -1,10 +1,10 @@
 <template>
-  <b-container fluid>
+  <b-container>
     <h1>Groups</h1>
 
     <div v-if="!groupData">Loading...</div>
 
-    <template v-if="groupData">
+    <div v-if="groupData">
       <b-row>
         <b-table
           :items="groupData.groups"
@@ -16,7 +16,7 @@
           <template
             slot="groupname"
             slot-scope="row">
-            <b-link :to="{ name: 'groups', params: { groupname: row.item.groupname }}">{{ row.item.groupname }}</b-link>
+            <b-link :to="{ name: 'group', params: { groupname: row.item.groupname }}">{{ row.item.groupname }}</b-link>
           </template>
 
           <template
@@ -28,16 +28,22 @@
 
         </b-table>
       </b-row>
+    </div>
 
-    </template>
+    <group-add />
+
   </b-container>
 </template>
 
 <script>
 
+import GroupAdd from '../components/Groups/GroupAdd.vue';
+
 export default {
+
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'GroupsView',
+  components: { GroupAdd },
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
   // https://vuejs.org/v2/style-guide/#Component-data-essential

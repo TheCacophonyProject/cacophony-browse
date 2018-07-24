@@ -15,12 +15,7 @@
         <dt>Your groups</dt>
         <dd id="groups"/>
       </dl>
-      <input 
-        id="new-group" 
-        class="btn btn-secondary" 
-        type="button" 
-        value="New Group" 
-        @click="newGroup" >
+      <b-link :to="{ name: 'groups'}">Add Group</b-link>
     </b-container>
   </div>
 </template>
@@ -46,6 +41,6 @@ export default {
     greeting: function () {
       return "Kia ora " + this.$store.state.User.userData.username;
     }
-  },
+  }
 };
 </script>
