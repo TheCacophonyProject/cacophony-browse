@@ -83,38 +83,52 @@ export default {
       animals: [],
       fromDate: "",
       toDate: "",
-      tagTypes: {}
+      tagTypes: { text: null, label: 'any' }
     };
   },
   methods: {
     buildQuery() {
-      let query = {type: 'thermalRaw'};
+      let query = {
+        type: 'thermalRaw',
+        where: {}
+      };
       // Add devices
       if (this.devices.length !== 0) {
-        query.DeviceId = [];
+        query.where.DeviceId = [];
         for (let device of this.devices) {
-          query.DeviceId.push(device.id);
+          query.where.DeviceId.push(device.id);
         }
       }
       // Add duration
       if (this.duration.low || this.duration.high) {
-        query.duration = {};
+        query.where.duration = {};
       }
       if (this.duration.low) {
-        query.duration["$gt"] = this.duration.low;
+        query.where.duration["$gt"] = this.duration.low;
       }
       if (this.duration.high) {
-        query.duration["$lt"] = this.duration.high;
+        query.where.duration["$lt"] = this.duration.high;
       }
       // Add date
       if (this.fromDate || this.toDate ) {
-        query.recordingDateTime = {};
+        query.where.recordingDateTime = {};
       }
       if (this.fromDate) {
-        query.recordingDateTime["$gt"] = this.fromDate;
+        query.where.recordingDateTime["$gt"] = this.fromDate;
       }
       if (this.toDate) {
-        query.recordingDateTime["$lt"] = this.toDate;
+        query.where.recordingDateTime["$lt"] = this.toDate;
+      }
+      // Add tag mode
+      if (this.tagTypes.label !== 'any') {
+        query.tagMode = this.tagTypes.text;
+      }
+      // Add animal tags
+      if (this.animals.length !== 0) {
+        query.tags = [];
+        for (let animal of this.animals) {
+          query.tags.push(animal);
+        }
       }
       this.$emit('input', query);
       this.$emit('searchButton');

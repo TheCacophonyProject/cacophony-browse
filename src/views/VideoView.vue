@@ -200,34 +200,37 @@ export default {
       });
     },
     nextRecording(direction, tagMode, tags) {
-      var query = {
-        DeviceId: this.recording.Device.id,
+      var params = {
+        where: {
+          DeviceId: this.recording.Device.id
+        },
+        limit: 1,
+        offset: 0
       };
+      if (tags) {
+        params.where.tags = JSON.stringify(tags);
+      }
+
       let order;
       switch (direction) {
       case "next":
-        query.recordingDateTime = {gt: this.recording.recordingDateTime};
+        params.where.recordingDateTime = {gt: this.recording.recordingDateTime};
         order = "ASC";
         break;
       case "previous":
-        query.recordingDateTime = {lt: this.recording.recordingDateTime};
+        params.where.recordingDateTime = {lt: this.recording.recordingDateTime};
         order = "DESC";
         break;
       default:
         throw `invalid direction: '${direction}'`;
       }
-
-      if (!tags) {
-        tags = null;
-      }
+      params.order  = JSON.stringify([["recordingDateTime", order]]);
+      params.where = JSON.stringify(params.where);
 
       let token = this.$store.state.User.JWT;
-      let limit = 1;
-      let offset = 0;
-      let orderJSON = JSON.stringify([["recordingDateTime", order]]);
 
       return new Promise((resolve, reject) => {
-        api.recording.query(token, limit, offset, tagMode, tags, query, orderJSON)
+        api.recording.query(token, params)
           .then(response => response.json())
           .then((json) => {
             if(!json.success) {

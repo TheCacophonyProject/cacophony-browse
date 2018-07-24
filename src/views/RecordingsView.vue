@@ -100,16 +100,22 @@ export default {
       // Remove previous values
       this.recordings = [];
       this.tableItems = [];
-      // Extract query options
+      // Create query params object
+      let params = {
+        where: JSON.stringify(this.query.where),
+        limit: this.perPage,
+        offset: (this.currentPage - 1) * this.perPage
+      };
       let token = this.$store.state.User.JWT;
-      let limit = this.perPage;
-      let offset = (this.currentPage - 1) * limit;
-      let tagMode = 'any';
-      let tags = {};
-      let query = this.query;
+      if (this.query.tagMode) {
+        params.tagMode = this.query.tagMode;
+      }
+      if (this.query.tags) {
+        params.tags = JSON.stringify(this.query.tags);
+      }
       // Call API and process results
       return new Promise((resolve, reject) => {
-        api.recording.query(token, limit, offset, tagMode, tags, query)
+        api.recording.query(token, params)
           .then(response => response.json())
           .then((json) => {
             if(!json.success) {
@@ -150,19 +156,23 @@ export default {
       }
     },
     parseTags(tags) {
-      let animal = (tag) => {
-        if (!tag.animal) {
-          return "F/P";
-        } else {
-          return tag.animal;
+      if (tags.length > 0) {
+        let animal = (tag) => {
+          if (!tag.animal) {
+            return "F/P";
+          } else {
+            return tag.animal;
+          }
+        };
+        let tagString = animal(tags[0]);
+        for (let i = 1; i < tags.length; i ++) {
+          let animalName = animal(tags[i]);
+          tagString = tagString + ', ' + animalName;
         }
-      };
-      let tagString = animal(tags[0]);
-      for (let i = 1; i < tags.length; i ++) {
-        let animalName = animal(tags[i]);
-        tagString = tagString + ', ' + animalName;
+        return tagString;
+      } else {
+        return 'untagged';
       }
-      return tagString;
     },
     parseProcessingState(result) {
       let string = result.toLowerCase();
