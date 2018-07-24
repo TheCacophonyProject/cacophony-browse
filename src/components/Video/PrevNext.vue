@@ -47,7 +47,7 @@ export default {
   },
   methods: {
     nextRecording(direction, tagMode, tags) {
-      let data = {
+      const data = {
         direction: direction,
         tagMode: tagMode,
         tags: tags

@@ -92,11 +92,11 @@ export default {
   },
   computed: {
     date: function () {
-      let date = new Date(this.recording.recordingDateTime);
+      const date = new Date(this.recording.recordingDateTime);
       return date.toLocaleDateString('en-NZ');
     },
     time: function () {
-      let date = new Date(this.recording.recordingDateTime);
+      const date = new Date(this.recording.recordingDateTime);
       return date.toLocaleTimeString();
     },
     fileSource: function () {
@@ -111,10 +111,10 @@ export default {
       return text;
     },
     tagItems: function () {
-      let tags = this.recording.Tags;
-      let tagItems = [];
+      const tags = this.recording.Tags;
+      const tagItems = [];
       tags.map((tag) => {
-        let tagItem = {};
+        const tagItem = {};
         if (tag.animal) {
           tagItem.animal = tag.animal;
         } else {
@@ -147,7 +147,7 @@ export default {
   },
   methods: {
     getRecordingDetails() {
-      let token = this.$store.state.User.JWT;
+      const token = this.$store.state.User.JWT;
       return new Promise((resolve, reject) => {
         api.recording.id(this.$route.params.id, token)
           .then(response => response.json())
@@ -163,8 +163,8 @@ export default {
       });
     },
     addTag(tag) {
-      let token = this.$store.state.User.JWT;
-      let id = Number(this.$route.params.id);
+      const token = this.$store.state.User.JWT;
+      const id = Number(this.$route.params.id);
       return new Promise((resolve, reject) => {
         api.tag.addTag(tag, id, token)
           .then(response => response.json())
@@ -182,7 +182,7 @@ export default {
       });
     },
     deleteTag(tagId) {
-      let token = this.$store.state.User.JWT;
+      const token = this.$store.state.User.JWT;
       return new Promise((resolve, reject) => {
         api.tag.deleteTag(tagId, token)
           .then(response => response.json())
@@ -227,7 +227,7 @@ export default {
       params.order  = JSON.stringify([["recordingDateTime", order]]);
       params.where = JSON.stringify(params.where);
 
-      let token = this.$store.state.User.JWT;
+      const token = this.$store.state.User.JWT;
 
       return new Promise((resolve, reject) => {
         api.recording.query(token, params)

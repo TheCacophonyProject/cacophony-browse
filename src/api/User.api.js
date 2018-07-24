@@ -9,7 +9,7 @@ export default {
 };
 
 function login(username, password) {
-  let body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+  const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
 
   return fetch(
     `${Config.api}/authenticate_user`,
@@ -31,7 +31,7 @@ function logout(){
   localStorage.setItem('JWT', '');
 }
 function register(username, password) {
-  let body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+  const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   return fetch(
     `${Config.api}/api/v1/Users`,
     {

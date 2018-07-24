@@ -52,9 +52,9 @@
 
 <script>
 
-let usernamePattern = /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/;
-let usernameLength = 5;
-let passwordLength = 8;
+const usernamePattern = /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/;
+const usernameLength = 5;
+const passwordLength = 8;
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential

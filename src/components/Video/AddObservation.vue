@@ -143,7 +143,7 @@ export default {
   },
   computed: {
     ageState () {
-      let pattern = /(\d)?(\d):(\d)?(\d)/;
+      const pattern = /(\d)?(\d):(\d)?(\d)/;
       if (this.age) {
         return pattern.test(this.age);
       } else {
@@ -151,7 +151,7 @@ export default {
       }
     },
     startTimeState () {
-      let pattern = /(\d)?(\d):[0-5][0-9]/;
+      const pattern = /(\d)?(\d):[0-5][0-9]/;
       if (this.startTime) {
         return pattern.test(this.startTime);
       } else {
@@ -159,7 +159,7 @@ export default {
       }
     },
     endTimeState () {
-      let pattern = /(\d)?(\d):[0-5][0-9]/;
+      const pattern = /(\d)?(\d):[0-5][0-9]/;
       if (this.endTime) {
         return pattern.test(this.endTime);
       } else {
@@ -171,9 +171,9 @@ export default {
         return null;
       }
 
-      let endTime = this.parseTimeString(this.endTime);
-      let startTime = this.parseTimeString(this.startTime);
-      let duration = endTime - startTime;
+      const endTime = this.parseTimeString(this.endTime);
+      const startTime = this.parseTimeString(this.startTime);
+      const duration = endTime - startTime;
 
       if (duration <= 0) {
         throw { message: "Negative duration. (Start time is after end time!)" };
@@ -182,9 +182,9 @@ export default {
     },
     ageMonths () {
       if (this.age) {
-        let ageString = this.age;
-        let ageYears = parseInt(ageString.split(':')[0]);
-        let ageMonths = parseInt(ageString.split(':')[1]);
+        const ageString = this.age;
+        const ageYears = parseInt(ageString.split(':')[0]);
+        const ageMonths = parseInt(ageString.split(':')[1]);
         return ageYears * 12 + ageMonths;
       } else {
         return null;
@@ -198,7 +198,7 @@ export default {
         this.alertMessage = "Invalid form.";
         return;
       } else {
-        let tag = {};
+        const tag = {};
         try {
           tag.animal = this.animalTag;
           tag.number = this.number;
@@ -225,22 +225,22 @@ export default {
       }
     },
     parseTimeString (timeString) {
-      let timeArray = timeString.split(':');
-      let minutes = parseInt(timeArray[0]);
-      let seconds = parseInt(timeArray[1]);
+      const timeArray = timeString.split(':');
+      const minutes = parseInt(timeArray[0]);
+      const seconds = parseInt(timeArray[1]);
       return minutes * 60 + seconds;
     },
     setTimeAsCurrentTime(type) {
       this.$emit('get-current-video-time');
       this.$nextTick(function () {
-        let currentTime = this.currentVideoTime;
+        const currentTime = this.currentVideoTime;
         let timeString = "";
         if (currentTime > 60) {
-          let minutes = Math.trunc(currentTime / 60);
-          let seconds = Math.trunc(currentTime % 60);
+          const minutes = Math.trunc(currentTime / 60);
+          const seconds = Math.trunc(currentTime % 60);
           timeString = `${minutes}:${("0" + seconds).slice(-2)}`;
         } else {
-          let seconds = Math.trunc(currentTime);
+          const seconds = Math.trunc(currentTime);
           timeString = `0:${("0" + seconds).slice(-2)}`;
         }
         this[type] = timeString;
@@ -255,7 +255,7 @@ export default {
       } else {
         throw `Error with ${type} time.`;
       }
-      let time = this.parseTimeString(timeString);
+      const time = this.parseTimeString(timeString);
       this.$emit('set-current-video-time', time);
     }
   }

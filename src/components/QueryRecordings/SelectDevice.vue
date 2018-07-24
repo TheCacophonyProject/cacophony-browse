@@ -52,9 +52,9 @@ export default {
             if(!json.success) {
               reject(json);
             }
-            let rows = json.devices.rows;
+            const rows = json.devices.rows;
             rows.map((row) => {
-              let option = {
+              const option = {
                 id: row.id,
                 name: row.devicename
               };

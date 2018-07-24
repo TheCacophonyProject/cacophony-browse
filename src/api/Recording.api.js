@@ -10,7 +10,7 @@ const recordingApi = '/api/v1/recordings';
 function query(token, params) {
   // Params must include where (stringified JSON), limit, offset
   // Params can also include tagMode, tags, order
-  let url = getRecordingURL(params);
+  const url = getRecordingURL(params);
   return fetch(
     url,
     {
@@ -24,16 +24,15 @@ function query(token, params) {
 
 function getRecordingURL(params) {
   // Create query string to add to api url
-  let queryString = Object.keys(params).map((key) => {
+  const queryString = Object.keys(params).map((key) => {
     return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
   }).join('&');
-  let url = `${Config.api}` + recordingApi + "?" + queryString;
-  return url;
+  return `${Config.api}` + recordingApi + "?" + queryString;
 }
 
 
 function id(id, token) {
-  let url = `${Config.api}` + recordingApi + `/${id}`;
+  const url = `${Config.api}` + recordingApi + `/${id}`;
   return fetch(
     url,
     {
@@ -46,9 +45,9 @@ function id(id, token) {
 }
 
 function comment(comment, id, token) {
-  let commentString = JSON.stringify({comment: comment});
-  let body = `updates=${encodeURIComponent(commentString)}`;
-  let url = `${Config.api}${recordingApi}/${id}`;
+  const commentString = JSON.stringify({comment: comment});
+  const body = `updates=${encodeURIComponent(commentString)}`;
+  const url = `${Config.api}${recordingApi}/${id}`;
   return fetch(
     url,
     {
@@ -62,7 +61,7 @@ function comment(comment, id, token) {
 }
 
 function del(id, token) {
-  let url = `${Config.api}${recordingApi}/${id}`;
+  const url = `${Config.api}${recordingApi}/${id}`;
   return fetch(
     url,
     {
