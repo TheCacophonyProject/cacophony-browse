@@ -10,8 +10,8 @@ const state = {
 
 const getters = {};
 
-// actions https://vuex.vuejs.org/guide/actions.html
-//Actions are similar to mutations, the differences being that:
+//  actions https://vuex.vuejs.org/guide/actions.html
+//  Actions are similar to mutations, the differences being that:
 //
 //	Instead of mutating the state, actions commit mutations.
 //	Actions can contain arbitrary asynchronous operations.
@@ -35,7 +35,7 @@ const actions = {
   NEW_GROUP ({ commit, rootState }, {groupName}) {
     commit('fetching');
     return new Promise((resolve, reject) => {
-      api.groups.newGroup(groupName, rootState.User.JWT)
+      api.groups.addNewGroup(groupName, rootState.User.JWT)
         .then(response => response.json())
         .then(json => {
           if (!json.success) {
