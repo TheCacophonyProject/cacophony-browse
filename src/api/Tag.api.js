@@ -8,9 +8,9 @@ export default {
 const tagApi = '/api/v1/tags';
 
 function addTag(tag, id, token) {
-  let url = `${Config.api}` + tagApi;
+  const url = `${Config.api}` + tagApi;
   tag = JSON.stringify(tag);
-  let body = `recordingId=${encodeURIComponent(id)}&tag=${encodeURIComponent(tag)}`;
+  const body = `recordingId=${encodeURIComponent(id)}&tag=${encodeURIComponent(tag)}`;
   return fetch(
     url,
     {
@@ -27,8 +27,8 @@ function addTag(tag, id, token) {
 }
 
 function deleteTag(id, token) {
-  let url = `${Config.api}` + tagApi;
-  let body = `tagId=${encodeURIComponent(id)}`;
+  const url = `${Config.api}` + tagApi;
+  const body = `tagId=${encodeURIComponent(id)}`;
   return fetch(
     url,
     {

@@ -34,14 +34,14 @@ export default {
   },
   methods: {
     updateHigh: function () {
-      let newValue = {
+      const newValue = {
         high: event.target.value,
         low: this.value.low
       };
       this.$emit('input', newValue);
     },
     updateLow: function () {
-      let newValue = {
+      const newValue = {
         high: this.value.high,
         low: event.target.value
       };

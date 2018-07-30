@@ -101,12 +101,12 @@ export default {
       this.recordings = [];
       this.tableItems = [];
       // Create query params object
-      let params = {
+      const params = {
         where: JSON.stringify(this.query.where),
         limit: this.perPage,
         offset: (this.currentPage - 1) * this.perPage
       };
-      let token = this.$store.state.User.JWT;
+      const token = this.$store.state.User.JWT;
       if (this.query.tagMode) {
         params.tagMode = this.query.tagMode;
       }
@@ -148,8 +148,8 @@ export default {
     },
     parseLocation(location) {
       if (location && typeof location === 'object') {
-        let latitude = location.coordinates[0];
-        let longitude = location.coordinates[1];
+        const latitude = location.coordinates[0];
+        const longitude = location.coordinates[1];
         return latitude + ', ' + longitude;
       } else {
         return "(unknown)";
@@ -157,7 +157,7 @@ export default {
     },
     parseTags(tags) {
       if (tags.length > 0) {
-        let animal = (tag) => {
+        const animal = (tag) => {
           if (!tag.animal) {
             return "F/P";
           } else {
@@ -166,7 +166,7 @@ export default {
         };
         let tagString = animal(tags[0]);
         for (let i = 1; i < tags.length; i ++) {
-          let animalName = animal(tags[i]);
+          const animalName = animal(tags[i]);
           tagString = tagString + ', ' + animalName;
         }
         return tagString;
@@ -175,7 +175,7 @@ export default {
       }
     },
     parseProcessingState(result) {
-      let string = result.toLowerCase();
+      const string = result.toLowerCase();
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
   }

@@ -96,7 +96,7 @@ export default {
   },
   methods: {
     updateComment() {
-      let token = this.$store.state.User.JWT;
+      const token = this.$store.state.User.JWT;
       return new Promise((resolve, reject) => {
         api.recording.comment(this.value, this.$route.params.id, token)
           .then(response => response.json())
@@ -111,7 +111,7 @@ export default {
       });
     },
     deleteRecording() {
-      let token = this.$store.state.User.JWT;
+      const token = this.$store.state.User.JWT;
       return new Promise((resolve, reject) => {
         api.recording.del(this.$route.params.id, token)
           .then(response => response.json())

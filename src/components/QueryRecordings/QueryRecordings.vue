@@ -88,14 +88,14 @@ export default {
   },
   methods: {
     buildQuery() {
-      let query = {
+      const query = {
         type: 'thermalRaw',
         where: {}
       };
       // Add devices
       if (this.devices.length !== 0) {
         query.where.DeviceId = [];
-        for (let device of this.devices) {
+        for (const device of this.devices) {
           query.where.DeviceId.push(device.id);
         }
       }
@@ -126,7 +126,7 @@ export default {
       // Add animal tags
       if (this.animals.length !== 0) {
         query.tags = [];
-        for (let animal of this.animals) {
+        for (const animal of this.animals) {
           query.tags.push(animal);
         }
       }

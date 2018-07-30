@@ -16,6 +16,7 @@
           :state="usernameState"
           type="text"
           autofocus
+          required
         />
       </b-form-group>
 
@@ -42,8 +43,8 @@
           type="password"/>
       </b-form-group>
 
-      <b-button 
-        type="submit" 
+      <b-button
+        type="submit"
         variant="primary">Register</b-button>
 
     </b-form>
@@ -52,9 +53,9 @@
 
 <script>
 
-let usernamePattern = /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/;
-let usernameLength = 5;
-let passwordLength = 8;
+const usernamePattern = /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/;
+const usernameLength = 5;
+const passwordLength = 8;
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
