@@ -27,6 +27,7 @@
     "vue": "^2.5.11",
     "vue-multiselect": "^2.1.0",
     "vue-router": "^3.0.1",
+    "vuelidate": "^0.7.4",
     "vuex": "^3.0.1"
   },
   "browserslist": [

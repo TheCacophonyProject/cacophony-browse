@@ -1,8 +1,6 @@
 <template>
   <b-container fluid>
 
-    <div v-if="!groupData">Loading...</div>
-
     <template v-if="groupData">
       <h1>{{ groupData.group.groupname }}</h1>
       <b-row>

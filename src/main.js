@@ -1,33 +1,31 @@
 import Vue from 'vue';
 import App from './App.vue';
-
-// Vuex
-// https://vuex.vuejs.org/
-import store from './stores';
-
-// Bootstrap-vue
-// https://bootstrap-vue.js.org/docs
 import BootstrapVue from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
-Vue.use(BootstrapVue);
-
-// Font-awesome
-// https://www.npmjs.com/package/@fortawesome/vue-fontawesome
+import Vuelidate from 'vuelidate';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-// Add more icons below
+import Multiselect from 'vue-multiselect';
+import { createRouter } from './router';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+
+import store from './stores';
+
+// https://bootstrap-vue.js.org/docs
+Vue.use(BootstrapVue);
+
+//https://monterail.github.io/vuelidate
+Vue.use(Vuelidate);
+
+// https://www.npmjs.com/package/@fortawesome/vue-fontawesome
 library.add(faTrash);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
-// Multi-select
 // https://vue-multiselect.js.org
-import Multiselect from 'vue-multiselect';
 Vue.component('multiselect', Multiselect);
 
 // https://router.vuejs.org/
-import { createRouter } from './router';
 const router = createRouter();
 
 new Vue({

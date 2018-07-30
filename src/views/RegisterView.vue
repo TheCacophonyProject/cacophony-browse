@@ -16,6 +16,7 @@
           :state="usernameState"
           type="text"
           autofocus
+          required
         />
       </b-form-group>
 
@@ -42,8 +43,8 @@
           type="password"/>
       </b-form-group>
 
-      <b-button 
-        type="submit" 
+      <b-button
+        type="submit"
         variant="primary">Register</b-button>
 
     </b-form>
