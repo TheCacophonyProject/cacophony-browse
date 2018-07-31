@@ -26,13 +26,11 @@ export default {
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
     groupData() {
-      if(!this.$store.state.Groups.fetching) {
-        const groups = this.$store.state.Groups.groups;
-        return {
-          groups,
-          owner: groups && groups[0].Users[0]
-        };
-      }
+      const groups = this.$store.state.Groups.groups;
+      return {
+        groups,
+        owner: groups.length ? groups[0].Users[0] : {}
+      };
     }
   },
   watch: {
