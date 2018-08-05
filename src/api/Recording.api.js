@@ -1,5 +1,6 @@
-import fetch from 'cross-fetch';
-import { Config } from '../../app.config' // eslint-disable-line
+import { Config } from '../../app.config';
+import { authorisedFetch } from './fetch';
+import querystring from 'querystring';
 
 export default {
   query, id, comment, del
@@ -7,67 +8,54 @@ export default {
 
 const recordingApi = '/api/v1/recordings';
 
-function query(token, params) {
+function query(params) {
   // Params must include where (stringified JSON), limit, offset
   // Params can also include tagMode, tags, order
-  const url = getRecordingURL(params);
-  return fetch(
+  const url = Config.api + recordingApi + "?" + querystring.stringify(params);
+
+  return authorisedFetch(
     url,
     {
       method:"GET",
-      headers: {'Authorization': token},
-      mode: 'cors',
       cache: "no-cache"
     }
   );
 }
 
-function getRecordingURL(params) {
-  // Create query string to add to api url
-  const queryString = Object.keys(params).map((key) => {
-    return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-  }).join('&');
-  return `${Config.api}` + recordingApi + "?" + queryString;
-}
-
-
-function id(id, token) {
-  const url = `${Config.api}` + recordingApi + `/${id}`;
-  return fetch(
-    url,
-    {
-      method:"GET",
-      headers: {'Authorization': token},
-      mode: 'cors',
-      cache: "no-cache"
-    }
-  );
-}
-
-function comment(comment, id, token) {
-  const commentString = JSON.stringify({comment: comment});
-  const body = `updates=${encodeURIComponent(commentString)}`;
+function id(id) {
   const url = `${Config.api}${recordingApi}/${id}`;
-  return fetch(
+  return authorisedFetch(
+    url,
+    {
+      method:"GET",
+      cache: "no-cache"
+    }
+  );
+}
+
+function comment(comment, id) {
+  const commentString = querystring.stringify({comment: comment});
+  const body = `updates=${commentString}`;
+  const url = `${Config.api}${recordingApi}/${id}`;
+  return authorisedFetch(
     url,
     {
       method:"PATCH",
-      headers: {'Authorization': token, 'Content-Type': 'application/x-www-form-urlencoded'},
-      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
       cache: "no-cache",
       body: body
     }
   );
 }
 
-function del(id, token) {
+function del(id) {
   const url = `${Config.api}${recordingApi}/${id}`;
-  return fetch(
+  return authorisedFetch(
     url,
     {
       method:"DELETE",
-      headers: {'Authorization': token},
-      mode: 'cors',
       cache: "no-cache"
     }
   );

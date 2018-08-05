@@ -7,7 +7,7 @@ import Vuelidate from 'vuelidate';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Multiselect from 'vue-multiselect';
-import { createRouter } from './router';
+import router from './router';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 import store from './stores';
@@ -24,9 +24,6 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 // https://vue-multiselect.js.org
 Vue.component('multiselect', Multiselect);
-
-// https://router.vuejs.org/
-const router = createRouter();
 
 new Vue({
   el: '#app',

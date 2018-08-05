@@ -1,4 +1,4 @@
 .idea/
 node_modules/
 *.iml
-app.config
+app.config.js

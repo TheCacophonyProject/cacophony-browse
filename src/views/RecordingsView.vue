@@ -96,7 +96,7 @@ export default {
     pagination() {
       this.getRecordings();
     },
-    getRecordings() {
+    async getRecordings() {
       // Remove previous values
       this.recordings = [];
       this.tableItems = [];
@@ -106,7 +106,7 @@ export default {
         limit: this.perPage,
         offset: (this.currentPage - 1) * this.perPage
       };
-      const token = this.$store.state.User.JWT;
+
       if (this.query.tagMode) {
         params.tagMode = this.query.tagMode;
       }
@@ -114,37 +114,35 @@ export default {
         params.tags = JSON.stringify(this.query.tags);
       }
       // Call API and process results
-      return new Promise((resolve, reject) => {
-        api.recording.query(token, params)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.recordings = json.rows;
-              this.count = json.count;
-              if (json.count > 0) {
-                this.countMessage = `${json.count} matches found (total)`;
-              } else if (json.count === 0) {
-                this.countMessage = 'No matches';
-              }
-              json.rows.map((row) => {
-                this.tableItems.push({
-                  id: row.id,
-                  devicename: row.Device.devicename,
-                  groupname: row.Group.groupname,
-                  location: this.parseLocation(row.location),
-                  date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
-                  time: new Date(row.recordingDateTime).toLocaleTimeString(),
-                  duration: row.duration,
-                  tags: this.parseTags(row.Tags),
-                  other: '',
-                  processing_state: this.parseProcessingState(row.processingState)
-                });
-              });
-            }
+      const response = await api.recording.query(params);
+
+      if(!response.success) {
+        response.messages && response.messages.forEach(message => {
+          this.$store.dispatch('Messaging/WARN', message);
+        });
+      } else {
+        this.recordings = response.rows;
+        this.count = response.count;
+        if (response.count > 0) {
+          this.countMessage = `${response.count} matches found (total)`;
+        } else if (response.count === 0) {
+          this.countMessage = 'No matches';
+        }
+        response.rows.map((row) => {
+          this.tableItems.push({
+            id: row.id,
+            devicename: row.Device.devicename,
+            groupname: row.Group.groupname,
+            location: this.parseLocation(row.location),
+            date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
+            time: new Date(row.recordingDateTime).toLocaleTimeString(),
+            duration: row.duration,
+            tags: this.parseTags(row.Tags),
+            other: '',
+            processing_state: this.parseProcessingState(row.processingState)
           });
-      });
+        });
+      }
     },
     parseLocation(location) {
       if (location && typeof location === 'object') {

@@ -4,16 +4,24 @@
 
     <b-form @submit="onSubmit">
 
+      <b-alert
+        :show="!!errorMessage"
+        variant="danger"
+        dismissible
+        @dismissed="errorMessage=undefined">
+        {{ errorMessage }}
+      </b-alert>
+
       <b-form-group
-        :state="usernameState"
-        :invalid-feedback="invalidUsername"
+        :state="!$v.form.username.$error"
+        :invalid-feedback="usernameFeedback"
         label="Username"
         label-for="input-username"
       >
         <b-form-input
           id="input-username"
-          v-model="username"
-          :state="usernameState"
+          v-model="$v.form.username.$model"
+          :state="!$v.form.username.$error"
           type="text"
           autofocus
           required
@@ -21,31 +29,35 @@
       </b-form-group>
 
       <b-form-group
-        :state="passwordState"
-        :invalid-feedback="invalidPassword"
+        :state="!$v.form.password.$error"
+        :invalid-feedback="passwordFeedback"
         label="Password"
         label-for="input-password"
       >
         <b-form-input
-          v-model="password"
-          :state="passwordState"
+          id="input-password"
+          v-model="$v.form.password.$model"
+          :state="!$v.form.password.$error"
           type="password"/>
       </b-form-group>
 
       <b-form-group
-        :state="retypeState"
-        :invalid-feedback="invalidRetype"
+        :state="!$v.form.passwordConfirm.$error"
+        :invalid-feedback="passwordConfirmFeedback"
         label="Retype password"
-        label-for="input-password-retype">
+        label-for="input-password-retype"
+      >
         <b-form-input
-          v-model="passwordRetype"
-          :state="retypeState"
+          v-model="$v.form.passwordConfirm.$model"
+          :state="!$v.form.passwordConfirm.$error"
           type="password"/>
       </b-form-group>
 
       <b-button
+        :disabled="$v.form.$invalid"
         type="submit"
-        variant="primary">Register</b-button>
+        variant="primary">Register
+      </b-button>
 
     </b-form>
   </b-container>
@@ -53,7 +65,9 @@
 
 <script>
 
-const usernamePattern = /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/;
+import {minLength, required, sameAs} from 'vuelidate/lib/validators';
+
+const validPattern = (value) => /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/.test(value);
 const usernameLength = 5;
 const passwordLength = 8;
 
@@ -63,66 +77,63 @@ export default {
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
   // https://vuejs.org/v2/style-guide/#Component-data-essential
-  data () {
+  data() {
     return {
-      username: '',
-      password: '',
-      passwordRetype: ''
+      form: {
+        username: '',
+        password: '',
+        passwordConfirm: '',
+      },
+      errorMessage: null
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
   computed: {
-    usernameState () {
-      if (this.username.length === 0) {
-        // Empty field
-        return null;
-      } else {
-        // Username length requirement is made up... need to check API for actual requirement
-        return usernamePattern.test(this.username) && this.username.length > usernameLength;
+    usernameFeedback() {
+      if (this.$v.form.username.$invalid) {
+        if(!this.$v.form.username.validPattern) {
+          return `Must be letters (either case) or numbers`;
+        }
+        return `Minimum username length is ${usernameLength} characters`;
       }
     },
-    invalidUsername () {
-      if (this.username.length <= usernameLength) {
-        return "Not long enough";
-      } else {
-        return "Only letters and numbers";
+    passwordFeedback() {
+      if (this.$v.form.password.$invalid) {
+        return `Minimum password length is ${passwordLength} characters`;
       }
     },
-    passwordState () {
-      if (this.password.length === 0) {
-        // Empty field
-        return null;
-      } else {
-        return this.password.length > passwordLength;
+    passwordConfirmFeedback() {
+      if (this.$v.form.passwordConfirm.$invalid) {
+        return `Must match password`;
       }
-    },
-    invalidPassword () {
-      return "Not long enough";
-    },
-    retypeState () {
-      if (this.passwordRetype.length === 0) {
-        // Empty field
-        return null;
-      } else {
-        return this.password === this.passwordRetype;
+    }
+  },
+  validations: {
+    form: {
+      username: {
+        required,
+        minLength: minLength(usernameLength),
+        validPattern
+      },
+      password: {
+        required,
+        minLength: minLength(passwordLength)
+      },
+      passwordConfirm: {
+        required,
+        sameAsPassword: sameAs('password')
       }
-    },
-    invalidRetype () {
-      return "Must match";
     }
   },
   methods: {
-    onSubmit (evt) {
+    async onSubmit(evt) {
       evt.preventDefault();
-      if (this.usernameState && this.passwordState && this.retypeState) {
-        this.$store.dispatch('User/REGISTER', {
-          username: this.username,
-          password: this.password
-        }).then(() => {
-          this.$router.push('/');
+
+      if (!this.$v.$invalid) {
+        await this.$store.dispatch('User/REGISTER', {
+          username: this.$v.form.username.$model,
+          password: this.$v.form.password.$model
         });
-      } else {
-				console.log("invalid form") //eslint-disable-line
       }
     }
   }

@@ -5,13 +5,13 @@ case 'production':
   api = "http://172.16.117.140";
   break;
 case 'development':
-  api = "http://172.16.117.140";
+  api = "https://api-test.cacophony.org.nz";
   break;
 case 'test':
   api = "http://mocked-api-path";
   break;
 default:
-  api = "http://172.16.117.140";
+  api = "https://api-test.cacophony.org.nz";
 }
 
 module.exports = {

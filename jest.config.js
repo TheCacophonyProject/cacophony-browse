@@ -3,7 +3,7 @@
 
 module.exports = {
   // All imported modules in your tests should be mocked automatically
-  // automock: false,
+  // automock: true,
 
   // Stop running tests after the first failure
   // bail: false,
@@ -117,7 +117,7 @@ module.exports = {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  // setupFiles: [],
+  "setupFiles": ["jest-localstorage-mock"],
 
   // The path to a module that runs some code to configure or set up the testing framework before each test
   // setupTestFrameworkScriptFile: null,
@@ -163,7 +163,8 @@ module.exports = {
   // A map from regular expressions to paths to transformers
   // transform: null,
   "transform": {
-    "^.+\\.js$": "babel-jest"
+    "^.+\\.js$": "babel-jest",
+    ".*\\.(vue)$": "<rootDir>/node_modules/vue-jest"
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

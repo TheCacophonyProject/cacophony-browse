@@ -41,28 +41,21 @@ export default {
     }
   },
   created: function () {
-    this.allDevices();
+    this.getDevices();
   },
   methods: {
-    allDevices: function () {
-      return new Promise((resolve, reject) => {
-        api.device.allDevices(this.$store.state.User.JWT)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            }
-            const rows = json.devices.rows;
-            rows.map((row) => {
-              const option = {
-                id: row.id,
-                name: row.devicename
-              };
-              this.options.push(option);
-            });
-            resolve(json);
-          });
+    async getDevices() {
+      const response = await api.device.getDevices();
+
+      const rows = response.devices.rows;
+      rows.map((row) => {
+        const option = {
+          id: row.id,
+          name: row.devicename
+        };
+        this.options.push(option);
       });
+
     }
   }
 };

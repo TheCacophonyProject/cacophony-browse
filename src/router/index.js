@@ -4,6 +4,7 @@ import Router from 'vue-router';
 import AudioBaitView from '../views/AudioBaitView.vue';
 import AudioView from '../views/AudioView.vue';
 import DevicesView from '../views/DevicesView.vue';
+import DeviceView from '../views/DeviceView.vue';
 import ErrorView from '../views/ErrorView.vue';
 import GroupsView from '../views/GroupsView.vue';
 import GroupView from '../views/GroupView.vue';
@@ -15,7 +16,7 @@ import VideoView from '../views/VideoView.vue';
 
 Vue.use(Router);
 
-export function createRouter() {
+function createRouter() {
   const router =  new Router({
     mode:'history',
     fallback:false,
@@ -24,6 +25,7 @@ export function createRouter() {
       {path:'/audiobait',component:AudioBaitView, meta: {requiresAuth: true}},
       {path:'/audio',component:AudioView, meta: {requiresAuth: true}},
       {path:'/devices',component:DevicesView, meta: {requiresAuth: true}},
+      {path:'/devices/:devicename', name: 'device', component: DeviceView, meta: {requiresAuth: true}},
       {path:'/error',component:ErrorView, meta: {requiresAuth: true}},
       {path:'/groups', name: 'groups', component:GroupsView, meta: {requiresAuth: true}},
       {path:'/groups/:groupname', name: 'group', component: GroupView, meta: {requiresAuth: true}},
@@ -31,7 +33,7 @@ export function createRouter() {
       {path:'/login', name: 'login', component:LoginView},
       {path:'/recordings',component:RecordingsView, meta: {requiresAuth: true}},
       {path:'/register',component:RegisterView},
-      {path:'/video/:id',component:VideoView}
+      {path:'/video/:id',component:VideoView, meta: {requiresAuth: true}}
     ]
   });
 
@@ -55,3 +57,5 @@ export function createRouter() {
 
   return router;
 }
+
+export default createRouter();

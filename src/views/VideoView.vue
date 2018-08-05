@@ -66,7 +66,7 @@
 <script>
 
 import api from '../api/index';
-import { Config } from '../../app.config' // eslint-disable-line
+import { Config } from '../../app.config';
 import QuickTag from '../components/Video/QuickTag.vue';
 import PrevNext from '../components/Video/PrevNext.vue';
 import AddObservation from '../components/Video/AddObservation.vue';
@@ -146,60 +146,47 @@ export default {
     this.getRecordingDetails();
   },
   methods: {
-    getRecordingDetails() {
-      const token = this.$store.state.User.JWT;
-      return new Promise((resolve, reject) => {
-        api.recording.id(this.$route.params.id, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.downloadFileJWT = json.downloadFileJWT;
-              this.downloadRawJWT = json.downloadRawJWT;
-              this.recording = json.recording;
-            }
-          });
-      });
+    async getRecordingDetails() {
+      const response = await api.recording.id(this.$route.params.id);
+      if(!response.success) {
+        response.messages && response.messages.forEach(message => {
+          this.$store.dispatch('Messaging/WARN', message);
+        });
+      } else {
+        this.downloadFileJWT = response.downloadFileJWT;
+        this.downloadRawJWT = response.downloadRawJWT;
+        this.recording = response.recording;
+      }
     },
-    addTag(tag) {
-      const token = this.$store.state.User.JWT;
+    async addTag(tag) {
       const id = Number(this.$route.params.id);
-      return new Promise((resolve, reject) => {
-        api.tag.addTag(tag, id, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.showAlert = true;
-              this.alertMessage = "Tag added.";
-              this.alertVariant = "success";
-              this.getRecordingDetails();
-              resolve(json);
-            }
-          });
-      });
+      const response = await api.tag.addTag(tag, id);
+
+      if(!response.success) {
+        response.messages && response.messages.forEach(message => {
+          this.$store.dispatch('Messaging/WARN', message);
+        });
+      } else {
+        this.showAlert = true;
+        this.alertMessage = "Tag added.";
+        this.alertVariant = "success";
+        this.getRecordingDetails();
+      }
     },
-    deleteTag(tagId) {
-      const token = this.$store.state.User.JWT;
-      return new Promise((resolve, reject) => {
-        api.tag.deleteTag(tagId, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.getRecordingDetails();
-              this.showAlert = true;
-              this.alertMessage = 'Tag deleted';
-              this.alertVariant = 'success';
-              resolve(json);
-            }
-          });
-      });
+    async deleteTag(tagId) {
+      const response = api.tag.deleteTag(tagId);
+      if(!response.success) {
+        response.messages && response.messages.forEach(message => {
+          this.$store.dispatch('Messaging/WARN', message);
+        });
+      } else {
+        this.getRecordingDetails();
+        this.showAlert = true;
+        this.alertMessage = 'Tag deleted';
+        this.alertVariant = 'success';
+      }
     },
-    nextRecording(direction, tagMode, tags) {
+    async nextRecording(direction, tagMode, tags) {
       var params = {
         where: {
           DeviceId: this.recording.Device.id
@@ -227,26 +214,21 @@ export default {
       params.order  = JSON.stringify([["recordingDateTime", order]]);
       params.where = JSON.stringify(params.where);
 
-      const token = this.$store.state.User.JWT;
+      const response = await api.recording.query(params);
 
-      return new Promise((resolve, reject) => {
-        api.recording.query(token, params)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              if (json.rows.length == 0) {
-                this.showAlert = true;
-                this.alertMessage = `No ${direction} recording for this device.`;
-                this.alertVariant = 'warning';
-                return;
-              }
-              this.$router.push({path: `/video/${json.rows[0].id}`});
-              resolve(json);
-            }
-          });
-      });
+      if(!response.success) {
+        response.messages && response.messages.forEach(message => {
+          this.$store.dispatch('Messaging/WARN', message);
+        });
+      } else {
+        if (response.rows.length == 0) {
+          this.showAlert = true;
+          this.alertMessage = `No ${direction} recording for this device.`;
+          this.alertVariant = 'warning';
+          return;
+        }
+        this.$router.push({path: `/video/${response.rows[0].id}`});
+      }
     },
     getCurrentVideoTime() {
       this.currentVideoTime = this.$refs.videoPlayer.currentTime;

@@ -91,7 +91,14 @@
             :items="groupData.devices"
             striped
             hover
-            responsive/>
+            responsive>
+
+            <template
+              slot="devicename"
+              slot-scope="row">
+              <b-link :to="{ name: 'device', params: { devicename: row.item.devicename }}">{{ row.item.devicename }}</b-link>
+            </template>
+          </b-table>
 
         </b-col>
       </b-row>
