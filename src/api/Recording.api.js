@@ -34,8 +34,8 @@ function id(id) {
 }
 
 function comment(comment, id) {
-  const commentString = querystring.stringify({comment: comment});
-  const body = `updates=${commentString}`;
+  const commentString = JSON.stringify({comment: comment});
+  const body = `updates=${encodeURIComponent(commentString)}`;
   const url = `${Config.api}${recordingApi}/${id}`;
   return authorisedFetch(
     url,

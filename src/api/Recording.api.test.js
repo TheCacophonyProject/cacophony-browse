@@ -83,7 +83,7 @@ describe('comment() calls authorisedFetch', () => {
       {
         method: 'PATCH',
         cache: 'no-cache',
-        body: `updates=${querystring.stringify({comment: testComment})}`,
+        body: `updates=${encodeURIComponent(JSON.stringify({comment: testComment}))}`,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }

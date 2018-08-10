@@ -45,10 +45,10 @@ export default {
   },
   methods: {
     async getDevices() {
+      // TODO: Convert to store dispatch once Devices store exists
       const response = await api.device.getDevices();
 
-      const rows = response.devices.rows;
-      rows.map((row) => {
+      response.devices && response.devices.rows.map((row) => {
         const option = {
           id: row.id,
           name: row.devicename
