@@ -95,36 +95,18 @@ export default {
     }
   },
   methods: {
-    updateComment() {
-      const token = this.$store.state.User.JWT;
-      return new Promise((resolve, reject) => {
-        api.recording.comment(this.value, this.$route.params.id, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.showCommentAlert = true;
-              resolve(json);
-            }
-          });
-      });
+    async updateComment() {
+      const result = await api.recording.comment(this.value, this.$route.params.id);
+      if(result.success) {
+        this.showCommentAlert = true;
+      }
     },
-    deleteRecording() {
-      const token = this.$store.state.User.JWT;
-      return new Promise((resolve, reject) => {
-        api.recording.del(this.$route.params.id, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.showDeleteAlert = true;
-              this.$emit('nextRecording');
-              resolve(json);
-            }
-          });
-      });
+    async deleteRecording() {
+      const result = await api.recording.del(this.$route.params.id);
+      if(result.success) {
+        this.showDeleteAlert = true;
+        this.$emit('nextRecording');
+      }
     }
   }
 };
