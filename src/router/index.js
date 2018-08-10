@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+import store from '../stores';
 
 import AudioBaitView from '../views/AudioBaitView.vue';
 import AudioView from '../views/AudioView.vue';
@@ -22,23 +23,23 @@ function createRouter() {
     fallback:false,
     scrollBehavior:() => ({y:0}),
     routes:[
-      {path:'/audiobait',component:AudioBaitView, meta: {requiresAuth: true}},
-      {path:'/audio',component:AudioView, meta: {requiresAuth: true}},
-      {path:'/devices',component:DevicesView, meta: {requiresAuth: true}},
-      {path:'/devices/:devicename', name: 'device', component: DeviceView, meta: {requiresAuth: true}},
-      {path:'/error',component:ErrorView, meta: {requiresAuth: true}},
-      {path:'/groups', name: 'groups', component:GroupsView, meta: {requiresAuth: true}},
-      {path:'/groups/:groupname', name: 'group', component: GroupView, meta: {requiresAuth: true}},
-      {path:'/', name: 'home', component:HomeView, meta: {requiresAuth: true}},
-      {path:'/login', name: 'login', component:LoginView},
-      {path:'/recordings',component:RecordingsView, meta: {requiresAuth: true}},
-      {path:'/register',component:RegisterView},
-      {path:'/video/:id',component:VideoView, meta: {requiresAuth: true}}
+      {path:'/audiobait',component:AudioBaitView},
+      {path:'/audio',component:AudioView},
+      {path:'/devices',component:DevicesView},
+      {path:'/devices/:devicename', name: 'device', component: DeviceView},
+      {path:'/error',component:ErrorView},
+      {path:'/groups', name: 'groups', component:GroupsView},
+      {path:'/groups/:groupname', name: 'group', component: GroupView},
+      {path:'/', name: 'home', component:HomeView},
+      {path:'/login', name: 'login', component:LoginView, meta: {noAuth: true}},
+      {path:'/recordings',component:RecordingsView},
+      {path:'/register',component:RegisterView, meta: {noAuth: true}},
+      {path:'/video/:id',component:VideoView}
     ]
   });
 
   router.beforeEach((to, from, next) => {
-    const isLoggedIn = !!localStorage.getItem('JWT');
+    const isLoggedIn = store.getters['User/isLoggedIn'];
 
     if (isLoggedIn) {
       if(to.name === 'login' || to.name === 'register') {
@@ -46,13 +47,13 @@ function createRouter() {
       }else {
         return next();
       }
-    } else if(to.matched.some(record => record.meta.requiresAuth)) {
-      return next({
-        path: '/login',
-        params: { nextUrl: to.fullPath }
-      });
+    } else if(to.matched.some(record => record.meta.noAuth)) {
+      return next();
     }
-    next();
+    next({
+      path: '/login',
+      params: { nextUrl: to.fullPath }
+    });
   });
 
   return router;
