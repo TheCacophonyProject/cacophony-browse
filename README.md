@@ -1,6 +1,7 @@
 # cacophony-web-vue
 
-> Cacophony web
+This is a reimplementation of the [Cacophony Project web UI](https://github.com/TheCacophonyProject/cacophony-web/) using modern practices. It is based on the [Vue](https://vuejs.org) framework and uses [Vuex](https://vuex.vuejs.org) for state management.
+
 
 ## Build Setup
 
