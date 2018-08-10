@@ -1,7 +1,7 @@
 jest.mock("./fetch");
 
 import groupApi from './Groups.api';
-import {authorisedFetch} from "./fetch";
+import {fetch} from "./fetch";
 import querystring from 'querystring';
 
 
@@ -9,7 +9,7 @@ describe('addGroup(groupname) calls authenticatedFetch', () => {
 
   test('with the correct path', async () => {
     await groupApi.addNewGroup();
-    expect(authorisedFetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups');
+    expect(fetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups');
   });
 
   test('with the correct request params', async () => {
@@ -18,11 +18,10 @@ describe('addGroup(groupname) calls authenticatedFetch', () => {
 
     await groupApi.addNewGroup(testGroupName);
 
-    expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-    expect(authorisedFetch.mock.calls[0][1]).toMatchObject(
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'POST',
-        cache: 'no-cache',
         body: querystring.stringify({groupname: testGroupName}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
@@ -33,7 +32,7 @@ describe('addGroup(groupname) calls authenticatedFetch', () => {
 
   test('just once', async () => {
     await groupApi.addNewGroup();
-    expect(authorisedFetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
 });
@@ -42,7 +41,7 @@ describe('addGroupUser(groupId, userName, isAdmin) calls authenticatedFetch', ()
 
   test('with the correct path', async () => {
     await groupApi.addGroupUser();
-    expect(authorisedFetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups/users');
+    expect(fetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups/users');
   });
 
   test('with the correct request params', async () => {
@@ -53,11 +52,10 @@ describe('addGroupUser(groupId, userName, isAdmin) calls authenticatedFetch', ()
 
     await groupApi.addGroupUser(testGroupId, testUserName, testBoolAdmin);
 
-    expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-    expect(authorisedFetch.mock.calls[0][1]).toMatchObject(
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'POST',
-        cache: 'no-cache',
         body: querystring.stringify({groupId: testGroupId, userId: testUserName, admin: testBoolAdmin}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
@@ -68,7 +66,7 @@ describe('addGroupUser(groupId, userName, isAdmin) calls authenticatedFetch', ()
 
   test('just once', async () => {
     await groupApi.addGroupUser();
-    expect(authorisedFetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -76,7 +74,7 @@ describe('removeGroupUser(groupId, userId) calls authenticatedFetch', () => {
 
   test('with the correct path', async () => {
     await groupApi.removeGroupUser();
-    expect(authorisedFetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups/users');
+    expect(fetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups/users');
   });
 
   test('with the correct request params', async () => {
@@ -86,11 +84,10 @@ describe('removeGroupUser(groupId, userId) calls authenticatedFetch', () => {
 
     await groupApi.removeGroupUser(testGroupId, testUserName);
 
-    expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-    expect(authorisedFetch.mock.calls[0][1]).toMatchObject(
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'DELETE',
-        cache: 'no-cache',
         body: querystring.stringify({groupId: testGroupId, userId: testUserName}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
@@ -102,7 +99,7 @@ describe('removeGroupUser(groupId, userId) calls authenticatedFetch', () => {
 
   test('just once', async () => {
     await groupApi.removeGroupUser();
-    expect(authorisedFetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -110,7 +107,7 @@ describe('getGroups(groupname) calls authenticatedFetch', () => {
 
   test('with the correct path (no param)', async () => {
     await groupApi.getGroups();
-    expect(authorisedFetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups?where={}');
+    expect(fetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/groups?where={}');
   });
 
   test('with correctly formatted query string', async () =>{
@@ -120,7 +117,7 @@ describe('getGroups(groupname) calls authenticatedFetch', () => {
 
     await groupApi.getGroups(params);
 
-    const query = authorisedFetch.mock.calls[0][0].split('?')[1];
+    const query = fetch.mock.calls[0][0].split('?')[1];
 
     const parsedString = querystring.parse(query);
     expect(parsedString).toMatchObject(
@@ -135,11 +132,10 @@ describe('getGroups(groupname) calls authenticatedFetch', () => {
 
     await groupApi.getGroups();
 
-    expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-    expect(authorisedFetch.mock.calls[0][1]).toMatchObject(
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'GET',
-        cache: 'no-cache',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }
@@ -149,6 +145,6 @@ describe('getGroups(groupname) calls authenticatedFetch', () => {
 
   test('just once', async () => {
     await groupApi.getGroups();
-    expect(authorisedFetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

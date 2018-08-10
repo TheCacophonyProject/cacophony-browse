@@ -14,12 +14,14 @@ const actions = {
   INFO ({ commit }, message) {
     commit('log', { message, level: 'info' });
   },
+  SUCCESS ({ commit }, message) {
+    commit('log', { message, level: 'success' });
+  },
   ACKNOWLEDGE ({ commit }) {
     commit('acknowledge');
   }
 };
 
-// mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
   log (state, message) {
     state.messages = [ ...state.messages, message ];

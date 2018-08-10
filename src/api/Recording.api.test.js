@@ -1,25 +1,24 @@
 jest.mock("./fetch");
-import { authorisedFetch } from "./fetch";
+import { fetch } from "./fetch";
 import recordingApi from './Recording.api';
 import querystring from 'querystring';
 
-describe('query() calls authorisedFetch', () => {
+describe('query() calls fetch', () => {
 
   test('with the correct request params', async () => {
     await recordingApi.query({});
-    expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-    expect(authorisedFetch.mock.calls[0][1].method).toBe('GET');
-    expect(authorisedFetch.mock.calls[0][1].cache).toBe("no-cache");
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1].method).toBe('GET');
   });
 
   test('with the correct path', async () => {
     await recordingApi.query({});
-    expect(authorisedFetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/recordings?');
+    expect(fetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/recordings?');
   });
 
   test('just once', async () => {
     await recordingApi.query({});
-    expect(authorisedFetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   test('with correctly formatted query string', async () =>{
@@ -31,7 +30,7 @@ describe('query() calls authorisedFetch', () => {
 
     await recordingApi.query(params);
 
-    const query = authorisedFetch.mock.calls[0][0].split('?')[1];
+    const query = fetch.mock.calls[0][0].split('?')[1];
 
     const parsedString = querystring.parse(query);
     expect(Object.keys(parsedString)).toHaveLength(3);
@@ -42,14 +41,13 @@ describe('query() calls authorisedFetch', () => {
 
 });
 
-describe('id() calls authorisedFetch', () => {
+describe('id() calls fetch', () => {
   test('with the correct request params', async () => {
     await recordingApi.id();
-    expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-    expect(authorisedFetch.mock.calls[0][1]).toMatchObject(
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
       {
-        method: 'GET',
-        cache: 'no-cache'
+        method: 'GET'
       }
     );
   });
@@ -57,20 +55,20 @@ describe('id() calls authorisedFetch', () => {
   test('with the correct path', async () => {
     const testId = 12345;
     await recordingApi.id(testId);
-    expect(authorisedFetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
+    expect(fetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
   });
 
   test('just once', async () => {
     await recordingApi.id();
-    expect(authorisedFetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 
-describe('comment() calls authorisedFetch', () => {
+describe('comment() calls fetch', () => {
   test('with the correct path', async () => {
     const testId = 123456;
     await recordingApi.comment(null, testId);
-    expect(authorisedFetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
+    expect(fetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
 
   });
 
@@ -78,11 +76,10 @@ describe('comment() calls authorisedFetch', () => {
     const testComment = "some comment";
 
     await recordingApi.comment(testComment, null);
-    expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-    expect(authorisedFetch.mock.calls[0][1]).toMatchObject(
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'PATCH',
-        cache: 'no-cache',
         body: `updates=${encodeURIComponent(JSON.stringify({comment: testComment}))}`,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -93,33 +90,32 @@ describe('comment() calls authorisedFetch', () => {
 
   test('just once', async () => {
     await recordingApi.comment();
-    expect(authorisedFetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });
 
-describe('del() calls authorisedFetch', () => {
+describe('del() calls fetch', () => {
 
     test('with the correct path', async () => {
       const testId = 123456;
       await recordingApi.del(testId);
-      expect(authorisedFetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
+      expect(fetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
 
     });
 
     test('with the correct request params', async () => {
 
       await recordingApi.del(null);
-      expect(authorisedFetch.mock.calls[0]).toHaveLength(2);
-      expect(authorisedFetch.mock.calls[0][1]).toMatchObject(
+      expect(fetch.mock.calls[0]).toHaveLength(2);
+      expect(fetch.mock.calls[0][1]).toMatchObject(
         {
-          method: 'DELETE',
-          cache: 'no-cache'
+          method: 'DELETE'
         }
       );
     });
 
     test('just once', async () => {
       await recordingApi.del();
-      expect(authorisedFetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledTimes(1);
     });
 });

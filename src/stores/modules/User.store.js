@@ -1,5 +1,4 @@
 import api from '../../api/index';
-import store from '../../stores';
 
 const state =  {
   isLoggingIn: false,
@@ -31,14 +30,7 @@ const actions = {
     if(result.success) {
       api.user.persistUser(result.userData.username,result.token);
       commit('receiveLogin', result);
-      return;
     }
-
-    result.messages.forEach(message => {
-      // TODO: Review - API returns either errors or messages when success flag is false. Errors are displayed at the fetch level, messages seems a special case and is handle here:
-      store.dispatch('Messaging/ERROR', message);
-    });
-
   },
   LOGOUT (context) {
     context.commit('invalidateLogin');

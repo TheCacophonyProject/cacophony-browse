@@ -1,5 +1,5 @@
 import { Config } from '../../app.config';
-import { authorisedFetch } from './fetch';
+import { fetch } from './fetch';
 import querystring from 'querystring';
 
 export default {
@@ -13,22 +13,20 @@ function query(params) {
   // Params can also include tagMode, tags, order
   const url = Config.api + recordingApi + "?" + querystring.stringify(params);
 
-  return authorisedFetch(
+  return fetch(
     url,
     {
-      method:"GET",
-      cache: "no-cache"
+      method:"GET"
     }
   );
 }
 
 function id(id) {
   const url = `${Config.api}${recordingApi}/${id}`;
-  return authorisedFetch(
+  return fetch(
     url,
     {
-      method:"GET",
-      cache: "no-cache"
+      method:"GET"
     }
   );
 }
@@ -37,14 +35,13 @@ function comment(comment, id) {
   const commentString = JSON.stringify({comment: comment});
   const body = `updates=${encodeURIComponent(commentString)}`;
   const url = `${Config.api}${recordingApi}/${id}`;
-  return authorisedFetch(
+  return fetch(
     url,
     {
       method:"PATCH",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      cache: "no-cache",
       body: body
     }
   );
@@ -52,11 +49,10 @@ function comment(comment, id) {
 
 function del(id) {
   const url = `${Config.api}${recordingApi}/${id}`;
-  return authorisedFetch(
+  return fetch(
     url,
     {
-      method:"DELETE",
-      cache: "no-cache"
+      method:"DELETE"
     }
   );
 }

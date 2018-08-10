@@ -1,5 +1,5 @@
 import { Config } from '../../app.config';
-import { authorisedFetch } from './fetch';
+import { fetch } from './fetch';
 
 export default {
   getDevices,
@@ -12,11 +12,10 @@ const deviceUsersApiUrl = Config.api + '/api/v1/devices/users';
 
 function getDevices() {
 
-  return authorisedFetch(
+  return fetch(
     devicesApiUrl,
     {
-      method:"GET",
-      cache: "no-cache",
+      method:"GET"
     });
 }
 
@@ -24,15 +23,14 @@ function addUserToDevice(username, deviceId, admin) {
 
   const body = `userId=${encodeURIComponent(username)}&deviceId=${encodeURIComponent(deviceId)}&admin=${admin}`;
 
-  return authorisedFetch(
+  return fetch(
     deviceUsersApiUrl,
     {
       method:"POST",
       body,
       headers: {
         'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
-      },
-      cache: "no-cache",
+      }
     }
   );
 }
@@ -41,15 +39,14 @@ function removeUserFromDevice(username, deviceId) {
 
   const body = `userId=${username}&deviceId=${deviceId}`;
 
-  return authorisedFetch(
+  return fetch(
     deviceUsersApiUrl,
     {
       method:"DELETE",
       body,
       headers: {
         'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
-      },
-      cache: "no-cache",
+      }
     }
   );
 }

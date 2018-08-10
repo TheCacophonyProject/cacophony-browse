@@ -1,5 +1,5 @@
 import { Config } from '../../app.config';
-import { authorisedFetch } from './fetch';
+import { fetch } from './fetch';
 import querystring from 'querystring';
 
 export default {
@@ -16,14 +16,13 @@ function addTag(tag, id) {
     tag: JSON.stringify(tag)
   });
 
-  return authorisedFetch(
+  return fetch(
     url,
     {
       method: "POST",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      cache: 'no-cache',
       body: body
     }
   );
@@ -35,14 +34,13 @@ function deleteTag(id) {
     url = `${Config.api}` + tagApi,
     body = querystring.stringify({ tagId: id });
 
-  return authorisedFetch(
+  return fetch(
     url,
     {
       method: "DELETE",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      cache: 'no-cache',
       body: body
     }
   );

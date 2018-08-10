@@ -3,25 +3,28 @@ jest.mock('../stores');
 import crossFetch from 'cross-fetch'; // mocked in __mocks__fetch.js
 import router from '../router';
 import store from '../stores';
-import { authorisedFetch, fetch } from './fetch';
+import { fetch } from './fetch';
 
-test('authorisedFetch(url, paramsObject) calls crossFetch with correct params', async () => {
+test('fetch(url, paramsObject) calls crossFetch with correct params', async () => {
   const
     testURL = 'testURL',
-    testObject = {'some': 'thing'},
+    testObject = {
+      'some': 'thing',
+      'mode': 'default override'
+    },
     testToken = 'some token value';
 
   crossFetch
     .mockReturnValue({
-      ok: true,
+      status: 200,
       json: () => {
-        return Promise.resolve({ok: true});
+        return Promise.resolve({});
       }
     });
 
   store.getters['User/getToken'] = testToken;
 
-  await authorisedFetch(testURL, testObject);
+  await fetch(testURL, testObject);
 
   expect(crossFetch).toHaveBeenCalledTimes(1);
   expect(crossFetch).toHaveBeenCalledWith(
@@ -29,34 +32,33 @@ test('authorisedFetch(url, paramsObject) calls crossFetch with correct params', 
     {
       headers: {Authorization: testToken},
       some: 'thing',
-      mode: 'cors'
+      mode: 'default override',
+      cache: 'no-cache'
     }
   );
 });
 
-test('authorisedFetch(url, paramsObject) handles response with general errors', async () => {
+test('fetch(url, paramsObject) handles response with general errors', async () => {
 
   const testResultObject = {
     errors: {
       someErrorKey: {
-        param: 'someErrorParam', // TODO: Find the purpose of the param? Is is a key for local content lookup?
+        param: 'someErrorParam', // TODO: Find the purpose of the param? Is it a key for local content lookup?
         msg: 'some error message'
       },
       someOtherErrorKey: {
-        param: 'someOtherErrorKey', // TODO: Find the purpose of the param? Is is a key for local content lookup?
+        param: 'someOtherErrorKey', // TODO: Find the purpose of the param? Is it a key for local content lookup?
         msg: 'some other error message'
       }
     }
   };
 
-  const failedResponse = {
-    ok: false,
+  crossFetch.mockReturnValue({
+    status: 400,
     json: () => Promise.resolve(testResultObject)
-  };
+  });
 
-  crossFetch.mockReturnValue(failedResponse);
-
-  const result = await authorisedFetch('', {});
+  const result = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(2);
   expect(store.dispatch).toHaveBeenCalledWith('Messaging/ERROR', testResultObject.errors.someErrorKey.msg);
@@ -67,25 +69,22 @@ test('authorisedFetch(url, paramsObject) handles response with general errors', 
 
 });
 
-test('authorisedFetch(url, paramsObject) handles response with authentication error', async () => {
+test('fetch(url, paramsObject) handles response with authentication error', async () => {
 
   const testResultObject = {
     errors: {
       authorization: {
-        param: 'authorization', // TODO: Find the purpose of the param? Is is a key for local content lookup?
         msg: 'some error message'
       }
     }
   };
 
-  const failedAuthorisationResponse = {
-    ok: false,
+  crossFetch.mockReturnValue({
+    status: 401,
     json: () => Promise.resolve(testResultObject)
-  };
+  });
 
-  crossFetch.mockReturnValue(failedAuthorisationResponse);
-
-  const result = await authorisedFetch('', {});
+  const result = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(2);
   expect(store.dispatch).toHaveBeenCalledWith('User/LOGOUT');
@@ -96,70 +95,20 @@ test('authorisedFetch(url, paramsObject) handles response with authentication er
   expect(result).toMatchObject(testResultObject);
 });
 
-test('authorisedFetch(url, paramsObject) handles response with "success" result', async () => {
+test('fetch(url, paramsObject) handles response with "success" result', async () => {
 
-  const testResultObject = {ok: true};
-  crossFetch
-    .mockReturnValue({
-      ok: true,
-      json: () => {
-        return Promise.resolve(testResultObject);
-      }
-    });
+  const testResultObject = {messages: ['some message']};
 
-  const result = await authorisedFetch('', {});
-
-  expect(store.dispatch).not.toHaveBeenCalled();
-  expect(router.push).not.toHaveBeenCalled();
-  expect(result).toMatchObject(testResultObject);
-});
-
-
-test('fetch(url, paramsObject) calls crossFetch with correct params', async () => {
-
-});
-
-test('fetch(url, paramsObject) handles response with general errors', async () => {
-
-  const testResultObject = {
-    errors: {
-      someErrorKey: {
-        param: 'someErrorParam', // TODO: Find the purpose of the param? Is is a key for local content lookup?
-        msg: 'some error message'
-      },
-      someOtherErrorKey: {
-        param: 'someOtherErrorKey', // TODO: Find the purpose of the param? Is is a key for local content lookup?
-        msg: 'some other error message'
-      }
+  crossFetch.mockReturnValue({
+    status: 200,
+    json: () => {
+      return Promise.resolve(testResultObject);
     }
-  };
-
-  const failedResponse = {
-    ok: false,
-    json: () => Promise.resolve(testResultObject)
-  };
-
-  crossFetch.mockReturnValue(failedResponse);
+  });
 
   const result = await fetch('', {});
 
-  expect(store.dispatch).toHaveBeenCalledTimes(2);
-  expect(store.dispatch).toHaveBeenCalledWith('Messaging/ERROR', testResultObject.errors.someErrorKey.msg);
-  expect(store.dispatch).toHaveBeenCalledWith('Messaging/ERROR', testResultObject.errors.someOtherErrorKey.msg);
-
+  expect(store.dispatch).toHaveBeenCalledTimes(1);
+  expect(store.dispatch).toHaveBeenCalledWith('Messaging/SUCCESS', testResultObject.messages[0]);
   expect(result).toMatchObject(testResultObject);
-
-});
-
-test('fetch(url, paramsObject) handles response with "success" result', async () => {
-  const
-    testURL = 'testURL',
-    testObject = {some: 'thing'};
-
-  await fetch(testURL, testObject);
-
-  const calls = crossFetch.mock.calls;
-  expect(crossFetch).toHaveBeenCalledTimes(1);
-  expect(calls[0][0]).toBe('testURL');
-  expect(calls[0][1]).toBe(testObject);
 });
