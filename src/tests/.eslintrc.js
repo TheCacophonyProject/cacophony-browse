@@ -27,6 +27,7 @@ module.exports = {
     'no-console': ['warn'],
     'no-undef': ['error'],
     'no-unused-vars': ['error'],
-    'brace-style': ['error']
+    'brace-style': ['error'],
+    'prefer-const': ['error']
   }
 };

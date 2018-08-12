@@ -1,5 +1,5 @@
-import fetch from 'cross-fetch';
-import { Config } from '../../app.config' // eslint-disable-line
+import { fetch } from './fetch';
+import { Config } from '../../app.config';
 
 export default {
   login,

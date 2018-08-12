@@ -1,5 +1,6 @@
-import fetch from 'cross-fetch';
-import { Config } from '../../app.config' // eslint-disable-line
+import { Config } from '../../app.config';
+import { fetch } from './fetch';
+import querystring from 'querystring';
 
 export default {
   addTag, deleteTag
@@ -7,38 +8,39 @@ export default {
 
 const tagApi = '/api/v1/tags';
 
-function addTag(tag, id, token) {
+function addTag(tag, id) {
   const url = `${Config.api}` + tagApi;
-  tag = JSON.stringify(tag);
-  const body = `recordingId=${encodeURIComponent(id)}&tag=${encodeURIComponent(tag)}`;
+
+  const body = querystring.stringify({
+    recordingId: id,
+    tag: JSON.stringify(tag)
+  });
+
   return fetch(
     url,
     {
       method: "POST",
       headers: {
-        'Authorization': token,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      mode: 'cors',
-      cache: 'no-cache',
       body: body
     }
   );
 }
 
-function deleteTag(id, token) {
-  const url = `${Config.api}` + tagApi;
-  const body = `tagId=${encodeURIComponent(id)}`;
+function deleteTag(id) {
+
+  const
+    url = `${Config.api}` + tagApi,
+    body = querystring.stringify({ tagId: id });
+
   return fetch(
     url,
     {
       method: "DELETE",
       headers: {
-        'Authorization': token,
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      mode: 'cors',
-      cache: 'no-cache',
       body: body
     }
   );

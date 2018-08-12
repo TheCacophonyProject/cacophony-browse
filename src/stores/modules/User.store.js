@@ -12,7 +12,8 @@ const state =  {
 // getters https://vuex.vuejs.org/guide/getters.html
 
 const getters = {
-  isLoggedIn: state => !!state.JWT
+  isLoggedIn: state => !!state.JWT,
+  getToken: state => state.JWT
 };
 
 // actions https://vuex.vuejs.org/guide/actions.html
@@ -22,41 +23,27 @@ const getters = {
 //	Actions can contain arbitrary asynchronous operations.
 
 const actions = {
-  LOGIN (context, payload) {
-    context.commit('invalidateLogin');
+  async LOGIN ({ commit,  }, payload) {
+    commit('invalidateLogin');
 
-    return new Promise((resolve, reject) => {
-      api.user.login(payload.username, payload.password)
-        .then(response => response.json())
-        .then((json) => {
-          if(!json.success) {
-            context.commit('rejectLogin', json);
-            reject(json);
-          }
-          api.user.persistUser(json.userData.username,json.token);
-          context.commit('receiveLogin', json);
-          resolve(json);
-        });
-    });
-
+    const result = await api.user.login(payload.username, payload.password);
+    if(result.success) {
+      api.user.persistUser(result.userData.username,result.token);
+      commit('receiveLogin', result);
+    }
   },
   LOGOUT (context) {
     context.commit('invalidateLogin');
     api.user.logout();
   },
-  REGISTER (context, payload) {
-    return new Promise((resolve, reject) => {
-      api.user.register(payload.username, payload.password)
-        .then(response => response.json())
-        .then((json) => {
-          if(!json.success) {
-            reject(json);
-          }
-          api.user.persistUser(json.userData.username,json.token);
-          context.commit('receiveLogin', json);
-          resolve(json);
-        });
-    });
+  async REGISTER ({ commit }, payload) {
+
+    const result = await api.user.register(payload.username, payload.password);
+
+    if(result.success) {
+      api.user.persistUser(result.userData.username,result.token);
+      commit('receiveLogin', result);
+    }
   }
 };
 

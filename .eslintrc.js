@@ -8,6 +8,13 @@ module.exports = {
     "plugin:import/errors",
     'plugin:vue/recommended'
   ],
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "ecmaFeatures": {
+      "globalReturn": true,
+      "experimentalObjectRestSpread": true
+    }
+  },
   rules: {
     'indent': ['error', 2],
     'linebreak-style': ['error', 'unix'],

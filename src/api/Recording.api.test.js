@@ -1,118 +1,121 @@
-import crossFetch from 'cross-fetch'; // mocked __mocks__/cross-fetch.js
+jest.mock("./fetch");
+import { fetch } from "./fetch";
 import recordingApi from './Recording.api';
-import {LocalStorageMock} from '../tests/testUtils';
-import { Config } from '../../app.config' // eslint-disable-line
+import querystring from 'querystring';
 
-global.localStorage = new LocalStorageMock();
+describe('query() calls fetch', () => {
 
-const recordingApiUrl = '/api/v1/recordings';
+  test('with the correct request params', async () => {
+    await recordingApi.query({});
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1].method).toBe('GET');
+  });
 
-describe('query() calls recordings api via fetch', () => {
-  const testToken = 'testJWT';
-  const testLimit = 100;
-  const testOffset = 0;
-  const testTagMode = 'any';
-  const testTags = '';
-  const testWhere = JSON.stringify({type: 'thermalRaw'})
-  const testOrder = null
+  test('with the correct path', async () => {
+    await recordingApi.query({});
+    expect(fetch.mock.calls[0][0]).toBe('http://mocked-api-path/api/v1/recordings?');
+  });
 
-  test('query() call with where, limit, offset params', async () =>{
-    let params = {
-      where: testWhere,
-      limit: testLimit,
-      offset: testOffset
-    }
-    let queryString = Object.keys(params).map((key) => {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-    }).join('&');
-    let expectedUrl = `${Config.api}` + recordingApiUrl + "?" + queryString;
+  test('just once', async () => {
+    await recordingApi.query({});
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 
-    await recordingApi.query(testToken, params)
+  test('with correctly formatted query string', async () =>{
+    const params = {
+      testQueryObjectValue: JSON.stringify({aKey:"aValue"}),
+      testQueryNumberValue: 100,
+      testQueryStringValue: "someString"
+    };
 
-    const calls = crossFetch.default.mock.calls;
-    expect(calls).toHaveLength(1);
-    expect(calls[0][0]).toBe(expectedUrl);
-    expect(calls[0][1].method).toBe('GET');
-    expect(calls[0][1].headers['Authorization']).toBe(testToken);
-    expect(Object.entries(calls[0][1].headers)).toHaveLength(1);
-  })
+    await recordingApi.query(params);
 
-  test('query() call with all params', async () =>{
-    let params = {
-      where: testWhere,
-      limit: testLimit,
-      offset: testOffset,
-      tagMode: testTagMode,
-      order: testOrder,
-      tags: testTags
-    }
-    let queryString = Object.keys(params).map((key) => {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-    }).join('&');
-    let expectedUrl = `${Config.api}` + recordingApiUrl + "?" + queryString;
+    const query = fetch.mock.calls[0][0].split('?')[1];
 
-    await recordingApi.query(testToken, params)
+    const parsedString = querystring.parse(query);
+    expect(Object.keys(parsedString)).toHaveLength(3);
+    expect(parsedString.testQueryNumberValue).toBe(params.testQueryNumberValue.toString());
+    expect(parsedString.testQueryStringValue).toBe(params.testQueryStringValue.toString());
+    expect(parsedString.testQueryObjectValue).toBe(params.testQueryObjectValue);
+  });
 
-    const calls = crossFetch.default.mock.calls;
-    expect(calls).toHaveLength(1);
-    expect(calls[0][0]).toBe(expectedUrl);
-    expect(calls[0][1].method).toBe('GET');
-    expect(calls[0][1].headers['Authorization']).toBe(testToken);
-    expect(Object.entries(calls[0][1].headers)).toHaveLength(1);
-  })
 });
 
-describe('id() calls recording api via fetch', () => {
-  let testId = 12345;
-  let testToken = 'testJWT';
-  let expectedUrl = `${Config.api}` + recordingApiUrl + `/${testId}`
+describe('id() calls fetch', () => {
+  test('with the correct request params', async () => {
+    await recordingApi.id();
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
+      {
+        method: 'GET'
+      }
+    );
+  });
 
-  test('id() call with params', async () => {
-    await recordingApi.id(testId, testToken)
+  test('with the correct path', async () => {
+    const testId = 12345;
+    await recordingApi.id(testId);
+    expect(fetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
+  });
 
-    const calls = crossFetch.default.mock.calls;
-    expect(calls).toHaveLength(1);
-    expect(calls[0][0]).toBe(expectedUrl);
-    expect(calls[0][1].method).toBe('GET');
-    expect(calls[0][1].headers['Authorization']).toBe(testToken);
-    expect(Object.entries(calls[0][1].headers)).toHaveLength(1);
-  })
-})
+  test('just once', async () => {
+    await recordingApi.id();
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+});
 
-describe('comment() calls recording api via fetch', () => {
-  let testComment = 'I like peanuts'
-  let testId = 12345;
-  let testToken = 'testJWT';
-  let expectedBody = `updates=${encodeURIComponent(JSON.stringify({comment: testComment}))}`
-  let expectedUrl = `${Config.api}` + recordingApiUrl + `/${testId}`
+describe('comment() calls fetch', () => {
+  test('with the correct path', async () => {
+    const testId = 123456;
+    await recordingApi.comment(null, testId);
+    expect(fetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
 
-  test('comment() call with params', async () => {
-    await recordingApi.comment(testComment, testId, testToken)
+  });
 
-    const calls = crossFetch.default.mock.calls;
-    expect(calls).toHaveLength(1);
-    expect(calls[0][0]).toBe(expectedUrl);
-    expect(calls[0][1].method).toBe('PATCH');
-    expect(Object.entries(calls[0][1].headers)).toHaveLength(2);
-    expect(calls[0][1].headers['Authorization']).toBe(testToken);
-    expect(calls[0][1].headers['Content-Type']).toBe('application/x-www-form-urlencoded');
-    expect(calls[0][1].body).toBe(expectedBody)
-  })
-})
+  test('with the correct request params', async () => {
+    const testComment = "some comment";
 
-describe('del() calls recording api via fetch', () => {
-  let testId = 12345;
-  let testToken = 'testJWT';
-  let expectedUrl = `${Config.api}` + recordingApiUrl + `/${testId}`
+    await recordingApi.comment(testComment, null);
+    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0][1]).toMatchObject(
+      {
+        method: 'PATCH',
+        body: `updates=${encodeURIComponent(JSON.stringify({comment: testComment}))}`,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+  });
 
-  test('del() call with params', async () => {
-    await recordingApi.del(testId, testToken)
+  test('just once', async () => {
+    await recordingApi.comment();
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+});
 
-    const calls = crossFetch.default.mock.calls;
-    expect(calls).toHaveLength(1);
-    expect(calls[0][0]).toBe(expectedUrl);
-    expect(calls[0][1].method).toBe('DELETE');
-    expect(Object.entries(calls[0][1].headers)).toHaveLength(1);
-    expect(calls[0][1].headers['Authorization']).toBe(testToken);
-  })
-})
+describe('del() calls fetch', () => {
+
+    test('with the correct path', async () => {
+      const testId = 123456;
+      await recordingApi.del(testId);
+      expect(fetch.mock.calls[0][0]).toBe(`http://mocked-api-path/api/v1/recordings/${testId}`);
+
+    });
+
+    test('with the correct request params', async () => {
+
+      await recordingApi.del(null);
+      expect(fetch.mock.calls[0]).toHaveLength(2);
+      expect(fetch.mock.calls[0][1]).toMatchObject(
+        {
+          method: 'DELETE'
+        }
+      );
+    });
+
+    test('just once', async () => {
+      await recordingApi.del();
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+});

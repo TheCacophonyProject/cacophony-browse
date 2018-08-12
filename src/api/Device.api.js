@@ -1,18 +1,52 @@
-import fetch from 'cross-fetch';
-import { Config } from '../../app.config' // eslint-disable-line
+import { Config } from '../../app.config';
+import { fetch } from './fetch';
 
 export default {
-  allDevices
+  getDevices,
+  addUserToDevice,
+  removeUserFromDevice
 };
 
-function allDevices(token) {
+const devicesApiUrl = Config.api + '/api/v1/devices';
+const deviceUsersApiUrl = Config.api + '/api/v1/devices/users';
+
+function getDevices() {
+
   return fetch(
-    `${Config.api}/api/v1/devices`,
+    devicesApiUrl,
     {
-      method:"GET",
-      headers: {'Authorization': token},
-      mode: 'cors',
-      cache: "no-cache",
+      method:"GET"
+    });
+}
+
+function addUserToDevice(username, deviceId, admin) {
+
+  const body = `userId=${encodeURIComponent(username)}&deviceId=${encodeURIComponent(deviceId)}&admin=${admin}`;
+
+  return fetch(
+    deviceUsersApiUrl,
+    {
+      method:"POST",
+      body,
+      headers: {
+        'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
+      }
+    }
+  );
+}
+
+function removeUserFromDevice(username, deviceId) {
+
+  const body = `userId=${username}&deviceId=${deviceId}`;
+
+  return fetch(
+    deviceUsersApiUrl,
+    {
+      method:"DELETE",
+      body,
+      headers: {
+        'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
+      }
     }
   );
 }

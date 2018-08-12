@@ -2,6 +2,7 @@ import api from '../../api/index';
 
 const state = {
   groups: [],
+  errors: null,
   fetching: true
 };
 
@@ -16,71 +17,43 @@ const getters = {};
 //	Actions can contain arbitrary asynchronous operations.
 
 const actions = {
-  GET_GROUPS ({ commit, rootState }, groupName) {
+  async GET_GROUPS ({ commit, rootState }, groupName) {
     commit('fetching');
-    return new Promise((resolve, reject) => {
-      api.groups.getGroups(groupName, rootState.User.JWT)
-        .then(response => response.json())
-        .then(json => {
-          commit('fetched');
-          if (!json.success) {
-            return reject(json.message || json.messages);
-          }
-          commit('receiveGroups', json);
-          resolve(json);
-        }).catch(() => {
-          // TODO: Deal with  API / network errors?
-        });
-    });
+    const result = await api.groups.getGroups(groupName, rootState.User.JWT);
+    commit('fetched');
 
+    if(result.success) {
+      commit('receiveGroups', result);
+    }
   },
-  ADD_GROUP ({ commit, rootState }, {groupName}) {
+
+  async ADD_GROUP ({ commit, rootState }, {groupName}) {
     commit('fetching');
-    return new Promise((resolve, reject) => {
-      api.groups.addNewGroup(groupName, rootState.User.JWT)
-        .then(response => response.json())
-        .then(json => {
-          commit('fetched');
-          if (!json.success) {
-            return reject(json);
-          }
-          resolve(json);
-        }).catch(() => {
-          // TODO: Deal with  API / network errors?
-        });
-    });
+    const result = await api.groups.addNewGroup(groupName, rootState.User.JWT);
+    commit('fetched');
+
+    if(result.success) {
+      commit('handleUpdate', result);
+    }
   },
-  ADD_GROUP_USER ({ commit, rootState }, {groupId, userName, isAdmin}) {
+
+  async ADD_GROUP_USER ({ commit, rootState }, {groupId, userName, isAdmin}) {
     commit('fetching');
-    return new Promise((resolve, reject) => {
-      api.groups.addGroupUser(groupId, userName, isAdmin, rootState.User.JWT)
-        .then(response => response.json())
-        .then(json => {
-          commit('fetched');
-          if (!json.success) {
-            return reject(json.message || json.messages);
-          }
-          resolve(json);
-        }).catch(() => {
-          // TODO: Deal with  API / network errors?
-        });
-    });
+    const result = await api.groups.addGroupUser(groupId, userName, isAdmin, rootState.User.JWT);
+    commit('fetched');
+
+    if(result.success) {
+      commit('handleUpdate', result);
+    }
   },
-  REMOVE_GROUP_USER ({ commit, rootState }, {groupId, userId}) {
+  async REMOVE_GROUP_USER ({ commit, rootState }, {groupId, userId}) {
     commit('fetching');
-    return new Promise((resolve, reject) => {
-      api.groups.removeGroupUser(groupId, userId, rootState.User.JWT)
-        .then(response => response.json())
-        .then(json => {
-          commit('fetched');
-          if (!json.success) {
-            return reject(json.message || json.messages);
-          }
-          resolve(json);
-        }).catch(() => {
-          // TODO: Deal with  API / network errors?
-        });
-    });
+    const result = await api.groups.removeGroupUser(groupId, userId, rootState.User.JWT);
+    commit('fetched');
+
+    if (result.success) {
+      commit('handleUpdate', result);
+    }
   }
 };
 
@@ -88,6 +61,12 @@ const actions = {
 const mutations = {
   receiveGroups (state, { groups }) {
     state.groups = groups;
+  },
+  handleUpdate (state, { messages }) {
+    state.messages = messages;
+  },
+  handleErrors (state, { errors }) {
+    state.errors = errors;
   },
   fetching (state) {
     state.fetching = true;

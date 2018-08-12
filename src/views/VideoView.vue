@@ -65,8 +65,8 @@
 
 <script>
 
-import api from '../api/index';
-import { Config } from '../../app.config' // eslint-disable-line
+import {mapState} from 'vuex';
+import { Config } from '../../app.config';
 import QuickTag from '../components/Video/QuickTag.vue';
 import PrevNext from '../components/Video/PrevNext.vue';
 import AddObservation from '../components/Video/AddObservation.vue';
@@ -80,9 +80,6 @@ export default {
   props: {},
   data () {
     return {
-      downloadFileJWT: null,
-      downloadRawJWT: null,
-      recording: null,
       showAddObservation: false,
       showAlert: false,
       alertMessage: "",
@@ -90,163 +87,83 @@ export default {
       currentVideoTime: 0
     };
   },
-  computed: {
-    date: function () {
-      const date = new Date(this.recording.recordingDateTime);
-      return date.toLocaleDateString('en-NZ');
-    },
-    time: function () {
-      const date = new Date(this.recording.recordingDateTime);
-      return date.toLocaleTimeString();
-    },
-    fileSource: function () {
-      return `${Config.api}` + "/api/v1/signedUrl?jwt=" + this.downloadFileJWT;
-    },
-    rawSource: function () {
-      return `${Config.api}` + "/api/v1/signedUrl?jwt=" + this.downloadRawJWT;
-    },
-    processingState: function () {
-      let text = this.recording.processingState.toLowerCase();
-      text = text.slice(0,1).toUpperCase() + text.slice(1);
-      return text;
-    },
-    tagItems: function () {
-      const tags = this.recording.Tags;
-      const tagItems = [];
-      tags.map((tag) => {
-        const tagItem = {};
-        if (tag.animal) {
-          tagItem.animal = tag.animal;
-        } else {
-          tagItem.animal = "none";
-        }
-        tagItem.event = tag.event;
-        if (tag.confidence) {
-          tagItem.confidence = tag.confidence.toFixed(2);
-        }
-        if (tag.automatic) {
-          tagItem.who = "Cacophony AI";
-          tagItem['_rowVariant'] = 'warning';
-        } else {
-          tagItem.who = tag.taggerId;
-        }
-        tagItem.when = new Date(tag.createdAt).toLocaleString();
-        tagItem.tag = tag;
-        tagItems.push(tagItem);
-      });
-      return tagItems;
-    }
-  },
+  computed:
+    mapState({
+      recording: state => state.Video.recording,
+      downloadFileJWT: state => state.Video.downloadFileJWT,
+      downloadRawJWT: state => state.Video.downloadRawJWT,
+      date: (state) => {
+        const date = new Date(state.Video.recording.recordingDateTime);
+        return date.toLocaleDateString('en-NZ');
+      },
+      time: state => {
+        const date = new Date(state.Video.recording.recordingDateTime);
+        return date.toLocaleTimeString();
+      },
+      fileSource: state => Config.api + "/api/v1/signedUrl?jwt=" + state.Video.downloadFileJWT,
+      rawSource: state => Config.api + "/api/v1/signedUrl?jwt=" + state.Video.downloadRawJWT,
+      processingState: state => {
+        let text = state.Video.recording.processingState.toLowerCase();
+        text = text.slice(0,1).toUpperCase() + text.slice(1);
+        return text;
+      },
+      tagItems() {
+        return this.$store.getters['Video/getTagItems'];
+      }
+    }),
   watch: {
     '$route' () {
       this.getRecordingDetails();
     }
   },
-  created: function() {
-    this.getRecordingDetails();
+  created: async function() {
+    await this.getRecordingDetails();
   },
   methods: {
     getRecordingDetails() {
-      const token = this.$store.state.User.JWT;
-      return new Promise((resolve, reject) => {
-        api.recording.id(this.$route.params.id, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.downloadFileJWT = json.downloadFileJWT;
-              this.downloadRawJWT = json.downloadRawJWT;
-              this.recording = json.recording;
-            }
-          });
-      });
+      this.$store.dispatch('Video/GET_RECORDING', this.$route.params.id);
     },
     addTag(tag) {
-      const token = this.$store.state.User.JWT;
       const id = Number(this.$route.params.id);
-      return new Promise((resolve, reject) => {
-        api.tag.addTag(tag, id, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.showAlert = true;
-              this.alertMessage = "Tag added.";
-              this.alertVariant = "success";
-              this.getRecordingDetails();
-              resolve(json);
-            }
-          });
-      });
+      this.$store.dispatch('Video/ADD_TAG', { tag, id });
     },
     deleteTag(tagId) {
-      const token = this.$store.state.User.JWT;
-      return new Promise((resolve, reject) => {
-        api.tag.deleteTag(tagId, token)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              this.getRecordingDetails();
-              this.showAlert = true;
-              this.alertMessage = 'Tag deleted';
-              this.alertVariant = 'success';
-              resolve(json);
-            }
-          });
-      });
+      this.$store.dispatch('Video/DELETE_TAG', tagId);
     },
-    nextRecording(direction, tagMode, tags) {
-      var params = {
-        where: {
-          DeviceId: this.recording.Device.id
-        },
-        limit: 1,
-        offset: 0
+    async nextRecording(direction, tagMode, tags) {
+      let where = {
+        DeviceId: this.recording.Device.id
       };
+
       if (tags) {
-        params.where.tags = JSON.stringify(tags);
+        where.tags = JSON.stringify(tags);
       }
 
       let order;
       switch (direction) {
       case "next":
-        params.where.recordingDateTime = {gt: this.recording.recordingDateTime};
+        where.recordingDateTime = {gt: this.recording.recordingDateTime};
         order = "ASC";
         break;
       case "previous":
-        params.where.recordingDateTime = {lt: this.recording.recordingDateTime};
+        where.recordingDateTime = {lt: this.recording.recordingDateTime};
         order = "DESC";
         break;
       default:
         throw `invalid direction: '${direction}'`;
       }
-      params.order  = JSON.stringify([["recordingDateTime", order]]);
-      params.where = JSON.stringify(params.where);
+      order  = JSON.stringify([["recordingDateTime", order]]);
+      where = JSON.stringify(where);
 
-      const token = this.$store.state.User.JWT;
+      const params ={
+        where,
+        order,
+        limit: 1,
+        offset: 0
+      };
 
-      return new Promise((resolve, reject) => {
-        api.recording.query(token, params)
-          .then(response => response.json())
-          .then((json) => {
-            if(!json.success) {
-              reject(json);
-            } else {
-              if (json.rows.length == 0) {
-                this.showAlert = true;
-                this.alertMessage = `No ${direction} recording for this device.`;
-                this.alertVariant = 'warning';
-                return;
-              }
-              this.$router.push({path: `/video/${json.rows[0].id}`});
-              resolve(json);
-            }
-          });
-      });
+      await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction });
+      this.$router.push({path: `/video/${this.recording.id}`});
     },
     getCurrentVideoTime() {
       this.currentVideoTime = this.$refs.videoPlayer.currentTime;
@@ -261,8 +178,8 @@ export default {
 <style>
 
 .video {
-	max-width: 100%;
-	height: auto;
+  max-width: 100%;
+  height: auto;
 }
 
 </style>

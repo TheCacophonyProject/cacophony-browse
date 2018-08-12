@@ -1,5 +1,5 @@
-import fetch from 'cross-fetch';
-import { Config } from '../../app.config'; // eslint-disable-line
+import { Config } from '../../app.config';
+import { fetch } from './fetch';
 
 export default {
   addNewGroup,
@@ -8,7 +8,7 @@ export default {
   removeGroupUser
 };
 
-function addNewGroup(groupName, JWT) {
+function addNewGroup(groupName) {
   const body = `groupname=${encodeURIComponent(groupName)}`;
 
   return fetch(
@@ -18,13 +18,12 @@ function addNewGroup(groupName, JWT) {
       body: body,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-        'Authorization': JWT
       }
     }
   );
 }
 
-function addGroupUser(groupId, userName, isAdmin, JWT) {
+function addGroupUser(groupId, userName, isAdmin) {
   const body = `groupId=${encodeURIComponent(groupId)}&userId=${encodeURIComponent(userName)}&admin=${encodeURIComponent(isAdmin)}`;
 
   return fetch(
@@ -34,13 +33,12 @@ function addGroupUser(groupId, userName, isAdmin, JWT) {
       body: body,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-        'Authorization': JWT
       }
     }
   );
 }
 
-function removeGroupUser(groupId, userId, JWT) {
+function removeGroupUser(groupId, userId) {
   const body = `groupId=${encodeURIComponent(groupId)}&userId=${encodeURIComponent(userId)}`;
 
   return fetch(
@@ -50,23 +48,21 @@ function removeGroupUser(groupId, userId, JWT) {
       body: body,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-        'Authorization': JWT
       }
     }
   );
 }
 
-function getGroups(groupname, JWT) {
+async function getGroups(groupname) {
   const where = JSON.stringify({groupname});
   const body = `where=${where}`;
 
-  return fetch(
+  return await fetch(
     `${Config.api}/api/v1/groups?${body}`,
     {
       method: "GET",
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-        'Authorization': JWT
       }
     }
   );
