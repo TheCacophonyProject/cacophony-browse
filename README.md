@@ -23,3 +23,40 @@ For detailed explanation on how things work, consult the [docs for vue-loader](h
 
 Please follow the Vue style guide for all development:
 https://vuejs.org/v2/style-guide/#ad
+
+# Production
+
+Create the distribution file
+``` bash
+npm run build
+```
+
+Serve an index.html file as follows from your chosen server:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cacophony</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+<div id="app"></div>
+<script src="http://localhost:3000/dist/build.js"></script>
+</body>
+</html>
+```
+
+An express app for example:
+
+```javascript
+const express = require('express');
+const app = express();
+const path = require('path');
+
+app.use('/dist', express.static(path.join(__dirname, '../cacophony-web-vuex/dist')));
+app.use('/*', express.static(path.join(__dirname, '/')));
+
+app.listen(3000, () => console.log('Listening on port 3000!'));
+```
