@@ -31,24 +31,7 @@ Create the distribution file
 npm run build
 ```
 
-Serve an index.html file as follows from your chosen server:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Cacophony</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-</head>
-<body>
-<div id="app"></div>
-<script src="http://localhost:3000/dist/build.js"></script>
-</body>
-</html>
-```
-
-An express app for example:
+The index.html file in the root of the project should be served via a web server, an express example might look as follows:
 
 ```javascript
 const express = require('express');
