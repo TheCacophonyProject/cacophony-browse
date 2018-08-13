@@ -1,11 +1,9 @@
-import userApi from "../../api/User.api";
-
 jest.genMockFromModule('../../api/Groups.api');
 jest.mock('../../api/Groups.api');
+
 import api from '../../api/Groups.api';
 import store from '../../stores';
 import GroupsStore from '../../stores/modules/Groups.store';
-
 
 describe('Actions', () => {
 
@@ -53,7 +51,6 @@ describe('Actions', () => {
     });
   });
 
-
   describe('ADD_GROUP', () => {
     test('calls api.groups.addNewGroup()', async () => {
       const testResult = {success: true};
@@ -64,7 +61,6 @@ describe('Actions', () => {
       expect(api.addNewGroup).toHaveBeenCalledTimes(1);
       expect(api.addNewGroup).toHaveBeenCalledWith(testName);
     });
-
     test('commits success.true mutations', async () => {
       const testResult = {success: true, messages: []};
       api.addNewGroup.mockReturnValueOnce(testResult);
@@ -87,7 +83,6 @@ describe('Actions', () => {
       expect(store.commit).not.toHaveBeenCalledWith('Groups/receiveUpdate');
     });
   });
-
 
   describe('ADD_GROUP_USER', async () => {
 
@@ -118,6 +113,7 @@ describe('Actions', () => {
       expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
       expect(store.commit).toHaveBeenNthCalledWith(3, 'Groups/receiveUpdate', testResult, undefined);
     });
+
     test('commits success.false mutations', async () => {
       api.addGroupUser.mockReturnValueOnce({success: false});
 
@@ -132,18 +128,9 @@ describe('Actions', () => {
 
   describe('REMOVE_GROUP_USER(groupId, userId)', () => {
 
-    // commit('fetching');
-    // const result = await api.groups.removeGroupUser(groupId, userId);
-    // commit('fetched');
-    //
-    // if (result.success) {
-    //   commit('receiveUpdate', result);
-    // }
-
     test('calls api.groups.removeGroupUser()', async () => {
       const testResult = {success: true};
       api.removeGroupUser.mockReturnValueOnce(testResult);
-
 
       await store.dispatch('Groups/REMOVE_GROUP_USER', {groupId: testGroupId, userId: testUserId});
 
@@ -177,20 +164,6 @@ describe('Actions', () => {
 });
 
 describe('Mutations', () => {
-// const mutations = {
-//   receiveGroups (state, { groups }) {
-//     state.groups = groups;
-//   },
-//   receiveUpdate (state, { messages }) {
-//     state.messages = messages;
-//   },
-//   fetching (state) {
-//     state.fetching = true;
-//   },
-//   fetched (state) {
-//     state.fetching = false;
-//   }
-// }
   let initialState;
 
   beforeEach(() => {
@@ -203,17 +176,20 @@ describe('Mutations', () => {
     GroupsStore.mutations.receiveGroups(initialState, { groups: testGroups});
     expect(initialState.groups).toMatchObject(testGroups);
   });
+
   test('receiveUpdate()', async () => {
     const testMessages = ["1","2","3"];
     expect(initialState.messages).toMatchObject([]);
     GroupsStore.mutations.receiveUpdate(initialState, { messages: testMessages});
     expect(initialState.messages).toMatchObject(testMessages);
   });
+
   test('fetching', async () => {
     expect(initialState.fetching).toBe(true);
     GroupsStore.mutations.fetching(initialState);
     expect(initialState.fetching).toBe(true);
   });
+
   test('fetched', async () => {
     expect(initialState.fetching).toBe(true);
     GroupsStore.mutations.fetched(initialState);
