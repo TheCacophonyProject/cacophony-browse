@@ -6,7 +6,7 @@ describe('Actions', () => {
 
   store.commit = jest.fn();
 
-  test('commits all message type mutations', async () => {
+  test('WARN/ERROR/INFO/SUCCESS commit log mutations', async () => {
     const testMessage = "some message";
 
     const actionCalls = [
@@ -31,7 +31,7 @@ describe('Actions', () => {
 
   });
 
-  test('commits all acknowledge mutation', async () => {
+  test('ACKNOWLEDGE commits acknowledge mutation', async () => {
     await store.dispatch("Messaging/ACKNOWLEDGE");
     expect(store.commit).toHaveBeenCalledTimes(1);
     expect(store.commit).toHaveBeenCalledWith('Messaging/acknowledge', undefined, undefined);
@@ -43,7 +43,7 @@ describe('Mutations', () => {
   const testMessageObject = { some: "message object" };
 
   beforeEach(() => {
-    initialState = Object.assign(MessagingStore.state);
+    initialState = Object.assign({}, MessagingStore.state);
   });
 
   test('log() sets message state', async () => {
