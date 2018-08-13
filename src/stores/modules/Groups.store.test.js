@@ -167,7 +167,7 @@ describe('Mutations', () => {
   let initialState;
 
   beforeEach(() => {
-    initialState = Object.assign(GroupsStore.state);
+    initialState = Object.assign({}, GroupsStore.state);
   });
 
   test('receiveGroups()', async () => {
@@ -185,13 +185,13 @@ describe('Mutations', () => {
   });
 
   test('fetching', async () => {
-    expect(initialState.fetching).toBe(true);
+    expect(initialState.fetching).toBe(null);
     GroupsStore.mutations.fetching(initialState);
     expect(initialState.fetching).toBe(true);
   });
 
   test('fetched', async () => {
-    expect(initialState.fetching).toBe(true);
+    expect(initialState.fetching).toBe(null);
     GroupsStore.mutations.fetched(initialState);
     expect(initialState.fetching).toBe(false);
   });
