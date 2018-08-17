@@ -1,4 +1,4 @@
-import { Config } from '../../app.config';
+import Config from '../../app.config';
 import { fetch } from './fetch';
 import querystring from 'querystring';
 

@@ -1,21 +1,10 @@
-let api;
-
-switch(process.env.NODE_ENV) {
-  case 'production':
-    api = "https://localhost:1080";
-    break;
+switch (process.env.NODE_ENV) {
   case 'development':
-    api = "https://localhost:1080";
+    module.exports = require('./configs/app.config.dev.js');
     break;
   case 'test':
-    api = "http://mocked-api-path";
+    module.exports = require('./configs/app.config.tests.js');
     break;
   default:
-    api = "https://localhost:1080";
+    module.exports = require('./configs/app.config.prod.js');
 }
-
-module.exports = {
-  'Config': {
-    api
-  }
-};

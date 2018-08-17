@@ -1,6 +1,6 @@
 .eslintrc.js
-app.config.js
-webpack.config*
+app.config.**
+webpack.configs*
 
 # FIXME: Tests should be lint'able but async arrow functions are failing. ./tests/.eslintrc.js needs review
 **/*.test.js
