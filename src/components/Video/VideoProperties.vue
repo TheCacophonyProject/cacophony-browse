@@ -58,7 +58,7 @@
 <script>
 
 import api from '../../api/index';
-import { Config } from '../../../app.config';
+import Config from '../../../app.config';
 
 export default {
   name: 'VideoProperties',

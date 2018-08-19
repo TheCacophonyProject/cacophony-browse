@@ -66,7 +66,7 @@
 <script>
 
 import {mapState} from 'vuex';
-import { Config } from '../../app.config';
+import Config from '../../app.config';
 import QuickTag from '../components/Video/QuickTag.vue';
 import PrevNext from '../components/Video/PrevNext.vue';
 import AddObservation from '../components/Video/AddObservation.vue';

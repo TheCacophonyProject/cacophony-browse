@@ -1,5 +1,5 @@
+import Config from '../../app.config';
 import { fetch } from './fetch';
-import { Config } from '../../app.config';
 
 export default {
   login,

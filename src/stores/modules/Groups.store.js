@@ -2,8 +2,9 @@ import api from '../../api/index';
 
 const state = {
   groups: [],
+  messages: [],
   errors: null,
-  fetching: true
+  fetching: null
 };
 
 // getters https://vuex.vuejs.org/guide/getters.html
@@ -17,9 +18,9 @@ const getters = {};
 //	Actions can contain arbitrary asynchronous operations.
 
 const actions = {
-  async GET_GROUPS ({ commit, rootState }, groupName) {
+  async GET_GROUPS ({ commit }, groupName) {
     commit('fetching');
-    const result = await api.groups.getGroups(groupName, rootState.User.JWT);
+    const result = await api.groups.getGroups(groupName);
     commit('fetched');
 
     if(result.success) {
@@ -27,32 +28,32 @@ const actions = {
     }
   },
 
-  async ADD_GROUP ({ commit, rootState }, {groupName}) {
+  async ADD_GROUP ({ commit }, groupName) {
     commit('fetching');
-    const result = await api.groups.addNewGroup(groupName, rootState.User.JWT);
+    const result = await api.groups.addNewGroup(groupName);
     commit('fetched');
 
     if(result.success) {
-      commit('handleUpdate', result);
+      commit('receiveUpdate', result);
     }
   },
 
-  async ADD_GROUP_USER ({ commit, rootState }, {groupId, userName, isAdmin}) {
+  async ADD_GROUP_USER ({ commit }, {groupId, userName, isAdmin}) {
     commit('fetching');
-    const result = await api.groups.addGroupUser(groupId, userName, isAdmin, rootState.User.JWT);
+    const result = await api.groups.addGroupUser(groupId, userName, isAdmin);
     commit('fetched');
 
     if(result.success) {
-      commit('handleUpdate', result);
+      commit('receiveUpdate', result);
     }
   },
-  async REMOVE_GROUP_USER ({ commit, rootState }, {groupId, userId}) {
+  async REMOVE_GROUP_USER ({ commit }, {groupId, userId}) {
     commit('fetching');
-    const result = await api.groups.removeGroupUser(groupId, userId, rootState.User.JWT);
+    const result = await api.groups.removeGroupUser(groupId, userId);
     commit('fetched');
 
     if (result.success) {
-      commit('handleUpdate', result);
+      commit('receiveUpdate', result);
     }
   }
 };
@@ -62,11 +63,8 @@ const mutations = {
   receiveGroups (state, { groups }) {
     state.groups = groups;
   },
-  handleUpdate (state, { messages }) {
+  receiveUpdate (state, { messages }) {
     state.messages = messages;
-  },
-  handleErrors (state, { errors }) {
-    state.errors = errors;
   },
   fetching (state) {
     state.fetching = true;

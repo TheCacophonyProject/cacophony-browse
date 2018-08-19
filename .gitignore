@@ -1,4 +1,6 @@
 .idea/
 node_modules/
 *.iml
-app.config.js
+configs/app.config.dev.js
+dist/
+launch.json
