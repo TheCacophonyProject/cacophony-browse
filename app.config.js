@@ -1,6 +1,8 @@
 switch (process.env.NODE_ENV) {
   case 'development':
-    module.exports = require('./configs/app.config.dev.js');
+    try {
+      module.exports = require('./configs/app.config.dev.js');
+    } catch(e) {}
     break;
   case 'test':
     module.exports = require('./configs/app.config.tests.js');
