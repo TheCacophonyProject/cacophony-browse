@@ -2,5 +2,5 @@
 node_modules/
 *.iml
 app.config.dev.js
-/dist
+dist/
 launch.json
