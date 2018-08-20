@@ -11,7 +11,9 @@
     "test": "cross-env NODE_ENV=test jest",
     "test:watch": "cross-env NODE_ENV=test npm run test -- --watch",
     "lint": "eslint ./src --ext .js,.vue",
-    "lint-fix": "eslint ./src --fix --ext .js,.vue"
+    "lint-fix": "eslint ./src --fix --ext .js,.vue",
+    "preversion": "npm test",
+    "version": "./update-nfpm-version"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.1",
