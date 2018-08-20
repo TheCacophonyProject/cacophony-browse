@@ -9,5 +9,5 @@ vendor: "The Cacophony Project"
 homepage: https://github.com/TheCacophonyProject
 license: "GPLv3"
 files:
-  ./index.html: "/srv/cacophony/cacophony-web-vuex/"
+  ./index.html: "/srv/cacophony/cacophony-web-vuex/index.html"
   ./dist/*: "/srv/cacophony/cacophony-web-vuex/dist/"
