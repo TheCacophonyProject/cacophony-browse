@@ -1,4 +1,3 @@
-import Config from '../../app.config';
 import { fetch } from './fetch';
 
 export default {
@@ -10,9 +9,8 @@ export default {
 
 function login(username, password) {
   const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
-
   return fetch(
-    `${Config.api}/authenticate_user`,
+    `${ENV.api}/authenticate_user`,
     {
       method:"POST",
       body:body,
@@ -33,7 +31,7 @@ function logout(){
 function register(username, password) {
   const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   return fetch(
-    `${Config.api}/api/v1/Users`,
+    `${ENV.api}/api/v1/Users`,
     {
       method:"POST",
       body:body,

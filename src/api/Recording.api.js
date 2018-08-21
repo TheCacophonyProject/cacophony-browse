@@ -1,4 +1,3 @@
-import Config from '../../app.config';
 import { fetch } from './fetch';
 import querystring from 'querystring';
 
@@ -11,7 +10,7 @@ const recordingApi = '/api/v1/recordings';
 function query(params) {
   // Params must include where (stringified JSON), limit, offset
   // Params can also include tagMode, tags, order
-  const url = Config.api + recordingApi + "?" + querystring.stringify(params);
+  const url = ENV.api + recordingApi + "?" + querystring.stringify(params);
 
   return fetch(
     url,
@@ -22,7 +21,7 @@ function query(params) {
 }
 
 function id(id) {
-  const url = `${Config.api}${recordingApi}/${id}`;
+  const url = `${ENV.api}${recordingApi}/${id}`;
   return fetch(
     url,
     {
@@ -34,7 +33,7 @@ function id(id) {
 function comment(comment, id) {
   const commentString = JSON.stringify({comment: comment});
   const body = `updates=${encodeURIComponent(commentString)}`;
-  const url = `${Config.api}${recordingApi}/${id}`;
+  const url = `${ENV.api}${recordingApi}/${id}`;
   return fetch(
     url,
     {
@@ -48,7 +47,7 @@ function comment(comment, id) {
 }
 
 function del(id) {
-  const url = `${Config.api}${recordingApi}/${id}`;
+  const url = `${ENV.api}${recordingApi}/${id}`;
   return fetch(
     url,
     {

@@ -1,6 +1,6 @@
 .idea/
 node_modules/
 *.iml
-app.config.dev.js
+configs/dev.js
 dist/
 launch.json
