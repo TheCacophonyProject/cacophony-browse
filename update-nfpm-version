@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# This script writes the version number in $npm_package_version into
+# the correct place in nfpm.yaml. It is called by a script target in
+# packages.json.
+
+perl -pi -e "s/^version:.+/version: \"$npm_package_version\"/" nfpm.yaml
+git add nfpm.yaml
