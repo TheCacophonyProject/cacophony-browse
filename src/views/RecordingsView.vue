@@ -183,7 +183,7 @@ export default {
 <style scoped>
 
 .information-line {
-	padding-top: 5px;
-	padding-bottom: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 </style>
