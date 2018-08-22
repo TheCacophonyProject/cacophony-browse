@@ -1,3 +1,3 @@
 module.exports = {
-  'api': "http://localhost:2000"
+  'api': "https://api-test.cacophony.org.nz"
 };

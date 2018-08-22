@@ -1,7 +1,7 @@
 {
   "name": "cacophony-web-vue",
   "description": "Cacophony web",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "author": "Andy Saunders <adbs1@yahoo.com>",
   "license": "MIT",
   "private": true,
@@ -13,7 +13,9 @@
     "test": "jest",
     "test:watch": "npm run test -- --watch",
     "lint": "eslint ./src --ext .js,.vue",
-    "lint-fix": "eslint ./src --fix --ext .js,.vue"
+    "lint-fix": "eslint ./src --fix --ext .js,.vue",
+    "preversion": "npm test",
+    "version": "./update-nfpm-version"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.1",

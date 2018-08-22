@@ -24,22 +24,14 @@ For detailed explanation on how things work, consult the [docs for vue-loader](h
 Please follow the Vue style guide for all development:
 https://vuejs.org/v2/style-guide/#ad
 
-# Production
+# Production Releases
 
-Create the distribution file
-``` bash
-npm run build
-```
+* Ensure all changes have been merged and are pulled into the local copy.
+* Update the version number and tag the new version with: `npm version <new-version>`
+* Push the tag to Github: `git push origin <version>`
+* Build the distribution: `npm run build`
+* Build the deb package: `nfpm pkg -t cacophony-web-vuex_<version>.deb`
+* Upload the resulting package to the [Github Releases](https://github.com/TheCacophonyProject/cacophony-web-vuex/releases) for cacophony-web-vuex
 
-The index.html file in the root of the project should be served via a web server, an express example might look as follows:
-
-```javascript
-const express = require('express');
-const app = express();
-const path = require('path');
-
-app.use('/dist', express.static(path.join(__dirname, '../cacophony-web-vuex/dist')));
-app.use('/*', express.static(path.join(__dirname, '/')));
-
-app.listen(3000, () => console.log('Listening on port 3000!'));
-```
+The /srv/cacophony/cacophony-web-vuex directory in the package should
+be served by a web server.

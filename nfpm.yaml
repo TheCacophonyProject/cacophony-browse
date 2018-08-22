@@ -1,0 +1,13 @@
+name: "cacophony-web-vuex"
+arch: "amd64"
+platform: "linux"
+version: "0.0.3"
+maintainer: "Cacophony Developers <dev@cacophony.org.nz>"
+description: |
+  Web interface for the Cacophony Project API
+vendor: "The Cacophony Project"
+homepage: https://github.com/TheCacophonyProject
+license: "GPLv3"
+files:
+  ./index.html: "/srv/cacophony/cacophony-web-vuex/index.html"
+  ./dist/*: "/srv/cacophony/cacophony-web-vuex/dist/"
