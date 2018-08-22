@@ -1,4 +1,3 @@
-import Config from '../../app.config';
 import { fetch } from './fetch';
 
 export default {
@@ -12,7 +11,7 @@ function addNewGroup(groupName) {
   const body = `groupname=${encodeURIComponent(groupName)}`;
 
   return fetch(
-    `${Config.api}/api/v1/groups`,
+    `${ENV.api}/api/v1/groups`,
     {
       method: "POST",
       body: body,
@@ -27,7 +26,7 @@ function addGroupUser(groupId, userName, isAdmin) {
   const body = `groupId=${encodeURIComponent(groupId)}&userId=${encodeURIComponent(userName)}&admin=${encodeURIComponent(isAdmin)}`;
 
   return fetch(
-    `${Config.api}/api/v1/groups/users`,
+    `${ENV.api}/api/v1/groups/users`,
     {
       method: "POST",
       body: body,
@@ -42,7 +41,7 @@ function removeGroupUser(groupId, userId) {
   const body = `groupId=${encodeURIComponent(groupId)}&userId=${encodeURIComponent(userId)}`;
 
   return fetch(
-    `${Config.api}/api/v1/groups/users`,
+    `${ENV.api}/api/v1/groups/users`,
     {
       method: "DELETE",
       body: body,
@@ -58,7 +57,7 @@ async function getGroups(groupname) {
   const body = `where=${where}`;
 
   return await fetch(
-    `${Config.api}/api/v1/groups?${body}`,
+    `${ENV.api}/api/v1/groups?${body}`,
     {
       method: "GET",
       headers: {
