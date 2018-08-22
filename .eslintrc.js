@@ -26,5 +26,6 @@ module.exports = {
     'no-unused-vars': ['error'],
     'brace-style': ['error'],
     'prefer-const': ['error']
-  }
+  },
+  "globals": { "ENV": true }
 };

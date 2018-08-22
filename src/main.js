@@ -31,3 +31,8 @@ new Vue({
   router,
   render: h => h(App)
 });
+
+if(ENV.environment !== 'PRODUCTION') {
+  console.info(`!!!!!!!!!!!!!!!! ${ENV.environment} MODE !!!!!!!!!!!!!!!!`); // eslint-disable-line
+  console.info(ENV); // eslint-disable-line
+}

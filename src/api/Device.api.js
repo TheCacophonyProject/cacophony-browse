@@ -1,4 +1,3 @@
-import Config from '../../app.config';
 import { fetch } from './fetch';
 
 export default {
@@ -7,8 +6,8 @@ export default {
   removeUserFromDevice
 };
 
-const devicesApiUrl = Config.api + '/api/v1/devices';
-const deviceUsersApiUrl = Config.api + '/api/v1/devices/users';
+const devicesApiUrl = `${ENV.api}/api/v1/devices`;
+const deviceUsersApiUrl = `${ENV.api}/api/v1/devices/users`;
 
 function getDevices() {
 

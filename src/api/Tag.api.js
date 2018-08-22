@@ -1,4 +1,3 @@
-import Config from '../../app.config';
 import { fetch } from './fetch';
 import querystring from 'querystring';
 
@@ -9,7 +8,7 @@ export default {
 const tagApi = '/api/v1/tags';
 
 function addTag(tag, id) {
-  const url = `${Config.api}` + tagApi;
+  const url = `${ENV.api}` + tagApi;
 
   const body = querystring.stringify({
     recordingId: id,
@@ -31,7 +30,7 @@ function addTag(tag, id) {
 function deleteTag(id) {
 
   const
-    url = `${Config.api}` + tagApi,
+    url = `${ENV.api}` + tagApi,
     body = querystring.stringify({ tagId: id });
 
   return fetch(
