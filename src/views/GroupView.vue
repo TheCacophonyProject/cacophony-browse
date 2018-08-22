@@ -1,8 +1,8 @@
 <template>
   <b-container fluid>
 
-    <template v-if="groupData">
-      <h1>{{ groupData.group.groupname }}</h1>
+    <template v-if="group">
+      <h1>{{ group.groupname }}</h1>
       <b-row>
         <b-col>
 
@@ -10,7 +10,7 @@
 
           <template>
             <b-table
-              :items="groupData.groupUsers"
+              :items="groupUsers"
               :fields="userTableFields"
               striped
               hover
@@ -20,11 +20,11 @@
                 slot="deleteButton"
                 slot-scope="row">
                 <font-awesome-icon
-                  v-if="groupData.owner.GroupUsers.admin && groupData.owner.id != row.item.id"
+                  v-if="owner.GroupUsers.admin && owner.id != row.item.id"
                   icon="trash"
                   size="1x"
                   style="cursor: pointer;"
-                  @click="removeGroupUser(groupData.group.id,row.item.id)"/>
+                  @click="removeGroupUser(group.id,row.item.id)"/>
               </template>
             </b-table>
           </template>
@@ -88,7 +88,7 @@
           <h4>Devices</h4>
           <!-- TODO: Format groups > devices table once functionality to add devices exists -->
           <b-table
-            :items="groupData.devices"
+            :items="devices"
             striped
             hover
             responsive>
@@ -108,12 +108,12 @@
 </template>
 
 <script>
+
+import {mapState} from 'vuex';
+
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'GroupView',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
   data() {
     return {
       addGroupUserName: null,
@@ -126,20 +126,14 @@ export default {
       ]
     };
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
-    groupData() {
-      if(!this.$store.state.Groups.fetching) {
-        const group = this.$store.state.Groups.groups[0];
-        return {
-          group,
-          owner: group.Users[0],
-          groupUsers: group.GroupUsers,
-          devices: group.Devices
-        };
-      }
-    }
-  },
+  computed:
+    mapState({
+      group: state => state.Groups.groups[0],
+      owner: state => state.Groups.groups[0].Users[0],
+      groupUsers: state => state.Groups.groups[0].GroupUsers,
+      devices: state => state.Groups.groups[0].Devices
+    })
+  ,
   watch: {
     '$route'() {
       this.fetchGroups();

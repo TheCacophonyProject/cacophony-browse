@@ -2,6 +2,7 @@ import { fetch } from './fetch';
 
 export default {
   login,
+  augmentUserData,
   persistUser,
   logout,
   register
@@ -17,6 +18,14 @@ function login(username, password) {
       headers:{
         'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
       }
+    }
+  );
+}
+function augmentUserData(username) {
+  return fetch(
+    `${ENV.api}/users/${username}`,
+    {
+      method:"GET"
     }
   );
 }

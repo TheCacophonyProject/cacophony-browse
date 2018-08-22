@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import Multiselect from 'vue-multiselect';
 import router from './router';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faCaretSquareDown, faCaretSquareUp } from '@fortawesome/free-regular-svg-icons';
 
 import store from './stores';
 
@@ -19,7 +20,7 @@ Vue.use(BootstrapVue);
 Vue.use(Vuelidate);
 
 // https://www.npmjs.com/package/@fortawesome/vue-fontawesome
-library.add(faTrash);
+library.add(faTrash, faCaretSquareDown, faCaretSquareUp);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 // https://vue-multiselect.js.org
