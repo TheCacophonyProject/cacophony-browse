@@ -14,6 +14,7 @@ import LoginView from '../views/LoginView.vue';
 import RecordingsView from '../views/RecordingsView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import VideoView from '../views/VideoView.vue';
+import AddEmailView from '../views/AddEmailView.vue';
 
 Vue.use(Router);
 
@@ -34,7 +35,8 @@ function createRouter() {
       {path:'/login', name: 'login', component:LoginView, meta: {noAuth: true}},
       {path:'/recordings',component:RecordingsView},
       {path:'/register',component:RegisterView, meta: {noAuth: true}},
-      {path:'/video/:id',component:VideoView}
+      {path:'/video/:id',component:VideoView},
+      {path:'/add_email', name: 'addEmail', component: AddEmailView},
     ]
   });
 

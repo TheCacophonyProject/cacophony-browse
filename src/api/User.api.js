@@ -4,7 +4,9 @@ export default {
   login,
   persistUser,
   logout,
-  register
+  register,
+  updateFields,
+  persistFields,
 };
 
 function login(username, password) {
@@ -20,13 +22,20 @@ function login(username, password) {
     }
   );
 }
-function persistUser(username, token) {
+function persistUser(username, token, email) {
   localStorage.setItem('username', username);
   localStorage.setItem('JWT', token);
+  localStorage.setItem('email', email);
+}
+function persistFields(data) {
+  for (var key in data) {
+    localStorage.setItem(key, data[key]);
+  }
 }
 function logout(){
   localStorage.setItem('username', '');
   localStorage.setItem('JWT', '');
+  localStorage.setItem('email', '');
 }
 function register(username, password) {
   const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
@@ -37,6 +46,18 @@ function register(username, password) {
       body:body,
       headers:{
         'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
+      }
+    }
+  );
+}
+function updateFields(fields) {
+  return fetch(
+    `${ENV.api}/api/v1/Users`,
+    {
+      method:"PATCH",
+      body: `data=${encodeURIComponent(JSON.stringify(fields))}`,
+      headers:{
+        'Content-Type': 'application/x-www-form-urlencoded',
       }
     }
   );
