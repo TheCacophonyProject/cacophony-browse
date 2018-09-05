@@ -50,4 +50,7 @@ function handleMessages(result, status) {
     }
   }
   result.messages && result.messages.forEach(message => store.dispatch(`Messaging/${level}`, message));
+  if (result.errorType == "client") {
+    store.dispatch('Messaging/ERROR', result.message);
+  }
 }

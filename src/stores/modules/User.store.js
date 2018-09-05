@@ -4,7 +4,10 @@ const state =  {
   isLoggingIn: false,
   didInvalidate: false,
   JWT: localStorage.getItem('JWT'),
-  userData: {'username': localStorage.getItem('username')},
+  userData: {
+    'username': localStorage.getItem('username'),
+    'email': localStorage.getItem('email'),
+  },
   errorMessage: undefined
 };
 
@@ -13,7 +16,8 @@ const state =  {
 
 const getters = {
   isLoggedIn: state => !!state.JWT,
-  getToken: state => state.JWT
+  getToken: state => state.JWT,
+  hasEmail: state => !!state.userData.email && state.userData.email != 'null',
 };
 
 // actions https://vuex.vuejs.org/guide/actions.html
@@ -28,7 +32,7 @@ const actions = {
 
     const result = await api.user.login(payload.username, payload.password);
     if(result.success) {
-      api.user.persistUser(result.userData.username,result.token);
+      api.user.persistUser(result.userData.username, result.token, result.userData.email);
       commit('receiveLogin', result);
     }
   },
@@ -38,13 +42,24 @@ const actions = {
   },
   async REGISTER ({ commit }, payload) {
 
-    const result = await api.user.register(payload.username, payload.password);
+    const result = await api.user.register(payload.username, payload.password, payload.email);
 
     if(result.success) {
-      api.user.persistUser(result.userData.username,result.token);
+      api.user.persistUser(result.userData.username, result.token, result.userData.email);
       commit('receiveLogin', result);
     }
-  }
+  },
+  async UPDATE ({ commit }, payload) {
+    const result = await api.user.updateFields(payload);
+    if (result.success) {
+      api.user.persistFields(payload);
+      commit('updateFields', payload);
+      return true;
+    } else {
+      commit('rejectUpdate', result);
+      return false;
+    }
+  },
 };
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
@@ -59,6 +74,14 @@ const mutations = {
   receiveLogin (state, data) {
     state.JWT = data.token;
     state.userData= data.userData;
+  },
+  updateFields (state, data) {
+    for (var key in data) {
+      state.userData[key] = data[key];
+    }
+  },
+  rejectUpdate (state, response) {
+    state.errorMessage = response.message;
   }
 };
 
