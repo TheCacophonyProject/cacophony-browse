@@ -42,7 +42,7 @@ const actions = {
   },
   async REGISTER ({ commit }, payload) {
 
-    const result = await api.user.register(payload.username, payload.password);
+    const result = await api.user.register(payload.username, payload.password, payload.email);
 
     if(result.success) {
       api.user.persistUser(result.userData.username, result.token, result.userData.email);

@@ -37,8 +37,11 @@ function logout(){
   localStorage.setItem('JWT', '');
   localStorage.setItem('email', '');
 }
-function register(username, password) {
-  const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+function register(username, password, email) {
+  const body =
+    `username=${encodeURIComponent(username)}` +
+    `&password=${encodeURIComponent(password)}` +
+    `&email=${encodeURIComponent(email)}`;
   return fetch(
     `${ENV.api}/api/v1/Users`,
     {
