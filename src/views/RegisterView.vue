@@ -29,6 +29,20 @@
       </b-form-group>
 
       <b-form-group
+        :state="!$v.form.email.$error"
+        label="Email"
+        label-for="input-email"
+      >
+        <b-form-input
+          id="input-email"
+          v-model="$v.form.email.$model"
+          :state="!$v.form.email.$error"
+          type="email"
+          required
+        />
+      </b-form-group>
+
+      <b-form-group
         :state="!$v.form.password.$error"
         :invalid-feedback="passwordFeedback"
         label="Password"
@@ -81,6 +95,7 @@ export default {
     return {
       form: {
         username: '',
+        email: '',
         password: '',
         passwordConfirm: '',
       },
@@ -115,6 +130,9 @@ export default {
         minLength: minLength(usernameLength),
         validPattern
       },
+      email: {
+        required,
+      },
       password: {
         required,
         minLength: minLength(passwordLength)
@@ -132,8 +150,12 @@ export default {
       if (!this.$v.$invalid) {
         await this.$store.dispatch('User/REGISTER', {
           username: this.$v.form.username.$model,
-          password: this.$v.form.password.$model
+          password: this.$v.form.password.$model,
+          email: this.$v.form.email.$model,
         });
+        if(this.$store.getters['User/isLoggedIn']) {
+          this.$router.push('/');
+        }
       }
     }
   }

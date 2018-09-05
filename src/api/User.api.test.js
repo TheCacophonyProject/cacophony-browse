@@ -61,7 +61,7 @@ describe('login(groupname) calls fetch', () => {
   });
 });
 
-describe('register(username,password) calls fetch', () => {
+describe('register(username,password,email) calls fetch', () => {
 
   test('with the correct path', async () => {
     await userApi.register();
@@ -76,14 +76,19 @@ describe('register(username,password) calls fetch', () => {
   test('register(username,password) calls api via fetch', async () => {
     const testUsername = 'testu';
     const testPassword = 'testp';
-    await userApi.register(testUsername, testPassword);
+    const testEmail = 'teste';
+    await userApi.register(testUsername, testPassword, testEmail);
 
     const calls = fetch.mock.calls;
     expect(calls).toHaveLength(1);
     expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'POST',
-        body: querystring.stringify({username: testUsername, password: testPassword}),
+        body: querystring.stringify({
+          username: testUsername,
+          password: testPassword,
+          email: testEmail,
+        }),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }
