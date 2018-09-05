@@ -44,7 +44,7 @@ function createRouter() {
     const isLoggedIn = store.getters['User/isLoggedIn'];
     const hasEmail = store.getters['User/hasEmail'];
     if (isLoggedIn && hasEmail) {
-      if(to.name === 'login' || to.name === 'register' || to.name === 'addEmail') {
+      if(['login','register','addEmail'].includes(to.name)) {
         return next({ name: 'home'});
       } else {
         return next();
