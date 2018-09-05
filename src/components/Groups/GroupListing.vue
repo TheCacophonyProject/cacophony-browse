@@ -1,20 +1,23 @@
 <template>
   <div>
     <div
-      v-for="(device, index) in devices"
+      v-for="(group, index) in groups"
       :key="index"
-      class="device">
+      class="group">
+
       <div class="header">
-        <h4>{{ device.devicename }}</h4>
+
+        <h4>{{ group.groupname }}</h4>
 
         <b-link
-          :to="{ name: 'device', params: { devicename: device.devicename }}"
+          :to="{ name: 'group', params: { groupname: group.groupname }}"
           class="show-button">
           <font-awesome-icon
             :icon="['far', 'caret-square-right']"
             size="2x"
             style="cursor: pointer;"/>
         </b-link>
+
       </div>
     </div>
   </div>
@@ -23,20 +26,11 @@
 <script>
 
 import {mapState} from 'vuex';
-import DeviceDetail from './DeviceDetail.vue';
 
 export default {
-  name: "DevicesListing",
-  components: {DeviceDetail},
-  data() {
-    return {
-      devicesTableFields: [
-        {key: 'devicename', label: 'Devices'},
-      ]
-    };
-  },
+  name: "GroupListing",
   computed: mapState({
-    devices: state => state.Devices.devices
+    groups: state => state.Groups.groups
   })
 };
 </script>
@@ -54,7 +48,7 @@ export default {
 
   }
 
-  .device {
+  .group {
     padding: 0.75rem;
     border-top: 1px solid #dee2e6;
     display: flex;
@@ -64,4 +58,5 @@ export default {
   .header {
     display: flex;
   }
+
 </style>

@@ -5,6 +5,7 @@ import store from '../stores';
 import AudioBaitView from '../views/AudioBaitView.vue';
 import AudioView from '../views/AudioView.vue';
 import DevicesView from '../views/DevicesView.vue';
+import DeviceView from '../views/DeviceView.vue';
 import ErrorView from '../views/ErrorView.vue';
 import GroupsView from '../views/GroupsView.vue';
 import GroupView from '../views/GroupView.vue';
@@ -24,7 +25,8 @@ function createRouter() {
     routes:[
       {path:'/audiobait',component:AudioBaitView},
       {path:'/audio',component:AudioView},
-      {path:'/devices',component:DevicesView},
+      {path:'/devices', name: 'devices',component:DevicesView},
+      {path:'/devices/:devicename', name: 'device', component: DeviceView},
       {path:'/error',component:ErrorView},
       {path:'/groups', name: 'groups', component:GroupsView},
       {path:'/groups/:groupname', name: 'group', component: GroupView},

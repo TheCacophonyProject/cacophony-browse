@@ -5,28 +5,28 @@ const state = {
 const getters = {};
 
 const actions = {
-  WARN ({ commit }, message) {
-    commit('log', { message, level: 'warning' });
+  WARN({commit}, message) {
+    commit('log', {message, level: 'warning'});
   },
-  ERROR ({ commit }, message) {
-    commit('log', { message, level: 'danger' });
+  ERROR({commit}, message) {
+    commit('log', {message, level: 'danger'});
   },
-  INFO ({ commit }, message) {
-    commit('log', { message, level: 'info' });
+  INFO({commit}, message) {
+    commit('log', {message, level: 'info'});
   },
-  SUCCESS ({ commit }, message) {
-    commit('log', { message, level: 'success' });
+  SUCCESS({commit}, message) {
+    commit('log', {message, level: 'success'});
   },
-  ACKNOWLEDGE ({ commit }) {
+  ACKNOWLEDGE({commit}) {
     commit('acknowledge');
   }
 };
 
 const mutations = {
-  log (state, message) {
-    state.messages = [ ...state.messages, message ];
+  log(state, message) {
+    state.messages = [...state.messages, message];
   },
-  acknowledge (state) {
+  acknowledge(state) {
     state.messages = [];
   }
 };

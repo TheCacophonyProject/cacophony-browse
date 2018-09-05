@@ -2,75 +2,67 @@ import api from '../../api/index';
 
 const state = {
   groups: [],
-  messages: [],
-  errors: null,
-  fetching: null
+  currentGroup: null,
+  fetched: false
 };
-
-// getters https://vuex.vuejs.org/guide/getters.html
 
 const getters = {};
 
-//  actions https://vuex.vuejs.org/guide/actions.html
-//  Actions are similar to mutations, the differences being that:
-//
-//	Instead of mutating the state, actions commit mutations.
-//	Actions can contain arbitrary asynchronous operations.
+async function _getGroup(groupname, commit) {
+  const result = await api.groups.getGroups(groupname);
+  const group = result.groups[0];
+  commit('setCurrentGroup', group);
+  commit('receiveGroups', result.groups);
+}
 
 const actions = {
-  async GET_GROUPS ({ commit }, groupName) {
+  async GET_GROUPS({commit}) {
     commit('fetching');
-    const result = await api.groups.getGroups(groupName);
+    const result = await api.groups.getGroups();
+    commit('receiveGroups', result.groups);
     commit('fetched');
-
-    if(result.success) {
-      commit('receiveGroups', result);
-    }
   },
 
-  async ADD_GROUP ({ commit }, groupName) {
+  async GET_GROUP({commit, state}, groupname) {
     commit('fetching');
-    const result = await api.groups.addNewGroup(groupName);
+    await _getGroup(groupname, commit, state);
     commit('fetched');
-
-    if(result.success) {
-      commit('receiveUpdate', result);
-    }
   },
 
-  async ADD_GROUP_USER ({ commit }, {groupId, userName, isAdmin}) {
+  async ADD_GROUP({commit, state}, groupname) {
     commit('fetching');
-    const result = await api.groups.addGroupUser(groupId, userName, isAdmin);
+    await api.groups.addNewGroup(groupname);
+    await _getGroup(groupname, commit, state);
     commit('fetched');
-
-    if(result.success) {
-      commit('receiveUpdate', result);
-    }
   },
-  async REMOVE_GROUP_USER ({ commit }, {groupId, userId}) {
-    commit('fetching');
-    const result = await api.groups.removeGroupUser(groupId, userId);
-    commit('fetched');
 
-    if (result.success) {
-      commit('receiveUpdate', result);
-    }
+  async ADD_GROUP_USER({commit, state}, {groupId, userName, isAdmin}) {
+    commit('fetching');
+    await api.groups.addGroupUser(groupId, userName, isAdmin);
+    await _getGroup(state.currentGroup.groupname, commit, state);
+    commit('fetched');
+  },
+
+  async REMOVE_GROUP_USER({commit, state}, {groupId, userId}) {
+    commit('fetching');
+    await api.groups.removeGroupUser(groupId, userId);
+    await _getGroup(state.currentGroup.groupname, commit, state);
+    commit('fetched');
   }
 };
 
-// mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
-  receiveGroups (state, { groups }) {
+  receiveGroups(state, groups) {
     state.groups = groups;
   },
-  receiveUpdate (state, { messages }) {
-    state.messages = messages;
+  setCurrentGroup(state, currentGroup) {
+    state.currentGroup = currentGroup;
   },
-  fetching (state) {
-    state.fetching = true;
+  fetching(state) {
+    state.fetched = false;
   },
-  fetched (state) {
-    state.fetching = false;
+  fetched(state) {
+    state.fetched = true;
   }
 };
 

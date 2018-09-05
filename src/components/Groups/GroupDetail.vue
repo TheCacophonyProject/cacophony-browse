@@ -1,9 +1,9 @@
 <template>
-  <div class="device-detail">
+  <div class="group-detail">
     <h2>Users</h2>
     <b-table
-      :items="device.Users"
-      :fields="deviceUsersTableFields"
+      :items="group.GroupUsers"
+      :fields="groupUsersTableFields"
       striped
       hover
       responsive>
@@ -11,15 +11,15 @@
       <template
         slot="admin"
         slot-scope="data">
-        {{ data.item.DeviceUsers.admin }}
+        {{ data.item.isAdmin }}
       </template>
 
       <template
         slot="controls"
         slot-scope="data">
 
-        <!-- TODO: Review the role restrictions for Devices Admin - See GroupDetail.vue for example -->
         <font-awesome-icon
+          v-if="isGroupAdmin"
           icon="trash"
           size="1x"
           style="cursor: pointer;"
@@ -27,18 +27,37 @@
 
       </template>
     </b-table>
-    <device-add-user />
+
+    <group-user-add
+      v-if="isGroupAdmin"
+      :group="group"/>
+
+    <h2>Devices</h2>
+    <b-table
+      :items="group.Devices"
+      striped
+      hover
+      responsive>
+
+      <template
+        slot="devicename"
+        slot-scope="row">
+        <b-link :to="{ name: 'device', params: { devicename: row.item.devicename }}">{{ row.item.devicename }}</b-link>
+      </template>
+    </b-table>
+
+
   </div>
 </template>
 
 <script>
-import DeviceAddUser from './DeviceAddUser.vue';
+import GroupUserAdd from "./GroupUserAdd.vue";
 
 export default {
-  name: "DeviceDetail",
-  components: { DeviceAddUser },
+  name: "GroupDetail",
+  components: {GroupUserAdd},
   props: {
-    device: {
+    group: {
       type: Object,
       required: true
     },
@@ -49,7 +68,7 @@ export default {
   },
   data() {
     return {
-      deviceUsersTableFields: [
+      groupUsersTableFields: [
         {key: 'id', label: 'Id'},
         {key: 'username', label: 'User Name'},
         {key: 'admin', label: 'Admin'},
@@ -57,16 +76,23 @@ export default {
       ]
     };
   },
+  computed: {
+    isGroupAdmin() {
+      const username = this.user.username;
+      return this.group.GroupUsers && this.group.GroupUsers.some(user => username === user.username && user.isAdmin);
+    },
+  },
   methods: {
     async removeUser(userId) {
-      await this.$store.dispatch('Devices/REMOVE_USER', {userId, device: this.device});
-    }
+      await this.$store.dispatch('Groups/REMOVE_GROUP_USER', {userId, groupId: this.group.id});
+    },
   }
 };
 </script>
 
 <style scoped>
-  .device-detail {
+
+  .group-detail {
     margin-top: 15px;
   }
 
@@ -81,4 +107,5 @@ export default {
       margin-top: 1.5rem;
     }
   }
+
 </style>

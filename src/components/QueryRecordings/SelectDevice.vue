@@ -15,8 +15,6 @@
 
 <script>
 
-import api from '../../api/index';
-
 export default {
   name: 'SelectDevice',
   props: {
@@ -25,12 +23,6 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      options: [
-      ]
-    };
-  },
   computed: {
     placeholder: function () {
       if (this.value.length > 0) {
@@ -38,24 +30,12 @@ export default {
       } else {
         return "all devices";
       }
-    }
-  },
-  created: function () {
-    this.getDevices();
-  },
-  methods: {
-    async getDevices() {
-      // TODO: Convert to store dispatch once Devices store exists
-      const response = await api.device.getDevices();
-
-      response.devices && response.devices.rows.map((row) => {
-        const option = {
-          id: row.id,
-          name: row.devicename
-        };
-        this.options.push(option);
+    },
+    options: function () {
+      this.$store.dispatch('Devices/GET_DEVICES');
+      return this.$store.state.Devices.devices.map(device => {
+        return {id: device.id, name: device.devicename};
       });
-
     }
   }
 };

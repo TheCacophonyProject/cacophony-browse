@@ -1,9 +1,9 @@
 <template>
   <div>
     <b-container>
+      <h1>Search Video Recordings</h1>
       <QueryRecordings
         v-model="query"
-        heading="Search Video Recordings"
         @searchButton="searchButton"/>
 
       <b-form-row class="information-line">
@@ -27,7 +27,7 @@
             :limit="limitPaginationButtons"
             class="pagination-buttons"
             align="center"
-            @input="pagination" />
+            @input="pagination"/>
         </b-col>
         <b-col
           md="6"
@@ -53,7 +53,7 @@
       :limit="limitPaginationButtons"
       class="pagination-buttons"
       align="center"
-      @input="pagination" />
+      @input="pagination"/>
   </div>
 </template>
 
@@ -67,7 +67,7 @@ export default {
   name: 'RecordingsView',
   components: {QueryRecordings, TableRecordings},
   props: {},
-  data () {
+  data() {
     return {
       query: {},
       recordings: [],
@@ -78,11 +78,11 @@ export default {
       perPage: 100,
       limitPaginationButtons: 5,
       perPageOptions: [
-        {value:10, text: "10 per page"},
-        {value:50, text: "50 per page"},
-        {value:100, text: "100 per page"},
-        {value:500, text: "500 per page"},
-        {value:1000, text: "1000 per page"}
+        {value: 10, text: "10 per page"},
+        {value: 50, text: "50 per page"},
+        {value: 100, text: "100 per page"},
+        {value: 500, text: "500 per page"},
+        {value: 1000, text: "1000 per page"}
       ]
     };
   },
@@ -116,7 +116,7 @@ export default {
       // Call API and process results
       const response = await api.recording.query(params);
 
-      if(!response.success) {
+      if (!response.success) {
         response.messages && response.messages.forEach(message => {
           this.$store.dispatch('Messaging/WARN', message);
         });
@@ -163,7 +163,7 @@ export default {
           }
         };
         let tagString = animal(tags[0]);
-        for (let i = 1; i < tags.length; i ++) {
+        for (let i = 1; i < tags.length; i++) {
           const animalName = animal(tags[i]);
           tagString = tagString + ', ' + animalName;
         }
@@ -181,9 +181,8 @@ export default {
 </script>
 
 <style scoped>
-
-.information-line {
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
+  .information-line {
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
 </style>

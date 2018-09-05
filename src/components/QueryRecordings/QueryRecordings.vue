@@ -1,8 +1,5 @@
 <template>
   <b-form-row>
-    <b-col cols="12">
-      <h4>{{ heading }}</h4>
-    </b-col>
     <b-col
       sm="6"
       md="4">
@@ -64,10 +61,6 @@ export default {
     SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate
   },
   props: {
-    heading: {
-      type: String,
-      default: "Heading"
-    },
     value: {
       type: Object,
       required: true

@@ -1,7 +1,7 @@
 <template>
-  <b-container v-if="group">
+  <b-container v-if="device">
     <header>
-      <h1>{{ group.groupname }}</h1>
+      <h1>{{ device.devicename }}</h1>
       <b-link
         class="hide-button"
         @click="back()">
@@ -11,8 +11,8 @@
           style="cursor: pointer;"/>
       </b-link>
     </header>
-    <group-detail
-      :group="group"
+    <device-detail
+      :device="device"
       :user="currentUser"
     />
   </b-container>
@@ -21,41 +21,28 @@
 <script>
 
 import {mapState} from 'vuex';
-import GroupDetail from '../components/Groups/GroupDetail.vue';
+import DeviceDetail from '../components/Devices/DeviceDetail.vue';
 
 export default {
-  name: 'GroupView',
-  components: {GroupDetail},
+  name: 'DeviceView',
+  components: {DeviceDetail},
   props: {},
-  data() {
-    return {
-      addGroupUserName: null,
-      addGroupUserAdmin: false,
-      addUserErrorMessage: null,
-      userTableFields: [
-        {key: 'username', label: 'User'},
-        {key: 'isAdmin', label: 'Admin'},
-        {key: 'deleteButton', label: ''}
-      ]
-    };
-  },
   computed:
     mapState({
-      group: state => state.Groups.currentGroup,
+      device: state => state.Devices.currentDevice,
       currentUser: state => state.User.userData
-    })
-  ,
+    }),
   watch: {
     '$route'() {
-      this.fetchGroup();
+      this.fetchDevice();
     }
   },
   created: async function () {
-    await this.fetchGroup();
+    await this.fetchDevice();
   },
   methods: {
-    fetchGroup: async function () {
-      await this.$store.dispatch('Groups/GET_GROUP', this.$route.params.groupname);
+    fetchDevice: async function () {
+      await this.$store.dispatch('Devices/GET_DEVICE', this.$route.params.devicename);
     },
     back: function () {
       this.$router.history.go(-1);
@@ -74,6 +61,7 @@ export default {
   }
 
   h1 {
+    font-size: large;
     margin: 0;
   }
 </style>

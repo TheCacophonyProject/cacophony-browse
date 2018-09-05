@@ -39,19 +39,19 @@
 
 <script>
 export default {
-  name:'Navbar',
-  data () {
+  name: 'Navbar',
+  data() {
     return {
-      userName:this.$store.state.User.userData.username
+      userName: this.$store.state.User.userData.username
     };
   },
-  computed:{
+  computed: {
     isLoggedIn() {
       return this.$store.getters['User/isLoggedIn'];
     }
   },
   methods: {
-    logout () {
+    logout() {
       this.$store.dispatch('User/LOGOUT');
       this.$router.go('home');
     }
@@ -59,15 +59,38 @@ export default {
 };
 </script>
 
-<style>
-	.navbar {
-		border-top: solid 12px green;
-		border-bottom: solid 1px green;
-		margin-bottom: 15px;
-	}
+<style scoped>
+  .navbar-brand {
+    width: 70%;
+  }
 
-	.active {
-  background-color: #e7e7e7;
-  color: #555;
-}
+  .navbar-brand img {
+    width: 100%;
+  }
+
+  .navbar-nav .nav-link {
+    padding-left: 0.5rem;
+  }
+
+  .navbar {
+    border-top: solid 12px green;
+    border-bottom: solid 1px green;
+    margin-bottom: 15px;
+  }
+
+  .active {
+    background-color: #eeeeee;
+    color: #555;
+    border-radius: 2px;
+  }
+
+  @media only screen and (min-width: 576px) {
+    .navbar-brand {
+      width: auto;
+    }
+
+    .navbar-brand img {
+      width: auto;
+    }
+  }
 </style>

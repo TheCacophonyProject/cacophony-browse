@@ -1,88 +1,60 @@
 import api from '../../api/index';
-import store from '../../stores';
 
 const state = {
-  devices: {},
-  currentDevice: {},
-  errors: null,
-  fetching: null
+  devices: [],
+  currentDevice: null,
+  fetched: false
 };
 
-const getters = {
-  isAdmin(state, device) {
-    for (var i in device.Users) {
-      if (device.Users[i].id === state.Users) {
-        return device.Users[i].DeviceUsers.admin;
-      }
-    }
-    return false;
-  }
-};
+const getters = {};
+
+async function _getDevice(devicename, commit) {
+  const result = await api.device.getDevices();
+  const device = result.devices.rows.find(device => device.devicename === devicename);
+  commit('setCurrentDevice', device);
+}
 
 const actions = {
-  async GET_DEVICES ({ commit }) {
+  async GET_DEVICES({commit}) {
     commit('fetching');
-
     const result = await api.device.getDevices();
+    commit('receiveDevices', result.devices.rows);
     commit('fetched');
+  },
 
-    if(result.success) {
-      commit('receiveDevices', result);
-    }
-  },
-  async GET_DEVICE ({ commit }, devicename) {
-    if(!state.devices.rows) {
-      await store.dispatch('Devices/GET_DEVICES');
-    }
-    if(state.currentDevice && state.currentDevice.devicename === devicename) {
-      return commit('setCurrentDevice', {});
-    }
-    const device = state.devices.rows.find(device => device.devicename === devicename);
-    commit('setCurrentDevice', device);
-  },
-  async ADD_USER ({ commit }, {username, deviceId, admin}) {
+  async GET_DEVICE({commit}, devicename) {
     commit('fetching');
-
-    const result = await api.device.addUserToDevice(username, deviceId, admin);
+    await _getDevice(devicename, commit);
     commit('fetched');
-
-    if(result.success) {
-      await store.dispatch('Devices/GET_DEVICES');
-
-      // FIXME: Vue component should re-render without needing the following two lines:
-      const device = state.devices.rows.find(device => device.id === deviceId);
-      commit('setCurrentDevice', device);
-    }
-
   },
-  async REMOVE_USER ({ commit }, { userId, deviceid }) {
+
+  async ADD_USER({commit}, {username, device, admin}) {
     commit('fetching');
-
-    const result = await api.device.removeUserFromDevice(userId, deviceid);
+    await api.device.addUserToDevice(username, device.id, admin);
+    await _getDevice(device.devicename, commit);
     commit('fetched');
+  },
 
-    if(result.success) {
-      await store.dispatch('Devices/GET_DEVICES');
-
-      // FIXME: Vue component should re-render without needing the following two lines:
-      const device = state.devices.rows.find(device => device.id === deviceid);
-      commit('setCurrentDevice', device);
-    }
+  async REMOVE_USER({commit}, {userId, device}) {
+    commit('fetching');
+    await api.device.removeUserFromDevice(userId, device.id);
+    await _getDevice(device.devicename, commit);
+    commit('fetched');
   }
 };
 
 const mutations = {
-  receiveDevices (state, { devices }) {
+  receiveDevices(state, devices) {
     state.devices = devices;
   },
-  setCurrentDevice (state, device) {
+  setCurrentDevice(state, device) {
     state.currentDevice = device;
   },
-  fetching (state) {
-    state.fetching = true;
+  fetching(state) {
+    state.fetched = false;
   },
-  fetched (state) {
-    state.fetching = false;
+  fetched(state) {
+    state.fetched = true;
   }
 };
 

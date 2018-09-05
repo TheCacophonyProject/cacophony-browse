@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <global-messaging />
-    <nav-bar />
-    <router-view class="view" />
+    <global-messaging/>
+    <nav-bar/>
+    <router-view class="view"/>
   </div>
 </template>
 

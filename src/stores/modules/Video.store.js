@@ -4,7 +4,9 @@ import store from '../index';
 const state = {
   downloadFileJWT: null,
   downloadRawJWT: null,
-  recording: null
+  recording: {
+    Tags: []
+  }
 };
 
 // getters https://vuex.vuejs.org/guide/getters.html
@@ -40,7 +42,7 @@ const getters = {
 
 const actions = {
 
-  async QUERY_RECORDING (undefined, { params, direction}) {
+  async QUERY_RECORDING(undefined, {params, direction}) {
     const result = await api.recording.query(params);
     if (!result.rows || result.rows.length == 0) {
       store.dispatch('Messaging/WARN', `No ${direction} recording for this device.`);
@@ -49,17 +51,17 @@ const actions = {
     store.dispatch('Video/GET_RECORDING', result.rows[0].id);
   },
 
-  async GET_RECORDING ({ commit }, recordingId) {
+  async GET_RECORDING({commit}, recordingId) {
     const result = await api.recording.id(recordingId);
     commit('receiveRecording', result);
   },
 
-  async DELETE_TAG ({ commit }, tag) {
+  async DELETE_TAG({commit}, tag) {
     await api.tag.deleteTag(tag);
     commit('deleteTag', tag);
   },
 
-  async ADD_TAG (undefined, { tag, id }) {
+  async ADD_TAG(undefined, {tag, id}) {
     await api.tag.addTag(tag, id);
     store.dispatch('Video/GET_RECORDING', id);
   }
@@ -67,7 +69,7 @@ const actions = {
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
-  receiveRecording (state, { recording, downloadFileJWT, downloadRawJWT }) {
+  receiveRecording(state, {recording, downloadFileJWT, downloadRawJWT}) {
     state.recording = recording;
     state.downloadFileJWT = downloadFileJWT;
     state.downloadRawJWT = downloadRawJWT;

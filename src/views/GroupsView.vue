@@ -1,38 +1,28 @@
-<template>
+<template v-if="groups">
   <b-container>
     <h1>Groups</h1>
-
-    <group-users
-      :groups="groupData.groups"
-      :owner="groupData.owner" />
-
-    <groups-add />
-
+    <group-listing :groups="groups" />
+    <group-add />
   </b-container>
 </template>
 
 <script>
 
-import GroupsAdd from '../components/Groups/GroupsAdd.vue';
-import GroupUsers from '../components/Groups/GroupUsers.vue';
+import GroupAdd from '../components/Groups/GroupAdd.vue';
+import GroupListing from '../components/Groups/GroupListing.vue';
+import {mapState} from 'vuex';
 
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'GroupsView',
   components: {
-    GroupsAdd,
-    GroupUsers
+    GroupAdd,
+    GroupListing
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
-    groupData() {
-      const groups = this.$store.state.Groups.groups;
-      return {
-        groups,
-        owner: groups.length ? groups[0].Users[0] : {}
-      };
-    }
-  },
+  computed:
+    mapState({
+      groups: state => state.Groups.groups
+    })
+  ,
   watch: {
     '$route' () {
       this.fetchGroups();
@@ -43,7 +33,7 @@ export default {
   },
   methods: {
     fetchGroups: function () {
-      this.$store.dispatch('Groups/GET_GROUPS', this.$route.params.groupname);
+      this.$store.dispatch('Groups/GET_GROUPS');
     }
   }
 };

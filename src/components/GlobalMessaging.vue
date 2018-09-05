@@ -1,9 +1,10 @@
 <template>
   <div class="container">
     <div
-      v-for="(item, index) in messages"
+      v-for="(item, index) in getMessages()"
       :key="index">
       <b-alert
+        v-if="displayLevels.includes(item.level)"
         :variant="item.level"
         show
         dismissible
@@ -17,10 +18,10 @@
 <script>
 export default {
   name: "GlobalMessaging",
-  computed: {
-    messages() {
-      return this.getMessages();
-    }
+  data: function () {
+    return {
+      displayLevels: ['warning', 'danger'] // ['warning', 'danger', 'info', 'success']
+    };
   },
   methods: {
     getMessages() {

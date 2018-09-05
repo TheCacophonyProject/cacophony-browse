@@ -1,11 +1,8 @@
 <template>
-
   <b-container>
-    <b-row>
-      <device-listing :devices="devices" />
-    </b-row>
+    <h1>Devices</h1>
+    <device-listing :devices="devices" />
   </b-container>
-
 </template>
 
 <script>
