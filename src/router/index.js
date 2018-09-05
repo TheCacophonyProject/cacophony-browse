@@ -36,17 +36,23 @@ function createRouter() {
       {path:'/recordings',component:RecordingsView},
       {path:'/register',component:RegisterView, meta: {noAuth: true}},
       {path:'/video/:id',component:VideoView},
-      {path:'/add_email', name: 'addEmail', component: AddEmailView},
+      {path:'/add_email', name: 'addEmail', component: AddEmailView, meta: {noEmail: true}},
     ]
   });
 
   router.beforeEach((to, from, next) => {
     const isLoggedIn = store.getters['User/isLoggedIn'];
-
-    if (isLoggedIn) {
-      if(to.name === 'login' || to.name === 'register') {
+    const hasEmail = store.getters['User/hasEmail'];
+    if (isLoggedIn && hasEmail) {
+      if(to.name === 'login' || to.name === 'register' || to.name === 'addEmail') {
         return next({ name: 'home'});
-      }else {
+      } else {
+        return next();
+      }
+    } else if (isLoggedIn && !hasEmail) {
+      if (to.name !== 'addEmail') {
+        return next({ name: 'addEmail' });
+      } else {
         return next();
       }
     } else if(to.matched.some(record => record.meta.noAuth)) {

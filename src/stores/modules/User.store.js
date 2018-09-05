@@ -6,7 +6,7 @@ const state =  {
   JWT: localStorage.getItem('JWT'),
   userData: {
     'username': localStorage.getItem('username'),
-    'email': localStorage.getItem('emial'),
+    'email': localStorage.getItem('email'),
   },
   errorMessage: undefined
 };
@@ -16,7 +16,8 @@ const state =  {
 
 const getters = {
   isLoggedIn: state => !!state.JWT,
-  getToken: state => state.JWT
+  getToken: state => state.JWT,
+  hasEmail: state => !!state.userData.email && state.userData.email != 'null',
 };
 
 // actions https://vuex.vuejs.org/guide/actions.html
