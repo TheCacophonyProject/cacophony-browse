@@ -1,5 +1,4 @@
 const path = require('path');
-const config = require('./app.config');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
@@ -64,6 +63,5 @@ module.exports = {
   performance: {
     hints: false
   },
-  devtool: '#eval-source-map',
-  externals: config
+  devtool: '#eval-source-map'
 };

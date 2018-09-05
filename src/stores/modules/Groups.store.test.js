@@ -1,164 +1,107 @@
 jest.genMockFromModule('../../api/Groups.api');
 jest.mock('../../api/Groups.api');
+jest.mock("./../../api/fetch");
 
 import api from '../../api/Groups.api';
-import store from '../../stores';
-import GroupsStore from '../../stores/modules/Groups.store';
+import GroupsStore from './Groups.store';
 
 describe('Actions', () => {
 
   const
-    testName = "some name",
-    testGroupId = 123456,
-    testUserId = 654321,
-    testUserName = "some user name",
-    testIsAdmin = false;
+    testResult = {
+      groups: [
+        {groupname: 'a'},
+        {groupname: 'b'}
+      ]
+    },
+    commit = jest.fn(),
+    state = {
+      currentGroup: testResult.groups[0],
+      groups: testResult.groups
+    };
 
-  store.commit = jest.fn();
+  beforeEach(() => {
+    api.getGroups.mockReturnValueOnce(testResult);
+  });
+
+  function _expectGetGroupsCalled(commit) {
+    expect(api.getGroups).toHaveBeenCalledTimes(1);
+    expect(commit).toHaveBeenCalledTimes(4);
+    expect(commit).toHaveBeenNthCalledWith(1, 'fetching');
+    expect(commit).toHaveBeenNthCalledWith(2, 'setCurrentGroup', testResult.groups[0]);
+    expect(commit).toHaveBeenNthCalledWith(3, 'receiveGroups', testResult.groups);
+    expect(commit).toHaveBeenLastCalledWith('fetched');
+  }
 
   describe('GET_GROUPS', () => {
 
-    test('calls api.groups.getGroups()', async () => {
-      const testResult = {success: true};
-      api.getGroups.mockReturnValueOnce(testResult);
+    beforeEach(async () => {
+      await GroupsStore.actions.GET_GROUPS({commit, state});
+    });
 
-      await store.dispatch('Groups/GET_GROUPS', testName);
-
+    test('calls api.groups.getGroups()', () => {
       expect(api.getGroups).toHaveBeenCalledTimes(1);
-      expect(api.getGroups).toHaveBeenCalledWith(testName);
+      expect(api.getGroups.mock.calls).toMatchObject([[]]); //no params
     });
 
-    test('commits success.true mutations', async () => {
-      const testResult = {success: true};
-      api.getGroups.mockReturnValueOnce(testResult);
-
-      await store.dispatch('Groups/GET_GROUPS', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(3);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(3, 'Groups/receiveGroups', testResult, undefined);
-    });
-    test('commits success.false mutations', async () => {
-      api.getGroups.mockReturnValueOnce({success: false});
-
-      await store.dispatch('Groups/GET_GROUPS', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(2);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).not.toHaveBeenCalledWith('Groups/receiveGroups');
+    test('commits correct mutations', () => {
+      expect(commit).toHaveBeenCalledTimes(3);
+      expect(commit).toHaveBeenNthCalledWith(1, "fetching");
+      expect(commit).toHaveBeenNthCalledWith(2, 'receiveGroups', testResult.groups);
+      expect(commit).toHaveBeenNthCalledWith(3, 'fetched');
     });
   });
 
-  describe('ADD_GROUP', () => {
+  describe('ADD_GROUP', async () => {
+
+    const testString = "some string";
+    api.addNewGroup.mockReturnValueOnce();
+
+    beforeEach(async () => {
+      await GroupsStore.actions.ADD_GROUP({commit, state}, testString);
+    });
+
     test('calls api.groups.addNewGroup()', async () => {
-      const testResult = {success: true};
-      api.addNewGroup.mockReturnValueOnce(testResult);
-
-      await store.dispatch('Groups/ADD_GROUP', testName);
-
       expect(api.addNewGroup).toHaveBeenCalledTimes(1);
-      expect(api.addNewGroup).toHaveBeenCalledWith(testName);
+      expect(api.addNewGroup).toHaveBeenCalledWith(testString);
     });
-    test('commits success.true mutations', async () => {
-      const testResult = {success: true, messages: []};
-      api.addNewGroup.mockReturnValueOnce(testResult);
 
-      await store.dispatch('Groups/ADD_GROUP', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(3);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(3, 'Groups/receiveUpdate', testResult, undefined);
-    });
-    test('commits success.false mutations', async () => {
-      api.addNewGroup.mockReturnValueOnce({success: false});
-
-      await store.dispatch('Groups/ADD_GROUP', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(2);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).not.toHaveBeenCalledWith('Groups/receiveUpdate');
+    test('calls _getGroup(groupname, commit, state)', async () => {
+      _expectGetGroupsCalled(commit);
     });
   });
 
   describe('ADD_GROUP_USER', async () => {
+    const testObject = {groupId: 'x', userName: "y", isAdmin: "z"};
+    beforeEach(async () => {
+      await GroupsStore.actions.ADD_GROUP_USER({commit, state}, testObject);
+    });
 
-    test('calls api.groups.addNewGroup()', async () => {
-      const
-        testResult = {success: true},
-        testParams ={
-          groupId: testGroupId,
-          userName: testUserName,
-          isAdmin: testIsAdmin
-      };
-      api.addGroupUser.mockReturnValueOnce(testResult);
-
-      await store.dispatch('Groups/ADD_GROUP_USER', testParams);
-
+    test('calls api.groups.addGroupUser()', async () => {
       expect(api.addGroupUser).toHaveBeenCalledTimes(1);
-      expect(api.addGroupUser).toHaveBeenCalledWith(testGroupId, testUserName, testIsAdmin);
+      expect(api.addGroupUser).toHaveBeenCalledWith(testObject.groupId, testObject.userName, testObject.isAdmin);
     });
 
-    test('commits success.true mutations', async () => {
-      const testResult = {success: true, messages: []};
-      api.addGroupUser.mockReturnValueOnce(testResult);
-
-      await store.dispatch('Groups/ADD_GROUP_USER', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(3);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(3, 'Groups/receiveUpdate', testResult, undefined);
-    });
-
-    test('commits success.false mutations', async () => {
-      api.addGroupUser.mockReturnValueOnce({success: false});
-
-      await store.dispatch('Groups/ADD_GROUP_USER', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(2);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).not.toHaveBeenCalledWith('Groups/receiveUpdate');
+    test('calls _getGroup(groupname, commit, state)', async () => {
+      _expectGetGroupsCalled(commit);
     });
   });
 
-  describe('REMOVE_GROUP_USER(groupId, userId)', () => {
+  describe('REMOVE_GROUP_USER', async () => {
+
+    const testObject = {groupId: 'x', userId: "y"};
+
+    beforeEach(async () => {
+      await GroupsStore.actions.REMOVE_GROUP_USER({commit, state}, testObject);
+    });
 
     test('calls api.groups.removeGroupUser()', async () => {
-      const testResult = {success: true};
-      api.removeGroupUser.mockReturnValueOnce(testResult);
-
-      await store.dispatch('Groups/REMOVE_GROUP_USER', {groupId: testGroupId, userId: testUserId});
-
       expect(api.removeGroupUser).toHaveBeenCalledTimes(1);
-      expect(api.removeGroupUser).toHaveBeenCalledWith(testGroupId, testUserId);
+      expect(api.removeGroupUser).toHaveBeenCalledWith(testObject.groupId, testObject.userId);
     });
 
-    test('commits success.true mutations', async () => {
-      const testResult = {success: true, messages: []};
-      api.removeGroupUser.mockReturnValueOnce(testResult);
-
-      await store.dispatch('Groups/REMOVE_GROUP_USER', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(3);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(3, 'Groups/receiveUpdate', testResult, undefined);
-    });
-
-    test('commits success.false mutations', async () => {
-      api.removeGroupUser.mockReturnValueOnce({success: false});
-
-      await store.dispatch('Groups/REMOVE_GROUP_USER', testName);
-
-      expect(store.commit).toHaveBeenCalledTimes(2);
-      expect(store.commit).toHaveBeenNthCalledWith(1, "Groups/fetching", undefined, undefined);
-      expect(store.commit).toHaveBeenNthCalledWith(2, 'Groups/fetched', undefined, undefined);
-      expect(store.commit).not.toHaveBeenCalledWith('Groups/receiveUpdate');
+    test('calls _getGroup(groupname, commit, state)', async () => {
+      _expectGetGroupsCalled(commit);
     });
   });
 });
@@ -170,29 +113,25 @@ describe('Mutations', () => {
     initialState = Object.assign({}, GroupsStore.state);
   });
 
-  test('receiveGroups()', async () => {
-    const testGroups = [1,2,3];
+  test('receiveGroups()', () => {
+    const testGroups = [1, 2, 3];
     expect(initialState.groups).toMatchObject([]);
-    GroupsStore.mutations.receiveGroups(initialState, { groups: testGroups});
+    GroupsStore.mutations.receiveGroups(initialState, testGroups);
     expect(initialState.groups).toMatchObject(testGroups);
   });
 
-  test('receiveUpdate()', async () => {
-    const testMessages = ["1","2","3"];
-    expect(initialState.messages).toMatchObject([]);
-    GroupsStore.mutations.receiveUpdate(initialState, { messages: testMessages});
-    expect(initialState.messages).toMatchObject(testMessages);
+  test('receiveCurrentGroup()', () => {
+    const testGroup = {};
+    expect(initialState.currentGroup).toBeNull();
+    GroupsStore.mutations.setCurrentGroup(initialState, testGroup);
+    expect(initialState.currentGroup).toMatchObject(testGroup);
   });
 
-  test('fetching', async () => {
-    expect(initialState.fetching).toBe(null);
-    GroupsStore.mutations.fetching(initialState);
-    expect(initialState.fetching).toBe(true);
-  });
-
-  test('fetched', async () => {
-    expect(initialState.fetching).toBe(null);
+  test('fetching / fetched', () => {
+    expect(initialState.fetched).toBe(false);
     GroupsStore.mutations.fetched(initialState);
-    expect(initialState.fetching).toBe(false);
+    expect(initialState.fetched).toBe(true);
+    GroupsStore.mutations.fetching(initialState);
+    expect(initialState.fetched).toBe(false);
   });
 });

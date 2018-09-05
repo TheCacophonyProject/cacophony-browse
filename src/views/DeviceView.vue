@@ -1,24 +1,67 @@
 <template>
-  <div>
-    <h1>Device</h1>
-    <p>TODO: Device View</p>
-  </div>
+  <b-container v-if="device">
+    <header>
+      <h1>{{ device.devicename }}</h1>
+      <b-link
+        class="hide-button"
+        @click="back()">
+        <font-awesome-icon
+          :icon="['far', 'window-close']"
+          size="2x"
+          style="cursor: pointer;"/>
+      </b-link>
+    </header>
+    <device-detail
+      :device="device"
+      :user="currentUser"
+    />
+  </b-container>
 </template>
 
 <script>
 
+import {mapState} from 'vuex';
+import DeviceDetail from '../components/Devices/DeviceDetail.vue';
+
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'DevicesView',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  name: 'DeviceView',
+  components: {DeviceDetail},
   props: {},
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
-  data () {
-    return {
-    };
+  computed:
+    mapState({
+      device: state => state.Devices.currentDevice,
+      currentUser: state => state.User.userData
+    }),
+  watch: {
+    '$route'() {
+      this.fetchDevice();
+    }
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
+  created: async function () {
+    await this.fetchDevice();
   },
+  methods: {
+    fetchDevice: async function () {
+      await this.$store.dispatch('Devices/GET_DEVICE', this.$route.params.devicename);
+    },
+    back: function () {
+      this.$router.history.go(-1);
+    }
+  }
 };
 </script>
+
+<style scoped>
+  header {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    margin: 1.5rem 0;
+  }
+
+  h1 {
+    font-size: large;
+    margin: 0;
+  }
+</style>

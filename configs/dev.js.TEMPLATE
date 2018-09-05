@@ -1,0 +1,4 @@
+module.exports = {
+  'environment': 'DEVELOPMENT',
+  'api': "https://api-test.cacophony.org.nz"
+};

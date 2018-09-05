@@ -1,6 +1,7 @@
 .idea/
-node_modules/
+.vscode/
+launch.json
 *.iml
+node_modules/
 configs/dev.js
 dist/
-launch.json

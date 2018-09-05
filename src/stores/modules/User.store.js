@@ -1,6 +1,6 @@
 import api from '../../api/index';
 
-const state =  {
+const state = {
   isLoggingIn: false,
   didInvalidate: false,
   JWT: localStorage.getItem('JWT'),
@@ -27,7 +27,7 @@ const getters = {
 //	Actions can contain arbitrary asynchronous operations.
 
 const actions = {
-  async LOGIN ({ commit,  }, payload) {
+  async LOGIN({commit,}, payload) {
     commit('invalidateLogin');
 
     const result = await api.user.login(payload.username, payload.password);
@@ -36,13 +36,14 @@ const actions = {
       commit('receiveLogin', result);
     }
   },
-  LOGOUT (context) {
+  LOGOUT(context) {
     context.commit('invalidateLogin');
     api.user.logout();
   },
-  async REGISTER ({ commit }, payload) {
+  async REGISTER({commit}, payload) {
 
     const result = await api.user.register(payload.username, payload.password, payload.email);
+
 
     if(result.success) {
       api.user.persistUser(result.userData.username, result.token, result.userData.email);
@@ -64,14 +65,14 @@ const actions = {
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
-  invalidateLogin (state) {
+  invalidateLogin(state) {
     state.JWT = "";
   },
-  rejectLogin (state, data) {
+  rejectLogin(state, data) {
     state.JWT = '';
     state.errorMessage = data.messages || data.message;
   },
-  receiveLogin (state, data) {
+  receiveLogin(state, data) {
     state.JWT = data.token;
     state.userData= data.userData;
   },

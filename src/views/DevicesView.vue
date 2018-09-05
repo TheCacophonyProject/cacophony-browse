@@ -1,21 +1,35 @@
 <template>
-  <h1>Devices</h1>
+  <b-container>
+    <h1>Devices</h1>
+    <device-listing :devices="devices" />
+  </b-container>
 </template>
 
 <script>
 
+import {mapState} from 'vuex';
+import DeviceListing from '../components/Devices/DeviceListing.vue';
+
 export default {
-  // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'DevicesView',
-  // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
+  components: { DeviceListing },
   props: {},
-  // https://vuejs.org/v2/style-guide/#Component-data-essential
-  data () {
-    return {
-    };
+  computed:
+    mapState({
+      devices: state => state.Devices.devices
+    }),
+  watch: {
+    '$route' () {
+      this.fetchDevices();
+    }
   },
-  // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {
+  created: function () {
+    this.fetchDevices();
   },
+  methods: {
+    fetchDevices: function () {
+      this.$store.dispatch('Devices/GET_DEVICES');
+    }
+  }
 };
 </script>

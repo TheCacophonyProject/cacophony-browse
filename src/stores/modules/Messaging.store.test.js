@@ -1,4 +1,3 @@
-
 import store from '../../stores';
 import MessagingStore from '../../stores/modules/Messaging.store';
 
@@ -10,21 +9,21 @@ describe('Actions', () => {
     const testMessage = "some message";
 
     const actionCalls = [
-      { name: 'WARN', level: 'warning'},
-      { name: 'ERROR', level: 'danger'},
-      { name: 'INFO', level: 'info'},
-      { name: 'SUCCESS', level: 'success'}
+      {name: 'WARN', level: 'warning'},
+      {name: 'ERROR', level: 'danger'},
+      {name: 'INFO', level: 'info'},
+      {name: 'SUCCESS', level: 'success'}
     ];
 
     actionCalls.forEach(async action => await store.dispatch(`Messaging/${action.name}`, testMessage));
 
     expect(store.commit).toHaveBeenCalledTimes(4);
 
-    actionCalls.forEach( (action, index) => {
+    actionCalls.forEach((action, index) => {
       expect(store.commit).toHaveBeenNthCalledWith(
-        index+1,
+        index + 1,
         'Messaging/log',
-        { message: testMessage, level: action.level },
+        {message: testMessage, level: action.level},
         undefined
       );
     });
@@ -40,7 +39,7 @@ describe('Actions', () => {
 
 describe('Mutations', () => {
   let initialState;
-  const testMessageObject = { some: "message object" };
+  const testMessageObject = {some: "message object"};
 
   beforeEach(() => {
     initialState = Object.assign({}, MessagingStore.state);

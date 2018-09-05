@@ -26,7 +26,7 @@ function createRouter() {
     routes:[
       {path:'/audiobait',component:AudioBaitView},
       {path:'/audio',component:AudioView},
-      {path:'/devices',component:DevicesView},
+      {path:'/devices', name: 'devices',component:DevicesView},
       {path:'/devices/:devicename', name: 'device', component: DeviceView},
       {path:'/error',component:ErrorView},
       {path:'/groups', name: 'groups', component:GroupsView},
