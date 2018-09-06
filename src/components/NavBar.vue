@@ -14,7 +14,6 @@
         id="navbarToggler"
         is-nav>
         <b-navbar-nav v-if="isLoggedIn">
-          <b-nav-item to="/audio">Audio</b-nav-item>
           <b-nav-item to="/audiobait">Audio Bait</b-nav-item>
           <b-nav-item to="/recordings">Recordings</b-nav-item>
           <b-nav-item to="/groups">Groups</b-nav-item>
