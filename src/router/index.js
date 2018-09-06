@@ -3,7 +3,6 @@ import Router from 'vue-router';
 import store from '../stores';
 
 import AudioBaitView from '../views/AudioBaitView.vue';
-import AudioView from '../views/AudioView.vue';
 import DevicesView from '../views/DevicesView.vue';
 import DeviceView from '../views/DeviceView.vue';
 import ErrorView from '../views/ErrorView.vue';
@@ -25,7 +24,6 @@ function createRouter() {
     scrollBehavior:() => ({y:0}),
     routes:[
       {path:'/audiobait',component:AudioBaitView},
-      {path:'/audio',component:AudioView},
       {path:'/devices', name: 'devices',component:DevicesView},
       {path:'/devices/:devicename', name: 'device', component: DeviceView},
       {path:'/error',component:ErrorView},
