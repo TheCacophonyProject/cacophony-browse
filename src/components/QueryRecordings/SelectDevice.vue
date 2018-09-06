@@ -1,5 +1,5 @@
 <template>
-  <b-form-group>
+  <b-form-group v-if="fetched">
     <label>Device</label>
     <multiselect
       :value="value"
@@ -14,6 +14,8 @@
 </template>
 
 <script>
+
+import {mapState} from 'vuex';
 
 export default {
   name: 'SelectDevice',
@@ -31,12 +33,15 @@ export default {
         return "all devices";
       }
     },
-    options: function () {
-      this.$store.dispatch('Devices/GET_DEVICES');
-      return this.$store.state.Devices.devices.map(device => {
+    ...mapState({
+      fetched: state => state.Devices.fetched,
+      options: state => state.Devices.devices.map(device => {
         return {id: device.id, name: device.devicename};
-      });
-    }
+      })
+    })
+  },
+  created: async function() {
+    await this.$store.dispatch('Devices/GET_DEVICES');
   }
 };
 
