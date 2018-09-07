@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <h2>Device</h2>
+    <h2>Group</h2>
     <spinner :fetching="!fetched"/>
     <div v-if="group && fetched">
       <header>
@@ -79,7 +79,14 @@ export default {
     margin: 1.5rem 0;
   }
 
+
   h1 {
+    font-size: large;
     margin: 0;
+  }
+
+  h2 {
+    font-size: x-large;
+    margin: 1.5rem 0;
   }
 </style>
