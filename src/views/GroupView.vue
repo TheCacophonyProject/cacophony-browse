@@ -1,20 +1,24 @@
 <template>
-  <b-container v-if="group">
-    <header>
-      <h1>{{ group.groupname }}</h1>
-      <b-link
-        class="hide-button"
-        @click="back()">
-        <font-awesome-icon
-          :icon="['far', 'window-close']"
-          size="2x"
-          style="cursor: pointer;"/>
-      </b-link>
-    </header>
-    <group-detail
-      :group="group"
-      :user="currentUser"
-    />
+  <b-container>
+    <h2>Device</h2>
+    <spinner :fetching="!fetched"/>
+    <div v-if="group && fetched">
+      <header>
+        <h1>{{ group.groupname }}</h1>
+        <b-link
+          class="hide-button"
+          @click="back()">
+          <font-awesome-icon
+            :icon="['far', 'window-close']"
+            size="2x"
+            style="cursor: pointer;"/>
+        </b-link>
+      </header>
+      <group-detail
+        :group="group"
+        :user="currentUser"
+      />
+    </div>
   </b-container>
 </template>
 
@@ -22,10 +26,11 @@
 
 import {mapState} from 'vuex';
 import GroupDetail from '../components/Groups/GroupDetail.vue';
+import Spinner from '../components/Spinner.vue';
 
 export default {
   name: 'GroupView',
-  components: {GroupDetail},
+  components: {GroupDetail, Spinner},
   props: {},
   data() {
     return {
@@ -42,6 +47,7 @@ export default {
   computed:
     mapState({
       group: state => state.Groups.currentGroup,
+      fetched: state => state.Groups.fetched,
       currentUser: state => state.User.userData
     })
   ,
