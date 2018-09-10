@@ -1,6 +1,7 @@
 <template>
   <div class="device-detail">
     <h2>Users</h2>
+
     <b-table
       :items="device.Users"
       :fields="deviceUsersTableFields"

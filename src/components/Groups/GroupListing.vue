@@ -1,5 +1,10 @@
 <template>
   <div>
+
+    <spinner :fetching="!fetched"/>
+
+    <p v-if="!groups.length">You currently aren't a member of any groups</p>
+
     <div
       v-for="(group, index) in groups"
       :key="index"
@@ -26,11 +31,14 @@
 <script>
 
 import {mapState} from 'vuex';
+import Spinner from '../Spinner.vue';
 
 export default {
   name: "GroupListing",
+  components: {Spinner},
   computed: mapState({
-    groups: state => state.Groups.groups
+    groups: state => state.Groups.groups,
+    fetched: state => state.Groups.fetched
   })
 };
 </script>
