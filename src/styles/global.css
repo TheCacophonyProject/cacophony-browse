@@ -2,3 +2,10 @@ h1 {
     font-size: x-large;
     margin: 1.5rem 0;
 }
+
+/* recordings */
+
+/* pagination */
+.page-item.active .page-link {
+  z-index: 0;
+}
