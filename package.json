@@ -6,10 +6,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot",
-    "dev:skip-tests": "webpack-dev-server --config webpack/webpack.dev.js --open --hot",
+    "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
+    "dev:skip-tests": "webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
     "build": "webpack --config webpack/webpack.prod.js --progress --hide-modules",
-    "build:staging": "webpack --config webpack/webpack.stage.js --progress --hide-modules",
     "test": "jest",
     "test:watch": "npm run test -- --watch",
     "lint": "eslint ./src --ext .js,.vue",

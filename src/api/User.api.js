@@ -1,3 +1,4 @@
+import config from '../config';
 import { fetch } from './fetch';
 
 export default {
@@ -12,7 +13,7 @@ export default {
 function login(username, password) {
   const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   return fetch(
-    `${ENV.api}/authenticate_user`,
+    `${config.api}/authenticate_user`,
     {
       method:"POST",
       body:body,
@@ -43,7 +44,7 @@ function register(username, password, email) {
     `&password=${encodeURIComponent(password)}` +
     `&email=${encodeURIComponent(email)}`;
   return fetch(
-    `${ENV.api}/api/v1/Users`,
+    `${config.api}/api/v1/Users`,
     {
       method:"POST",
       body:body,
@@ -55,7 +56,7 @@ function register(username, password, email) {
 }
 function updateFields(fields) {
   return fetch(
-    `${ENV.api}/api/v1/Users`,
+    `${config.api}/api/v1/Users`,
     {
       method:"PATCH",
       body: `data=${encodeURIComponent(JSON.stringify(fields))}`,

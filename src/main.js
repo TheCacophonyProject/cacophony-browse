@@ -1,3 +1,7 @@
+import config from './config';
+config.environment = __ENV__;  //eslint-disable-line
+config.api = __API__;          //eslint-disable-line
+
 import Vue from 'vue';
 import App from './App.vue';
 import BootstrapVue from 'bootstrap-vue';
@@ -9,6 +13,7 @@ import router from './router';
 import FontAwesomeIcon from './fontAwesomeIcons';
 import store from './stores';
 import './styles/global.css';
+
 
 // https://bootstrap-vue.js.org/docs
 Vue.use(BootstrapVue);
@@ -28,6 +33,6 @@ new Vue({
   render: h => h(App)
 });
 
-if(ENV.environment !== 'PRODUCTION') {
-  console.info(`${ENV.environment} MODE\n\nConfig:\n`, ENV); // eslint-disable-line
+if (config.environment !== 'PRODUCTION') {
+  console.info(`${config.environment} MODE\n\nConfig:\n`, config); // eslint-disable-line
 }

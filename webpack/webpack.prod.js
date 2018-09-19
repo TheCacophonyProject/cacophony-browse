@@ -12,7 +12,8 @@ module.exports = merge(common, {
       minimize: true
     }),
     new webpack.DefinePlugin({
-      ENV: JSON.stringify(require(path.join(__dirname, '../configs/prod.js')))
+      __ENV__: JSON.stringify("PRODUCTION"),
+      __API__: JSON.stringify("https://api.cacophony.org.nz"),
     })
   ],
   optimization: {

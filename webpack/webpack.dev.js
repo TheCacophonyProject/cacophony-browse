@@ -2,12 +2,14 @@ const merge = require('webpack-merge');
 const path = require('path');
 const common = require('./webpack.common');
 const webpack = require('webpack');
+const devConfig = require(path.join(__dirname, '../configs/dev.js'));
 
 module.exports = merge(common, {
   mode: 'development',
   plugins: [
     new webpack.DefinePlugin({
-      ENV: JSON.stringify(require(path.join(__dirname, '../configs/dev.js')))
+      __ENV__: JSON.stringify("DEVELOPMENT"),
+      __API__: JSON.stringify(devConfig.api),
     })
   ],
   devServer: {

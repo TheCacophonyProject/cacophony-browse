@@ -1,3 +1,4 @@
+import config from '../config';
 import { fetch } from './fetch';
 
 export default {
@@ -6,24 +7,16 @@ export default {
   removeUserFromDevice
 };
 
-const devicesApiUrl = `${ENV.api}/api/v1/devices`;
-const deviceUsersApiUrl = `${ENV.api}/api/v1/devices/users`;
 
 function getDevices() {
-
-  return fetch(
-    devicesApiUrl,
-    {
-      method:"GET"
-    });
+  return fetch(`${config.api}/api/v1/devices`, { method:"GET" });
 }
 
 function addUserToDevice(username, deviceId, admin) {
-
   const body = `userId=${encodeURIComponent(username)}&deviceId=${encodeURIComponent(deviceId)}&admin=${admin}`;
 
   return fetch(
-    deviceUsersApiUrl,
+    `${config.api}/api/v1/devices/users`,
     {
       method:"POST",
       body,
@@ -35,11 +28,10 @@ function addUserToDevice(username, deviceId, admin) {
 }
 
 function removeUserFromDevice(username, deviceId) {
-
   const body = `userId=${username}&deviceId=${deviceId}`;
 
   return fetch(
-    deviceUsersApiUrl,
+    `${config.api}/api/v1/devices/users`,
     {
       method:"DELETE",
       body,

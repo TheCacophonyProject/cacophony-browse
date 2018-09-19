@@ -56,8 +56,8 @@
 </template>
 
 <script>
-
 import api from '../../api/index';
+import config from '../../config';
 
 export default {
   name: 'VideoProperties',
@@ -87,10 +87,10 @@ export default {
   },
   computed: {
     downloadRawUrl: function () {
-      return `${ENV.api}/api/v1/signedUrl?jwt=${this.downloadRaw}`;
+      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadRaw}`;
     },
     downloadFileUrl: function () {
-      return `${ENV.api}/api/v1/signedUrl?jwt=${this.downloadFile}`;
+      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadFile}`;
     }
   },
   methods: {
@@ -112,5 +112,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>
