@@ -1,7 +1,8 @@
-// This gets populated at startup.
+// These are the values for unit tests. They are overriden at startup
+// for dev/staging/prod.
 const config = {
-  environment: null,
-  api: null
+  environment: "TEST",
+  'api': "http://mocked-api-path"
 };
 
 export default config;
