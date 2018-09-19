@@ -6,6 +6,12 @@ const devConfig = require(path.join(__dirname, '../configs/dev.js'));
 
 module.exports = merge(common, {
   mode: 'development',
+  entry: './src/load.js',
+  output: {
+    path: path.resolve(__dirname, '../dist'),
+    publicPath: '/dist/',
+    filename: 'build.js'
+  },
   plugins: [
     new webpack.DefinePlugin({
       __ENV__: JSON.stringify("DEVELOPMENT"),

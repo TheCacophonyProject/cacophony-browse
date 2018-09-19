@@ -1,7 +1,3 @@
-import config from './config';
-config.environment = __ENV__;  //eslint-disable-line
-config.api = __API__;          //eslint-disable-line
-
 import Vue from 'vue';
 import App from './App.vue';
 import BootstrapVue from 'bootstrap-vue';
@@ -13,26 +9,28 @@ import router from './router';
 import FontAwesomeIcon from './fontAwesomeIcons';
 import store from './stores';
 import './styles/global.css';
+import config from './config';
 
+export default function() {
+  // https://bootstrap-vue.js.org/docs
+  Vue.use(BootstrapVue);
 
-// https://bootstrap-vue.js.org/docs
-Vue.use(BootstrapVue);
+  //https://monterail.github.io/vuelidate
+  Vue.use(Vuelidate);
 
-//https://monterail.github.io/vuelidate
-Vue.use(Vuelidate);
+  Vue.component('font-awesome-icon', FontAwesomeIcon);
 
-Vue.component('font-awesome-icon', FontAwesomeIcon);
+  // https://vue-multiselect.js.org
+  Vue.component('multiselect', Multiselect);
 
-// https://vue-multiselect.js.org
-Vue.component('multiselect', Multiselect);
+  new Vue({
+    el: '#app',
+    store,
+    router,
+    render: h => h(App)
+  });
 
-new Vue({
-  el: '#app',
-  store,
-  router,
-  render: h => h(App)
-});
-
-if (config.environment !== 'PRODUCTION') {
-  console.info(`${config.environment} MODE\n\nConfig:\n`, config); // eslint-disable-line
+  if (config.environment !== 'PRODUCTION') {
+    console.info(`${config.environment} MODE\n\nConfig:\n`, config); // eslint-disable-line
+  }
 }
