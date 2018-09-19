@@ -3,6 +3,8 @@ const path = require('path');
 const common = require('./webpack.common');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 
 module.exports = merge(common, {
   mode: 'production',
@@ -25,6 +27,18 @@ module.exports = merge(common, {
       __API__: JSON.stringify("https://api.cacophony.org.nz"),
       __ENV_STAGING__: JSON.stringify("STAGING"),
       __API_STAGING__: JSON.stringify("https://api-test.cacophony.org.nz")
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index-prod.html',
+      template: 'index.template.ejs',
+      excludeChunks: ['staging'],
+      inject: 'body',
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index-staging.html',
+      template: 'index.template.ejs',
+      excludeChunks: ['prod'],
+      inject: 'body',
     })
   ],
   optimization: {
