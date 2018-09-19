@@ -2,7 +2,7 @@ const merge = require('webpack-merge');
 const path = require('path');
 const common = require('./webpack.common');
 const webpack = require('webpack');
-const devConfig = require(path.join(__dirname, '../configs/dev.js'));
+const devConfig = require(path.join(__dirname, '../dev.js'));
 
 module.exports = merge(common, {
   mode: 'development',
@@ -14,7 +14,7 @@ module.exports = merge(common, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      __ENV__: JSON.stringify("DEVELOPMENT"),
+      __ENV__: JSON.stringify(devConfig.environment),
       __API__: JSON.stringify(devConfig.api),
     })
   ],

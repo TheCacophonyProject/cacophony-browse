@@ -3,5 +3,5 @@
 launch.json
 *.iml
 node_modules/
-configs/dev.js
+dev.js
 dist/
