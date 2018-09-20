@@ -73,7 +73,7 @@ import VideoProperties from '../components/Video/VideoProperties.vue';
 import VideoHelp from '../components/Video/VideoHelp.vue';
 
 export default {
-  name: 'VideoView',
+  name: 'RecordingView',
   components: {QuickTag, PrevNext, AddObservation, ObservedAnimals, VideoProperties, VideoHelp},
   props: {},
   data () {

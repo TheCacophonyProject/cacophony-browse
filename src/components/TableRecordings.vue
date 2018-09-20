@@ -10,7 +10,7 @@
       slot="id"
       slot-scope="row">
       <a
-        :href="'/video/' + row.item.id"
+        :href="'/recording/' + row.item.id"
         target="_blank">
         {{ row.item.id }}
       </a>
