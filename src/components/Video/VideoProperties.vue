@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h3>Video properties</h3>
     <b-form>
       <b-form-group
         label="Processing:"
@@ -21,7 +20,7 @@
           <div class="col-md-1" />
           <b-button
             class="col-md-3"
-            @click="updateComment">Save Comment</b-button>
+            @click="updateComment">Save</b-button>
         </b-form-row>
       </b-form-group>
       <b-alert
@@ -34,7 +33,7 @@
         <b-button
           :block="true"
           variant="danger"
-          @click="deleteRecording()">Delete Video</b-button>
+          @click="deleteRecording()">Delete</b-button>
       </b-form-group>
       <b-alert
         :show="showDeleteAlert"
@@ -44,7 +43,6 @@
 
     </b-form>
 
-    <h3>Download Files</h3>
     <b-button
       :href="downloadRawUrl"
       target="_blank">Download Raw</b-button>

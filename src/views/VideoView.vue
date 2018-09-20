@@ -2,7 +2,6 @@
   <b-container v-if="recording">
     <b-row>
       <b-col cols="12">
-        <h1>View Recording</h1>
         <h4>'{{ recording.Device.devicename }}' - {{ date }}, {{ time }}</h4>
       </b-col>
 
