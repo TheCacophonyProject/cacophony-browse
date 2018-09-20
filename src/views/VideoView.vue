@@ -64,7 +64,7 @@
 </template>
 
 <script>
-
+import config from '../config';
 import {mapState} from 'vuex';
 import QuickTag from '../components/Video/QuickTag.vue';
 import PrevNext from '../components/Video/PrevNext.vue';
@@ -99,8 +99,8 @@ export default {
         const date = new Date(state.Video.recording.recordingDateTime);
         return date.toLocaleTimeString();
       },
-      fileSource: state => `${ENV.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
-      rawSource: state => `${ENV.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
+      fileSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
+      rawSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
       processingState: state => {
         let text = state.Video.recording.processingState.toLowerCase();
         text = text.slice(0,1).toUpperCase() + text.slice(1);
