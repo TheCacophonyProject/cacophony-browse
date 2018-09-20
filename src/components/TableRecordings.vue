@@ -7,13 +7,30 @@
     responsive
     class="recording-table">
     <template
-      slot="view"
+      slot="id"
       slot-scope="row">
-      <b-button
-        :to="'/video/' + row.item.id"
+      <a
+        :href="'/video/' + row.item.id"
         target="_blank">
-        View
-      </b-button>
+        {{ row.item.id }}
+      </a>
+    </template>
+    <template
+      slot="type"
+      slot-scope="{item: { type }}">
+      <template v-if="type === 'audio'">
+        <span title="Audio">
+          <font-awesome-icon icon="music"/>
+        </span>
+      </template>
+      <template v-else-if="type === 'thermalRaw'">
+        <span title="Thermal video">
+          <font-awesome-icon icon="video"/>
+        </span>
+      </template>
+      <template v-else>
+        {{ type }}
+      </template>
     </template>
     <template
       slot="other"
@@ -39,11 +56,11 @@ export default {
     return {
       fields: [
         {
-          key: 'view',
-          label: 'View'
+          key: 'id',
+          label: 'ID'
         },
         {
-          key: 'id'
+          key: 'type'
         },
         {
           key: 'devicename',

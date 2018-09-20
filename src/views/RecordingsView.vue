@@ -1,7 +1,6 @@
 <template>
   <div>
     <b-container>
-      <h1>Search Video Recordings</h1>
       <QueryRecordings
         v-model="query"
         @searchButton="searchButton"/>
@@ -132,6 +131,7 @@ export default {
         response.rows.map((row) => {
           this.tableItems.push({
             id: row.id,
+            type: row.type,
             devicename: row.Device.devicename,
             groupname: row.Group.groupname,
             location: this.parseLocation(row.location),
