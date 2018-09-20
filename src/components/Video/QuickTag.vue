@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tag-buttons">
     <img
       class="tag-button"
       title="Mark as possum"
@@ -74,11 +74,14 @@ export default {
 </script>
 
 <style scoped>
+.tag-buttons {
+  padding: 1em;
+  text-align: center;
+}
 .tag-button {
-  max-width: 15%;
-  max-height: 75px;
-  width: auto;
-  height: auto;
+  box-sizing: border-box;
+  width: 3.5em;
+  max-height: 3.5em;
   cursor: pointer;
 }
 </style>
