@@ -1,6 +1,12 @@
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
-import {faBatteryThreeQuarters, faCog, faTrash} from '@fortawesome/free-solid-svg-icons';
+import {
+  faBatteryThreeQuarters,
+  faCog,
+  faTrash,
+  faVideo,
+  faMusic
+} from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
   faCaretSquareLeft,
@@ -18,7 +24,9 @@ library.add(
   faCaretSquareLeft,
   faWindowClose,
   faCog,
-  faBatteryThreeQuarters
+  faBatteryThreeQuarters,
+  faVideo,
+  faMusic
 );
 
 export default FontAwesomeIcon;

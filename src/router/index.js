@@ -12,7 +12,7 @@ import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import RecordingsView from '../views/RecordingsView.vue';
 import RegisterView from '../views/RegisterView.vue';
-import VideoView from '../views/VideoView.vue';
+import RecordingVue from '../views/RecordingView.vue';
 import AddEmailView from '../views/AddEmailView.vue';
 
 Vue.use(Router);
@@ -33,7 +33,7 @@ function createRouter() {
       {path:'/login', name: 'login', component:LoginView, meta: {noAuth: true}},
       {path:'/recordings',component:RecordingsView},
       {path:'/register',component:RegisterView, meta: {noAuth: true}},
-      {path:'/video/:id',component:VideoView},
+      {path:'/recording/:id', component: RecordingVue},
       {path:'/add_email', name: 'addEmail', component: AddEmailView, meta: {noEmail: true}},
     ]
   });

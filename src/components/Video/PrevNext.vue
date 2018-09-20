@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="img-buttons">
     <img
       class="img-button"
       title="Previous for device, skipping bird &amp; false-positives"
@@ -60,13 +60,14 @@ export default {
 </script>
 
 <style scoped>
+.img-buttons {
+  padding: 1em;
+  text-align: center;
+}
 .img-button {
   cursor: pointer;
   box-sizing: border-box;
-  max-width: 15%;
-  max-height: 75px;
-  width: auto;
-  height: auto;
+  width: 4em;
+  max-height: 4em;
 }
-
 </style>

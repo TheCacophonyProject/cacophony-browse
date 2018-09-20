@@ -1,7 +1,6 @@
 <template>
   <div>
     <b-container>
-      <h1>Search Video Recordings</h1>
       <QueryRecordings
         v-model="query"
         @searchButton="searchButton"/>
@@ -75,12 +74,13 @@ export default {
       count: null,
       countMessage: null,
       currentPage: null,
-      perPage: 100,
+      perPage: 300,
       limitPaginationButtons: 5,
       perPageOptions: [
         {value: 10, text: "10 per page"},
         {value: 50, text: "50 per page"},
         {value: 100, text: "100 per page"},
+        {value: 300, text: "300 per page"},
         {value: 500, text: "500 per page"},
         {value: 1000, text: "1000 per page"}
       ]
@@ -131,6 +131,7 @@ export default {
         response.rows.map((row) => {
           this.tableItems.push({
             id: row.id,
+            type: row.type,
             devicename: row.Device.devicename,
             groupname: row.Group.groupname,
             location: this.parseLocation(row.location),
