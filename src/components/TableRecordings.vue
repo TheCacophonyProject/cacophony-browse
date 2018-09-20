@@ -57,10 +57,10 @@ export default {
           key: 'location'
         },
         {
-          key: 'time'
+          key: 'date'
         },
         {
-          key: 'date'
+          key: 'time'
         },
         {
           key: 'duration'
