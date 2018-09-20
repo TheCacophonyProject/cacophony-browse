@@ -8,30 +8,37 @@
       <b-col
         cols="12"
         lg="8">
-        <video
-          ref="videoPlayer"
-          :key="recording.id"
-          controls
-          autoplay
-          max-width="100%"
-          width="640"
-          height="auto"
-          class="video">
-          <source :src="fileSource" >
-          Sorry, your browser does not support video playback.
-        </video>
-        <QuickTag
-          v-show="!showAddObservation"
-          @addTag="addTag($event)"
-          @displayAddObservation="showAddObservation = true"/>
-        <AddObservation
-          v-show="showAddObservation"
-          :current-video-time="currentVideoTime"
-          @get-current-video-time="getCurrentVideoTime()"
-          @set-current-video-time="setCurrentVideoTime($event)"
-          @addTag="addTag($event)"
-          @hideAddObservations="showAddObservation = false"
-        />
+        <template v-if="isVideo">
+          <video
+            ref="player"
+            :key="recording.id"
+            controls
+            autoplay
+            height="auto"
+            class="video">
+            <source :src="fileSource" >
+            Sorry, your browser does not support video playback.
+          </video>
+          <QuickTag
+            v-show="!showAddObservation"
+            @addTag="addTag($event)"
+            @displayAddObservation="showAddObservation = true"/>
+          <AddObservation
+            v-show="showAddObservation"
+            :current-video-time="currentVideoTime"
+            @get-current-video-time="getCurrentVideoTime()"
+            @set-current-video-time="setCurrentVideoTime($event)"
+            @addTag="addTag($event)"
+            @hideAddObservations="showAddObservation = false" />
+        </template>
+        <template v-else>
+          <audio
+            ref="player"
+            :src="fileSource"
+            controls
+            autoplay
+            class="audio"/>
+        </template>
         <PrevNext
           :recording="recording"
           @nextRecording="nextRecording($event.direction, $event.tagMode, $event.tags)"/>
@@ -41,6 +48,7 @@
           dismissible
           @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
         <ObservedAnimals
+          v-if="isVideo"
           :items="tagItems"
           @deleteTag="deleteTag($event)"/>
       </b-col>
@@ -90,6 +98,7 @@ export default {
       recording: state => state.Video.recording,
       downloadFileJWT: state => state.Video.downloadFileJWT,
       downloadRawJWT: state => state.Video.downloadRawJWT,
+      isVideo: state => state.Video.recording.type == "thermalRaw",
       date: (state) => {
         const date = new Date(state.Video.recording.recordingDateTime);
         return date.toLocaleDateString('en-NZ');
@@ -161,13 +170,13 @@ export default {
       };
 
       await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction });
-      this.$router.push({path: `/video/${this.recording.id}`});
+      this.$router.push({path: `/recording/${this.recording.id}`});
     },
     getCurrentVideoTime() {
-      this.currentVideoTime = this.$refs.videoPlayer.currentTime;
+      this.currentVideoTime = this.$refs.player.currentTime;
     },
     setCurrentVideoTime(time) {
-      this.$refs.videoPlayer.currentTime = time;
+      this.$refs.player.currentTime = time;
     }
   }
 };
@@ -176,8 +185,15 @@ export default {
 <style>
 
 .video {
+  min-width: 100%;
   max-width: 100%;
   height: auto;
+}
+
+.audio {
+  display: block;
+  min-width: 100%;
+  max-width: 100%;
 }
 
 </style>
