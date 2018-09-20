@@ -8,11 +8,11 @@
   "scripts": {
     "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
     "dev:skip-tests": "webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
-    "release": "webpack --config webpack/webpack.release.js --progress --hide-modules",
+    "release": "npm test && webpack --config webpack/webpack.release.js --progress --hide-modules",
     "test": "jest",
     "test:watch": "npm run test -- --watch",
     "lint": "eslint ./src --ext .js,.vue",
-    "lint-fix": "eslint ./src --fix --ext .js,.vue",
+    "lint:fix": "eslint ./src --fix --ext .js,.vue",
     "preversion": "npm test",
     "version": "./update-nfpm-version"
   },
