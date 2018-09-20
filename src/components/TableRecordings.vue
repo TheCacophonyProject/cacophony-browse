@@ -15,11 +15,18 @@
         View
       </b-button>
     </template>
+    <template
+      slot="other"
+      slot-scope="{item: { other: { batteryLevel }}}">
+      <template v-if="batteryLevel">
+        <font-awesome-icon icon="battery-three-quarters"/>
+        {{ batteryLevel }}%
+      </template>
+    </template>
   </b-table>
 </template>
 
 <script>
-
 export default {
   name: 'TableRecordings',
   props: {

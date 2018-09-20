@@ -138,7 +138,7 @@ export default {
             time: new Date(row.recordingDateTime).toLocaleTimeString(),
             duration: row.duration,
             tags: this.parseTags(row.Tags),
-            other: '',
+            other: this.parseOther(row),
             processing_state: this.parseProcessingState(row.processingState)
           });
         });
@@ -171,6 +171,13 @@ export default {
       } else {
         return 'untagged';
       }
+    },
+    parseOther(row) {
+      const out = {};
+      if (row.batteryLevel !== null) {
+        out.batteryLevel = row.batteryLevel;
+      }
+      return out;
     },
     parseProcessingState(result) {
       const string = result.toLowerCase();
