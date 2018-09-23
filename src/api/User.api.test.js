@@ -27,7 +27,7 @@ describe('login(groupname) calls fetch', () => {
     expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'POST',
-        body: querystring.stringify({username: testUsername, password: testPassword}),
+        body: querystring.stringify({nameOrEmail: testUsername, password: testPassword}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }

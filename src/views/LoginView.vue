@@ -14,11 +14,11 @@
         </b-alert>
 
         <b-form-group
-          label="Username"
-          label-for="input-username">
+          label="Username Or Email"
+          label-for="input-username-or-email">
           <b-form-input
-            id="input-username"
-            v-model="username"
+            id="input-username-or-email"
+            v-model="usernameOrEmail"
             type="text"/>
         </b-form-group>
 
@@ -55,7 +55,7 @@ export default {
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data() {
     return {
-      username: '',
+      usernameOrEmail: '',
       password: '',
       errorMessage: null
     };
@@ -66,9 +66,9 @@ export default {
     async onSubmit(evt) {
       evt.preventDefault();
 
-      if (this.username && this.password) {
+      if (this.usernameOrEmail && this.password) {
         await this.$store.dispatch('User/LOGIN', {
-          username: this.username,
+          username: this.usernameOrEmail,
           password: this.password
         });
 
@@ -77,7 +77,7 @@ export default {
         }
 
       } else {
-        this.errorMessage = "Username & password are required";
+        this.errorMessage = "Username/Email & password are required";
         setTimeout(() => {
           return this.errorMessage = false;
         }, 3000);
