@@ -10,8 +10,8 @@ export default {
   persistFields,
 };
 
-function login(username, password) {
-  const body = `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+function login(usernameOrEmail, password) {
+  const body = `nameOrEmail=${encodeURIComponent(usernameOrEmail)}&password=${encodeURIComponent(password)}`;
   return fetch(
     `${config.api}/authenticate_user`,
     {
