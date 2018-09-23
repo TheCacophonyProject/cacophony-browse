@@ -14,7 +14,7 @@
         </b-alert>
 
         <b-form-group
-          label="Username Or Email"
+          label="Username or Email"
           label-for="input-username-or-email">
           <b-form-input
             id="input-username-or-email"
@@ -77,7 +77,7 @@ export default {
         }
 
       } else {
-        this.errorMessage = "Username/Email & password are required";
+        this.errorMessage = "Username/email & password are required";
         setTimeout(() => {
           return this.errorMessage = false;
         }, 3000);
