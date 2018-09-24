@@ -5,9 +5,7 @@
         <router-link
           class="navbar-brand"
           to="/"
-          alt="home">
-          <img src="../assets/titlebar.png">
-        </router-link>
+          alt="home" />
       </b-navbar-brand>
       <b-navbar-toggle target="navbarToggler"/>
       <b-collapse
