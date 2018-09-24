@@ -27,5 +27,4 @@ module.exports = {
     'brace-style': ['error'],
     'prefer-const': ['error']
   },
-  "globals": { "ENV": true }
 };
