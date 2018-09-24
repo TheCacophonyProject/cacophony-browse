@@ -82,7 +82,6 @@ export default {
   methods: {
     buildQuery() {
       const query = {
-        type: 'thermalRaw',
         where: {}
       };
       // Add devices
