@@ -50,7 +50,8 @@
         <ObservedAnimals
           v-if="isVideo"
           :items="tagItems"
-          @deleteTag="deleteTag($event)"/>
+          @deleteTag="deleteTag($event)"
+          @addTag="addTag($event)"/>
       </b-col>
 
       <b-col

@@ -22,10 +22,22 @@
         slot="deleteButton"
         slot-scope="row">
         <font-awesome-icon
+          v-b-popover.hover.bottom="'Delete tag'"
           icon="trash"
           size="2x"
           style="cursor: pointer;"
           @click="$emit('deleteTag', row.item.tag.id)"/>
+      </template>
+      <template
+        slot="confirmButton"
+        slot-scope="row">
+        <font-awesome-icon
+          v-b-popover.hover.bottom="'Confirm the automatic tag'"
+          v-if="row.item.tag.automatic && row.item.tag.animal !== 'unidentified'"
+          icon="check-circle"
+          size="2x"
+          style="cursor: pointer;"
+          @click="confirmTag(row.item)"/>
       </template>
     </b-table>
   </div>
@@ -52,7 +64,8 @@ export default {
         {key: 'who', label: 'By Who'},
         {key: 'when', label: 'When'},
         {key: 'additionalInfo', label: 'Additional Information'},
-        {key: 'deleteButton', label: ''}
+        {key: 'deleteButton', label: ''},
+        {key: 'confirmButton', label: ''}
       ]
     };
   },
@@ -108,6 +121,18 @@ export default {
         string += timestring;
       }
       return string;
+    },
+    confirmTag: function (rowItem) {
+      const animal = rowItem.animal;
+      const event = rowItem.event;
+      const tag = {};
+      if (event === 'false positive') {
+        tag.event = 'false positive';
+      } else {
+        tag.animal = animal;
+      }
+      tag.confidence = 0.6;
+      this.$emit('addTag', tag);
     }
   },
 };

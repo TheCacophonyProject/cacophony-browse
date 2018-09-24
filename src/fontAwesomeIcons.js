@@ -5,7 +5,8 @@ import {
   faCog,
   faTrash,
   faVideo,
-  faMusic
+  faMusic,
+  faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
@@ -26,7 +27,8 @@ library.add(
   faCog,
   faBatteryThreeQuarters,
   faVideo,
-  faMusic
+  faMusic,
+  faCheckCircle
 );
 
 export default FontAwesomeIcon;
