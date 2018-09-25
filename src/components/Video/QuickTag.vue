@@ -66,7 +66,7 @@ export default {
     quickTag(animal) {
       const tag = {};
       tag.animal = animal;
-      tag.confidence = 0.6;
+      tag.confidence = 0.85;
       this.$emit('addTag', tag);
     }
   }
