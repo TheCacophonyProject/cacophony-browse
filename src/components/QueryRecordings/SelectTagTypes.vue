@@ -2,12 +2,9 @@
   <b-form-group>
     <label>Tag Types</label>
 
-    <multiselect
+    <b-form-select
       :value="value"
       :options="options"
-      :close-on-select="true"
-      track-by="text"
-      label="label"
       placeholder="any"
       @input="$emit('input', $event)"
     />
@@ -19,19 +16,19 @@ export default {
   name: 'SelectTagTypes',
   props: {
     value: {
-      type: Object,
+      type: String,
       required: true
     }
   },
   data () {
     return {
       options: [
-        { text: null, label: 'any' },
-        { text: 'untagged', label: 'untagged only' },
-        { text: 'tagged', label: 'tagged only' },
-        { text: 'automatic-only', label: 'automatic only' },
-        { text: 'human-only', label: 'manual only'},
-        { text: 'automatic+human', label: 'both automatic & manual'}
+        { value: 'any', text: 'any' },
+        { value: 'untagged', text: 'untagged only' },
+        { value: 'tagged', text: 'tagged only' },
+        { value: 'automatic-only', text: 'automatic only' },
+        { value: 'human-only', text: 'manual only'},
+        { value: 'automatic+human', text: 'both automatic & manual'}
       ]
     };
   }
