@@ -1,7 +1,7 @@
 <template>
   <b-form-group>
     <label>Duration (sec)</label>
-    <b-form-row>
+    <b-form-row style="margin-left: 0px; margin-right: 0px;">
       <b-form-input
         :max="value.high"
         :value="value.low"

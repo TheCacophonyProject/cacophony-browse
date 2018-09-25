@@ -8,7 +8,13 @@
     </b-col>
     <b-col
       sm="6"
-      md="4">
+      md="2" >
+      <SelectRecordingType
+        v-model="recordingType"/>
+    </b-col>
+    <b-col
+      sm="6"
+      md="2">
       <SelectTagTypes
         v-model="tagTypes"/>
     </b-col>
@@ -54,11 +60,12 @@ import SelectTagTypes from './SelectTagTypes.vue';
 import SelectAnimal from './SelectAnimal.vue';
 import SelectDuration from './SelectDuration.vue';
 import SelectDate from './SelectDate.vue';
+import SelectRecordingType from './SelectRecordingType.vue';
 
 export default {
   name: 'QueryRecordings',
   components: {
-    SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate
+    SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate, SelectRecordingType
   },
   props: {
     value: {
@@ -76,7 +83,8 @@ export default {
       animals: [],
       fromDate: "",
       toDate: "",
-      tagTypes: { text: null, label: 'any' }
+      tagTypes: 'any',
+      recordingType: 'both'
     };
   },
   methods: {
@@ -112,7 +120,7 @@ export default {
         query.where.recordingDateTime["$lt"] = this.toDate;
       }
       // Add tag mode
-      if (this.tagTypes.label !== 'any') {
+      if (this.tagTypes !== 'any') {
         query.tagMode = this.tagTypes.text;
       }
       // Add animal tags
@@ -121,6 +129,12 @@ export default {
         for (const animal of this.animals) {
           query.tags.push(animal);
         }
+      }
+      // Add recording type
+      if (this.recordingType == 'video') {
+        query.where.type = 'thermalRaw';
+      } else if (this.recordingType == 'audio') {
+        query.where.type = 'audio';
       }
       this.$emit('input', query);
       this.$emit('searchButton');
