@@ -131,7 +131,7 @@ export default {
       } else {
         tag.animal = animal;
       }
-      tag.confidence = 0.6;
+      tag.confidence = rowItem.confidence;
       this.$emit('addTag', tag);
     }
   },
