@@ -85,8 +85,7 @@ export default {
       animals: [],
       fromDate: "",
       toDate: "",
-      tagTypes: 'any',
-      recordingType: 'both'
+      tagTypes: 'any'
     };
   },
   computed: {
@@ -97,6 +96,14 @@ export default {
         return false;
       } else {
         return true;
+      }
+    },
+    recordingType: {
+      get () {
+        return this.$store.state.User.recordingTypePref;
+      },
+      set (value) {
+        this.$store.commit('User/updateRecordingTypePref', value);
       }
     }
   },

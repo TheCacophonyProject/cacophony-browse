@@ -8,7 +8,8 @@ const state = {
     'username': localStorage.getItem('username'),
     'email': localStorage.getItem('email'),
   },
-  errorMessage: undefined
+  errorMessage: undefined,
+  recordingTypePref: 'both'
 };
 
 
@@ -83,6 +84,9 @@ const mutations = {
   },
   rejectUpdate (state, response) {
     state.errorMessage = response.message;
+  },
+  updateRecordingTypePref (state, data) {
+    state.recordingTypePref = data;
   }
 };
 
