@@ -92,11 +92,7 @@ export default {
     isAudio: function () {
       // If it is an audio recording, then animals and tag types should be
       // disabled as these filters do not apply to audio recordings
-      if (this.recordingType === 'video') {
-        return false;
-      } else {
-        return true;
-      }
+      return this.recordingType !== "video";
     },
     recordingType: {
       get () {
@@ -108,7 +104,7 @@ export default {
     }
   },
   watch: {
-    'isAudio': function () {
+    isAudio: function () {
       if (this.isAudio) {
         // Reset any existing filters for animals and tag types when searching
         // for audio recordings
