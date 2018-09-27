@@ -1,10 +1,12 @@
 <template>
-  <b-form-group>
+  <b-form-group
+    v-b-tooltip.hover="tooltipTitle">
     <label>Tag Types</label>
 
     <b-form-select
       :value="value"
       :options="options"
+      :disabled="disabled"
       placeholder="any"
       @input="$emit('input', $event)"
     />
@@ -18,6 +20,10 @@ export default {
     value: {
       type: String,
       required: true
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -31,6 +37,15 @@ export default {
         { value: 'automatic+human', text: 'both automatic & manual'}
       ]
     };
+  },
+  computed: {
+    tooltipTitle: function () {
+      if (this.disabled) {
+        return 'Disabled when recording type includes audio';
+      } else {
+        return "";
+      }
+    }
   }
 };
 

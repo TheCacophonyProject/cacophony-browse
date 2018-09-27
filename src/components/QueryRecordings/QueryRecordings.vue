@@ -16,13 +16,15 @@
       sm="6"
       md="2">
       <SelectTagTypes
-        v-model="tagTypes"/>
+        v-model="tagTypes"
+        :disabled="isAudio"/>
     </b-col>
     <b-col
       sm="6"
       md="4">
       <SelectAnimal
-        v-model="animals"/>
+        v-model="animals"
+        :disabled="isAudio"/>
     </b-col>
     <b-col
       sm="6"
@@ -86,6 +88,27 @@ export default {
       tagTypes: 'any',
       recordingType: 'both'
     };
+  },
+  computed: {
+    isAudio: function () {
+      // If it is an audio recording, then animals and tag types should be
+      // disabled as these filters do not apply to audio recordings
+      if (this.recordingType === 'video') {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  },
+  watch: {
+    'isAudio': function () {
+      if (this.isAudio) {
+        // Reset any existing filters for animals and tag types when searching
+        // for audio recordings
+        this.animals = [];
+        this.tagTypes = 'any';
+      }
+    }
   },
   methods: {
     buildQuery() {

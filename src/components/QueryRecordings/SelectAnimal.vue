@@ -1,11 +1,13 @@
 <template>
-  <b-form-group>
+  <b-form-group
+    v-b-tooltip.hover="tooltipTitle">
     <label>Animals</label>
     <multiselect
       :value="value"
       :options="options"
       :multiple="true"
       :placeholder="placeholder"
+      :disabled="disabled"
       @input="$emit('input', $event)"/>
   </b-form-group>
 </template>
@@ -18,11 +20,14 @@ export default {
     value: {
       type: Array,
       required: true
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
     return {
-      thisvalue: ["interesting", "possum"],
       options: [
         "interesting",
         "possum",
@@ -53,6 +58,13 @@ export default {
         return "add more animals";
       } else {
         return "all animals";
+      }
+    },
+    tooltipTitle: function () {
+      if (this.disabled) {
+        return 'Disabled when recording type includes audio';
+      } else {
+        return "";
       }
     }
   },
