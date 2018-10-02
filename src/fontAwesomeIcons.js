@@ -6,7 +6,13 @@ import {
   faTrash,
   faVideo,
   faMusic,
-  faCheckCircle
+  faCheckCircle,
+  faAngleLeft,
+  faAngleDoubleLeft,
+  faAngleRight,
+  faAngleDoubleRight,
+  faQuestion,
+  faAsterisk
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
@@ -28,7 +34,13 @@ library.add(
   faBatteryThreeQuarters,
   faVideo,
   faMusic,
-  faCheckCircle
+  faCheckCircle,
+  faAngleLeft,
+  faAngleDoubleLeft,
+  faAngleRight,
+  faAngleDoubleRight,
+  faQuestion,
+  faAsterisk
 );
 
 export default FontAwesomeIcon;

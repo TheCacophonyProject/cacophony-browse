@@ -7,6 +7,7 @@ import Vuelidate from 'vuelidate';
 import Multiselect from 'vue-multiselect';
 import router from './router';
 import FontAwesomeIcon from './fontAwesomeIcons';
+import FontAwesomeLayers from '@fortawesome/vue-fontawesome';
 import store from './stores';
 import './styles/global.css';
 import config from './config';
@@ -19,6 +20,7 @@ export default function() {
   Vue.use(Vuelidate);
 
   Vue.component('font-awesome-icon', FontAwesomeIcon);
+  Vue.component('font-awesome-layers', FontAwesomeLayers);
 
   // https://vue-multiselect.js.org
   Vue.component('multiselect', Multiselect);
