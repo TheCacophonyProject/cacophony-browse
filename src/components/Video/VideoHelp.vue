@@ -2,39 +2,71 @@
   <div>
     <h3>Help</h3>
     <b-row>
-      <b-col cols="4">
-        <img
-          class="img-button"
-          src="../../assets/video/previous.png" >
-        <img
-          class="img-button"
-          src="../../assets/video/next.png" >
+      <b-col cols="5">
+        <font-awesome-icon 
+          class="fa-fw"
+          icon="angle-left" 
+          size="2x" />
+        <font-awesome-icon 
+          class="fa-fw"
+          icon="angle-right"
+          size="2x" />
       </b-col>
-      <b-col cols="8">
+      <b-col cols="7">
         <p class="col-xs-6">Move between recordings for device</p>
       </b-col>
-
-      <b-col cols="4">
-        <img
-          class="img-button"
-          src="../../assets/video/previous-no-human.png" >
-        <img
-          class="img-button"
-          src="../../assets/video/next-no-human.png" >
+      <b-col cols="5">
+        <font-awesome-layers class="fa-fw">
+          <font-awesome-icon 
+            icon="question"
+            style="color: green"
+            transform="up-16 shrink-7"
+            value="?" />
+          <font-awesome-icon 
+            class="fa-2x"
+            icon="angle-left" 
+            transform="left-5" />
+        </font-awesome-layers>
+        <font-awesome-layers class="fa-fw">
+          <font-awesome-icon 
+            class="fa-2x"
+            icon="angle-right" 
+            transform="right-5" />
+          <font-awesome-icon 
+            icon="question"
+            style="color: green"
+            transform="up-16 shrink-7"
+            value="?" />
+        </font-awesome-layers>
       </b-col>
-      <b-col cols="8">
+      <b-col cols="7">
         <p class="col-xs-6">Move between recordings for device which have not been manually tagged</p>
       </b-col>
-
-      <b-col cols="4">
-        <img
-          class="img-button"
-          src="../../assets/video/previous-interesting.png" >
-        <img
-          class="img-button"
-          src="../../assets/video/next-interesting.png" >
+      <b-col cols="5">
+        <font-awesome-layers class="fa-fw">
+          <font-awesome-icon 
+            icon="asterisk"
+            style="color: red"
+            transform="up-16 shrink-7"
+            value="?" />
+          <font-awesome-icon 
+            class="fa-2x"
+            icon="angle-double-left" 
+            transform="left-5" />
+        </font-awesome-layers>
+        <font-awesome-layers class="fa-fw">
+          <font-awesome-icon 
+            class="fa-2x"
+            icon="angle-double-right" 
+            transform="right-5" />
+          <font-awesome-icon 
+            icon="asterisk"
+            style="color: red"
+            transform="up-16 shrink-7"
+            value="?" />
+        </font-awesome-layers>
       </b-col>
-      <b-col cols="8">
+      <b-col cols="7">
         <p class="col-xs-6">Move between 'interesting' tagged recordings for device where the first tag is not a a bird or false/positive</p>
       </b-col>
     </b-row>
@@ -49,12 +81,11 @@ export default {
 </script>
 
 <style scoped>
-.img-button {
-  cursor: pointer;
+.col-5 {
+  text-align: center;
+}
+.fa-fw {
   box-sizing: border-box;
-  max-width: 40%;
-  max-height: 75px;
-  width: auto;
-  height: auto;
+  opacity: 0.6;
 }
 </style>
