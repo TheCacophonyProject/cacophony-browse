@@ -48,7 +48,7 @@ const actions = {
       store.dispatch('Messaging/WARN', `No ${direction} recording for this device.`);
       return;
     }
-    store.dispatch('Video/GET_RECORDING', result.rows[0].id);
+    return store.dispatch('Video/GET_RECORDING', result.rows[0].id);
   },
 
   async GET_RECORDING({commit}, recordingId) {
