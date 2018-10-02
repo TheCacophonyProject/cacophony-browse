@@ -42,11 +42,13 @@ const getters = {
 
 const actions = {
 
-  async QUERY_RECORDING(undefined, {params, direction}) {
+  async QUERY_RECORDING(undefined, {params, direction, skipMessage}) {
     const result = await api.recording.query(params);
     if (!result.rows || result.rows.length == 0) {
-      store.dispatch('Messaging/WARN', `No ${direction} recording for this device.`);
-      return;
+      if (!skipMessage) {
+        store.dispatch('Messaging/WARN', `No ${direction} recording for this device.`);
+      }
+      return false;
     }
     return store.dispatch('Video/GET_RECORDING', result.rows[0].id);
   },
@@ -54,6 +56,7 @@ const actions = {
   async GET_RECORDING({commit}, recordingId) {
     const result = await api.recording.id(recordingId);
     commit('receiveRecording', result);
+    return result.success;
   },
 
   async DELETE_TAG({commit}, tag) {

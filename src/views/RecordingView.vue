@@ -41,7 +41,7 @@
         </template>
         <PrevNext
           :recording="recording"
-          @nextRecording="nextRecording($event.direction, $event.tagMode, $event.tags)"/>
+          @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>
         <b-alert
           :show="showAlert"
           :variant="alertVariant"
@@ -62,7 +62,7 @@
           v-model="recording.comment"
           :download-raw="downloadRawJWT"
           :download-file="downloadFileJWT"
-          @nextRecording="nextRecording('next', 'any')"/>
+          @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
         <VideoHelp class="mt-2" />
       </b-col>
 
@@ -138,7 +138,12 @@ export default {
     deleteTag(tagId) {
       this.$store.dispatch('Video/DELETE_TAG', tagId);
     },
-    async nextRecording(direction, tagMode, tags) {
+    async gotoNextRecording(direction, tagMode, tags, skipMessage) {
+      if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
+        this.$router.push({path: `/recording/${this.recording.id}`});
+      }
+    },
+    async getNextRecording(direction, tagMode, tags, skipMessage) {
       let where = {
         DeviceId: this.recording.Device.id
       };
@@ -157,6 +162,11 @@ export default {
         where.recordingDateTime = {lt: this.recording.recordingDateTime};
         order = "DESC";
         break;
+      case "either":
+        if (await this.getNextRecording('next', tagMode, tags, true)) {
+          return true;
+        }
+        return await this.getNextRecording('previous', tagMode, tags, skipMessage);
       default:
         throw `invalid direction: '${direction}'`;
       }
@@ -170,8 +180,7 @@ export default {
         offset: 0
       };
 
-      await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction });
-      this.$router.push({path: `/recording/${this.recording.id}`});
+      return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
     },
     getCurrentVideoTime() {
       this.currentVideoTime = this.$refs.player.currentTime;
