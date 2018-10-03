@@ -101,6 +101,9 @@ export default {
       set (value) {
         this.$store.commit('User/updateRecordingTypePref', value);
       }
+    },
+    groups: function() {
+      return this.$store.state.Groups;
     }
   },
   watch: {
@@ -122,7 +125,15 @@ export default {
       if (this.devices.length !== 0) {
         query.where.DeviceId = [];
         for (const device of this.devices) {
-          query.where.DeviceId.push(device.id);
+          if (typeof device.id === 'number') {
+            // Add single devices
+            query.where.DeviceId.push(device.id);
+          } else {
+            // Add groups of devices
+            for (const item of device.devices) {
+              query.where.DeviceId.push(item.id);
+            }
+          }
         }
       }
       // Add duration
