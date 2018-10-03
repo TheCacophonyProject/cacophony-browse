@@ -11,6 +11,16 @@
           <p v-else-if="recording.location && prop.key === 'location'">
             <strong>Location: </strong>{{ parseLocation }}
           </p>
+          <p v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
+            <strong>Additional Metadata:</strong>
+            <ul>
+              <li
+                v-for="(key, index) of Object.keys(recording['additionalMetadata'])"
+                :key="index">
+                {{ key }}: {{ recording['additionalMetadata'][key] }}
+              </li>
+            </ul>
+          </p>
           <p v-else-if="recording[prop.key]" >
             <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
           </p>
