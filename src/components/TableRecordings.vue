@@ -36,16 +36,21 @@
       slot="other"
       slot-scope="{item: { other: { batteryLevel }}}">
       <template v-if="batteryLevel">
-        <font-awesome-icon icon="battery-three-quarters"/>
-        {{ batteryLevel }}%
+        <BatteryLevel :battery-level="batteryLevel"/>
       </template>
     </template>
   </b-table>
 </template>
 
 <script>
+
+import BatteryLevel from './BatteryLevel.vue';
+
 export default {
   name: 'TableRecordings',
+  components: {
+    BatteryLevel
+  },
   props: {
     items: {
       type: Array,
