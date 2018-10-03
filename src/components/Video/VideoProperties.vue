@@ -8,6 +8,9 @@
           <p v-if="recording.batteryLevel && prop.key === 'batteryLevel'">
             <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
           </p>
+          <p v-else-if="recording.location && prop.key === 'location'">
+            <strong>Location: </strong>{{ parseLocation }}
+          </p>
           <p v-else-if="recording[prop.key]" >
             <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
           </p>
@@ -109,6 +112,13 @@ export default {
     },
     downloadFileUrl: function () {
       return `${config.api}/api/v1/signedUrl?jwt=${this.downloadFile}`;
+    },
+    parseLocation: function () {
+      if (this.recording.location.type === 'Point') {
+        return `Lat: ${this.recording.location.coordinates[0].toFixed(2)}, Long: ${this.recording.location.coordinates[1].toFixed(2)}`;
+      } else {
+        return this.recording.location;
+      }
     }
   },
   methods: {
