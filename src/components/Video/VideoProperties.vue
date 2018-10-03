@@ -2,6 +2,7 @@
   <div>
     <b-form>
       <b-form-group>
+        <h3>Properties</h3>
         <div
           v-for="prop of properties"
           :key="prop.key">
@@ -51,7 +52,7 @@
         <b-button
           :block="true"
           variant="danger"
-          @click="deleteRecording()">Delete</b-button>
+          @click="deleteRecording()">Delete Recording</b-button>
       </b-form-group>
       <b-alert
         :show="showDeleteAlert"
