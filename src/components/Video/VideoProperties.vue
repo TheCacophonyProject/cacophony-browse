@@ -13,14 +13,10 @@
             <strong>Location: </strong>{{ parseLocation }}
           </p>
           <p v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
-            <strong>Additional Metadata:</strong>
-            <ul>
-              <li
-                v-for="(key, index) of Object.keys(recording['additionalMetadata'])"
-                :key="index">
-                {{ key }}: {{ recording['additionalMetadata'][key] }}
-              </li>
-            </ul>
+            <b-table
+              :items="metaItems"
+              :fields="metaFields"
+              small/>
           </p>
           <p v-else-if="recording[prop.key]" >
             <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
@@ -114,6 +110,16 @@ export default {
         {key: 'airplaneModeOn', title: 'Airplane Mode'},
         {key: 'version', title: 'Version'},
         {key: 'additionalMetadata', title: 'Additional Metadata'}
+      ],
+      metaFields: [
+        {
+          key: 'key',
+          label: 'Additional Metadata'
+        },
+        {
+          key: 'data',
+          label: ''
+        }
       ]
     };
   },
@@ -130,6 +136,17 @@ export default {
       } else {
         return this.recording.location;
       }
+    },
+    metaItems: function () {
+      const data = this.recording['additionalMetadata'];
+      const items = [];
+      for (const key in data) {
+        items.push({
+          key: key,
+          data: data[key]
+        });
+      }
+      return items;
     }
   },
   methods: {
