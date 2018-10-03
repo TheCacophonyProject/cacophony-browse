@@ -1,12 +1,13 @@
 <template>
   <div>
     <b-form>
-      <b-form-group
-        label="Processing:"
-        horizontal>
-        <b-input
-          :value="processingState"
-          disabled />
+      <b-form-group>
+        <p
+          v-for="prop of properties"
+          v-if="recording[prop.key]"
+          :key="prop.key">
+          <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
+        </p>
       </b-form-group>
 
       <b-form-group
@@ -60,10 +61,6 @@ import config from '../../config';
 export default {
   name: 'VideoProperties',
   props: {
-    processingState: {
-      type: String,
-      default: "incomplete"
-    },
     value: {
       type: String,
       default: ""
@@ -75,12 +72,27 @@ export default {
     downloadFile: {
       type: String,
       default: ""
+    },
+    recording: {
+      type: Object,
+      required: true
     }
   },
   data () {
     return {
       showCommentAlert: false,
-      showDeleteAlert: false
+      showDeleteAlert: false,
+      properties: [
+        {key: 'processingState', title: 'Processing State'},
+        {key: 'location', title: 'Location'},
+        {key: 'relativeToDusk', title: 'Relative to Dusk'},
+        {key: 'relativeToDawn', title: 'Relative to Dawn'},
+        {key: 'batteryLevel', title: 'Battery Level'},
+        {key: 'batteryCharging', title: 'Battery Charging'},
+        {key: 'airplaneModeOn', title: 'Airplane Mode'},
+        {key: 'version', title: 'Version'},
+        {key: 'additionalMetadata', title: 'Additional Metadata'}
+      ]
     };
   },
   computed: {

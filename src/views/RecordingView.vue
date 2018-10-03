@@ -58,10 +58,10 @@
         cols="12"
         lg="4">
         <VideoProperties
-          :processing-state="processingState"
           v-model="recording.comment"
           :download-raw="downloadRawJWT"
           :download-file="downloadFileJWT"
+          :recording="recording"
           @nextRecording="nextRecording('next', 'any')"/>
         <VideoHelp class="mt-2" />
       </b-col>
