@@ -2,12 +2,16 @@
   <div>
     <b-form>
       <b-form-group>
-        <p
+        <div
           v-for="prop of properties"
-          v-if="recording[prop.key]"
           :key="prop.key">
-          <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
-        </p>
+          <p v-if="recording.batteryLevel && prop.key === 'batteryLevel'">
+            <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
+          </p>
+          <p v-else-if="recording[prop.key]" >
+            <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
+          </p>
+        </div>
       </b-form-group>
 
       <b-form-group
@@ -57,9 +61,13 @@
 <script>
 import api from '../../api/index';
 import config from '../../config';
+import BatteryLevel from '../BatteryLevel.vue';
 
 export default {
   name: 'VideoProperties',
+  components: {
+    BatteryLevel
+  },
   props: {
     value: {
       type: String,

@@ -1,7 +1,11 @@
 import {library} from '@fortawesome/fontawesome-svg-core';
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome';
 import {
+  faBatteryFull,
   faBatteryThreeQuarters,
+  faBatteryHalf,
+  faBatteryQuarter,
+  faBatteryEmpty,
   faCog,
   faTrash,
   faVideo,
@@ -31,7 +35,11 @@ library.add(
   faCaretSquareLeft,
   faWindowClose,
   faCog,
+  faBatteryFull,
   faBatteryThreeQuarters,
+  faBatteryHalf,
+  faBatteryQuarter,
+  faBatteryEmpty,
   faVideo,
   faMusic,
   faCheckCircle,
