@@ -7,7 +7,7 @@ import Vuelidate from 'vuelidate';
 import Multiselect from 'vue-multiselect';
 import router from './router';
 import FontAwesomeIcon from './fontAwesomeIcons';
-import FontAwesomeLayers from '@fortawesome/vue-fontawesome';
+import {FontAwesomeLayers} from '@fortawesome/vue-fontawesome';
 import store from './stores';
 import './styles/global.css';
 import config from './config';
