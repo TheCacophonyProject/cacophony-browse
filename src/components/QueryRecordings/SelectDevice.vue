@@ -35,13 +35,20 @@ export default {
     },
     ...mapState({
       fetched: state => state.Devices.fetched,
-      options: state => state.Devices.devices.map(device => {
+      devices: state => state.Devices.devices.map(device => {
         return {id: device.id, name: device.devicename};
+      }),
+      groups: state => state.Groups.groups.map(group => {
+        return {id: 'group' + group.id, name: group.groupname + ' (group)', devices: group.Devices};
       })
-    })
+    }),
+    options: function () {
+      return this.devices.concat(this.groups);
+    }
   },
   created: async function() {
     await this.$store.dispatch('Devices/GET_DEVICES');
+    await this.$store.dispatch('Groups/GET_GROUPS');
   }
 };
 
