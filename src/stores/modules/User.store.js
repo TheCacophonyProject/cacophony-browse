@@ -9,7 +9,7 @@ const state = {
     'email': localStorage.getItem('email'),
   },
   errorMessage: undefined,
-  recordingTypePref: 'both'
+  recordingTypePref: localStorage.getItem('recordingTypePref') || 'both'
 };
 
 
@@ -87,6 +87,7 @@ const mutations = {
   },
   updateRecordingTypePref (state, data) {
     state.recordingTypePref = data;
+    localStorage.setItem('recordingTypePref', data);
   }
 };
 
