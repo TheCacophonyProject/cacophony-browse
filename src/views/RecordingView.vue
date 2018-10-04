@@ -58,7 +58,6 @@
         cols="12"
         lg="4">
         <VideoProperties
-          :processing-state="processingState"
           v-model="recording.comment"
           :download-raw="downloadRawJWT"
           :download-file="downloadFileJWT"
