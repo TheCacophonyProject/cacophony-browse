@@ -160,7 +160,7 @@ export default {
       const result = await api.recording.del(this.$route.params.id);
       if(result.success) {
         this.showDeleteAlert = true;
-        this.$emit('nextRecording');
+        this.$emit('nextOrPreviousRecording');
       }
     }
   }
