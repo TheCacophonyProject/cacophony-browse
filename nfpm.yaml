@@ -1,7 +1,7 @@
 name: "cacophony-web-vuex"
 arch: "amd64"
 platform: "linux"
-version: "0.1.0"
+version: "0.0.0"
 maintainer: "Cacophony Developers <dev@cacophony.org.nz>"
 description: |
   Web interface for the Cacophony Project API
