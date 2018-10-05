@@ -61,6 +61,7 @@
           v-model="recording.comment"
           :download-raw="downloadRawJWT"
           :download-file="downloadFileJWT"
+          :recording="recording"
           @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
         <VideoHelp class="mt-2" />
       </b-col>
