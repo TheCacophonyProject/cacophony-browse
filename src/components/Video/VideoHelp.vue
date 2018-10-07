@@ -3,11 +3,11 @@
     <h3>Help</h3>
     <b-row>
       <b-col cols="5">
-        <font-awesome-icon 
+        <font-awesome-icon
           class="fa-fw"
-          icon="angle-left" 
+          icon="angle-left"
           size="2x" />
-        <font-awesome-icon 
+        <font-awesome-icon
           class="fa-fw"
           icon="angle-right"
           size="2x" />
@@ -15,7 +15,9 @@
       <b-col cols="7">
         <p class="col-xs-6">Move between recordings for device</p>
       </b-col>
-      <b-col cols="5">
+      <b-col
+        cols="5"
+        class="fa-fw">
         <font-awesome-icon
           icon="question"
           style="color: green"
@@ -38,7 +40,9 @@
       <b-col cols="7">
         <p class="col-xs-6">Move between recordings for device which have not been manually tagged</p>
       </b-col>
-      <b-col cols="5">
+      <b-col
+        cols="5"
+        class="fa-fw">
         <font-awesome-icon
           icon="asterisk"
           style="color: red"
