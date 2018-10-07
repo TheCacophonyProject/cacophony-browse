@@ -1,0 +1,3 @@
+* text=auto
+*.vue text eol=LF
+*.js text eol=LF
