@@ -87,8 +87,12 @@ export default {
       } else {
         image = animal + '.png';
       }
-      const link = require('../../assets/video/' + image);
-      return `<img class="animal-image" src="${link}" />`;
+      try {
+        const link = require('../../assets/video/' + image);
+        return `<img class="animal-image" src="${link}" />`;
+      } catch (e) {
+        return '';
+      }
     },
     additionalInfo: function (tag) {
       let string = "";
