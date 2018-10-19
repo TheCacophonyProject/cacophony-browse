@@ -5,8 +5,6 @@ This is a reimplementation of the [Cacophony Project web UI](https://github.com/
 
 ## Build Setup
 
-
-
 ``` bash
 # install dependencies
 npm install
