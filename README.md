@@ -5,9 +5,15 @@ This is a reimplementation of the [Cacophony Project web UI](https://github.com/
 
 ## Build Setup
 
+
+
 ``` bash
 # install dependencies
 npm install
+
+# create config file
+cp dev-config.js.TEMPLATE to dev-config.js
+# now edit the config file to point to correct API server
 
 # serve with hot reload at localhost:8080
 npm run dev
