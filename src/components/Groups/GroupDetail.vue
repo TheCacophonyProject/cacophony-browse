@@ -23,7 +23,7 @@
           icon="trash"
           size="1x"
           style="cursor: pointer;"
-          @click="removeUser(data.item.id)"/>
+          @click="removeUser(data.item.username)"/>
 
       </template>
     </b-table>
@@ -83,8 +83,8 @@ export default {
     },
   },
   methods: {
-    async removeUser(userId) {
-      await this.$store.dispatch('Groups/REMOVE_GROUP_USER', {userId, groupId: this.group.id});
+    async removeUser(username) {
+      await this.$store.dispatch('Groups/REMOVE_GROUP_USER', {userName: username, groupName: this.group.groupname});
     },
   }
 };
