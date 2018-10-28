@@ -13,7 +13,7 @@
         aria-describedby="input1LiveFeedback"
         type="text"
         autofocus
-        placeholder="User Id"
+        placeholder="Username"
         class="input"
       />
 

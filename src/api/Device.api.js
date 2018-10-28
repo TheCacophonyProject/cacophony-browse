@@ -13,7 +13,7 @@ function getDevices() {
 }
 
 function addUserToDevice(username, deviceId, admin) {
-  const body = `userId=${encodeURIComponent(username)}&deviceId=${encodeURIComponent(deviceId)}&admin=${admin}`;
+  const body = `username=${encodeURIComponent(username)}&deviceId=${encodeURIComponent(deviceId)}&admin=${admin}`;
 
   return fetch(
     `${config.api}/api/v1/devices/users`,
@@ -28,7 +28,7 @@ function addUserToDevice(username, deviceId, admin) {
 }
 
 function removeUserFromDevice(username, deviceId) {
-  const body = `userId=${username}&deviceId=${deviceId}`;
+  const body = `username=${username}&deviceId=${deviceId}`;
 
   return fetch(
     `${config.api}/api/v1/devices/users`,

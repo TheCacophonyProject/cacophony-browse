@@ -35,9 +35,9 @@ const actions = {
     commit('fetched');
   },
 
-  async REMOVE_USER({commit}, {userId, device}) {
+  async REMOVE_USER({commit}, {userName, device}) {
     commit('fetching');
-    await api.device.removeUserFromDevice(userId, device.id);
+    await api.device.removeUserFromDevice(userName, device.id);
     await _getDevice(device.devicename, commit);
     commit('fetched');
   }
