@@ -148,10 +148,6 @@ export default {
         DeviceId: this.recording.Device.id
       };
 
-      if (tags) {
-        where.tags = JSON.stringify(tags);
-      }
-
       let order;
       switch (direction) {
       case "next":
@@ -179,6 +175,13 @@ export default {
         limit: 1,
         offset: 0
       };
+
+      if (tags) {
+        params.tags = JSON.stringify(tags);
+      }
+      if (tagMode) {
+        params.tagMode = tagMode;
+      }
 
       return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
     },
