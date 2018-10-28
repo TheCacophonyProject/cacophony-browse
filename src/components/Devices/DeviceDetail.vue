@@ -24,7 +24,7 @@
           icon="trash"
           size="1x"
           style="cursor: pointer;"
-          @click="removeUser(data.item.id)"/>
+          @click="removeUser(data.item.username)"/>
 
       </template>
     </b-table>
@@ -59,8 +59,8 @@ export default {
     };
   },
   methods: {
-    async removeUser(userId) {
-      await this.$store.dispatch('Devices/REMOVE_USER', {userId, device: this.device});
+    async removeUser(userName) {
+      await this.$store.dispatch('Devices/REMOVE_USER', {userName, device: this.device});
     }
   }
 };
