@@ -155,11 +155,11 @@ export default {
       let order;
       switch (direction) {
       case "next":
-        where.recordingDateTime = {gt: this.recording.recordingDateTime};
+        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
         order = "ASC";
         break;
       case "previous":
-        where.recordingDateTime = {lt: this.recording.recordingDateTime};
+        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
         order = "DESC";
         break;
       case "either":
