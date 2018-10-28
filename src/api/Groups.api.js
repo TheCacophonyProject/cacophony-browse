@@ -23,8 +23,8 @@ function addNewGroup(groupName) {
   );
 }
 
-function addGroupUser(groupId, userName, isAdmin) {
-  const body = `groupId=${encodeURIComponent(groupId)}&userId=${encodeURIComponent(userName)}&admin=${encodeURIComponent(isAdmin)}`;
+function addGroupUser(groupName, userName, isAdmin) {
+  const body = `group=${encodeURIComponent(groupName)}&username=${encodeURIComponent(userName)}&admin=${encodeURIComponent(isAdmin)}`;
 
   return fetch(
     `${config.api}/api/v1/groups/users`,
@@ -38,8 +38,8 @@ function addGroupUser(groupId, userName, isAdmin) {
   );
 }
 
-function removeGroupUser(groupId, userId) {
-  const body = `groupId=${encodeURIComponent(groupId)}&userId=${encodeURIComponent(userId)}`;
+function removeGroupUser(groupName, userName) {
+  const body = `group=${encodeURIComponent(groupName)}&username=${encodeURIComponent(userName)}`;
 
   return fetch(
     `${config.api}/api/v1/groups/users`,

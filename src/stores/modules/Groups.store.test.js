@@ -66,20 +66,20 @@ describe('Actions', () => {
       expect(api.addNewGroup).toHaveBeenCalledWith(testString);
     });
 
-    test('calls _getGroup(groupname, commit, state)', async () => {
+    test('calls _getGroup(groupName, commit, state)', async () => {
       _expectGetGroupsCalled(commit);
     });
   });
 
   describe('ADD_GROUP_USER', async () => {
-    const testObject = {groupId: 'x', userName: "y", isAdmin: "z"};
+    const testObject = {groupName: 'x', userName: "y", isAdmin: "z"};
     beforeEach(async () => {
       await GroupsStore.actions.ADD_GROUP_USER({commit, state}, testObject);
     });
 
     test('calls api.groups.addGroupUser()', async () => {
       expect(api.addGroupUser).toHaveBeenCalledTimes(1);
-      expect(api.addGroupUser).toHaveBeenCalledWith(testObject.groupId, testObject.userName, testObject.isAdmin);
+      expect(api.addGroupUser).toHaveBeenCalledWith(testObject.groupName, testObject.userName, testObject.isAdmin);
     });
 
     test('calls _getGroup(groupname, commit, state)', async () => {
@@ -89,7 +89,7 @@ describe('Actions', () => {
 
   describe('REMOVE_GROUP_USER', async () => {
 
-    const testObject = {groupId: 'x', userId: "y"};
+    const testObject = {groupName: 'x', userName: "y"};
 
     beforeEach(async () => {
       await GroupsStore.actions.REMOVE_GROUP_USER({commit, state}, testObject);
@@ -97,10 +97,10 @@ describe('Actions', () => {
 
     test('calls api.groups.removeGroupUser()', async () => {
       expect(api.removeGroupUser).toHaveBeenCalledTimes(1);
-      expect(api.removeGroupUser).toHaveBeenCalledWith(testObject.groupId, testObject.userId);
+      expect(api.removeGroupUser).toHaveBeenCalledWith(testObject.groupName, testObject.userName);
     });
 
-    test('calls _getGroup(groupname, commit, state)', async () => {
+    test('calls _getGroup(groupName, commit, state)', async () => {
       _expectGetGroupsCalled(commit);
     });
   });

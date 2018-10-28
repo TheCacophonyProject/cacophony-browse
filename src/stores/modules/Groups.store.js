@@ -36,16 +36,16 @@ const actions = {
     commit('fetched');
   },
 
-  async ADD_GROUP_USER({commit, state}, {groupId, userName, isAdmin}) {
+  async ADD_GROUP_USER({commit, state}, {groupName, userName, isAdmin}) {
     commit('fetching');
-    await api.groups.addGroupUser(groupId, userName, isAdmin);
+    await api.groups.addGroupUser(groupName, userName, isAdmin);
     await _getGroup(state.currentGroup.groupname, commit, state);
     commit('fetched');
   },
 
-  async REMOVE_GROUP_USER({commit, state}, {groupId, userId}) {
+  async REMOVE_GROUP_USER({commit, state}, {groupName, userName}) {
     commit('fetching');
-    await api.groups.removeGroupUser(groupId, userId);
+    await api.groups.removeGroupUser(groupName, userName);
     await _getGroup(state.currentGroup.groupname, commit, state);
     commit('fetched');
   }

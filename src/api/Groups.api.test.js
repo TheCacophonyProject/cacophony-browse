@@ -5,7 +5,7 @@ import {fetch} from "./fetch";
 import querystring from 'querystring';
 
 
-describe('addGroup(groupname) calls authenticatedFetch', () => {
+describe('addGroup(groupName) calls authenticatedFetch', () => {
 
   test('with the correct path', async () => {
     await groupApi.addNewGroup();
@@ -37,7 +37,7 @@ describe('addGroup(groupname) calls authenticatedFetch', () => {
 
 });
 
-describe('addGroupUser(groupId, userName, isAdmin) calls authenticatedFetch', () => {
+describe('addGroupUser(groupName, userName, isAdmin) calls authenticatedFetch', () => {
 
   test('with the correct path', async () => {
     await groupApi.addGroupUser();
@@ -46,17 +46,17 @@ describe('addGroupUser(groupId, userName, isAdmin) calls authenticatedFetch', ()
 
   test('with the correct request params', async () => {
     const
-      testGroupId = "some groupId",
+      testGroup = "some group",
       testUserName = "some userName",
       testBoolAdmin = true;
 
-    await groupApi.addGroupUser(testGroupId, testUserName, testBoolAdmin);
+    await groupApi.addGroupUser(testGroup, testUserName, testBoolAdmin);
 
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'POST',
-        body: querystring.stringify({groupId: testGroupId, userId: testUserName, admin: testBoolAdmin}),
+        body: querystring.stringify({group: testGroup, username: testUserName, admin: testBoolAdmin}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }
@@ -70,7 +70,7 @@ describe('addGroupUser(groupId, userName, isAdmin) calls authenticatedFetch', ()
   });
 });
 
-describe('removeGroupUser(groupId, userId) calls authenticatedFetch', () => {
+describe('removeGroupUser(groupName,username) calls authenticatedFetch', () => {
 
   test('with the correct path', async () => {
     await groupApi.removeGroupUser();
@@ -79,16 +79,16 @@ describe('removeGroupUser(groupId, userId) calls authenticatedFetch', () => {
 
   test('with the correct request params', async () => {
     const
-      testGroupId = "some groupId",
+      testGroup = "some group",
       testUserName = "some userName";
 
-    await groupApi.removeGroupUser(testGroupId, testUserName);
+    await groupApi.removeGroupUser(testGroup, testUserName);
 
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'DELETE',
-        body: querystring.stringify({groupId: testGroupId, userId: testUserName}),
+        body: querystring.stringify({group: testGroup, username: testUserName}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }
@@ -103,7 +103,7 @@ describe('removeGroupUser(groupId, userId) calls authenticatedFetch', () => {
   });
 });
 
-describe('getGroups(groupname) calls authenticatedFetch', () => {
+describe('getGroups(groupName) calls authenticatedFetch', () => {
 
   test('with the correct path (no param)', async () => {
     await groupApi.getGroups();
