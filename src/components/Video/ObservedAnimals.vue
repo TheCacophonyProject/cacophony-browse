@@ -83,7 +83,7 @@ export default {
       } else if (animal == 'bird/kiwi') {
         image = 'kiwi.png';
       } else if (animal == 'unidentified') {
-        image = 'none.png';
+        image = 'unknown.png';
       } else {
         image = animal + '.png';
       }
