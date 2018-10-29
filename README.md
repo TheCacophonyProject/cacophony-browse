@@ -1,6 +1,6 @@
-# cacophony-web-vue
+# cacophony-browse
 
-This is a reimplementation of the [Cacophony Project web UI](https://github.com/TheCacophonyProject/cacophony-web/) using modern practices. It is based on the [Vue](https://vuejs.org) framework and uses [Vuex](https://vuex.vuejs.org) for state management.
+This is a web interface for querying with and interacting with Cacophony Project recordings using the project's API. It is based on the [Vue](https://vuejs.org) framework and uses [Vuex](https://vuex.vuejs.org) for state management.
 
 
 ## Build Setup
