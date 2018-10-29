@@ -78,8 +78,12 @@ export default {
   },
   computed: {
     isGroupAdmin() {
-      const username = this.user.username;
-      return this.group.GroupUsers && this.group.GroupUsers.some(user => username === user.username && user.isAdmin);
+      if (this.user && this.group.GroupUsers) {
+        const username = this.user.username;
+        // hack - as long as they are not added (ie global admin) or added as an admin user.
+        return !this.group.GroupUsers.some(user => username === user.username && !user.isAdmin);
+      }
+      return false;
     },
   },
   methods: {

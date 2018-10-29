@@ -19,8 +19,8 @@
         slot="controls"
         slot-scope="data">
 
-        <!-- TODO: Review the role restrictions for Devices Admin - See GroupDetail.vue for example -->
         <font-awesome-icon
+          v-if="isDeviceAdmin"
           icon="trash"
           size="1x"
           style="cursor: pointer;"
@@ -28,7 +28,7 @@
 
       </template>
     </b-table>
-    <device-add-user />
+    <device-add-user v-if="isDeviceAdmin"/>
   </div>
 </template>
 
@@ -57,6 +57,16 @@ export default {
         {key: 'controls', label: '', class: 'device-actions-cell'}
       ]
     };
+  },
+  computed: {
+    isDeviceAdmin() {
+      if (this.user && this.device.Users) {
+        const username = this.user.username;
+        // hack - as long as they are not added (ie global admin) or added as an admin user.
+        return !this.device.Users.some(user => username === user.username && !user.DeviceUsers.admin);
+      }
+      return false;
+    },
   },
   methods: {
     async removeUser(userName) {
