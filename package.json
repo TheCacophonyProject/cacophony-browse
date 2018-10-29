@@ -1,9 +1,9 @@
 {
-  "name": "cacophony-web-vue",
-  "description": "Cacophony web",
+  "name": "cacophony-browse",
+  "description": "Web interface for the Cacophony Project API",
   "version": "0.0.0",
-  "author": "Andy Saunders <adbs1@yahoo.com>",
-  "license": "MIT",
+  "author": "Cacophony Developers <dev@cacophony.org.nz>",
+  "license": "GPLv3",
   "private": true,
   "scripts": {
     "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
