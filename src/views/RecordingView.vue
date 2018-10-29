@@ -2,7 +2,7 @@
   <b-container v-if="recording">
     <b-row>
       <b-col cols="12">
-        <h4>'{{ recording.Device.devicename }}' - {{ date }}, {{ time }}</h4>
+        <h4>'{{ devicename }}' - {{ date }}, {{ time }}</h4>
       </b-col>
 
       <b-col
@@ -107,6 +107,12 @@ export default {
       time: state => {
         const date = new Date(state.Video.recording.recordingDateTime);
         return date.toLocaleTimeString();
+      },
+      devicename: state => {
+        if (state.Video.recording.Device) {
+          return state.Video.recording.Device.devicename;
+        }
+        return "";
       },
       fileSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
       rawSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
