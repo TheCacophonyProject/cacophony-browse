@@ -34,11 +34,11 @@ https://vuejs.org/v2/style-guide/#ad
 * Tag the release (starting with a "v"), e.g.: `git tag -a v1.2.3 -m "1.2.3 release"`
 * Push the tag to Github, e.g.: `git push origin v1.2.3`
 * TravisCI will run the tests, create a release package and create a
-  [Github Release](https://github.com/TheCacophonyProject/cacophony-web-vuex/releases)
+  [Github Release](https://github.com/TheCacophonyProject/cacophony-browse/releases)
 
 ## Web Server Configuration
 
-The /srv/cacophony/cacophony-web-vuex directory in the release package
+The /srv/cacophony/cacophony-browse directory in the release package
 should be served by a web server.
 
 Sample configuration for the [Caddy](https://caddyserver.com/) web server:
@@ -47,7 +47,7 @@ Sample configuration for the [Caddy](https://caddyserver.com/) web server:
 # Update the host and port to match desired
 http://localhost:9000 {
     gzip
-    root  /srv/cacophony/cacophony-web-vuex
+    root  /srv/cacophony/cacophony-browse
 
     rewrite {
         ext !.jpg !.png !.svg !.js
