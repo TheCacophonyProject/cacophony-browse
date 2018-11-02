@@ -6,22 +6,21 @@
     <p v-if="!devices.length && fetched">You currently have no devices.</p>
 
     <div
-      v-for="(device, index) in devices"
+      v-for="(device, index) in orderedDevices"
       :key="index"
       :class="fetchable()"
       class="device">
-      <div class="header">
+      <router-link
+        :to="{ name: 'device', params: { devicename: device.devicename }}"
+        tag="div"
+        class="header">
+
         <h4>{{ device.devicename }}</h4>
 
-        <b-link
-          :to="{ name: 'device', params: { devicename: device.devicename }}"
-          class="show-button">
-          <font-awesome-icon
-            :icon="['far', 'caret-square-right']"
-            size="2x"
-            style="cursor: pointer;"/>
-        </b-link>
-      </div>
+        <icon-link
+          :icon="['fas', 'angle-right']"
+          :link="{ name: 'device', params: { devicename: device.devicename }}"/>
+      </router-link>
     </div>
   </div>
 </template>
@@ -31,10 +30,11 @@
 import {mapState} from 'vuex';
 import DeviceDetail from './DeviceDetail.vue';
 import Spinner from '../Spinner.vue';
+import IconLink from '../IconLink.vue';
 
 export default {
   name: "DevicesListing",
-  components: {DeviceDetail, Spinner},
+  components: {DeviceDetail, Spinner, IconLink},
   data() {
     return {
       devicesTableFields: [
@@ -44,7 +44,10 @@ export default {
   },
   computed: mapState({
     fetched: state => state.Devices.fetched,
-    devices: state => state.Devices.devices
+    devices: state => state.Devices.devices,
+    orderedDevices: function () {
+      return this.devices.sort((a, b) => a.devicename.localeCompare( b.devicename) );
+    }
   }),
   methods: {
     fetchable() {
@@ -67,12 +70,6 @@ export default {
   h4 {
     margin-top: 0.75rem;
     font-size: 1rem;
-  }
-
-  .show-button {
-    display: flex;
-    margin-left: auto;
-
   }
 
   .device {

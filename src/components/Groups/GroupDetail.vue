@@ -1,9 +1,10 @@
 <template>
   <div class="group-detail">
-    <h2>Users</h2>
+    <h2>Users <help :help-text="usersHelpTip"/></h2>
     <b-table
       :items="group.GroupUsers"
       :fields="groupUsersTableFields"
+      :sort-by="userSortBy"
       striped
       hover
       responsive>
@@ -28,13 +29,16 @@
       </template>
     </b-table>
 
+    <h2>Add user</h2>
     <group-user-add
       v-if="isGroupAdmin"
       :group="group"/>
 
-    <h2>Devices</h2>
+    <h2>Devices <help :help-text="devicesHelpTip"/></h2>
     <b-table
       :items="group.Devices"
+      :fields="deviceTableFields"
+      :sort-by="deviceSortBy"
       striped
       hover
       responsive>
@@ -52,10 +56,12 @@
 
 <script>
 import GroupUserAdd from "./GroupUserAdd.vue";
+import Help from "../Help.vue";
+import IconLink from "../IconLink.vue";
 
 export default {
   name: "GroupDetail",
-  components: {GroupUserAdd},
+  components: {GroupUserAdd, Help, IconLink},
   props: {
     group: {
       type: Object,
@@ -69,11 +75,26 @@ export default {
   data() {
     return {
       groupUsersTableFields: [
-        {key: 'id', label: 'Id'},
-        {key: 'username', label: 'User Name'},
+        {key: 'username', label: 'User Name', sortable: 'true'},
         {key: 'admin', label: 'Admin'},
         {key: 'controls', label: '', class: 'device-actions-cell'}
-      ]
+      ],
+      userSortBy: 'username',
+      deviceTableFields: [
+        {key: 'devicename', label: 'Device Name', sortable: 'true'},
+      ],
+      deviceSortBy: 'devicename',
+      usersHelpTip: {
+        title: 'Users',
+        content: '<p>These are the users who can view recordings for the group\'s devices.</p>' +
+          '<p>If you are a group admin, you can also add new users.</p>'
+      },
+      devicesHelpTip: {
+        title: 'Devices',
+        content: '<p>These are devices that this group manages.</p>' +
+          '<p>Devices specify which group they belong to when they first register.   Therefore the devices ' +
+          'list cannot be edited.</p>'
+      }
     };
   },
   computed: {
@@ -101,15 +122,7 @@ export default {
   }
 
   h2 {
-    font-size: medium;
-    margin-top: 1rem;
+    font-size: large;
+    margin-top: 2rem;
   }
-
-  @media only screen and (min-width: 576px) {
-    h2 {
-      font-size: large;
-      margin-top: 1.5rem;
-    }
-  }
-
 </style>

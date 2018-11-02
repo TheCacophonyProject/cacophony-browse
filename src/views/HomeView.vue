@@ -29,7 +29,6 @@
           </span>
         </dd>
       </dl>
-      <b-link :to="{ name: 'groups'}">Add Group</b-link>
     </b-container>
   </div>
 </template>

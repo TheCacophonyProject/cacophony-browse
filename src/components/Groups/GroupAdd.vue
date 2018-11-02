@@ -31,7 +31,7 @@
             :disabled="$v.form.$invalid || !fetched"
             type="submit"
             variant="primary">
-            Add group
+            Create new group
           </b-button>
         </b-form-group>
       </b-form>
