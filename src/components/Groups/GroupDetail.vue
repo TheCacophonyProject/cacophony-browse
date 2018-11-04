@@ -1,55 +1,59 @@
 <template>
-  <div class="group-detail">
-    <h2>Users <help :help-text="usersHelpTip"/></h2>
-    <b-table
-      :items="group.GroupUsers"
-      :fields="groupUsersTableFields"
-      :sort-by="userSortBy"
-      striped
-      hover
-      responsive>
+  <div class="container">
+    <div class="group-detail row">
+      <div class="users-detail col-lg-7">
+        <h2>Users <help :help-text="usersHelpTip"/></h2>
+        <b-table
+          :items="group.GroupUsers"
+          :fields="groupUsersTableFields"
+          :sort-by="userSortBy"
+          striped
+          hover
+          responsive>
 
-      <template
-        slot="admin"
-        slot-scope="data">
-        {{ data.item.isAdmin }}
-      </template>
+          <template
+            slot="admin"
+            slot-scope="data">
+            {{ data.item.isAdmin }}
+          </template>
 
-      <template
-        slot="controls"
-        slot-scope="data">
+          <template
+            slot="controls"
+            slot-scope="data">
 
-        <font-awesome-icon
+            <font-awesome-icon
+              v-if="isGroupAdmin"
+              icon="trash"
+              size="1x"
+              style="cursor: pointer;"
+              @click="removeUser(data.item.username)"/>
+
+          </template>
+        </b-table>
+
+        <h2>Add user</h2>
+        <group-user-add
           v-if="isGroupAdmin"
-          icon="trash"
-          size="1x"
-          style="cursor: pointer;"
-          @click="removeUser(data.item.username)"/>
+          :group="group"/>
+      </div>
 
-      </template>
-    </b-table>
+      <div class="devices-detail col-lg-5">
+        <h2>Devices <help :help-text="devicesHelpTip"/></h2>
+        <b-table
+          :items="group.Devices"
+          :fields="deviceTableFields"
+          :sort-by="deviceSortBy"
+          hover
+          responsive>
 
-    <h2>Add user</h2>
-    <group-user-add
-      v-if="isGroupAdmin"
-      :group="group"/>
-
-    <h2>Devices <help :help-text="devicesHelpTip"/></h2>
-    <b-table
-      :items="group.Devices"
-      :fields="deviceTableFields"
-      :sort-by="deviceSortBy"
-      striped
-      hover
-      responsive>
-
-      <template
-        slot="devicename"
-        slot-scope="row">
-        <b-link :to="{ name: 'device', params: { devicename: row.item.devicename }}">{{ row.item.devicename }}</b-link>
-      </template>
-    </b-table>
-
+          <template
+            slot="devicename"
+            slot-scope="row">
+            <b-link :to="{ name: 'device', params: { devicename: row.item.devicename }}">{{ row.item.devicename }}</b-link>
+          </template>
+        </b-table>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -116,9 +120,12 @@ export default {
 </script>
 
 <style scoped>
-
   .group-detail {
     margin-top: 15px;
+  }
+
+  .users-detail {
+    border-right: 1px solid #ddd;
   }
 
   h2 {
