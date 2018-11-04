@@ -9,6 +9,7 @@
           :sort-by="userSortBy"
           striped
           hover
+          outlined
           responsive>
 
           <template
@@ -44,6 +45,7 @@
           :fields="deviceTableFields"
           :sort-by="deviceSortBy"
           hover
+          outlined
           responsive>
 
           <template
@@ -124,8 +126,14 @@ export default {
     margin-top: 15px;
   }
 
-  .users-detail {
-    border-right: 1px solid #ddd;
+  @media (min-width: 992px) {
+    .users-detail && {
+      padding-right:30px;
+    }
+
+    .devices-detail {
+      padding-left:30px;
+    }
   }
 
   h2 {
