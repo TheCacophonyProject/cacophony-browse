@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <h1>Devices</h1>
+    <h1>Your Devices</h1>
     <device-listing :devices="devices" />
   </b-container>
 </template>

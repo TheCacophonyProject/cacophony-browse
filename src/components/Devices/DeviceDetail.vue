@@ -1,10 +1,11 @@
 <template>
   <div class="device-detail">
-    <h2>Users</h2>
+    <h2>Users <help :help-text="usersHelpTip"/></h2>
 
     <b-table
       :items="device.Users"
       :fields="deviceUsersTableFields"
+      :sort-by="userSortBy"
       striped
       hover
       responsive>
@@ -28,16 +29,19 @@
 
       </template>
     </b-table>
+
+    <h2>Add user</h2>
     <device-add-user v-if="isDeviceAdmin"/>
   </div>
 </template>
 
 <script>
 import DeviceAddUser from './DeviceAddUser.vue';
+import Help from '../Help.vue';
 
 export default {
   name: "DeviceDetail",
-  components: { DeviceAddUser },
+  components: { DeviceAddUser, Help },
   props: {
     device: {
       type: Object,
@@ -51,11 +55,17 @@ export default {
   data() {
     return {
       deviceUsersTableFields: [
-        {key: 'id', label: 'Id'},
         {key: 'username', label: 'User Name'},
         {key: 'admin', label: 'Admin'},
         {key: 'controls', label: '', class: 'device-actions-cell'}
-      ]
+      ],
+      userSortBy: 'username',
+      usersHelpTip: {
+        title: 'Users',
+        content: '<p>These are the users who can view recordings just for this device.  (The device\'s group users ' +
+          ' can also view the recordings)</p>' +
+          '<p>If you are an admin, you can also add device users.</p>'
+      },
     };
   },
   computed: {

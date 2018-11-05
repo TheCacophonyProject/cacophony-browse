@@ -2,6 +2,7 @@
   <b-table
     :items="items"
     :fields="fields"
+    small
     striped
     hover
     responsive
@@ -73,10 +74,12 @@ export default {
         },
         {
           key: 'groupname',
-          label: 'Group'
+          label: 'Group',
+          class: 'd-none d-lg-table-cell'
         },
         {
-          key: 'location'
+          key: 'location',
+          class: 'd-none d-lg-table-cell'
         },
         {
           key: 'date'
@@ -91,10 +94,12 @@ export default {
           key: 'tags'
         },
         {
-          key: 'other'
+          key: 'other',
+          class: 'd-none d-lg-table-cell'
         },
         {
-          key: 'processing_state'
+          key: 'processing_state',
+          class: 'd-none d-lg-table-cell'
         },
       ]
     };
@@ -102,10 +107,11 @@ export default {
 };
 </script>
 
-<style scoped>
-
-.recording-table {
-  padding-top: 15px
-}
-
+<style>
+  td.table-xtra {
+    color: red;
+  }
+  .recording-table {
+    padding-top: 15px;
+  }
 </style>
