@@ -3,8 +3,15 @@
 
     <spinner :fetching="!fetched"/>
 
-    <p v-if="!groups.length">You currently aren't a member of any groups</p>
-
+    <div v-if="!groups.length">
+      <p>
+        <icon-link
+          :icon="['fas', 'exclamation-triangle']"/>
+        You don't belong to any groups.</p>
+      <p>If you are setting up a device, create a group below.  All the devices you
+      manage will be linked together through this group, so choose a name relating to your project or property.
+      </p>
+    </div>
     <div
       v-for="(group, index) in orderedGroups"
       :key="index"
@@ -19,7 +26,8 @@
 
         <icon-link
           :icon="['fas', 'angle-right']"
-          :link="{ name: 'group', params: { groupname: group.groupname }}"/>
+          :link="{ name: 'group', params: { groupname: group.groupname }}"
+          :position="'right'"/>
       </router-link>
     </div>
   </div>
@@ -61,4 +69,7 @@ export default {
     display: flex;
   }
 
+  p {
+    display: flex;
+  }
 </style>

@@ -2,22 +2,33 @@
   <div class="container">
     <div
       v-for="(item, index) in getMessages()"
-      :key="index">
+      :key="index"
+      class="row">
       <b-alert
         v-if="displayLevels.includes(item.level)"
         :variant="item.level"
         show
         dismissible
+
         @dismissed="acknowledgeMessages">
-        {{ item.message }}
+        <div
+          class="col-sm-11 offset-sm-1 col-md-7 offset-md-2 col-lg-4 offset-lg-4 box">
+          <icon-link
+            :icon="['fas', 'exclamation-triangle']"
+            :colour="'red'"/>
+          Opps! Something went wrong. <br> Message is: "{{ item.message }}"
+        </div>
       </b-alert>
     </div>
   </div>
 </template>
 
 <script>
+import IconLink from './IconLink.vue';
+
 export default {
   name: "GlobalMessaging",
+  components: {IconLink},
   data: function () {
     return {
       displayLevels: ['warning', 'danger'] // ['warning', 'danger', 'info', 'success']
@@ -27,7 +38,7 @@ export default {
     getMessages() {
       // TODO: Messaging is a little clunky - some ui love required
       clearTimeout(this.timeout);
-      this.timeout = setTimeout(() => this.$store.dispatch('Messaging/ACKNOWLEDGE'), 2000);
+      this.timeout = setTimeout(() => this.$store.dispatch('Messaging/ACKNOWLEDGE'), 10000);
       return this.$store.state.Messaging.messages;
     },
     acknowledgeMessages() {
@@ -62,5 +73,9 @@ export default {
     border-radius: 0;
     width: 100%;
     min-height: 100px;
+  }
+
+  .box {
+    border: 1px;
   }
 </style>

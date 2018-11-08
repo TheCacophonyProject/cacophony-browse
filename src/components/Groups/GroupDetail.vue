@@ -127,7 +127,7 @@ export default {
   }
 
   @media (min-width: 992px) {
-    .users-detail && {
+    .users-detail {
       padding-right:30px;
     }
 

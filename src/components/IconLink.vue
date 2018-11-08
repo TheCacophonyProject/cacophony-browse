@@ -1,9 +1,10 @@
 <template>
   <b-link
     :to="link"
-    class="link-button">
+    :class="position">
     <font-awesome-icon
       :icon="icon"
+      :class="colour"
       size="2x"
       style="cursor: pointer;"/>
   </b-link>
@@ -19,16 +20,31 @@ export default {
     },
     link: {
       type: Object,
-      required: true
+      default: null,
+    },
+    colour: {
+      type: String,
+      default: 'green',
+    },
+    position: {
+      type: String,
+      default: '',
     }
   }
 };
 </script>
 
 <style scoped>
-  .link-button {
-    color: #28a745;
+  .right {
     display: flex;
     margin-left: auto;
+  }
+
+  .green {
+    color: #28a745;
+  }
+
+  .red {
+    color: darkred;
   }
 </style>
