@@ -9,7 +9,7 @@
           :icon="['fas', 'exclamation-triangle']"/>
         You don't belong to any groups.</p>
       <p>If you are setting up a device, create a group below.  All the devices you
-      manage will be linked together through this group, so choose a name relating to your project or property.
+      manage will be linked together through this group, so choose a name relating to your organisation, project or property.
       </p>
     </div>
     <div
