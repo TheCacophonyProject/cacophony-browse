@@ -27,7 +27,7 @@
               icon="trash"
               size="1x"
               style="cursor: pointer;"
-              @click="removeUser(data.item.username)"/>
+              @click="removeUser(data.item.username, uiUser)"/>
 
           </template>
         </b-table>
@@ -61,6 +61,7 @@
 </template>
 
 <script>
+import {mapState} from 'vuex';
 import GroupUserAdd from "./GroupUserAdd.vue";
 import Help from "../Help.vue";
 import IconLink from "../IconLink.vue";
@@ -103,18 +104,28 @@ export default {
       }
     };
   },
-  computed: {
-    isGroupAdmin() {
+  computed: mapState({
+    uiUser: state => state.User.userData.username,
+    isGroupAdmin: function () {
       if (this.user && this.group.GroupUsers) {
         const username = this.user.username;
         // hack - as long as they are not added (ie global admin) or added as an admin user.
         return !this.group.GroupUsers.some(user => username === user.username && !user.isAdmin);
       }
       return false;
-    },
-  },
+    }
+  }),
   methods: {
-    async removeUser(username) {
+    async removeUser(username, uiUser) {
+      if (username == uiUser) {
+        // TODO make this dialog look nicer
+        var retVal = confirm("Are you sure you want to remove yourself from this group?  If you countinue " +
+        "will no longer be able to view recordings from the devices in this group and you will not be able to " +
+        "add yourself back to the group.\n\nDo you want to continue ?");
+        if( retVal == false ) {
+          return;
+        }
+      }
       await this.$store.dispatch('Groups/REMOVE_GROUP_USER', {userName: username, groupName: this.group.groupname});
     },
   }
