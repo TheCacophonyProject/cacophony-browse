@@ -118,7 +118,7 @@ export default {
   methods: {
     async removeUser(username, uiUser) {
       if (username == uiUser) {
-        // TODO make this dialog look nicer
+        // TODO make this dialog look nicer (same for device)
         var retVal = confirm("Are you sure you want to remove yourself from this group?  If you countinue " +
         "will no longer be able to view recordings from the devices in this group and you will not be able to " +
         "add yourself back to the group.\n\nDo you want to continue ?");

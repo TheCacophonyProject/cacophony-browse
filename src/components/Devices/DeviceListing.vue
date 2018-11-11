@@ -19,7 +19,8 @@
 
         <icon-link
           :icon="['fas', 'angle-right']"
-          :link="{ name: 'device', params: { devicename: device.devicename }}"/>
+          :link="{ name: 'device', params: { devicename: device.devicename }}"
+          :position="'right'"/>
       </router-link>
     </div>
   </div>
