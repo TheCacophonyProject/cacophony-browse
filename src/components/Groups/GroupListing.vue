@@ -3,7 +3,7 @@
 
     <spinner :fetching="!fetched"/>
 
-    <div v-if="!groups.length">
+    <div v-if="fetched && !groups.length">
       <p>
         <icon-link
           :icon="['fas', 'exclamation-triangle']"/>

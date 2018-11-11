@@ -26,7 +26,8 @@
             <b-link :to="{ name: 'group', params: { groupname: group.groupname }}">
               {{ group.groupname }}</b-link><span v-if="index+1 !== groups.length">, </span>
           </span>
-          <span v-if="!groups.length">
+          <spinner :fetching="!fetched"/>
+          <span v-if="fetched && !groups.length">
             <p>
               <icon-link
                 :icon="['fas', 'exclamation-triangle']"
@@ -47,12 +48,14 @@
 import Hero from '../components/Hero.vue';
 import {mapState} from 'vuex';
 import IconLink from "../components/IconLink.vue";
+import Spinner from "../components/Spinner.vue";
 
 export default {
   name: 'HomeView',
   components: {
     Hero,
-    IconLink
+    IconLink,
+    Spinner
   },
   computed: mapState({
     user: state => state.User,
@@ -60,7 +63,8 @@ export default {
     firstname: state => state.User.userData.firstname,
     lastname: state => state.User.userData.lastname,
     email: state => state.User.userData.email,
-    groups: state => state.Groups.groups
+    groups: state => state.Groups.groups,
+    fetched: state => state.Groups.fetched,
   }),
   created: function () {
     this.fetchGroups();
