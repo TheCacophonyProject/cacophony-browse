@@ -22,13 +22,17 @@
             slot="controls"
             slot-scope="data">
 
-            <font-awesome-icon
+            <b-button
+              v-b-tooltip.hover
               v-if="isGroupAdmin"
-              icon="trash"
-              size="1x"
-              style="cursor: pointer;"
-              @click="removeUser(data.item.username, uiUser)"/>
-
+              title="Remove user from group"
+              class="trash-button"
+              @click="removeUser(data.item.username, uiUser)">
+              <font-awesome-icon
+                icon="trash"
+                size="1x"
+                style="cursor: pointer;"/>
+            </b-button>
           </template>
         </b-table>
 
@@ -150,5 +154,12 @@ export default {
   h2 {
     font-size: large;
     margin-top: 2rem;
+  }
+
+  button.trash-button {
+    padding: 0;
+    background: inherit;
+    color: black;
+    border: none;
   }
 </style>
