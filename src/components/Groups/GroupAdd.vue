@@ -50,7 +50,6 @@ export default {
   name: 'GroupAdd',
   data() {
     return {
-      addGroupErrorMessage: null,
       form: {
         groupName: ''
       }
@@ -80,12 +79,12 @@ export default {
 
       if (!this.$v.$invalid) {
         const groupName = this.$v.form.groupName.$model;
-
+        /* eslint-disable */
         this.$store.dispatch('Groups/ADD_GROUP', groupName).then(() => {
           this.$router.push(`/groups/${groupName}`);
         }).catch(error => {
-          this.addGroupErrorMessage = error.message;
         });
+        /* eslint-enable */
       }
     }
   }

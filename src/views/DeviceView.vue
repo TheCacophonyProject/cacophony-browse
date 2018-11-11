@@ -4,7 +4,8 @@
       <h1>Device: {{ device.devicename }}</h1>
       <icon-link
         :icon="['fas', 'angle-left']"
-        :link="{ name: 'devices'}"/>
+        :link="{ name: 'devices'}"
+        :position="'right'"/>
     </header>
     <spinner :fetching="!fetched" />
     <div v-if="device && fetched">

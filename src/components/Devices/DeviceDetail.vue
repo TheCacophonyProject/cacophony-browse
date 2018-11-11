@@ -20,13 +20,17 @@
         slot="controls"
         slot-scope="data">
 
-        <font-awesome-icon
+        <b-button
+          v-b-tooltip.hover
           v-if="isDeviceAdmin"
-          icon="trash"
-          size="1x"
-          style="cursor: pointer;"
-          @click="removeUser(data.item.username)"/>
-
+          title="Remove user from device"
+          class="trash-button"
+          @click="removeUser(data.item.username, uiUser)">
+          <font-awesome-icon
+            icon="trash"
+            size="1x"
+            style="cursor: pointer;"/>
+        </b-button>
       </template>
     </b-table>
 
@@ -36,6 +40,7 @@
 </template>
 
 <script>
+import {mapState} from 'vuex';
 import DeviceAddUser from './DeviceAddUser.vue';
 import Help from '../Help.vue';
 
@@ -68,8 +73,9 @@ export default {
       },
     };
   },
-  computed: {
-    isDeviceAdmin() {
+  computed: mapState({
+    uiUser: state => state.User.userData.username,
+    isDeviceAdmin: function () {
       if (this.user && this.device.Users) {
         const username = this.user.username;
         // hack - as long as they are not added (ie global admin) or added as an admin user.
@@ -77,9 +83,18 @@ export default {
       }
       return false;
     },
-  },
+  }),
   methods: {
-    async removeUser(userName) {
+    async removeUser(userName, uiUser) {
+      if (userName == uiUser) {
+        // TODO make this dialog look nicer (same for groups)
+        var retVal = confirm("Are you sure you want to remove yourself from this device?  If you countinue " +
+        "will no longer be able to view recordings from this device and you will not be able to " +
+        "add yourself back to the group.\n\nDo you want to continue?");
+        if( retVal == false ) {
+          return;
+        }
+      }
       await this.$store.dispatch('Devices/REMOVE_USER', {userName, device: this.device});
     }
   }
@@ -101,5 +116,12 @@ export default {
       font-size: large;
       margin-top: 1.5rem;
     }
+  }
+
+  button.trash-button {
+    padding: 0;
+    background: inherit;
+    color: black;
+    border: none;
   }
 </style>

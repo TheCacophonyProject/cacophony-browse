@@ -36,6 +36,7 @@ describe('Actions', () => {
   describe('GET_GROUPS', () => {
 
     beforeEach(async () => {
+      api.getGroups.mockReturnValueOnce(testResult);
       await GroupsStore.actions.GET_GROUPS({commit, state});
     });
 
@@ -55,9 +56,9 @@ describe('Actions', () => {
   describe('ADD_GROUP', async () => {
 
     const testString = "some string";
-    api.addNewGroup.mockReturnValueOnce();
 
     beforeEach(async () => {
+      api.addNewGroup.mockReturnValueOnce({success: true});
       await GroupsStore.actions.ADD_GROUP({commit, state}, testString);
     });
 
@@ -68,6 +69,25 @@ describe('Actions', () => {
 
     test('calls _getGroup(groupName, commit, state)', async () => {
       _expectGetGroupsCalled(commit);
+    });
+  });
+
+  describe('ADD_GROUP failure (eg. groupname already used)', async () => {
+
+    const testString = "some string";
+
+    beforeEach(async () => {
+      api.addNewGroup.mockReturnValueOnce({errors: "an error", success: false});
+    });
+
+    test('calls api.groups.addNewGroup()', async () => {
+      try {
+        await GroupsStore.actions.ADD_GROUP({commit, state}, testString);
+      } catch (e) {
+        expect(commit).toHaveBeenLastCalledWith('fetched');
+        return;
+      }
+      throw new Error('Add group should have thrown an error')
     });
   });
 

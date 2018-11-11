@@ -4,7 +4,8 @@
       <h1>Group: {{ group.groupname }}</h1>
       <icon-link
         :icon="['fas', 'angle-left']"
-        :link="{ name: 'groups'}"/>
+        :link="{ name: 'groups'}"
+        :position="'right'"/>
     </header>
     <spinner :fetching="!fetched"/>
     <div v-if="group && fetched">

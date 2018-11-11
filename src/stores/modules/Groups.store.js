@@ -31,7 +31,11 @@ const actions = {
 
   async ADD_GROUP({commit, state}, groupname) {
     commit('fetching');
-    await api.groups.addNewGroup(groupname);
+    var result = await api.groups.addNewGroup(groupname);
+    if(result.errors) {
+      commit('fetched');
+      throw "There were errors";
+    }
     await _getGroup(groupname, commit, state);
     commit('fetched');
   },

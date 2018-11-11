@@ -1,7 +1,6 @@
 <template>
   <div>
-    <Hero/>
-    <b-container>
+    <b-container class="kiaora">
       <h1>Kia ora {{ username }}</h1>
       <dl>
         <dt>Username</dt>
@@ -27,9 +26,20 @@
             <b-link :to="{ name: 'group', params: { groupname: group.groupname }}">
               {{ group.groupname }}</b-link><span v-if="index+1 !== groups.length">, </span>
           </span>
+          <spinner :fetching="!fetched"/>
+          <span v-if="fetched && !groups.length">
+            <p>
+              <icon-link
+                :icon="['fas', 'exclamation-triangle']"
+                :link="{ name: 'devices'}"/>
+              You will not see any results as you do not have any devices (cacophonators or cacophonometers)</p>
+            <p>If you are setting up your own device you should  <b-link :to="{ name: 'groups'}">create a group </b-link>for your devices.</p>
+            <p>Otherwise ask the admin of your device for access to it.</p>
+          </span>
         </dd>
       </dl>
     </b-container>
+    <Hero/>
   </div>
 </template>
 
@@ -37,11 +47,15 @@
 
 import Hero from '../components/Hero.vue';
 import {mapState} from 'vuex';
+import IconLink from "../components/IconLink.vue";
+import Spinner from "../components/Spinner.vue";
 
 export default {
   name: 'HomeView',
   components: {
-    Hero
+    Hero,
+    IconLink,
+    Spinner
   },
   computed: mapState({
     user: state => state.User,
@@ -49,7 +63,8 @@ export default {
     firstname: state => state.User.userData.firstname,
     lastname: state => state.User.userData.lastname,
     email: state => state.User.userData.email,
-    groups: state => state.Groups.groups
+    groups: state => state.Groups.groups,
+    fetched: state => state.Groups.fetched,
   }),
   created: function () {
     this.fetchGroups();
@@ -61,3 +76,10 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+  .kiaora {
+    padding-bottom: 2em;
+  }
+
+</style>
