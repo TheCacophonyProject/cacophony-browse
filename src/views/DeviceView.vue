@@ -1,6 +1,7 @@
 <template>
   <b-container>
-    <header>
+    <header
+      v-if="fetched">
       <h1>Device: {{ device.devicename }}</h1>
       <icon-link
         :icon="['fas', 'angle-left']"
@@ -62,5 +63,6 @@ export default {
   h1 {
     font-size: x-large;
     margin: 0;
+    font-weight: bold;
   }
 </style>

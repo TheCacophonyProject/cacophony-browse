@@ -36,7 +36,6 @@
           </template>
         </b-table>
 
-        <h2>Add user</h2>
         <group-user-add
           v-if="isGroupAdmin"
           :group="group"/>
@@ -141,6 +140,11 @@ export default {
     margin-top: 15px;
   }
 
+  .users-detail, .devices-detail {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
   @media (min-width: 992px) {
     .users-detail {
       padding-right:30px;
@@ -152,7 +156,7 @@ export default {
   }
 
   h2 {
-    font-size: large;
+    font-size: x-large;
     margin-top: 2rem;
   }
 

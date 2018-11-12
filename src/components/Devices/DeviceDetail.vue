@@ -34,7 +34,6 @@
       </template>
     </b-table>
 
-    <h2>Add user</h2>
     <device-add-user v-if="isDeviceAdmin"/>
   </div>
 </template>
@@ -107,15 +106,8 @@ export default {
   }
 
   h2 {
-    font-size: medium;
-    margin-top: 1rem;
-  }
-
-  @media only screen and (min-width: 576px) {
-    h2 {
-      font-size: large;
+      font-size: x-large;
       margin-top: 1.5rem;
-    }
   }
 
   button.trash-button {
