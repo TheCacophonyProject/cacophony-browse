@@ -1,5 +1,6 @@
 <template>
   <b-card bg-variant="light">
+    <h3>Add user</h3>
 
     <b-form
       inline
@@ -109,6 +110,11 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
+  }
+
+  h3 {
+    font-size: large;
+    font-weight: bold;
   }
 
   @media only screen and (min-width: 576px) {

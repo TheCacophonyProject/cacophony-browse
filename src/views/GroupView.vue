@@ -1,6 +1,7 @@
 <template>
   <b-container>
-    <header>
+    <header
+      v-if="fetched">
       <h1>Group: {{ group.groupname }}</h1>
       <icon-link
         :icon="['fas', 'angle-left']"
@@ -64,10 +65,11 @@ export default {
     justify-content: space-between;
     flex-direction: row;
     align-items: center;
-    margin: 1.5rem 0;
+    margin: 1.5rem 0 -1.5em 0;
   }
 
   h1 {
+    font-weight: bold;
     font-size: x-large;
     margin: 0;
   }
