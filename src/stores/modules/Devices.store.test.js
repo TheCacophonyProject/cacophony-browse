@@ -72,7 +72,7 @@ describe('Actions', () => {
 
   describe('REMOVE_USER', async () => {
 
-    const testObject = {device: {id: 'x'}, userId: "y"};
+    const testObject = {device: {id: 21}, userName: "Bob"};
 
     beforeEach(async () => {
       await DevicesStore.actions.REMOVE_USER({commit, state}, testObject);
@@ -80,7 +80,7 @@ describe('Actions', () => {
 
     test('calls api.devices.removeDeviceUser()', async () => {
       expect(api.removeUserFromDevice).toHaveBeenCalledTimes(1);
-      expect(api.removeUserFromDevice).toHaveBeenCalledWith(testObject.userId, testObject.device.id);
+      expect(api.removeUserFromDevice).toHaveBeenCalledWith("Bob", 21);
     });
 
     test('calls _getDevice(devicename, commit, state)', async () => {

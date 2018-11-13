@@ -3,27 +3,32 @@
 
     <spinner :fetching="!fetched"/>
 
-    <p v-if="!groups.length">You currently aren't a member of any groups</p>
-
+    <div v-if="fetched && !groups.length">
+      <p>
+        <icon-link
+          :icon="['fas', 'exclamation-triangle']"/>
+        You don't belong to any groups.</p>
+      <p>If you are setting up a device, create a group below.  All the devices you
+      manage will be linked together through this group, so choose a name relating to your organisation, project or property.
+      </p>
+    </div>
     <div
-      v-for="(group, index) in groups"
+      v-for="(group, index) in orderedGroups"
       :key="index"
       class="group">
 
-      <div class="header">
+      <router-link
+        :to="{ name: 'group', params: { groupname: group.groupname }}"
+        tag="div"
+        class="header">
 
         <h4>{{ group.groupname }}</h4>
 
-        <b-link
-          :to="{ name: 'group', params: { groupname: group.groupname }}"
-          class="show-button">
-          <font-awesome-icon
-            :icon="['far', 'caret-square-right']"
-            size="2x"
-            style="cursor: pointer;"/>
-        </b-link>
-
-      </div>
+        <icon-link
+          :icon="['fas', 'angle-right']"
+          :link="{ name: 'group', params: { groupname: group.groupname }}"
+          :position="'right'"/>
+      </router-link>
     </div>
   </div>
 </template>
@@ -32,13 +37,17 @@
 
 import {mapState} from 'vuex';
 import Spinner from '../Spinner.vue';
+import IconLink from '../IconLink.vue';
 
 export default {
   name: "GroupListing",
-  components: {Spinner},
+  components: {Spinner, IconLink},
   computed: mapState({
     groups: state => state.Groups.groups,
-    fetched: state => state.Groups.fetched
+    fetched: state => state.Groups.fetched,
+    orderedGroups: function () {
+      return this.groups.sort((a, b) => a.groupname.localeCompare( b.groupname) );
+    }
   })
 };
 </script>
@@ -49,13 +58,6 @@ export default {
     margin-top: 0.75rem;
     font-size: 1rem;
   }
-
-  .show-button {
-    display: flex;
-    margin-left: auto;
-
-  }
-
   .group {
     padding: 0.75rem;
     border-top: 1px solid #dee2e6;
@@ -67,4 +69,7 @@ export default {
     display: flex;
   }
 
+  p {
+    display: flex;
+  }
 </style>

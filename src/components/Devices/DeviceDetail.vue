@@ -1,10 +1,11 @@
 <template>
   <div class="device-detail">
-    <h2>Users</h2>
+    <h2>Users <help :help-text="usersHelpTip"/></h2>
 
     <b-table
       :items="device.Users"
       :fields="deviceUsersTableFields"
+      :sort-by="userSortBy"
       striped
       hover
       responsive>
@@ -19,25 +20,32 @@
         slot="controls"
         slot-scope="data">
 
-        <!-- TODO: Review the role restrictions for Devices Admin - See GroupDetail.vue for example -->
-        <font-awesome-icon
-          icon="trash"
-          size="1x"
-          style="cursor: pointer;"
-          @click="removeUser(data.item.id)"/>
-
+        <b-button
+          v-b-tooltip.hover
+          v-if="isDeviceAdmin"
+          title="Remove user from device"
+          class="trash-button"
+          @click="removeUser(data.item.username, uiUser)">
+          <font-awesome-icon
+            icon="trash"
+            size="1x"
+            style="cursor: pointer;"/>
+        </b-button>
       </template>
     </b-table>
-    <device-add-user />
+
+    <device-add-user v-if="isDeviceAdmin"/>
   </div>
 </template>
 
 <script>
+import {mapState} from 'vuex';
 import DeviceAddUser from './DeviceAddUser.vue';
+import Help from '../Help.vue';
 
 export default {
   name: "DeviceDetail",
-  components: { DeviceAddUser },
+  components: { DeviceAddUser, Help },
   props: {
     device: {
       type: Object,
@@ -51,16 +59,42 @@ export default {
   data() {
     return {
       deviceUsersTableFields: [
-        {key: 'id', label: 'Id'},
         {key: 'username', label: 'User Name'},
         {key: 'admin', label: 'Admin'},
         {key: 'controls', label: '', class: 'device-actions-cell'}
-      ]
+      ],
+      userSortBy: 'username',
+      usersHelpTip: {
+        title: 'Users',
+        content: '<p>These are the users who can view recordings just for this device.  (The device\'s group users ' +
+          ' can also view the recordings)</p>' +
+          '<p>If you are an admin, you can also add device users.</p>'
+      },
     };
   },
+  computed: mapState({
+    uiUser: state => state.User.userData.username,
+    isDeviceAdmin: function () {
+      if (this.user && this.device.Users) {
+        const username = this.user.username;
+        // hack - as long as they are not added (ie global admin) or added as an admin user.
+        return !this.device.Users.some(user => username === user.username && !user.DeviceUsers.admin);
+      }
+      return false;
+    },
+  }),
   methods: {
-    async removeUser(userId) {
-      await this.$store.dispatch('Devices/REMOVE_USER', {userId, device: this.device});
+    async removeUser(userName, uiUser) {
+      if (userName == uiUser) {
+        // TODO make this dialog look nicer (same for groups)
+        var retVal = confirm("Are you sure you want to remove yourself from this device?  If you countinue " +
+        "will no longer be able to view recordings from this device and you will not be able to " +
+        "add yourself back to the group.\n\nDo you want to continue?");
+        if( retVal == false ) {
+          return;
+        }
+      }
+      await this.$store.dispatch('Devices/REMOVE_USER', {userName, device: this.device});
     }
   }
 };
@@ -72,14 +106,14 @@ export default {
   }
 
   h2 {
-    font-size: medium;
-    margin-top: 1rem;
+      font-size: x-large;
+      margin-top: 1.5rem;
   }
 
-  @media only screen and (min-width: 576px) {
-    h2 {
-      font-size: large;
-      margin-top: 1.5rem;
-    }
+  button.trash-button {
+    padding: 0;
+    background: inherit;
+    color: black;
+    border: none;
   }
 </style>

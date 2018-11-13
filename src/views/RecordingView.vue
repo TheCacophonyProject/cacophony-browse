@@ -2,7 +2,7 @@
   <b-container v-if="recording">
     <b-row>
       <b-col cols="12">
-        <h4>'{{ recording.Device.devicename }}' - {{ date }}, {{ time }}</h4>
+        <h4>'{{ devicename }}' - {{ date }}, {{ time }}</h4>
       </b-col>
 
       <b-col
@@ -108,6 +108,12 @@ export default {
         const date = new Date(state.Video.recording.recordingDateTime);
         return date.toLocaleTimeString();
       },
+      devicename: state => {
+        if (state.Video.recording.Device) {
+          return state.Video.recording.Device.devicename;
+        }
+        return "";
+      },
       fileSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
       rawSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
       processingState: state => {
@@ -148,18 +154,14 @@ export default {
         DeviceId: this.recording.Device.id
       };
 
-      if (tags) {
-        where.tags = JSON.stringify(tags);
-      }
-
       let order;
       switch (direction) {
       case "next":
-        where.recordingDateTime = {gt: this.recording.recordingDateTime};
+        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
         order = "ASC";
         break;
       case "previous":
-        where.recordingDateTime = {lt: this.recording.recordingDateTime};
+        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
         order = "DESC";
         break;
       case "either":
@@ -179,6 +181,13 @@ export default {
         limit: 1,
         offset: 0
       };
+
+      if (tags) {
+        params.tags = JSON.stringify(tags);
+      }
+      if (tagMode) {
+        params.tagMode = tagMode;
+      }
 
       return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
     },

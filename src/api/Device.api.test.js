@@ -34,16 +34,16 @@ describe('addUserToDevice() calls fetch', () => {
 
   test('with the correct request params', async () => {
     const
-      testUserId = 123456,
+      testUser = "james",
       testDeviceId = 654321,
       testIsAdmin = true;
 
-    await devicesApi.addUserToDevice(testUserId, testDeviceId, testIsAdmin);
+    await devicesApi.addUserToDevice(testUser, testDeviceId, testIsAdmin);
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'POST',
-        body: querystring.stringify({userId: testUserId, deviceId: testDeviceId, admin: testIsAdmin}),
+        body: querystring.stringify({username: testUser, deviceId: testDeviceId, admin: testIsAdmin}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }
@@ -66,15 +66,15 @@ describe('removeUserFromDevice() calls fetch', () => {
 
   test('with the correct request params', async () => {
     const
-      testUserId = 123456,
+    testUser = "james",
       testDeviceId = 654321;
 
-    await devicesApi.removeUserFromDevice(testUserId, testDeviceId);
+    await devicesApi.removeUserFromDevice(testUser, testDeviceId);
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject(
       {
         method: 'DELETE',
-        body: querystring.stringify({userId: testUserId, deviceId: testDeviceId}),
+        body: querystring.stringify({username: testUser, deviceId: testDeviceId}),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
         }

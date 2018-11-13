@@ -16,7 +16,8 @@ import {
   faAngleRight,
   faAngleDoubleRight,
   faQuestion,
-  faAsterisk
+  faAsterisk,
+  faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
@@ -48,7 +49,8 @@ library.add(
   faAngleRight,
   faAngleDoubleRight,
   faQuestion,
-  faAsterisk
+  faAsterisk,
+  faExclamationTriangle
 );
 
 export default FontAwesomeIcon;

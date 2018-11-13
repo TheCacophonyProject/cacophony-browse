@@ -1,6 +1,6 @@
 <template v-if="groups">
   <b-container>
-    <h1>Groups</h1>
+    <h1>Your Groups <help :help-text="helpTip"/></h1>
     <group-listing :groups="groups" />
     <group-add />
   </b-container>
@@ -10,13 +10,24 @@
 
 import GroupAdd from '../components/Groups/GroupAdd.vue';
 import GroupListing from '../components/Groups/GroupListing.vue';
+import Help from '../components/Help.vue';
 import {mapState} from 'vuex';
 
 export default {
   name: 'GroupsView',
   components: {
     GroupAdd,
-    GroupListing
+    GroupListing,
+    Help
+  },
+  data() {
+    return {
+      helpTip: {
+        title: 'Groups',
+        content: '<p>Groups link together devices with the users who can view their recordings</p> ' +
+          '<p>Click on a group to see its devices and users.</p>'
+      }
+    };
   },
   computed:
     mapState({

@@ -1,19 +1,15 @@
 <template>
   <b-container>
-    <h2>Group</h2>
+    <header
+      v-if="fetched">
+      <h1>Group: {{ group.groupname }}</h1>
+      <icon-link
+        :icon="['fas', 'angle-left']"
+        :link="{ name: 'groups'}"
+        :position="'right'"/>
+    </header>
     <spinner :fetching="!fetched"/>
     <div v-if="group && fetched">
-      <header>
-        <h1>{{ group.groupname }}</h1>
-        <b-link
-          class="hide-button"
-          @click="back()">
-          <font-awesome-icon
-            :icon="['far', 'window-close']"
-            size="2x"
-            style="cursor: pointer;"/>
-        </b-link>
-      </header>
       <group-detail
         :group="group"
         :user="currentUser"
@@ -27,21 +23,17 @@
 import {mapState} from 'vuex';
 import GroupDetail from '../components/Groups/GroupDetail.vue';
 import Spinner from '../components/Spinner.vue';
+import IconLink from '../components/IconLink.vue';
 
 export default {
   name: 'GroupView',
-  components: {GroupDetail, Spinner},
+  components: {GroupDetail, Spinner, IconLink},
   props: {},
   data() {
     return {
       addGroupUserName: null,
       addGroupUserAdmin: false,
       addUserErrorMessage: null,
-      userTableFields: [
-        {key: 'username', label: 'User'},
-        {key: 'isAdmin', label: 'Admin'},
-        {key: 'deleteButton', label: ''}
-      ]
     };
   },
   computed:
@@ -62,9 +54,6 @@ export default {
   methods: {
     fetchGroup: async function () {
       await this.$store.dispatch('Groups/GET_GROUP', this.$route.params.groupname);
-    },
-    back: function () {
-      this.$router.history.go(-1);
     }
   }
 };
@@ -76,17 +65,12 @@ export default {
     justify-content: space-between;
     flex-direction: row;
     align-items: center;
-    margin: 1.5rem 0;
+    margin: 1.5rem 0 -1.5em 0;
   }
-
 
   h1 {
-    font-size: large;
-    margin: 0;
-  }
-
-  h2 {
+    font-weight: bold;
     font-size: x-large;
-    margin: 1.5rem 0;
+    margin: 0;
   }
 </style>

@@ -1,6 +1,6 @@
-# cacophony-web-vue
+# cacophony-browse
 
-This is a reimplementation of the [Cacophony Project web UI](https://github.com/TheCacophonyProject/cacophony-web/) using modern practices. It is based on the [Vue](https://vuejs.org) framework and uses [Vuex](https://vuex.vuejs.org) for state management.
+This is a web interface for querying with and interacting with Cacophony Project recordings using the project's API. It is based on the [Vue](https://vuejs.org) framework and uses [Vuex](https://vuex.vuejs.org) for state management.
 
 
 ## Build Setup
@@ -8,6 +8,10 @@ This is a reimplementation of the [Cacophony Project web UI](https://github.com/
 ``` bash
 # install dependencies
 npm install
+
+# create config file
+cp dev-config.js.TEMPLATE to dev-config.js
+# now edit the config file to point to correct API server
 
 # serve with hot reload at localhost:8080
 npm run dev
@@ -30,11 +34,11 @@ https://vuejs.org/v2/style-guide/#ad
 * Tag the release (starting with a "v"), e.g.: `git tag -a v1.2.3 -m "1.2.3 release"`
 * Push the tag to Github, e.g.: `git push origin v1.2.3`
 * TravisCI will run the tests, create a release package and create a
-  [Github Release](https://github.com/TheCacophonyProject/cacophony-web-vuex/releases)
+  [Github Release](https://github.com/TheCacophonyProject/cacophony-browse/releases)
 
 ## Web Server Configuration
 
-The /srv/cacophony/cacophony-web-vuex directory in the release package
+The /srv/cacophony/cacophony-browse directory in the release package
 should be served by a web server.
 
 Sample configuration for the [Caddy](https://caddyserver.com/) web server:
@@ -43,7 +47,7 @@ Sample configuration for the [Caddy](https://caddyserver.com/) web server:
 # Update the host and port to match desired
 http://localhost:9000 {
     gzip
-    root  /srv/cacophony/cacophony-web-vuex
+    root  /srv/cacophony/cacophony-browse
 
     rewrite {
         ext !.jpg !.png !.svg !.js

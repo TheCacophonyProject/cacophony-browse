@@ -1,5 +1,6 @@
 <template>
   <b-card bg-variant="light">
+    <h3>Add user</h3>
 
     <b-form
       inline
@@ -12,7 +13,7 @@
         v-model="$v.form.username.$model"
         aria-describedby="input1LiveFeedback"
         type="text"
-        placeholder="User Id"
+        placeholder="Username"
         autofocus
         class="input"
       />
@@ -29,7 +30,7 @@
           :disabled="$v.form.$invalid || !fetched"
           type="submit"
           variant="primary">
-          Add Device User
+          Add User to Device
         </b-button>
       </div>
     </b-form>
@@ -105,6 +106,11 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
+  }
+
+  h3 {
+    font-size: large;
+    font-weight: bold;
   }
 
   @media only screen and (min-width: 576px) {

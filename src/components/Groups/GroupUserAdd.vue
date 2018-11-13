@@ -1,5 +1,6 @@
 <template>
   <b-card bg-variant="light">
+    <h3>Add user</h3>
 
     <b-form
       inline
@@ -13,7 +14,7 @@
         aria-describedby="input1LiveFeedback"
         type="text"
         autofocus
-        placeholder="User Id"
+        placeholder="Username"
         class="input"
       />
 
@@ -30,7 +31,7 @@
           :disabled="$v.form.$invalid"
           type="submit"
           variant="primary">
-          Add Group User
+          Add user to group
         </b-button>
       </div>
     </b-form>
@@ -82,7 +83,7 @@ export default {
         const params = {
           userName: this.$v.form.username.$model,
           isAdmin: this.$v.form.isAdmin.$model,
-          groupId: this.group.id
+          groupName: this.group.groupname
         };
 
         this.$store.dispatch('Groups/ADD_GROUP_USER', params);
@@ -109,6 +110,11 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
+  }
+
+  h3 {
+    font-size: large;
+    font-weight: bold;
   }
 
   @media only screen and (min-width: 576px) {

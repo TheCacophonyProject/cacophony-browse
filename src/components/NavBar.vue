@@ -12,16 +12,17 @@
         id="navbarToggler"
         is-nav>
         <b-navbar-nav v-if="isLoggedIn">
-          <b-nav-item to="/audiobait">Audio Bait</b-nav-item>
           <b-nav-item to="/recordings">Recordings</b-nav-item>
-          <b-nav-item to="/groups">Groups</b-nav-item>
-          <b-nav-item to="/devices">Devices</b-nav-item>
           <b-nav-item to="/data">Data</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav
           v-if="isLoggedIn"
           class="ml-auto">
           <b-nav-text>Hello {{ userName }}</b-nav-text>
+          <b-nav-item-dropdown text="Settings">
+            <b-dropdown-item href="/groups">Groups</b-dropdown-item>
+            <b-dropdown-item href="/devices">Devices</b-dropdown-item>
+          </b-nav-item-dropdown>
           <b-nav-item @click="logout">Logout</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav

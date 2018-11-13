@@ -12,7 +12,7 @@ before_deploy:
 - npm version --no-git-tag-version ${version}
 - npm run release
 - "curl -sL https://github.com/goreleaser/nfpm/releases/download/v0.9.5/nfpm_0.9.5_Linux_x86_64.tar.gz | tar -C /tmp -xzf -"
-- /tmp/nfpm pkg -t cacophony-web-vuex_${version}.deb
+- /tmp/nfpm pkg -t cacophony-browse_${version}.deb
 
 deploy:
   provider: releases
@@ -23,4 +23,4 @@ deploy:
   file: "*.deb"
   on:
     tags: true
-    repo: TheCacophonyProject/cacophony-web-vuex
+    repo: TheCacophonyProject/cacophony-browse

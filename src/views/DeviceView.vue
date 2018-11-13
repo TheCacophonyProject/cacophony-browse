@@ -1,19 +1,15 @@
 <template>
   <b-container>
-    <h2>Device</h2>
+    <header
+      v-if="fetched">
+      <h1>Device: {{ device.devicename }}</h1>
+      <icon-link
+        :icon="['fas', 'angle-left']"
+        :link="{ name: 'devices'}"
+        :position="'right'"/>
+    </header>
     <spinner :fetching="!fetched" />
     <div v-if="device && fetched">
-      <header>
-        <h1>{{ device.devicename }}</h1>
-        <b-link
-          class="hide-button"
-          @click="back()">
-          <font-awesome-icon
-            :icon="['far', 'window-close']"
-            size="2x"
-            style="cursor: pointer;"/>
-        </b-link>
-      </header>
       <device-detail
         :device="device"
         :user="currentUser"
@@ -27,10 +23,11 @@
 import {mapState} from 'vuex';
 import DeviceDetail from '../components/Devices/DeviceDetail.vue';
 import Spinner from '../components/Spinner.vue';
+import IconLink from '../components/IconLink.vue';
 
 export default {
   name: 'DeviceView',
-  components: {DeviceDetail, Spinner},
+  components: {DeviceDetail, Spinner, IconLink},
   props: {},
   computed:
     mapState({
@@ -49,9 +46,6 @@ export default {
   methods: {
     fetchDevice: async function () {
       await this.$store.dispatch('Devices/GET_DEVICE', this.$route.params.devicename);
-    },
-    back: function () {
-      this.$router.history.go(-1);
     }
   }
 };
@@ -67,12 +61,8 @@ export default {
   }
 
   h1 {
-    font-size: large;
-    margin: 0;
-  }
-
-  h2 {
     font-size: x-large;
-    margin: 1.5rem 0;
+    margin: 0;
+    font-weight: bold;
   }
 </style>

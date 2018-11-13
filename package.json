@@ -1,9 +1,9 @@
 {
-  "name": "cacophony-web-vue",
-  "description": "Cacophony web",
+  "name": "cacophony-browse",
+  "description": "Web interface for the Cacophony Project API",
   "version": "0.0.0",
-  "author": "Andy Saunders <adbs1@yahoo.com>",
-  "license": "MIT",
+  "author": "Cacophony Developers <dev@cacophony.org.nz>",
+  "license": "GPLv3",
   "private": true,
   "scripts": {
     "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
@@ -26,6 +26,7 @@
     "chart.js": "^2.7.3",
     "cross-fetch": "^2.2.2",
     "jquery": "^3.3.1",
+    "merge": "^1.2.1",
     "vue": "^2.5.11",
     "vue-multiselect": "^2.1.0",
     "vue-router": "^3.0.1",

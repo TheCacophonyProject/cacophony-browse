@@ -36,6 +36,7 @@ describe('Actions', () => {
   describe('GET_GROUPS', () => {
 
     beforeEach(async () => {
+      api.getGroups.mockReturnValueOnce(testResult);
       await GroupsStore.actions.GET_GROUPS({commit, state});
     });
 
@@ -55,9 +56,9 @@ describe('Actions', () => {
   describe('ADD_GROUP', async () => {
 
     const testString = "some string";
-    api.addNewGroup.mockReturnValueOnce();
 
     beforeEach(async () => {
+      api.addNewGroup.mockReturnValueOnce({success: true});
       await GroupsStore.actions.ADD_GROUP({commit, state}, testString);
     });
 
@@ -66,20 +67,39 @@ describe('Actions', () => {
       expect(api.addNewGroup).toHaveBeenCalledWith(testString);
     });
 
-    test('calls _getGroup(groupname, commit, state)', async () => {
+    test('calls _getGroup(groupName, commit, state)', async () => {
       _expectGetGroupsCalled(commit);
     });
   });
 
+  describe('ADD_GROUP failure (eg. groupname already used)', async () => {
+
+    const testString = "some string";
+
+    beforeEach(async () => {
+      api.addNewGroup.mockReturnValueOnce({errors: "an error", success: false});
+    });
+
+    test('calls api.groups.addNewGroup()', async () => {
+      try {
+        await GroupsStore.actions.ADD_GROUP({commit, state}, testString);
+      } catch (e) {
+        expect(commit).toHaveBeenLastCalledWith('fetched');
+        return;
+      }
+      throw new Error('Add group should have thrown an error')
+    });
+  });
+
   describe('ADD_GROUP_USER', async () => {
-    const testObject = {groupId: 'x', userName: "y", isAdmin: "z"};
+    const testObject = {groupName: 'x', userName: "y", isAdmin: "z"};
     beforeEach(async () => {
       await GroupsStore.actions.ADD_GROUP_USER({commit, state}, testObject);
     });
 
     test('calls api.groups.addGroupUser()', async () => {
       expect(api.addGroupUser).toHaveBeenCalledTimes(1);
-      expect(api.addGroupUser).toHaveBeenCalledWith(testObject.groupId, testObject.userName, testObject.isAdmin);
+      expect(api.addGroupUser).toHaveBeenCalledWith(testObject.groupName, testObject.userName, testObject.isAdmin);
     });
 
     test('calls _getGroup(groupname, commit, state)', async () => {
@@ -89,7 +109,7 @@ describe('Actions', () => {
 
   describe('REMOVE_GROUP_USER', async () => {
 
-    const testObject = {groupId: 'x', userId: "y"};
+    const testObject = {groupName: 'x', userName: "y"};
 
     beforeEach(async () => {
       await GroupsStore.actions.REMOVE_GROUP_USER({commit, state}, testObject);
@@ -97,10 +117,10 @@ describe('Actions', () => {
 
     test('calls api.groups.removeGroupUser()', async () => {
       expect(api.removeGroupUser).toHaveBeenCalledTimes(1);
-      expect(api.removeGroupUser).toHaveBeenCalledWith(testObject.groupId, testObject.userId);
+      expect(api.removeGroupUser).toHaveBeenCalledWith(testObject.groupName, testObject.userName);
     });
 
-    test('calls _getGroup(groupname, commit, state)', async () => {
+    test('calls _getGroup(groupName, commit, state)', async () => {
       _expectGetGroupsCalled(commit);
     });
   });
