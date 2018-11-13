@@ -14,7 +14,18 @@
     <DateRange
       v-model="dateRange"
       @update="getData()"/>
-  </b-container>
+    <div
+      v-if="!fetching && unused.length > 0" 
+      class="mt-2">
+      Devices with no recordings for the selected time period:
+      <ul>
+        <li
+          v-for="(name, index) in unused"
+          :key="index">
+          {{ name }}
+        </li>
+      </ul>
+  </div></b-container>
 </template>
 
 <script>
@@ -39,7 +50,8 @@ export default {
       title: "",
       data: {},
       fetching: false,
-      dateRange: 7
+      dateRange: 7,
+      unused: []
     };
   },
   computed: {
@@ -89,7 +101,7 @@ export default {
       // Create data and label variables
       const labels = [];
       const data = [];
-      const unused = [];
+      this.unused = [];
       for (const device of this.devices) {
         if (this.deviceCount[device.id] > 0) {
           data.push({
@@ -99,7 +111,7 @@ export default {
           });
           labels.push(device.name);
         } else {
-          unused.push(device.name);
+          this.unused.push(device.name);
         }
       }
 
