@@ -16,6 +16,7 @@
           <b-nav-item to="/recordings">Recordings</b-nav-item>
           <b-nav-item to="/groups">Groups</b-nav-item>
           <b-nav-item to="/devices">Devices</b-nav-item>
+          <b-nav-item to="/data">Data</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav
           v-if="isLoggedIn"
