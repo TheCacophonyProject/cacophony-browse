@@ -71,7 +71,6 @@ export default {
         offset: 0,
         tagMode: "any"
       };
-      console.log('Query', params);
 
       // Get all data (first 1000 rows)
       let allData = await api.query(params);
@@ -105,23 +104,37 @@ export default {
       }
 
       // Create colors for bar graphs
+      const colorPicker = () => {
+        let hue;
+        if (this.lastHue < 360) {
+          hue = this.lastHue + 60;
+          this.lastHue = hue;
+        } else {
+          hue = this.lastHue - 339;
+          this.lastHue = hue;
+        }
+        const hsl = `hsl(${hue}, 80%, 80%)`;
+        return hsl;
+      };
       this.lastHue = -60; // reset starting hue
-      const colors = data.map(() => 'hsl(-60, 80%, 50%)');
+      const colors = data.map(() => colorPicker());
       // Create dataset suitable for ChartJS
       this.data = {
         labels: labels,
         datasets: [
           {
             data: data.map((item) => item.count),
-
+            backgroundColor: colors,
+            borderColor: colors,
+            borderWidth: 1
           }
-        ],
-        // label: "Number of recordings",
-        backgroundColor: colors,
-        borderColor: colors,
-        borderWidth: 1
+        ]
       };
-      this.title = `Device Activity (Last ${this.dateRange} days)`;
+      if (this.dateRange === 0) {
+        this.title = 'Device Activity (All time)';
+      } else {
+        this.title = `Device Activity (Last ${this.dateRange} days)`;
+      }
       this.fetching = false;
     },
     dateQuery() {
@@ -132,31 +145,24 @@ export default {
         return year + "-" + month + "-" + day;
       };
       const today = new Date(Date.now()); // today
-      const todayms = today.getTime(); // today in ms
-      const daysms = this.dateRange*24*60*60*1000; // days to go back in ms
-      const fromdatems = todayms - daysms; // from date in ms
-      const fromDate = parseDate(new Date(fromdatems)); // from date as text
       const toDate = parseDate(today); // to date as text
-      return {
-        "$gt": fromDate,
-        "$lt": toDate
-      };
+
+      if (this.dateRange === 0) {
+        return {
+          "$lt": toDate
+        };
+      } else {
+        const todayms = today.getTime(); // today in ms
+        const daysms = this.dateRange*24*60*60*1000; // days to go back in ms
+        const fromdatems = todayms - daysms; // from date in ms
+        const fromDate = parseDate(new Date(fromdatems)); // from date as text
+        return {
+          "$gt": fromDate,
+          "$lt": toDate
+        };
+      }
+
     }
-  },
-  colorPicker() {
-    let hue;
-    if (this.lastHue < 360) {
-      hue = this.lastHue + 60;
-      this.lastHue = hue;
-    } else {
-      hue = this.lastHue - 339;
-      this.lastHue = hue;
-    }
-    const hsl = `hsl(${hue}, 80%, 50%)`;
-    return hsl;
-  },
-
-
-
+  }
 };
 </script>
