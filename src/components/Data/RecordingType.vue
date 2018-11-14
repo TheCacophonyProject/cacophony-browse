@@ -1,14 +1,14 @@
 <template>
-  <b-button-group
-    :vertical="vertical"
+  <b-button-group 
+    :vertical="vertical" 
     class="my-1">
     <b-btn
-      v-for="(date, index) in dates"
+      v-for="(type, index) in types"
       :key="index"
-      :variant="variant(date.value)"
+      :variant="variant(type.value)"
       active
-      @click="$emit('input', date.value)">
-      {{ date.text }}
+      @click="$emit('input', type.value)">
+      {{ type.text }}
     </b-btn>
   </b-button-group>
 </template>
@@ -16,10 +16,10 @@
 <script>
 
 export default {
-  name: 'DateRange',
+  name: 'RecordingType',
   props: {
     value: {
-      type: Number,
+      type: String,
       required: true
     },
     vertical: {
@@ -29,12 +29,10 @@ export default {
   },
   data: function () {
     return {
-      dates: [
-        {text: 'Last 7 Days', value: 7},
-        {text: 'Last 30 Days', value: 30},
-        {text: 'Last 60 Days', value: 60},
-        {text: 'Last 365 Days', value: 365},
-        {text: 'All Time', value: 0}
+      types: [
+        {text: 'Video', value: 'video'},
+        {text: 'Audio', value: 'audio'},
+        {text: 'Video & Audio', value: 'both'},
       ]
     };
   },

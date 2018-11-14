@@ -13,9 +13,14 @@
     </div>
     <DateRange
       v-model="dateRange"
-      @update="getData()"/>
+      :vertical="vertical"/>
+    <RecordingType
+      v-model="recordingTypes"
+      :vertical="vertical"/>
+    <UpdateGraphButton @update="getData()"/>
+
     <div
-      v-if="!fetching && unused.length > 0" 
+      v-if="!fetching && unused.length > 0"
       class="mt-2">
       Devices with no recordings for the selected time period:
       <ul>
@@ -34,11 +39,13 @@ import BarChart from '../components/Chart/BarChart.vue';
 import Spinner from '../components/Spinner.vue';
 import api from './../api/Recording.api.js';
 import DateRange from '../components/Data/DateRange.vue';
+import RecordingType from '../components/Data/RecordingType.vue';
+import UpdateGraphButton from '../components/Data/UpdateGraphButton.vue';
 
 export default {
   name: 'DataView',
   components: {
-    BarChart, Spinner, DateRange
+    BarChart, Spinner, DateRange, RecordingType, UpdateGraphButton
   },
   props: {
 
@@ -51,7 +58,9 @@ export default {
       data: {},
       fetching: false,
       dateRange: 7,
-      unused: []
+      unused: [],
+      recordingTypes: 'both',
+      width: window.innerWidth
     };
   },
   computed: {
@@ -62,18 +71,37 @@ export default {
       // .sort((a,b) => {
       //   return a.name - b.name;
       // });
+    },
+    type: function () {
+      switch (this.recordingTypes) {
+      case 'both':
+        return ['thermalRaw', 'audio'];
+      case 'video':
+        return 'thermalRaw';
+      case 'audio':
+        return 'audio';
+      default:
+        return 'both';
+      }
+    },
+    vertical: function () {
+      // Change button orientation to vertical on small screen sizes
+      return this.width < 576;
     }
   },
   created: async function() {
     await this.$store.dispatch('Devices/GET_DEVICES');
     await this.getData();
+    window.addEventListener('resize', () => {
+      this.width = window.innerWidth;
+    });
   },
   methods: {
     getData: async function () {
       this.fetching = true;
       // Extract query information
       const where = {
-        type: 'thermalRaw',
+        type: this.type,
         recordingDateTime: this.dateQuery()
       };
       const limit = 1000;
