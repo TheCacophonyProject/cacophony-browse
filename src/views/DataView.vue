@@ -11,12 +11,23 @@
         y-axis-label="Number of Recordings"
       />
     </div>
-    <DateRange
-      v-model="dateRange"
-      :vertical="vertical"/>
-    <RecordingType
-      v-model="recordingTypes"
-      :vertical="vertical"/>
+    <b-row>
+      <b-col>
+        <DateRange
+          v-model="dateRange"
+          :vertical="vertical"/>
+      </b-col>
+      <b-col>
+        <RecordingType
+          v-model="recordingTypes"
+          :vertical="vertical"/>
+      </b-col>
+      <b-col>
+        <DeviceGroups
+          v-model="showGroups"
+          :all-groups="allGroups"/>
+      </b-col>
+    </b-row>
     <UpdateGraphButton @update="getData()"/>
 
     <div
@@ -41,11 +52,12 @@ import api from './../api/Recording.api.js';
 import DateRange from '../components/Data/DateRange.vue';
 import RecordingType from '../components/Data/RecordingType.vue';
 import UpdateGraphButton from '../components/Data/UpdateGraphButton.vue';
+import DeviceGroups from '../components/Data/DeviceGroups.vue';
 
 export default {
   name: 'DataView',
   components: {
-    BarChart, Spinner, DateRange, RecordingType, UpdateGraphButton
+    BarChart, Spinner, DateRange, RecordingType, UpdateGraphButton, DeviceGroups
   },
   props: {
 
@@ -60,13 +72,32 @@ export default {
       dateRange: 7,
       unused: [],
       recordingTypes: 'both',
-      width: window.innerWidth
+      width: window.innerWidth,
+      showGroups: 'all'
     };
   },
   computed: {
     devices: function () {
-      return this.$store.state.Devices.devices.map(device => {
+      let devices;
+      if (this.showGroups === 'all') {
+        devices = this.$store.state.Devices.devices;
+      } else {
+        for (const group of this.allGroups) {
+          if (group.id === this.showGroups) {
+            devices = group.devices;
+          }
+        }
+      }
+      return devices.map(device => {
         return {id: device.id, name: device.devicename};
+      });
+      // .sort((a,b) => {
+      //   return a.name - b.name;
+      // });
+    },
+    allGroups: function () {
+      return this.$store.state.Groups.groups.map(group => {
+        return {id: group.id, name: group.groupname, devices: group.Devices};
       });
       // .sort((a,b) => {
       //   return a.name - b.name;
@@ -91,6 +122,7 @@ export default {
   },
   created: async function() {
     await this.$store.dispatch('Devices/GET_DEVICES');
+    await this.$store.dispatch('Groups/GET_GROUPS');
     await this.getData();
     window.addEventListener('resize', () => {
       this.width = window.innerWidth;

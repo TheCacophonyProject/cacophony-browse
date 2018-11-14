@@ -1,16 +1,15 @@
 <template>
-  <b-button-group
-    :vertical="vertical"
-    class="my-1">
-    <b-btn
-      v-for="(date, index) in dates"
-      :key="index"
-      :variant="variant(date.value)"
-      active
-      @click="$emit('input', date.value)">
-      {{ date.text }}
-    </b-btn>
-  </b-button-group>
+  <b-form-group label="Date range">
+    <b-button-group :vertical="vertical">
+      <b-btn
+        v-for="(date, index) in dates"
+        :key="index"
+        :variant="variant(date.value)"
+        @click="$emit('input', date.value)">
+        {{ date.text }}
+      </b-btn>
+    </b-button-group>
+  </b-form-group>
 </template>
 
 <script>

@@ -1,16 +1,15 @@
 <template>
-  <b-button-group 
-    :vertical="vertical" 
-    class="my-1">
-    <b-btn
-      v-for="(type, index) in types"
-      :key="index"
-      :variant="variant(type.value)"
-      active
-      @click="$emit('input', type.value)">
-      {{ type.text }}
-    </b-btn>
-  </b-button-group>
+  <b-form-group label="Device Type">
+    <b-button-group :vertical="vertical">
+      <b-btn
+        v-for="(type, index) in types"
+        :key="index"
+        :variant="variant(type.value)"
+        @click="$emit('input', type.value)">
+        {{ type.text }}
+      </b-btn>
+    </b-button-group>
+  </b-form-group>
 </template>
 
 <script>
