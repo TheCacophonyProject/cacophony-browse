@@ -161,7 +161,6 @@ export default {
         params.limit = allData.count;
         allData = await api.query(params);
       }
-
       // Count the number of recordings for each device
       this.devices.map((device) => this.deviceCount[device.id] = 0);
       for (const row of allData.rows) {
@@ -211,28 +210,34 @@ export default {
           }
         ]
       };
+      const title = 'Device Activity';
       if (this.dateRange === 0) {
-        this.title = 'Device Activity (All time)';
-      } else {
-        this.title = `Device Activity (Last ${this.dateRange} days)`;
+        this.title = `${title} (All time)`;
+      } else if (this.dateRange ===1) {
+        this.title = `${title} (Last 24 Hours)`;
+      }else {
+        this.title = `${title} (Last ${this.dateRange} days)`;
       }
       this.fetching = false;
     },
     dateQuery() {
       const parseDate = function (date) {
+        const hour = (0 + date.getHours().toString()).slice(-2);
+        const min = (0 + date.getMinutes().toString()).slice(-2);
         const day = (0 + date.getDate().toString()).slice(-2);
         const month = (0 + (date.getMonth() + 1).toString()).slice(-2);
         const year = date.getFullYear();
-        return year + "-" + month + "-" + day;
+        return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + "00";
       };
       const today = new Date(Date.now()); // today
       const toDate = parseDate(today); // to date as text
 
       if (this.dateRange === 0) {
+        // All time option
         return {
           "$lt": toDate
         };
-      } else {
+      }       else {
         const todayms = today.getTime(); // today in ms
         const daysms = this.dateRange*24*60*60*1000; // days to go back in ms
         const fromdatems = todayms - daysms; // from date in ms

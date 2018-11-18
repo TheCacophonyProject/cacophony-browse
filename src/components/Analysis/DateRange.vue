@@ -29,6 +29,7 @@ export default {
   data: function () {
     return {
       dates: [
+        {text: 'Last 24 Hours', value: 1},
         {text: 'Last 7 Days', value: 7},
         {text: 'Last 30 Days', value: 30},
         {text: 'Last 60 Days', value: 60},
