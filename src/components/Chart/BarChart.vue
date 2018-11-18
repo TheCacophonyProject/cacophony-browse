@@ -82,7 +82,10 @@ export default {
           legend: {
             display: false
           },
-          maintainAspectRatio: false
+          maintainAspectRatio: false,
+          onClick: (event, array) => {
+            this.$emit('click', array);
+          }
         }
       };
     }

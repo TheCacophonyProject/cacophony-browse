@@ -10,6 +10,7 @@
         :log="logarithmic"
         x-axis-label = "Device Name"
         y-axis-label="Number of Recordings"
+        @click="gotoRecordingsSearchPage($event)"
       />
     </div>
     <b-row>
@@ -260,6 +261,23 @@ export default {
         };
       }
 
+    },
+    gotoRecordingsSearchPage (array) {
+      const fromDate = this.dateQuery()['$gt'].slice(0,10);
+      const toDate = this.dateQuery()['$lt'].slice(0,10);
+      const deviceName = array[0]._model.label;
+      const deviceId = this.devices.find((device) => {
+        return device.name === deviceName;
+      }).id;
+      this.$router.push({
+        path: 'recordings',
+        query: {
+          fromDate: fromDate,
+          toDate: toDate,
+          deviceId: deviceId,
+          showGroups: this.showGroups
+        }
+      });
     }
   }
 };
