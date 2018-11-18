@@ -1,5 +1,5 @@
 <template>
-  <b-form-group label="Device Type">
+  <b-form-group label="Recording Type">
     <b-button-group :vertical="vertical">
       <b-btn
         v-for="(type, index) in types"
