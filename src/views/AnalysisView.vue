@@ -7,6 +7,7 @@
         v-if="!fetching"
         :title="title"
         :data="data"
+        :log="logarithmic"
         x-axis-label = "Device Name"
         y-axis-label="Number of Recordings"
       />
@@ -27,6 +28,12 @@
           v-model="showGroups"
           :all-groups="allGroups"/>
       </b-col>
+      <b-col>
+        <ScaleChoice
+          v-model="logarithmic"
+          :vertical="vertical"/>
+      </b-col>
+      {{ logarithmic }}
     </b-row>
 
     <div
@@ -51,11 +58,12 @@ import api from './../api/Recording.api.js';
 import DateRange from '../components/Analysis/DateRange.vue';
 import RecordingType from '../components/Analysis/RecordingType.vue';
 import DeviceGroups from '../components/Analysis/DeviceGroups.vue';
+import ScaleChoice from '../components/Analysis/ScaleChoice.vue';
 
 export default {
   name: 'AnalysisView',
   components: {
-    BarChart, Spinner, DateRange, RecordingType, DeviceGroups
+    BarChart, Spinner, DateRange, RecordingType, DeviceGroups, ScaleChoice
   },
   props: {
 
@@ -71,7 +79,8 @@ export default {
       unused: [],
       recordingTypes: 'both',
       width: window.innerWidth,
-      showGroups: 'all'
+      showGroups: 'all',
+      logarithmic: false
     };
   },
   computed: {
@@ -122,10 +131,13 @@ export default {
     dateRange: function () {
       this.getData();
     },
-    recordingTypes:function () {
+    recordingTypes: function () {
       this.getData();
     },
-    showGroups:function () {
+    showGroups: function () {
+      this.getData();
+    },
+    logarithmic: function () {
       this.getData();
     },
   },

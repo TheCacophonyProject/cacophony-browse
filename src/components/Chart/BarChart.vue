@@ -27,6 +27,10 @@ export default {
       type: Object,
       required: true
     },
+    log: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -43,8 +47,21 @@ export default {
           responsive: true,
           scales: {
             yAxes: [{
+              type: this.log ? 'logarithmic' : 'linear',
               ticks: {
                 beginAtZero: true,
+                userCallback: (tick) => {
+                  if (this.log) {
+                    var remain = tick / (Math.pow(10, Math.floor(Chart.helpers.log10(tick))));
+                    if (remain === 1 || remain === 2 || remain === 5) {
+                      return tick.toString();
+                    }
+                    return '';
+                  } else {
+                    return tick;
+                  }
+                },
+                min: 0
               },
               scaleLabel: {
                 display: true,
