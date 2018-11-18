@@ -28,7 +28,6 @@
           :all-groups="allGroups"/>
       </b-col>
     </b-row>
-    <UpdateGraphButton @update="getData()"/>
 
     <div
       v-if="!fetching && unused.length > 0"
@@ -51,13 +50,12 @@ import Spinner from '../components/Spinner.vue';
 import api from './../api/Recording.api.js';
 import DateRange from '../components/Data/DateRange.vue';
 import RecordingType from '../components/Data/RecordingType.vue';
-import UpdateGraphButton from '../components/Data/UpdateGraphButton.vue';
 import DeviceGroups from '../components/Data/DeviceGroups.vue';
 
 export default {
   name: 'DataView',
   components: {
-    BarChart, Spinner, DateRange, RecordingType, UpdateGraphButton, DeviceGroups
+    BarChart, Spinner, DateRange, RecordingType, DeviceGroups
   },
   props: {
 
@@ -119,6 +117,17 @@ export default {
       // Change button orientation to vertical on small screen sizes
       return this.width < 576;
     }
+  },
+  watch: {
+    dateRange: function () {
+      this.getData();
+    },
+    recordingTypes:function () {
+      this.getData();
+    },
+    showGroups:function () {
+      this.getData();
+    },
   },
   created: async function() {
     await this.$store.dispatch('Devices/GET_DEVICES');
