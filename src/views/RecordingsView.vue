@@ -86,11 +86,6 @@ export default {
       ]
     };
   },
-  mounted: function () {
-    if (this.$route.query) {
-      console.log(this.$route.query);
-    }
-  },
   methods: {
     searchButton() {
       // Loading wheel here

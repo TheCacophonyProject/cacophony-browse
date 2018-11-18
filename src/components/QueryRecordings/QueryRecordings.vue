@@ -116,6 +116,16 @@ export default {
       }
     }
   },
+  mounted: function () {
+    if (this.$route.query) {
+      const query = this.$route.query;
+      this.devices = [query.deviceId];
+      this.recordingType = query.recordingType;
+      this.fromDate = query.fromDate;
+      this.toDate = query.toDate;
+      this.buildQuery();
+    }
+  },
   methods: {
     buildQuery() {
       const query = {

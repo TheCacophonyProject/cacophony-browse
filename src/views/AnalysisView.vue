@@ -268,14 +268,14 @@ export default {
       const deviceName = array[0]._model.label;
       const deviceId = this.devices.find((device) => {
         return device.name === deviceName;
-      }).id;
+      });
       this.$router.push({
         path: 'recordings',
         query: {
           fromDate: fromDate,
           toDate: toDate,
           deviceId: deviceId,
-          showGroups: this.showGroups
+          recordingType: this.recordingTypes
         }
       });
     }
