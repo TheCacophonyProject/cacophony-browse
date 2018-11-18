@@ -13,7 +13,7 @@
         is-nav>
         <b-navbar-nav v-if="isLoggedIn">
           <b-nav-item to="/recordings">Recordings</b-nav-item>
-          <b-nav-item to="/data">Data</b-nav-item>
+          <b-nav-item to="/analysis">Analysis</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav
           v-if="isLoggedIn"

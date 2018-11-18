@@ -48,12 +48,12 @@
 import BarChart from '../components/Chart/BarChart.vue';
 import Spinner from '../components/Spinner.vue';
 import api from './../api/Recording.api.js';
-import DateRange from '../components/Data/DateRange.vue';
-import RecordingType from '../components/Data/RecordingType.vue';
-import DeviceGroups from '../components/Data/DeviceGroups.vue';
+import DateRange from '../components/Analysis/DateRange.vue';
+import RecordingType from '../components/Analysis/RecordingType.vue';
+import DeviceGroups from '../components/Analysis/DeviceGroups.vue';
 
 export default {
-  name: 'DataView',
+  name: 'AnalysisView',
   components: {
     BarChart, Spinner, DateRange, RecordingType, DeviceGroups
   },
