@@ -240,37 +240,25 @@ export default {
       this.fetching = false;
     },
     dateQuery() {
-      const parseDate = function (date) {
-        const hour = (0 + date.getHours().toString()).slice(-2);
-        const min = (0 + date.getMinutes().toString()).slice(-2);
-        const day = (0 + date.getDate().toString()).slice(-2);
-        const month = (0 + (date.getMonth() + 1).toString()).slice(-2);
-        const year = date.getFullYear();
-        return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + "00";
-      };
-      const today = new Date(Date.now()); // today
-      const toDate = parseDate(today); // to date as text
+      const toDate = new Date();
 
       if (this.dateRange === 0) {
         // All time option
         return {
-          "$lt": toDate
+          "$lt": toDate.toISOString()
         };
       }       else {
-        const todayms = today.getTime(); // today in ms
-        const daysms = this.dateRange*24*60*60*1000; // days to go back in ms
-        const fromdatems = todayms - daysms; // from date in ms
-        const fromDate = parseDate(new Date(fromdatems)); // from date as text
+        const fromDate = new Date(toDate.getTime() - this.dateRange*24*60*60*1000);
         return {
-          "$gt": fromDate,
-          "$lt": toDate
+          "$gt": fromDate.toISOString(),
+          "$lt": toDate.toISOString()
         };
       }
 
     },
     gotoRecordingsSearchPage (array) {
-      const fromDate = this.dateQuery()['$gt'].slice(0,10);
-      const toDate = this.dateQuery()['$lt'].slice(0,10);
+      const fromDate = this.dateQuery()['$gt'];
+      const toDate = this.dateQuery()['$lt'];
       const deviceName = array[0]._model.label;
       const deviceId = this.devices.find((device) => {
         return device.name === deviceName;
@@ -281,7 +269,7 @@ export default {
           fromDate: fromDate,
           toDate: toDate,
           deviceId: JSON.stringify(deviceId),
-          recordingType: this.recordingType
+          recordingType: JSON.stringify(this.recordingType)
         }
       });
     }
