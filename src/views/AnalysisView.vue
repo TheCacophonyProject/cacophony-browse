@@ -1,10 +1,10 @@
 <template>
   <b-container>
+    <ScaleChoice
+      v-if="!fetching"
+      v-model="logarithmic"/>
     <div style="height: 60vh; width: 100%">
       <Spinner :fetching="fetching"/>
-      <ScaleChoice
-        v-if="!fetching"
-        v-model="logarithmic"/>
       <BarChart
         v-if="!fetching"
         :title="title"
