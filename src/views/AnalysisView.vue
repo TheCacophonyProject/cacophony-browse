@@ -113,28 +113,20 @@ export default {
       return devices.map(device => {
         return {id: device.id, name: device.devicename};
       });
-      // .sort((a,b) => {
-      //   return a.name - b.name;
-      // });
     },
     allGroups: function () {
       return this.$store.state.Groups.groups.map(group => {
         return {id: group.id, name: group.groupname, devices: group.Devices};
       });
-      // .sort((a,b) => {
-      //   return a.name - b.name;
-      // });
     },
     type: function () {
       switch (this.recordingType) {
-      case 'both':
-        return ['thermalRaw', 'audio'];
       case 'video':
         return 'thermalRaw';
       case 'audio':
         return 'audio';
       default:
-        return 'both';
+        return ['thermalRaw', 'audio'];
       }
     },
     vertical: function () {
