@@ -76,7 +76,6 @@ export default {
       title: "",
       data: {},
       fetching: false,
-      dateRange: 7,
       unused: [],
       width: window.innerWidth,
       showGroups: 'all',
@@ -90,6 +89,14 @@ export default {
       },
       set (value) {
         this.$store.commit('User/updateRecordingTypePref', value);
+      }
+    },
+    dateRange: {
+      get () {
+        return this.$store.state.User.analysisDatePref;
+      },
+      set (value) {
+        this.$store.commit('User/updateAnalysisDatePref', value);
       }
     },
     devices: function () {
