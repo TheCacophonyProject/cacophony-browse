@@ -85,8 +85,14 @@ export default {
           maintainAspectRatio: false,
           onClick: (event, array) => {
             if (array.length > 0) {
-              // Only send click event if a bar is clicked on
+              // Send click event if a bar is clicked on
               this.$emit('click', array);
+            }
+          },
+          onHover: (event, array) => {
+            if (array.length > 0) {
+              // Change pointer when hovering over a bar
+              event.target.style.cursor = 'pointer';
             }
           }
         }
