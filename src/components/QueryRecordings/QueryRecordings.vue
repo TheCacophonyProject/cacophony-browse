@@ -164,7 +164,7 @@ export default {
         query.where.recordingDateTime["$gt"] = this.fromDate;
       }
       if (this.toDate) {
-        query.where.recordingDateTime["$lt"] = this.toDate;
+        query.where.recordingDateTime["$lt"] = this.toDate + " 23:59:59";
       }
       // Add tag mode
       if (this.tagTypes !== 'any') {
