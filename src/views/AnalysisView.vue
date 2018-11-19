@@ -274,7 +274,7 @@ export default {
         query: {
           fromDate: fromDate,
           toDate: toDate,
-          deviceId: deviceId,
+          deviceId: JSON.stringify(deviceId),
           recordingType: this.recordingTypes
         }
       });

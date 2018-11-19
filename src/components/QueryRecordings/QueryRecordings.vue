@@ -119,7 +119,7 @@ export default {
   mounted: function () {
     if (this.$route.query) {
       const query = this.$route.query;
-      this.devices = [query.deviceId];
+      this.devices = [JSON.parse(query.deviceId)];
       this.recordingType = query.recordingType;
       this.fromDate = query.fromDate;
       this.toDate = query.toDate;
