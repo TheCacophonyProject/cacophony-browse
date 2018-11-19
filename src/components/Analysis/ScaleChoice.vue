@@ -1,13 +1,11 @@
 <template>
-  <b-button-group size="sm">
-    <b-btn
-      v-for="(type, index) in types"
-      :key="index"
-      :variant="variant(type.value)"
-      @click="$emit('input', type.value)">
-      {{ type.text }}
-    </b-btn>
-  </b-button-group>
+  <b-btn
+    :pressed="value"
+    variant="outline-secondary"
+    size="sm"
+    @click="$emit('input', !value)">
+    Log Scale
+  </b-btn>
 </template>
 
 <script>
@@ -23,19 +21,19 @@ export default {
   data: function () {
     return {
       types: [
-        {text: 'Linear', value: false},
-        {text: 'Logarithmic', value: true},
+        {text: 'Log', value: false},
+        {text: 'Log', value: true},
       ]
     };
   },
   methods: {
-    variant(buttonValue) {
-      if (buttonValue === this.value) {
-        return 'primary';
-      } else {
-        return 'secondary';
-      }
-    }
   }
 };
 </script>
+
+<style scoped>
+
+b-btn {
+  margin: 20px;
+}
+</style>
