@@ -1,15 +1,13 @@
 <template>
-  <b-form-group label="y-Axis Scale">
-    <b-button-group :vertical="vertical">
-      <b-btn
-        v-for="(type, index) in types"
-        :key="index"
-        :variant="variant(type.value)"
-        @click="$emit('input', type.value)">
-        {{ type.text }}
-      </b-btn>
-    </b-button-group>
-  </b-form-group>
+  <b-button-group size="sm">
+    <b-btn
+      v-for="(type, index) in types"
+      :key="index"
+      :variant="variant(type.value)"
+      @click="$emit('input', type.value)">
+      {{ type.text }}
+    </b-btn>
+  </b-button-group>
 </template>
 
 <script>
@@ -21,10 +19,6 @@ export default {
       type: Boolean,
       required: true
     },
-    vertical: {
-      type: Boolean,
-      default: false
-    }
   },
   data: function () {
     return {

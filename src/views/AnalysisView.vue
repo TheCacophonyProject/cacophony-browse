@@ -1,8 +1,10 @@
 <template>
   <b-container>
     <div style="height: 60vh; width: 100%">
-
       <Spinner :fetching="fetching"/>
+      <ScaleChoice
+        v-if="!fetching"
+        v-model="logarithmic"/>
       <BarChart
         v-if="!fetching"
         :title="title"
@@ -29,12 +31,6 @@
           v-model="showGroups"
           :all-groups="allGroups"/>
       </b-col>
-      <b-col>
-        <ScaleChoice
-          v-model="logarithmic"
-          :vertical="vertical"/>
-      </b-col>
-      {{ logarithmic }}
     </b-row>
 
     <div
