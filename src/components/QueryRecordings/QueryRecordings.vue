@@ -116,7 +116,23 @@ export default {
       }
     }
   },
+  mounted: function () {
+    if (this.$route.query) {
+      const query = this.$route.query;
+      this.devices = [JSON.parse(query.deviceId)];
+      this.recordingType = JSON.parse(query.recordingType);
+      this.fromDate = this.parseDate(new Date(query.fromDate));
+      this.toDate = this.parseDate(new Date(query.toDate));
+      this.buildQuery();
+    }
+  },
   methods: {
+    parseDate (date) {
+      const day = (0 + date.getDate().toString()).slice(-2);
+      const month = (0 + (date.getMonth() + 1).toString()).slice(-2);
+      const year = date.getFullYear();
+      return year + "-" + month + "-" + day;
+    },
     buildQuery() {
       const query = {
         where: {}

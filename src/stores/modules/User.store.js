@@ -9,7 +9,8 @@ const state = {
     'email': localStorage.getItem('email'),
   },
   errorMessage: undefined,
-  recordingTypePref: localStorage.getItem('recordingTypePref') || 'both'
+  recordingTypePref: localStorage.getItem('recordingTypePref') || 'both',
+  analysisDatePref: parseInt(localStorage.getItem('analysisDatePref')) || 7
 };
 
 
@@ -88,6 +89,10 @@ const mutations = {
   updateRecordingTypePref (state, data) {
     state.recordingTypePref = data;
     localStorage.setItem('recordingTypePref', data);
+  },
+  updateAnalysisDatePref (state, data) {
+    state.analysisDatePref = data;
+    localStorage.setItem('analysisDatePref', data);
   }
 };
 
