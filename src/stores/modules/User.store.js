@@ -10,7 +10,7 @@ const state = {
   },
   errorMessage: undefined,
   recordingTypePref: localStorage.getItem('recordingTypePref') || 'both',
-  analysisDatePref: localStorage.getItem('analysisDatePref') || 7
+  analysisDatePref: parseInt(localStorage.getItem('analysisDatePref')) || 7
 };
 
 
