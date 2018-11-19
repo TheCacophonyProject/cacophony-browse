@@ -21,7 +21,7 @@
       </b-col>
       <b-col>
         <RecordingType
-          v-model="recordingTypes"
+          v-model="recordingType"
           :vertical="vertical"/>
       </b-col>
       <b-col>
@@ -78,13 +78,20 @@ export default {
       fetching: false,
       dateRange: 7,
       unused: [],
-      recordingTypes: 'both',
       width: window.innerWidth,
       showGroups: 'all',
       logarithmic: false
     };
   },
   computed: {
+    recordingType: {
+      get () {
+        return this.$store.state.User.recordingTypePref;
+      },
+      set (value) {
+        this.$store.commit('User/updateRecordingTypePref', value);
+      }
+    },
     devices: function () {
       let devices;
       if (this.showGroups === 'all') {
@@ -112,7 +119,7 @@ export default {
       // });
     },
     type: function () {
-      switch (this.recordingTypes) {
+      switch (this.recordingType) {
       case 'both':
         return ['thermalRaw', 'audio'];
       case 'video':
@@ -132,7 +139,7 @@ export default {
     dateRange: function () {
       this.getData();
     },
-    recordingTypes: function () {
+    recordingType: function () {
       this.getData();
     },
     showGroups: function () {
@@ -275,7 +282,7 @@ export default {
           fromDate: fromDate,
           toDate: toDate,
           deviceId: JSON.stringify(deviceId),
-          recordingType: this.recordingTypes
+          recordingType: this.recordingType
         }
       });
     }
