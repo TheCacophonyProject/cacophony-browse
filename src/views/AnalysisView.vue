@@ -145,7 +145,11 @@ export default {
       this.getData();
     },
     logarithmic: function () {
-      this.getData();
+      // Trigger a re-draw of the graph without fetching data again
+      this.fetching = true;
+      this.$nextTick(() => {
+        this.fetching = false;
+      });
     },
   },
   created: async function() {
