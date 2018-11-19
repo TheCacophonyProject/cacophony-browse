@@ -84,7 +84,10 @@ export default {
           },
           maintainAspectRatio: false,
           onClick: (event, array) => {
-            this.$emit('click', array);
+            if (array.length > 0) {
+              // Only send click event if a bar is clicked on
+              this.$emit('click', array);
+            }
           }
         }
       };
