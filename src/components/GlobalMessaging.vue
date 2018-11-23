@@ -16,7 +16,7 @@
           <icon-link
             :icon="['fas', 'exclamation-triangle']"
             :colour="'red'"/>
-          Opps! Something went wrong. <br> Message is: "{{ item.message }}"
+          Oops! Something went wrong. <br> Message is: "{{ item.message }}"
         </div>
       </b-alert>
     </div>
