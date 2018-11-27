@@ -112,8 +112,8 @@ export default {
     isGroupAdmin: function () {
       if (this.user && this.group.GroupUsers) {
         const username = this.user.username;
-        // hack - as long as they are not added (ie global admin) or added as an admin user.
-        return !this.group.GroupUsers.some(user => username === user.username && !user.isAdmin);
+        return this.user.globalPermission == "write" ||
+          this.group.GroupUsers.some(user => user.isAdmin && user.username === username);
       }
       return false;
     }
