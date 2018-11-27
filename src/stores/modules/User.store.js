@@ -7,6 +7,7 @@ const state = {
   userData: {
     'username': localStorage.getItem('username'),
     'email': localStorage.getItem('email'),
+    'globalPermission': localStorage.getItem('globalPermission'),
   },
   errorMessage: undefined,
   recordingTypePref: localStorage.getItem('recordingTypePref') || 'both',
@@ -34,7 +35,7 @@ const actions = {
 
     const result = await api.user.login(payload.username, payload.password);
     if(result.success) {
-      api.user.persistUser(result.userData.username, result.token, result.userData.email);
+      api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
       commit('receiveLogin', result);
     }
   },
@@ -48,7 +49,7 @@ const actions = {
 
 
     if(result.success) {
-      api.user.persistUser(result.userData.username, result.token, result.userData.email);
+      api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
       commit('receiveLogin', result);
     }
   },
