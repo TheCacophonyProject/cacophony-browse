@@ -138,7 +138,7 @@ export default {
             date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
             time: new Date(row.recordingDateTime).toLocaleTimeString(),
             duration: row.duration,
-            tags: this.parseTags(row.Tags),
+            tags: row.Tags,
             other: this.parseOther(row),
             processing_state: this.parseProcessingState(row.processingState)
           });
@@ -152,25 +152,6 @@ export default {
         return latitude + ', ' + longitude;
       } else {
         return "(unknown)";
-      }
-    },
-    parseTags(tags) {
-      if (tags.length > 0) {
-        const animal = (tag) => {
-          if (!tag.animal) {
-            return "F/P";
-          } else {
-            return tag.animal;
-          }
-        };
-        let tagString = animal(tags[0]);
-        for (let i = 1; i < tags.length; i++) {
-          const animalName = animal(tags[i]);
-          tagString = tagString + ', ' + animalName;
-        }
-        return tagString;
-      } else {
-        return 'untagged';
       }
     },
     parseOther(row) {
