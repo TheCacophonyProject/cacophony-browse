@@ -20,6 +20,7 @@
           class="ml-auto">
           <b-nav-text>Hello {{ userName }}</b-nav-text>
           <b-nav-item-dropdown text="Settings">
+            text="Admin"
             <b-dropdown-item href="/groups">Groups</b-dropdown-item>
             <b-dropdown-item href="/devices">Devices</b-dropdown-item>
           </b-nav-item-dropdown>
