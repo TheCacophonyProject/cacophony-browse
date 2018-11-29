@@ -23,10 +23,11 @@ function login(usernameOrEmail, password) {
     }
   );
 }
-function persistUser(username, token, email) {
+function persistUser(username, token, email, globalPermission) {
   localStorage.setItem('username', username);
   localStorage.setItem('JWT', token);
   localStorage.setItem('email', email);
+  localStorage.setItem('globalPermission', globalPermission);
 }
 function persistFields(data) {
   for (var key in data) {
@@ -37,6 +38,7 @@ function logout(){
   localStorage.setItem('username', '');
   localStorage.setItem('JWT', '');
   localStorage.setItem('email', '');
+  localStorage.setItem('globalPermission', '');
 }
 function register(username, password, email) {
   const body =
