@@ -7,12 +7,20 @@ const state = {
   userData: {
     'username': localStorage.getItem('username'),
     'email': localStorage.getItem('email'),
+    'globalPermission': getGlobalPermission(),
   },
   errorMessage: undefined,
   recordingTypePref: localStorage.getItem('recordingTypePref') || 'both',
   analysisDatePref: parseInt(localStorage.getItem('analysisDatePref')) || 7
 };
 
+function getGlobalPermission() {
+  var globalPermission = localStorage.getItem('globalPermission');
+  if (["write", "read", "off"].includes(globalPermission)) {
+    return globalPermission;
+  }
+  return "off";
+}
 
 // getters https://vuex.vuejs.org/guide/getters.html
 
@@ -34,7 +42,7 @@ const actions = {
 
     const result = await api.user.login(payload.username, payload.password);
     if(result.success) {
-      api.user.persistUser(result.userData.username, result.token, result.userData.email);
+      api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
       commit('receiveLogin', result);
     }
   },
@@ -48,7 +56,7 @@ const actions = {
 
 
     if(result.success) {
-      api.user.persistUser(result.userData.username, result.token, result.userData.email);
+      api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
       commit('receiveLogin', result);
     }
   },
