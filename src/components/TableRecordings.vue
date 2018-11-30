@@ -44,10 +44,10 @@
       slot="tags"
       slot-scope="{item: {tags}}">
       <span
-        v-for="(tag, index) in collateTags(tags)"
+        v-for="(tag, index) in tags"
         :class="tag.class"
         :key="index">
-        {{ tag.text }}
+        {{ tag.text }}<span v-if="index + 1 < tags.length">,</span>
       </span>
     </template>
   </b-table>
@@ -115,58 +115,7 @@ export default {
     };
   },
   methods: {
-    collateTags: function (tags) {
-      // Build a collection of tagItems - one per animal
-      const tagItems = {};
-      for (const tag of tags) {
-        const animal = tag.animal === null ? 'F/P' : tag.animal;
-        if (!tagItems[animal]) {
-          // Animal has not been seen yet
-          tagItems[animal] = {};
-        }
-        if (tag.automatic) {
-          tagItems[animal].automatic = true;
-        } else {
-          tagItems[animal].human = true;
-        }
-      }
-      // Use automatic and human status to create an ordered array of objects
-      // suitable for parsing into coloured spans
-      const result = [];
-      for (const animal of Object.keys(tagItems)) {
-        const tagItem = tagItems[animal];
-        if (tagItem.automatic && tagItem.human) {
-          result.push({
-            text: animal,
-            class: 'text-success',
-            order: 0
-          });
-        } else if (tagItem.human) {
-          result.push({
-            text: animal,
-            class: '',
-            order: 1
-          });
-        } else if (tagItem.automatic) {
-          result.push({
-            text: animal,
-            class: 'text-danger',
-            order: 2
-          });
-        }
-      }
-      // Sort the result array
-      result.sort((a,b) => {
-        return a.order - b.order;
-      });
-      // Add commas to the strings if appropriate
-      result.forEach((item, index, array) => {
-        if (index !== array.length - 1) {
-          array[index].text = item.text + ',';
-        }
-      });
-      return result;
-    }
+
   },
 };
 </script>
