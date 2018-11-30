@@ -117,7 +117,7 @@ export default {
       if (this.query.tags) {
         params.tags = JSON.stringify(this.query.tags);
       }
-      console.log('params', params);
+      
       // Call API and process results
       const response = await api.recording.query(params);
 
