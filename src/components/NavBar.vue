@@ -17,9 +17,15 @@
         </b-navbar-nav>
         <b-navbar-nav
           v-if="isLoggedIn"
-          class="ml-auto">
+          class="ml-auto mr-auto d-none d-lg-block">
           <b-nav-text>Hello {{ userName }}</b-nav-text>
-          <b-nav-item-dropdown text="Settings">
+        </b-navbar-nav>
+        <b-navbar-nav
+          v-if="isLoggedIn"
+          class="ml-auto">
+          <b-nav-item-dropdown
+            text="Admin"
+            style="padding-left: 0.5rem;">
             <b-dropdown-item href="/groups">Groups</b-dropdown-item>
             <b-dropdown-item href="/devices">Devices</b-dropdown-item>
           </b-nav-item-dropdown>
