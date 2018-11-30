@@ -31,7 +31,7 @@
             @addTag="addTag($event)"
             @hideAddObservations="showAddObservation = false" />
         </template>
-        <template v-else>
+        <template v-if="isAudio">
           <audio
             ref="player"
             :src="fileSource"
@@ -100,6 +100,7 @@ export default {
       downloadFileJWT: state => state.Video.downloadFileJWT,
       downloadRawJWT: state => state.Video.downloadRawJWT,
       isVideo: state => state.Video.recording.type == "thermalRaw",
+      isAudio: state => state.Video.recording.type == "audio",
       date: (state) => {
         const date = new Date(state.Video.recording.recordingDateTime);
         return date.toLocaleDateString('en-NZ');
