@@ -44,7 +44,7 @@
       slot="tags"
       slot-scope="{item: {tags}}">
       <span
-        v-for="(tag, index) in parseTags(tags)"
+        v-for="(tag, index) in collateTags(tags)"
         :class="tag.class"
         :key="index">
         {{ tag.text }}
@@ -115,7 +115,7 @@ export default {
     };
   },
   methods: {
-    parseTags: function (tags) {
+    collateTags: function (tags) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
       for (const tag of tags) {
