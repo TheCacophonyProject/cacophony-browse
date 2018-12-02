@@ -141,10 +141,12 @@ export default {
       const data = this.recording['additionalMetadata'];
       const items = [];
       for (const key in data) {
-        items.push({
-          key: key,
-          data: data[key]
-        });
+        if (key != "tracks") {
+          items.push({
+            key: key,
+            data: data[key]
+          });
+        }
       }
       return items;
     }
