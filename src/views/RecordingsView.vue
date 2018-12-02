@@ -94,7 +94,11 @@ export default {
       this.getRecordings();
     },
     pagination() {
-      this.getRecordings();
+      // Only get recordings if there is a where query ie will only run after
+      // "Search" has been pushed at least once
+      if (this.query.where) {
+        this.getRecordings();
+      }
     },
     async getRecordings() {
       // Remove previous values
@@ -113,6 +117,7 @@ export default {
       if (this.query.tags) {
         params.tags = JSON.stringify(this.query.tags);
       }
+      
       // Call API and process results
       const response = await api.recording.query(params);
 
