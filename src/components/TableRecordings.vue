@@ -40,6 +40,16 @@
         <BatteryLevel :battery-level="batteryLevel"/>
       </template>
     </template>
+    <template
+      slot="tags"
+      slot-scope="{item: {tags}}">
+      <span
+        v-for="(tag, index) in tags"
+        :class="tag.class"
+        :key="index">
+        {{ tag.text }}<span v-if="index + 1 < tags.length">,</span>
+      </span>
+    </template>
   </b-table>
 </template>
 
@@ -103,7 +113,10 @@ export default {
         },
       ]
     };
-  }
+  },
+  methods: {
+
+  },
 };
 </script>
 
