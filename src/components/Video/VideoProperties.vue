@@ -22,6 +22,11 @@
             <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
           </p>
         </div>
+        <p v-if="recording['additionalMetadata']">
+          <TrackData
+            v-if="recording['additionalMetadata']['tracks']"
+            :tracks="recording['additionalMetadata']['tracks']"/>
+        </p>
       </b-form-group>
 
       <b-form-group
@@ -72,11 +77,12 @@
 import api from '../../api/index';
 import config from '../../config';
 import BatteryLevel from '../BatteryLevel.vue';
+import TrackData from './TrackData.vue';
 
 export default {
   name: 'VideoProperties',
   components: {
-    BatteryLevel
+    BatteryLevel, TrackData
   },
   props: {
     value: {
