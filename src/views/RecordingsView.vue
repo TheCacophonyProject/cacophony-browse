@@ -143,7 +143,7 @@ export default {
             date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
             time: new Date(row.recordingDateTime).toLocaleTimeString(),
             duration: row.duration,
-            tags: this.parseTags(row.Tags),
+            tags: this.collateTags(row.Tags),
             other: this.parseOther(row),
             processing_state: this.parseProcessingState(row.processingState)
           });
@@ -159,25 +159,6 @@ export default {
         return "(unknown)";
       }
     },
-    parseTags(tags) {
-      if (tags.length > 0) {
-        const animal = (tag) => {
-          if (!tag.animal) {
-            return "F/P";
-          } else {
-            return tag.animal;
-          }
-        };
-        let tagString = animal(tags[0]);
-        for (let i = 1; i < tags.length; i++) {
-          const animalName = animal(tags[i]);
-          tagString = tagString + ', ' + animalName;
-        }
-        return tagString;
-      } else {
-        return 'untagged';
-      }
-    },
     parseOther(row) {
       const out = {};
       if (row.batteryLevel !== null) {
@@ -188,6 +169,52 @@ export default {
     parseProcessingState(result) {
       const string = result.toLowerCase();
       return string.charAt(0).toUpperCase() + string.slice(1);
+    },
+    collateTags: function (tags) {
+      // Build a collection of tagItems - one per animal
+      const tagItems = {};
+      for (const tag of tags) {
+        const animal = tag.animal === null ? 'F/P' : tag.animal;
+        if (!tagItems[animal]) {
+          // Animal has not been seen yet
+          tagItems[animal] = {};
+        }
+        if (tag.automatic) {
+          tagItems[animal].automatic = true;
+        } else {
+          tagItems[animal].human = true;
+        }
+      }
+      // Use automatic and human status to create an ordered array of objects
+      // suitable for parsing into coloured spans
+      const result = [];
+      for (const animal of Object.keys(tagItems)) {
+        const tagItem = tagItems[animal];
+        if (tagItem.automatic && tagItem.human) {
+          result.push({
+            text: animal,
+            class: 'text-success',
+            order: 0
+          });
+        } else if (tagItem.human) {
+          result.push({
+            text: animal,
+            class: '',
+            order: 1
+          });
+        } else if (tagItem.automatic) {
+          result.push({
+            text: animal,
+            class: 'text-danger',
+            order: 2
+          });
+        }
+      }
+      // Sort the result array
+      result.sort((a,b) => {
+        return a.order - b.order;
+      });
+      return result;
     }
   }
 };
