@@ -29,7 +29,7 @@
           <p><span class="title">Time:</span> {{ track.start_s }} - {{ track.end_s }}s</p>
           <p>
             <span class="title">Confidence:</span>
-            {{ track.confidence }} (&#916; {{ track.clarity }})
+            {{ track.confidence }} <span class="delta">(&#916; {{ track.clarity }})</span>
             <span
               v-if="!display_all.includes(track)"
               title="Show all result classes"
@@ -49,6 +49,9 @@
           </p>
           <table
             v-if="display_all.includes(track)">
+            <thead>
+              <tr><th>Animal</th><th>Confidence</th></tr>
+            </thead>
             <tr
               v-for="(value, animal) in track.all_class_confidences"
               :key="animal">
@@ -105,7 +108,16 @@ export default {
   }
 
   table {
-    border: 1px solid lightgray;
+    margin: 10px 30px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  th, td {
+    border-top: 1px solid #ddd;
+  }
+
+  td {
+    padding-right: 20px;
   }
 
   .title {
@@ -116,12 +128,7 @@ export default {
     margin-bottom: 0;
   }
 
-  .button {
-    width: 4em;
-    max-height: 4em;
-    box-sizing: border-box;
-    display: inline-block;
-    opacity: 0.6;
-    border: 1px solid lightgray;
+  .delta {
+    color: gray;
   }
 </style>
