@@ -15,6 +15,8 @@ import {
   faAngleDoubleLeft,
   faAngleRight,
   faAngleDoubleRight,
+  faAngleUp,
+  faAngleDown,
   faQuestion,
   faAsterisk,
   faExclamationTriangle,
@@ -48,6 +50,8 @@ library.add(
   faAngleDoubleLeft,
   faAngleRight,
   faAngleDoubleRight,
+  faAngleUp,
+  faAngleDown,
   faQuestion,
   faAsterisk,
   faExclamationTriangle
