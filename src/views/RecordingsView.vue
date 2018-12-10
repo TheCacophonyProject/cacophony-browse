@@ -191,7 +191,7 @@ export default {
       const result = [];
       for (let animal of Object.keys(tagItems).sort()) {
         const tagItem = tagItems[animal];
-        if (animal == "z_false-positive") {
+        if (animal == "z_false positive") {
           animal = "F/P";
         } else if (animal == "z_multiple animals") {
           animal = "multiple";

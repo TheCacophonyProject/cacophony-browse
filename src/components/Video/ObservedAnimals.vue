@@ -78,7 +78,7 @@ export default {
       // TODO implement alternative that doesn't use 'require' in this manner
       // https://bootstrap-vue.js.org/docs/reference/images/
       let image = null;
-      if (event == 'false-positive') {
+      if (event == 'false positive') {
         image = 'none.png';
       } else if (event == 'multiple animals') {
         image = 'multiple.png';
@@ -129,12 +129,9 @@ export default {
       return string;
     },
     confirmTag: function (rowItem) {
-      const animal = rowItem.animal;
       const tag = {};
       tag.event = rowItem.event;
-      if (tag.animal) {
-        tag.animal = animal;
-      }
+      tag.animal = rowItem.animal;
       tag.confidence = rowItem.confidence;
       this.$emit('addTag', tag);
     }
