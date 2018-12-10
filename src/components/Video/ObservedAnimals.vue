@@ -80,7 +80,7 @@ export default {
       let image = null;
       if (event == 'false-positive') {
         image = 'none.png';
-      } else if (event == 'multiple-animals') {
+      } else if (event == 'multiple animals') {
         image = 'multiple.png';
       } else if (animal == 'bird/kiwi') {
         image = 'kiwi.png';
@@ -130,11 +130,9 @@ export default {
     },
     confirmTag: function (rowItem) {
       const animal = rowItem.animal;
-      const event = rowItem.event;
       const tag = {};
-      if (event === 'false positive') {
-        tag.event = 'false positive';
-      } else {
+      tag.event = rowItem.event;
+      if (tag.animal) {
         tag.animal = animal;
       }
       tag.confidence = rowItem.confidence;
