@@ -174,8 +174,7 @@ export default {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
       for (const tag of tags) {
-        // z_ to make these types of tags come last on sort
-        const animal = tag.animal === null ? "z_" + tag.event : tag.animal;
+        const animal = tag.animal === null ? tag.event : tag.animal;
         if (!tagItems[animal]) {
           // Animal has not been seen yet
           tagItems[animal] = {};
@@ -191,31 +190,35 @@ export default {
       const result = [];
       for (let animal of Object.keys(tagItems).sort()) {
         const tagItem = tagItems[animal];
+        let subOrder = 0;
         if (animal == "z_false positive") {
           animal = "F/P";
+          subOrder = 3;
         } else if (animal == "z_multiple animals") {
           animal = "multiple";
+          subOrder = 2;
         } else if (animal == "unidentified") {
           animal = "?";
+          subOrder = 1;
         }
 
         if (tagItem.automatic && tagItem.human) {
           result.push({
             text: animal,
             class: 'text-success',
-            order: 0
+            order: subOrder
           });
         } else if (tagItem.human) {
           result.push({
             text: animal,
             class: '',
-            order: 1
+            order: 10 + subOrder
           });
         } else if (tagItem.automatic) {
           result.push({
             text: animal,
             class: 'text-danger',
-            order: 2
+            order: 20 + subOrder
           });
         }
       }
