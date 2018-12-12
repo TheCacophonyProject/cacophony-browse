@@ -77,8 +77,8 @@ export default {
     isDeviceAdmin: function () {
       if (this.user && this.device.Users) {
         const username = this.user.username;
-        // hack - as long as they are not added (ie global admin) or added as an admin user.
-        return !this.device.Users.some(user => username === user.username && !user.DeviceUsers.admin);
+        return this.user.globalPermission == "write" ||
+          this.device.Users.some(user => user.DeviceUsers.admin && user.username === username);
       }
       return false;
     },
