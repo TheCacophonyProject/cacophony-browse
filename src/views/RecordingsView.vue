@@ -191,10 +191,10 @@ export default {
       for (let animal of Object.keys(tagItems).sort()) {
         const tagItem = tagItems[animal];
         let subOrder = 0;
-        if (animal == "z_false positive") {
+        if (animal == "false positive") {
           animal = "F/P";
           subOrder = 3;
-        } else if (animal == "z_multiple animals") {
+        } else if (animal == "multiple animals") {
           animal = "multiple";
           subOrder = 2;
         } else if (animal == "unidentified") {
