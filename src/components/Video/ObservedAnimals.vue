@@ -11,7 +11,7 @@
       <template
         slot="animalImage"
         slot-scope="row">
-        <span v-html="animalImage(row.item.animal)"/>
+        <span v-html="animalImage(row.item.animal, row.item.event)"/>
       </template>
       <template
         slot="additionalInfo"
@@ -72,14 +72,16 @@ export default {
   computed: {
   },
   methods: {
-    animalImage: function (animal) {
+    animalImage: function (animal, event) {
       // Struggling to get images to show correctly so using work-around
       // suggested at bottom of this page.
       // TODO implement alternative that doesn't use 'require' in this manner
       // https://bootstrap-vue.js.org/docs/reference/images/
       let image = null;
-      if (animal == 'none') {
+      if (event == 'false positive') {
         image = 'none.png';
+      } else if (event == 'multiple animals') {
+        image = 'multiple.png';
       } else if (animal == 'bird/kiwi') {
         image = 'kiwi.png';
       } else if (animal == 'unidentified') {
@@ -127,14 +129,9 @@ export default {
       return string;
     },
     confirmTag: function (rowItem) {
-      const animal = rowItem.animal;
-      const event = rowItem.event;
       const tag = {};
-      if (event === 'false positive') {
-        tag.event = 'false positive';
-      } else {
-        tag.animal = animal;
-      }
+      tag.event = rowItem.event;
+      tag.animal = rowItem.animal;
       tag.confidence = rowItem.confidence;
       this.$emit('addTag', tag);
     }

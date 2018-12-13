@@ -21,12 +21,18 @@
     <div
       v-if="display">
       <div
-        v-for="(track, index) in tracks"
+        v-for="(track, index) in orderBy(tracks, 'start_s')"
         :key="index"
+        :class="trackClass(track.status)"
         class="tracks">
-        <h3>{{ index + 1 }} - {{ track.label }}</h3>
+        <h3>
+          <span v-html="trackImage(track.status, track.label)"/>
+          {{ index + 1 }} - {{ track.label }}</h3>
         <div class="details">
-          <p><span class="title">Time:</span> {{ track.start_s }} - {{ track.end_s }}s</p>
+          <p>
+            <span class="title">Time:</span> {{ track.start_s }} - {{ track.end_s }}s
+            <span class="delta"> ({{ (track.end_s - track.start_s) | currency('', 1) }}s) </span>
+          </p>
           <p>
             <span class="title">Confidence:</span>
             {{ track.confidence }} <span class="delta">(&#916; {{ track.clarity }})</span>
@@ -60,6 +66,7 @@
             </tr>
           </table>
           <p><span class="title">Novelty:</span> {{ track.average_novelty }}</p>
+          <p v-if="track.message"><span class="title">Message:</span> {{ track.message }}</p>
         </div>
       </div>
     </div>
@@ -68,8 +75,13 @@
 </template>
 
 <script>
+/* global require */
+
+import Vue2Filters from 'vue2-filters';
+
 export default {
   name: 'TrackData',
+  mixins: [Vue2Filters.mixin],
   props: {
     tracks: {
       type: Array,
@@ -82,6 +94,11 @@ export default {
       display_all: []
     };
   },
+  computed: {
+    orderedTracks: function () {
+      return this.tracks.slice().sort((a, b) => a.start_s - b.start_s );
+    }
+  },
   methods: {
     hideResults(track) {
       this.display_all.splice(this.display_all.indexOf(track), 1);
@@ -89,7 +106,33 @@ export default {
     showResults(track) {
       this.display_all.push(track);
     },
-  }
+    trackClass: function (status) {
+      if ((status == 'tag') || (status == 'unknown')) {
+        return "";
+      } else {
+        return "ignored";
+      }
+    },
+    trackImage: function (status, animal) {
+      // Struggling to get images to show correctly so using work-around
+      // suggested at bottom of this page.
+      // TODO implement alternative that doesn't use 'require' in this manner
+      // https://bootstrap-vue.js.org/docs/reference/images/
+      let image = null;
+      if (status == 'tag') {
+        image = animal + '.png';
+      } else if (status == 'unknown') {
+        image = 'unknown.png';
+      }
+
+      try {
+        const link = require('../../assets/video/' + image);
+        return `<img class="track-image" src="${link}" />`;
+      } catch (e) {
+        return `<img class="track-image"/>`;
+      }
+    },
+  },
 };
 </script>
 
@@ -131,4 +174,17 @@ export default {
   .delta {
     color: gray;
   }
+
+  .ignored {
+    color: gray;
+  }
+</style>
+
+<style>
+ .track-image {
+    max-width: 30px;
+    max-height: 30px;
+    width: auto;
+    height: auto;
+ }
 </style>

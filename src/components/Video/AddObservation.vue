@@ -121,7 +121,7 @@ export default {
       number: 1,
       event: "just wandering about",
       eventOptions: [
-        "just wandering about", "false positive", "interaction with lure", "interaction with trap", "set trap to activate", "trapped in trap", "other"
+        "just wandering about", "false positive", "multiple animals", "interaction with lure", "interaction with trap", "set trap to activate", "trapped in trap", "other"
       ],
       confidence: 0.8,
       confidenceOptions: [

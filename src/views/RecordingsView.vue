@@ -117,7 +117,7 @@ export default {
       if (this.query.tags) {
         params.tags = JSON.stringify(this.query.tags);
       }
-      
+
       // Call API and process results
       const response = await api.recording.query(params);
 
@@ -174,7 +174,7 @@ export default {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
       for (const tag of tags) {
-        const animal = tag.animal === null ? 'F/P' : tag.animal;
+        const animal = tag.animal === null ? tag.event : tag.animal;
         if (!tagItems[animal]) {
           // Animal has not been seen yet
           tagItems[animal] = {};
@@ -188,25 +188,37 @@ export default {
       // Use automatic and human status to create an ordered array of objects
       // suitable for parsing into coloured spans
       const result = [];
-      for (const animal of Object.keys(tagItems)) {
+      for (let animal of Object.keys(tagItems).sort()) {
         const tagItem = tagItems[animal];
+        let subOrder = 0;
+        if (animal == "false positive") {
+          animal = "F/P";
+          subOrder = 3;
+        } else if (animal == "multiple animals") {
+          animal = "multiple";
+          subOrder = 2;
+        } else if (animal == "unidentified") {
+          animal = "?";
+          subOrder = 1;
+        }
+
         if (tagItem.automatic && tagItem.human) {
           result.push({
             text: animal,
             class: 'text-success',
-            order: 0
+            order: subOrder
           });
         } else if (tagItem.human) {
           result.push({
             text: animal,
             class: '',
-            order: 1
+            order: 10 + subOrder
           });
         } else if (tagItem.automatic) {
           result.push({
             text: animal,
             class: 'text-danger',
-            order: 2
+            order: 20 + subOrder
           });
         }
       }

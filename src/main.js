@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import App from './App.vue';
 import BootstrapVue from 'bootstrap-vue';
+import Vue2Filters from 'vue2-filters';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import Vuelidate from 'vuelidate';
@@ -17,6 +18,9 @@ export default function() {
 
   //https://monterail.github.io/vuelidate
   Vue.use(Vuelidate);
+
+  //https://github.com/freearhey/vue2-filters
+  Vue.use(Vue2Filters);
 
   Vue.component('font-awesome-icon', FontAwesomeIcon);
 

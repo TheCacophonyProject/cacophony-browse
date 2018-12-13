@@ -19,9 +19,8 @@ const getters = {
       const tagItem = {};
       if (tag.animal) {
         tagItem.animal = tag.animal;
-      } else {
-        tagItem.animal = "none";
       }
+
       tagItem.event = tag.event;
       if (tag.confidence) {
         tagItem.confidence = tag.confidence.toFixed(2);

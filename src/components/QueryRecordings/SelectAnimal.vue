@@ -47,7 +47,6 @@ export default {
         "rabbit",
         "spider",
         "other",
-        "false-positive",
         "unidentified",
       ]
     };
