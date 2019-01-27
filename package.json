@@ -6,7 +6,7 @@
   "license": "GPLv3",
   "private": true,
   "scripts": {
-    "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
+    "dev": "webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
     "dev:skip-tests": "webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
     "release": "webpack --config webpack/webpack.release.js --progress --hide-modules",
     "test": "jest",
@@ -27,9 +27,11 @@
     "cross-fetch": "^2.2.2",
     "jquery": "^3.3.1",
     "merge": "^1.2.1",
+    "video.js": "^7.4.1",
     "vue": "^2.5.11",
     "vue-multiselect": "^2.1.0",
     "vue-router": "^3.0.1",
+    "vue-video-player": "^5.0.2",
     "vue2-filters": "^0.4.1",
     "vuelidate": "^0.7.4",
     "vuex": "^3.0.1"
