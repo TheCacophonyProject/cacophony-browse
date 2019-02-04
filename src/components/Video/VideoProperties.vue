@@ -21,7 +21,7 @@
               </p>
             </div>
           </div>
-          <p v-else-if="recording[prop.key]" >
+          <p v-else-if="recording[prop.key] != null" >
             <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
           </p>
         </div>
