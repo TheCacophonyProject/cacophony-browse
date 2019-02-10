@@ -117,14 +117,14 @@ export default {
     }
   },
   mounted: function () {
-    if (this.$route.query) {
-      const query = this.$route.query;
-      this.devices = [JSON.parse(query.deviceId)];
-      this.recordingType = JSON.parse(query.recordingType);
-      this.fromDate = this.parseDate(new Date(query.fromDate));
-      this.toDate = this.parseDate(new Date(query.toDate));
-      this.buildQuery();
+    const query = this.$route.query;
+    if (query && Object.keys(query).length > 0) {
+      this.devices = (query.deviceId ? [JSON.parse(query.deviceId)] : []);
+      this.recordingType = (query.recordingType ? JSON.parse(query.recordingType) : 'both');
+      this.fromDate = (query.fromDate ? this.parseDate(new Date(query.fromDate)) : '');
+      this.toDate = (query.toDate ? this.parseDate(new Date(query.toDate)) : '');
     }
+    this.buildQuery();
   },
   methods: {
     parseDate (date) {
