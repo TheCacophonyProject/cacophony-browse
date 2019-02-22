@@ -29,7 +29,7 @@ const getters = {
         tagItem.who = "Cacophony AI";
         tagItem['_rowVariant'] = 'warning';
       } else {
-        tagItem.who = tag.tagger.username;
+        tagItem.who = tag.tagger ? tag.tagger.username : '-';
       }
       tagItem.when = new Date(tag.createdAt).toLocaleString();
       tagItem.tag = tag;
