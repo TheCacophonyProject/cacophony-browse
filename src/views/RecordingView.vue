@@ -100,6 +100,7 @@ export default {
       currentVideoTime: 0,
       lastDisplayedVideoTime: 0,
       lastTrackFrame: 0,
+      scale: 4,
       playerOptions: {
         autoplay: false,
         muted: true,
@@ -227,29 +228,27 @@ export default {
 
       // Only update the canvas if the video time has changed as this means a new
       // video frame is being displayed.
-      if (v.player.currentTime() !== this.lastDisplayedVideoTime){
+      if (v.player.currentTime() !== this.lastDisplayedVideoTime) {
+        const frameData = this.getCurrentVideoFrameData(v.player.currentTime());
+
         const canvas = this.$refs.canvas;
         const context = canvas.getContext('2d');
 
         const container = this.$refs.container;
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
-        const wScale = canvas.width/160;
-        const hScale = canvas.height/120;
-
-        const frameData = this.getCurrentVideoFrameData(v.player.currentTime());
-        if (!frameData) {
-          return;
-        }
+        const ss = 4;
 
         // Clear the canvas before each new frame
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         // Translate the context so the top left corner of the rectangle is always (0,0)
         context.save();
-        context.translate(frameData.x * wScale, frameData.y * hScale);
-        this.displayBox(context, frameData.rectWidth * wScale, frameData.rectHeight * hScale);
-        this.displayText(context, frameData.text, frameData.rectWidth * wScale, frameData.rectHeight * hScale);
+        if (frameData) {
+          context.translate(frameData.x * ss, frameData.y * ss);
+          this.displayBox(context, frameData.rectWidth * ss, frameData.rectHeight * ss);
+          this.displayText(context, frameData.text, frameData.rectWidth * ss, frameData.rectHeight * ss);
+        }
         context.restore();
 
         this.lastDisplayedVideoTime = v.player.currentTime();
@@ -361,6 +360,7 @@ export default {
 
 .container {
   position: relative;
+  width: 640px;
   padding: 0;
 }
 
