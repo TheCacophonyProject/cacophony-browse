@@ -99,14 +99,14 @@ export default {
       alertVariant: "",
       currentVideoTime: 0,
       lastDisplayedVideoTime: 0,
+      lastTrackFrame: 0,
       playerOptions: {
         autoplay: false,
-        width: '700px',
-        playbackRates: [0.5, 1, 1.5, 2, 4],
+        muted: true,
+        width: '640px',
+        playbackRates: [0.5, 1, 2, 4, 8],
         sources: [{
           type: "video/mp4",
-          src: "http://vjs.zencdn.net/v/oceans.mp4",
-          //src: this.fileSource,
         }],
       }
     };
@@ -137,9 +137,8 @@ export default {
       fileSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
       rawSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
       processingState: state => {
-        let text = state.Video.recording.processingState.toLowerCase();
-        text = text.slice(0,1).toUpperCase() + text.slice(1);
-        return text;
+        const text = state.Video.recording.processingState.toLowerCase();
+        return text == 'finished';
       },
       tagItems() {
         return this.$store.getters['Video/getTagItems'];
@@ -148,6 +147,9 @@ export default {
   watch: {
     '$route' () {
       this.getRecordingDetails();
+    },
+    fileSource: function (newValue) {
+      this.$data.playerOptions.sources[0].src = newValue;
     }
   },
   created: async function() {
@@ -178,16 +180,38 @@ export default {
     displayBox(context, width, height) {
       context.beginPath();
       context.rect(0, 0, width, height);
-      context.strokeStyle = 'red';
+      context.strokeStyle = 'yellow';
       context.stroke();
     },
     getCurrentVideoFrameData(currentTime) {
-      // TODO this information should be obtained based on the currentTime
-      const rectWidth = 120;
-      const rectHeight = 100;
-      const x = currentTime * 10;
-      const y = 100;
-      const text = 'Possum';
+      const trackPos = this.recording.additionalMetadata.tracks[0].positions;
+      if (currentTime < trackPos[this.lastTrackFrame][0]) {
+        this.lastTrackFrame = 0;
+      }
+
+      for (let i = this.lastTrackFrame + 1; i < trackPos.length; i++) {
+        if (currentTime > trackPos[i][0]) {
+          this.lastTrackFrame = i;
+        } else {
+          break;
+        }
+      }
+
+      if (this.lastTrackFrame == 0 && currentTime < trackPos[0][0]) {
+        return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
+      }
+
+      if (this.lastTrackFrame == trackPos.length - 1 && currentTime > trackPos[this.lastTrackFrame][0] + 0.112) {
+        return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
+      }
+
+
+      const rect = trackPos[this.lastTrackFrame][1];
+      const rectWidth = rect[2] - rect[0];
+      const rectHeight = rect[3] - rect[1];
+      const x = rect[0];
+      const y = rect[1];
+      const text = 'Possum' + currentTime + "--" + this.lastTrackFrame;
 
       return {rectWidth, rectHeight, x, y, text};
     },
@@ -210,17 +234,22 @@ export default {
         const container = this.$refs.container;
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
+        const wScale = canvas.width/160;
+        const hScale = canvas.height/120;
 
         const frameData = this.getCurrentVideoFrameData(v.player.currentTime());
+        if (!frameData) {
+          return;
+        }
 
         // Clear the canvas before each new frame
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         // Translate the context so the top left corner of the rectangle is always (0,0)
         context.save();
-        context.translate(frameData.x, frameData.y);
-        this.displayBox(context, frameData.rectWidth, frameData.rectHeight);
-        this.displayText(context, frameData.text, frameData.rectWidth, frameData.rectHeight);
+        context.translate(frameData.x * wScale, frameData.y * hScale);
+        this.displayBox(context, frameData.rectWidth * wScale, frameData.rectHeight * hScale);
+        this.displayText(context, frameData.text, frameData.rectWidth * wScale, frameData.rectHeight * hScale);
         context.restore();
 
         this.lastDisplayedVideoTime = v.player.currentTime();
@@ -308,6 +337,11 @@ export default {
 
 .vjs-control-bar {
   z-index: 1000;
+}
+
+.video .video-js .vjs-volume-panel,
+.video .video-js .vjs-fullscreen-control {
+  display: none;
 }
 
 .audio {
