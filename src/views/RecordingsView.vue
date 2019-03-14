@@ -15,19 +15,14 @@
             </h5>
           </b-form-text>
         </b-col>
+
         <b-col
           md="6"
           lg="4">
-          <b-pagination
-            v-if="count > perPage"
-            :total-rows="count"
-            v-model="currentPage"
-            :per-page="perPage"
-            :limit="limitPaginationButtons"
-            class="pagination-buttons"
-            align="center"
-            @input="pagination"/>
+          <!-- Pagination used to go here, now just an empty space to keep things
+              aligned until the rest of the UI gets its redesign -->
         </b-col>
+
         <b-col
           md="6"
           lg="4">
@@ -44,15 +39,17 @@
 
     </b-container>
     <TableRecordings :items="tableItems"/>
-    <b-pagination
-      v-if="count > perPage"
-      :total-rows="count"
-      v-model="currentPage"
-      :per-page="perPage"
-      :limit="limitPaginationButtons"
-      class="pagination-buttons"
-      align="center"
-      @input="pagination"/>
+    <div class="sticky-footer">
+      <b-pagination
+        v-if="count > perPage"
+        :total-rows="count"
+        v-model="currentPage"
+        :per-page="perPage"
+        :limit="limitPaginationButtons"
+        class="pagination-buttons"
+        align="center"
+        @input="pagination"/>
+    </div>
   </div>
 </template>
 
@@ -236,5 +233,20 @@ export default {
   .information-line {
     padding-top: 5px;
     padding-bottom: 5px;
+  }
+
+  .sticky-footer {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: white;
+    border-top: solid rgb(222, 226, 230) 1px;
+  }
+
+  .pagination-buttons {
+    margin-bottom: 0px;
   }
 </style>
