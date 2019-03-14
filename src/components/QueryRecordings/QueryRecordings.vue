@@ -157,10 +157,10 @@ export default {
         query.where.duration = {};
       }
       if (this.duration.low) {
-        query.where.duration["$gt"] = this.duration.low;
+        query.where.duration["$gte"] = this.duration.low;
       }
       if (this.duration.high) {
-        query.where.duration["$lt"] = this.duration.high;
+        query.where.duration["$lte"] = this.duration.high;
       }
       // Add date
       if (this.fromDate || this.toDate ) {
