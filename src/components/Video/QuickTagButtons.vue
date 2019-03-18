@@ -49,7 +49,7 @@
       class="tag-button"
       title="Mark as false positive (meaning there is no animal present)"
       src="../../assets/video/none.png"
-      @click="$emit('addTag', {event: 'false positive'})" >
+      @click="quickTag('false-positive')" >
     <img
       class="tag-button"
       title="Open form to add other animal and/or extra details"
@@ -63,11 +63,10 @@
 export default {
   name: 'QuickTagButtons',
   methods: {
-    quickTag(animal) {
+    quickTag(what) {
       const tag = {};
-      tag.animal = animal;
       tag.confidence = 0.85;
-      tag.what = animal;
+      tag.what = what;
       this.$emit('addTag', tag);
     }
   }

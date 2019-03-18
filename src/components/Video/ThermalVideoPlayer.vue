@@ -36,7 +36,7 @@ export default {
     currentTrack: {
       type: Number,
       default: 0,
-    }
+    },
   },
   data () {
     return {
@@ -60,15 +60,24 @@ export default {
     videoUrl: function (newValue) {
       this.$data.playerOptions.sources[0].src = newValue;
     },
+    currentTrack: function(index) {
+      this.lastDisplayedVideoTime = -1;
+      this.setTimeAndRedraw(this.tracks[index].data.start_s);
+    },
   },
   mounted: function () {
     this.$data.playerOptions.sources[0].src = this.videoUrl;
   },
   methods: {
+    setTimeAndRedraw(time) {
+      this.lastTrackFrame = 0;
+      this.$refs.player.player.currentTime(time);
+    },
     seeking(event) {
       // If the user is moving the time slider on the video then update the canvas
       // as well so that it matches the underlying video frame.
       if(event.type === "seeking") {
+        this.lastTrackFrame = 0;
         this.draw();
       }
     },
@@ -113,8 +122,6 @@ export default {
       if (this.lastTrackFrame == trackPos.length - 1 && currentTime > trackPos[this.lastTrackFrame][0] + 0.112) {
         return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
       }
-
-
       const rect = trackPos[this.lastTrackFrame][1];
       const rectWidth = rect[2] - rect[0];
       const rectHeight = rect[3] - rect[1];

@@ -13,7 +13,7 @@
             ref = "thermalPlayer"
             :video-url="fileSource"
             :tracks="tracks"
-            :current-track="0"/>
+            :current-track="selectedTrack"/>
           <QuickTag
             v-show="!showAddObservation"
             @addTag="addTag($event)"
@@ -65,7 +65,9 @@
               <TrackInfo
                 :track="track"
                 :index="index"
-                :recording-id="getRecordingId()"/>
+                :recording-id="getRecordingId()"
+                :show="index==selectedTrack"
+                @trackSelected="trackSelected($event)"/>
             </div>
           </div>
         </div>
@@ -106,6 +108,8 @@ export default {
       showAlert: false,
       alertMessage: "",
       alertVariant: "",
+      selectedTrack: 0,
+      startVideoTime: 0,
     };
   },
   computed:
@@ -217,7 +221,12 @@ export default {
       this.$refs.addObs.currentVideoTime = this.$refs.thermalPlayer.player.currentTime;
     },
     setCurrentVideoTime(time) {
-      this.$refs.thermalPlayer.player.currentTime = time;
+      this.startVideoTime = time;
+    },
+    trackSelected(track) {
+      if (track != this.selectedTrack) {
+        this.selectedTrack = track;
+      }
     }
   }
 };

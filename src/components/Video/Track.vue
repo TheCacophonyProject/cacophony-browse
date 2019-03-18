@@ -1,31 +1,36 @@
 <template>
   <div
     :class="trackClass()">
-    <h3>
-      <span v-html="trackImage()"/>
-      {{ index + 1 }} - {{ track.data.label }}</h3>
-    {{ message }}
     <div
-      v-if="show">
+      @click="trackSelected()">
+      <h3>
+        <span v-html="trackImage()"/>
+        {{ index + 1 }} - {{ track.data.label }}
+      </h3>
+      {{ message }}
+    </div>
+    <!-- v-if="isVideo" -->
+    <div
+      v-if="show"
+      class="track-details">
       <TrackData
         :track-data="track.data"/>
       <QuickTagButtons
         v-show="true"
         @addTag="addTag($event)"
         @displayAddObservation="showAddObservation = true"/>
-        <!-- <AddObservation
-          v-show="showFullAddTag"
-          ref = "addObs"
-          :current-video-time="0"
-          @get-current-video-time="getCurrentVideoTime()"
-          @set-current-video-time="setCurrentVideoTime($event)"
-          @addTag="addTag($event)"
-          @hideAddObservations="showAddObservation = false" /> -->
-        <!-- <ObservedAnimals
-          v-if="isVideo"
-          :items="tagItems"
-          @deleteTag="deleteTag($event)"
-          @addTag="addTag($event)"/> -->
+      <!-- <AddObservation
+        v-show="showFullAddTag"
+        ref = "addObs"
+        :current-video-time="0"
+        @get-current-video-time="getCurrentVideoTime()"
+        @set-current-video-time="setCurrentVideoTime($event)"
+        @addTag="addTag($event)"
+        @hideAddObservations="showAddObservation = false" /> -->
+      <TrackTags
+        :items="track.TrackTags"
+        @addTag="addTag($event)"
+        @deleteTag="deleteTag($event)"/>
     </div>
   </div>
 </template>
@@ -34,11 +39,12 @@
 /* global require */
 import TrackData from './TrackData.vue';
 import QuickTagButtons from './QuickTagButtons.vue';
+import TrackTags from './TrackTags.vue';
 
 export default {
   name: 'Track',
   components: {
-    TrackData, QuickTagButtons,
+    TrackData, QuickTagButtons, TrackTags,
   },
   props: {
     track: {
@@ -55,7 +61,7 @@ export default {
     },
     show: {
       type: Boolean,
-      default: true,
+      default: false,
     }
   },
   data() {
@@ -98,6 +104,13 @@ export default {
       const trackId = this.track.id;
       this.$store.dispatch('Video/ADD_TRACK_TAG', { tag, recordingId, trackId });
     },
+    deleteTag(tag) {
+      const recordingId = this.recordingId;
+      this.$store.dispatch('Video/DELETE_TRACK_TAG', { tag, recordingId});
+    },
+    trackSelected() {
+      this.$emit('trackSelected', this.index);
+    },
   },
 };
 </script>
@@ -111,9 +124,12 @@ export default {
     margin-bottom: 0;
   }
 
-  .details {
-    padding-left: 20px;
-    padding-bottom: 5px;
+  .track-details {
+    font-size: 85%;
+    margin-left: 30px;
+    margin-top: -10px;
+    padding: 5px;
+    /* border: 1px solid lightgray; */
   }
 
   table {

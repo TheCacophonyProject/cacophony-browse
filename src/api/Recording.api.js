@@ -3,7 +3,7 @@ import { fetch } from './fetch';
 import querystring from 'querystring';
 
 export default {
-  query, id, comment, del, tracks, addTrackTag,
+  query, id, comment, del, tracks, addTrackTag, deleteTrackTag
 };
 
 const apiPath = '/api/v1/recordings';
@@ -85,6 +85,16 @@ function addTrackTag(tag, recordingId, trackId) {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: body
+    }
+  );
+}
+
+function deleteTrackTag(tag, recordingId) {
+  const url = `${config.api}${apiPath}/${recordingId}/tracks/${tag.TrackId}/tags/${tag.id}`;
+  return fetch(
+    url,
+    {
+      method:"DELETE"
     }
   );
 }

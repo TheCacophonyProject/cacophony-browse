@@ -76,7 +76,6 @@ export default {
   }
 
   .details {
-    padding-left: 20px;
     padding-bottom: 5px;
   }
 

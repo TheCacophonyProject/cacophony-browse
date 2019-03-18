@@ -89,7 +89,13 @@ const actions = {
     await api.recording.addTrackTag(tag, recordingId, trackId);
     //!!!!!NEED TO DO SOMETHING SMARTER TO UPDATE HERE!//
     // store.dispatch('Video/GET_RECORDING', recordingId);
-  }
+  },
+
+  async DELETE_TRACK_TAG(undefined, {tag, recordingId}) {
+    await api.recording.deleteTrackTag(tag, recordingId);
+    //!!!!!NEED TO DO SOMETHING SMARTER TO UPDATE HERE!//
+    // store.dispatch('Video/GET_RECORDING', recordingId);
+  },
 };
 
 
