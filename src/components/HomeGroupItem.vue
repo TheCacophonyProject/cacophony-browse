@@ -38,7 +38,7 @@ export default {
   async mounted () {
     // Last 24 hours
     const toDate = new Date();
-    const fromDate = new Date(toDate.getTime() - 365*24*60*60*1000);
+    const fromDate = new Date(toDate.getTime() - 24*60*60*1000);
     const dateQuery = {
       "$gt": fromDate.toISOString(),
       "$lt": toDate.toISOString()
