@@ -3,13 +3,18 @@
     <h3>Your groups</h3>
     <p>Click on a group to view the last 24 hours of recordings in that group</p>
 
-    <b-list-group>
-      <HomeGroupItem
-        v-for="group in orderBy(groups, 'groupname')"
-        :key="group.id"
-        :group="group"
-      />
-    </b-list-group>
+    <div
+      id="group-list-container"
+      style="max-height: 50vh; overflow-y: auto;">
+
+      <b-list-group >
+        <HomeGroupItem
+          v-for="(group, index) in orderBy(groups, 'groupname')"
+          :key="index"
+          :group="group"
+        />
+      </b-list-group>
+    </div>
   </div>
 </template>
 
