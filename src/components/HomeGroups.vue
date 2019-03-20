@@ -5,7 +5,7 @@
 
     <b-list-group>
       <HomeGroupItem
-        v-for="group in groups"
+        v-for="group in orderBy(groups, 'groupname')"
         :key="group.id"
         :group="group"
       />
@@ -17,13 +17,15 @@
 
 import HomeGroupItem from './HomeGroupItem.vue';
 import { mapState } from 'vuex';
+import Vue2Filters from 'vue2-filters';
 
 export default {
   name: "HomeGroups",
   components: { HomeGroupItem },
+  mixins: [Vue2Filters.mixin],
   computed: mapState({
     groups: state => state.Groups.groups,
-  }),
+  })
 };
 </script>
 
