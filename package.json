@@ -16,8 +16,6 @@
     "version": "./update-nfpm-version"
   },
   "dependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/runtime": "^7.4.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.1",
     "@fortawesome/free-regular-svg-icons": "^5.2.0",
@@ -57,7 +55,7 @@
     "babel-plugin-syntax-async-functions": "^6.13.0",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.2",
-    "css-loader": "^0.28.7",
+    "css-loader": "^2.1.1",
     "eslint": "^5.15.3",
     "eslint-loader": "^2.1.0",
     "eslint-plugin-import": "^2.13.0",
