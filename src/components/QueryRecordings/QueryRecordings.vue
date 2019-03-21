@@ -82,6 +82,7 @@ export default {
         high: null
       },
       devices: [],
+      deviceGroups: [],
       animals: [],
       fromDate: "",
       toDate: "",
@@ -119,12 +120,44 @@ export default {
   mounted: function () {
     const query = this.$route.query;
     if (query && Object.keys(query).length > 0) {
-      this.devices = (query.deviceId ? [JSON.parse(query.deviceId)] : []);
-      this.recordingType = (query.recordingType ? JSON.parse(query.recordingType) : 'both');
-      this.fromDate = (query.fromDate ? this.parseDate(new Date(query.fromDate)) : '');
-      this.toDate = (query.toDate ? this.parseDate(new Date(query.toDate)) : '');
+
+      this.tagTypes = query.tagMode || 'any';
+      this.animals = (query.tags && JSON.parse(query.tags)) || [];
+      if (query.where) {
+        const whereClause = JSON.parse(query.where);
+        let type = 'both';
+        if (whereClause.type) {
+          type = whereClause.type === 'thermalRaw' ? 'video' : whereClause.type;
+        }
+        this.recordingType = type;
+        this.duration = (whereClause.duration && {
+          low: whereClause.duration["$gte"] || "0",
+          high: whereClause.duration["$lte"] || null,
+        }) || this.duration;
+        this.fromDate = (
+          whereClause.recordingDateTime &&
+          whereClause.recordingDateTime["$gt"]
+        ) || '';
+        this.toDate = (
+          whereClause.recordingDateTime &&
+          whereClause.recordingDateTime["$lt"] &&
+          whereClause.recordingDateTime["$lt"].replace(" 23:59:59", '')
+        ) || '';
+        this.deviceGroups = whereClause.DeviceGroups || [];
+        this.devices = [...this.devices, ...this.deviceGroups];
+        if (whereClause.DeviceId) {
+          this.devices = [...this.devices, ...whereClause.DeviceId];
+        }
+      } else {
+        // Old behaviour, may be redundant now.
+        // Not even sure when this case can be hit?
+        this.devices = (query.deviceId ? [JSON.parse(query.deviceId)] : []);
+        this.recordingType = (query.recordingType ? JSON.parse(query.recordingType) : 'both');
+        this.fromDate = (query.fromDate ? this.parseDate(new Date(query.fromDate)) : '');
+        this.toDate = (query.toDate ? this.parseDate(new Date(query.toDate)) : '');
+      }
+      this.buildQuery();
     }
-    this.buildQuery();
   },
   methods: {
     parseDate (date) {
@@ -139,18 +172,37 @@ export default {
       };
       // Add devices
       if (this.devices.length !== 0) {
-        query.where.DeviceId = [];
+        const deviceIds = [];
         for (const device of this.devices) {
-          if (typeof device.id === 'number') {
-            // Add single devices
-            query.where.DeviceId.push(device.id);
-          } else {
-            // Add groups of devices
-            for (const item of device.devices) {
-              query.where.DeviceId.push(item.id);
+          if (typeof device === 'object') {
+            if (typeof device.id === 'number') {
+              // Add single devices
+              deviceIds.push(device.id);
+            } else {
+              // NOTE: if the device is a group, the id is a string.
+              // Add groups of devices
+              query.where.DeviceGroups = query.where.DeviceGroups || [];
+              query.where.DeviceGroups.push(device.id);
+              if (device.devices) {
+                for (const item of device.devices) {
+                  deviceIds.push(item.id);
+                }
+              }
             }
+          } else if (typeof device === 'number') {
+            // We're reconstituting this from the query params, so we only have
+            // device ids at this stage, we don't have the labels.
+            deviceIds.push(device);
           }
         }
+        // Dedupe ids.
+        query.where.DeviceId = deviceIds.reduce((acc, id) => {
+          !acc.includes(id) && acc.push(id);
+          return acc;
+        }, []);
+      }
+      if (this.deviceGroups && this.deviceGroups.length) {
+        query.where.DeviceGroups = this.deviceGroups;
       }
       // Add duration
       if (this.duration.low || this.duration.high) {
@@ -168,13 +220,17 @@ export default {
       }
       if (this.fromDate) {
         query.where.recordingDateTime["$gt"] = this.fromDate;
+      } else {
+        query.where.recordingDateTime && delete query.where.recordingDateTime["$gt"];
       }
       if (this.toDate) {
         query.where.recordingDateTime["$lt"] = this.toDate + " 23:59:59";
+      } else {
+        query.where.recordingDateTime && delete query.where.recordingDateTime["$lt"];
       }
       // Add tag mode
       if (this.tagTypes !== 'any') {
-        query.tagMode = this.tagTypes.text;
+        query.tagMode = this.tagTypes;
       }
       // Add animal tags
       if (this.animals.length !== 0) {
