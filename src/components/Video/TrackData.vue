@@ -67,14 +67,6 @@ export default {
 </script>
 
 <style scoped>
-  .tracks {
-    padding-left: 20px;
-  }
-
-  .tracks h3 {
-    margin-bottom: 0;
-  }
-
   .details {
     padding-bottom: 5px;
   }
@@ -87,33 +79,4 @@ export default {
   th, td {
     border-top: 1px solid #ddd;
   }
-
-  td {
-    padding-right: 20px;
-  }
-
-  .title {
-    font-weight: 550;
-  }
-
-  .details p {
-    margin-bottom: 0;
-  }
-
-  .delta {
-    color: gray;
-  }
-
-  .ignored {
-    color: gray;
-  }
-</style>
-
-<style>
- .track-image {
-    max-width: 30px;
-    max-height: 30px;
-    width: auto;
-    height: auto;
- }
 </style>

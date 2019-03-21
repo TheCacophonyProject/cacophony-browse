@@ -1,15 +1,42 @@
 <template>
   <div
     :class="trackClass()">
-    <div
-      @click="trackSelected()">
-      <h3>
-        <span v-html="trackImage()"/>
-        {{ index + 1 }} - {{ track.data.label }}
-      </h3>
+    <b-row
+      class="track-header">
+      <b-col
+        cols="1"
+        lg="0"
+        title="Previous track"
+        class="prev-track"
+        @click="trackSelected(-1)">
+        <font-awesome-icon
+          v-if="index != 0"
+          class="fa-2x"
+          icon="angle-left"/>
+      </b-col>
+      <b-col
+        cols="10"
+        class="track-title">
+        <h3
+          @click="trackSelected(0)">
+          <span
+            v-html="trackImage()"/>
+          Track {{ index + 1 }} - {{ track.data.label }}
+        </h3>
+      </b-col>
+      <b-col
+        cols="1"
+        lg="2"
+        title="Next track"
+        class="next-track"
+        @click="trackSelected(1)">
+        <font-awesome-icon
+          v-if="index < numTracks - 1"
+          class="fa-2x"
+          icon="angle-right"/>
+      </b-col>
       {{ message }}
-    </div>
-    <!-- v-if="isVideo" -->
+    </b-row>
     <div
       v-if="show"
       class="track-details">
@@ -59,6 +86,10 @@ export default {
       type: Number,
       required: true,
     },
+    numTracks: {
+      type: Number,
+      required: true,
+    },
     show: {
       type: Boolean,
       default: false,
@@ -76,10 +107,11 @@ export default {
   },
   methods: {
     trackClass: function () {
+      const selected = "selected-" + this.show;
       if ("tag" in this.track.data) {
-        return "";
+        return selected;
       } else {
-        return "ignored";
+        return selected + " ignored";
       }
     },
     trackImage: function () {
@@ -108,8 +140,14 @@ export default {
       const recordingId = this.recordingId;
       this.$store.dispatch('Video/DELETE_TRACK_TAG', { tag, recordingId});
     },
-    trackSelected() {
-      this.$emit('trackSelected', this.index);
+    trackSelected(increment) {
+      const index = this.index + increment;
+      if (0 <= index && index < this.numTracks) {
+        this.$emit('trackSelected', this.index + increment);
+      }
+    },
+    headerClass() {
+      return "selected-" + this.show;
     },
   },
 };
@@ -124,12 +162,46 @@ export default {
     margin-bottom: 0;
   }
 
+  .track-details >>> p {
+    margin-bottom: .2em;
+  }
+
   .track-details {
-    font-size: 85%;
+    font-size: 90%;
     margin-left: 30px;
     margin-top: -10px;
     padding: 5px;
     /* border: 1px solid lightgray; */
+  }
+
+  .track-title {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+
+  .selected-false {
+    color: grey;
+  }
+
+  .selected-true {
+    border: 1px solid lightgrey;
+  }
+
+  @media only screen and (max-width: 991px) {
+    .selected-false >>> .track-header {
+      display: none;
+    }
+  }
+
+  @media only screen and (min-width: 992px) {
+    .prev-track {
+      display: none;
+    }
+  }
+
+  .prev-track,
+  .next-track {
+    color: grey;
   }
 
   table {
@@ -159,6 +231,10 @@ export default {
 
   .ignored {
     color: gray;
+  }
+
+  .tag-buttons {
+    padding: 12px 0;
   }
 </style>
 

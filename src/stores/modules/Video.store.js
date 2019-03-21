@@ -80,21 +80,19 @@ const actions = {
     commit('deleteTag', tag);
   },
 
-  async ADD_TAG(undefined, {tag, id}) {
+  async ADD_TAG(commit, {tag, id}) {
     await api.tag.addTag(tag, id);
     store.dispatch('Video/GET_RECORDING', id);
   },
 
-  async ADD_TRACK_TAG(undefined, {tag, recordingId, trackId}) {
+  async ADD_TRACK_TAG({commit}, {tag, recordingId, trackId}) {
     await api.recording.addTrackTag(tag, recordingId, trackId);
-    //!!!!!NEED TO DO SOMETHING SMARTER TO UPDATE HERE!//
-    // store.dispatch('Video/GET_RECORDING', recordingId);
+    return await getTracks(commit, recordingId);
   },
 
-  async DELETE_TRACK_TAG(undefined, {tag, recordingId}) {
+  async DELETE_TRACK_TAG({commit}, {tag, recordingId}) {
     await api.recording.deleteTrackTag(tag, recordingId);
-    //!!!!!NEED TO DO SOMETHING SMARTER TO UPDATE HERE!//
-    // store.dispatch('Video/GET_RECORDING', recordingId);
+    return await getTracks(commit, recordingId);
   },
 };
 

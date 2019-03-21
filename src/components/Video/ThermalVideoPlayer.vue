@@ -4,6 +4,8 @@
     class="container">
     <canvas
       ref="canvas"
+      :width="canvasWidth"
+      :height="canvasHeight"
       class="canvas"/>
     <video-player
       ref="player"
@@ -43,22 +45,25 @@ export default {
       lastDisplayedVideoTime: 0,
       currentVideoTime: 0,
       lastTrackFrame: 0,
-      scale: 4,
       playerOptions: {
         autoplay: false,
         muted: true,
-        width: '640px',
+        width: '720px',
         playbackRates: [0.5, 1, 2, 4, 8],
+        inactivityTimeout: 0,
         sources: [{
           type: "video/mp4",
           src: "blah blah",
         }],
-      }
+      },
+      canvasWidth: 800,
+      canvasHeight: 600,
+      scale: 5,
     };
   },
   watch: {
-    videoUrl: function (newValue) {
-      this.$data.playerOptions.sources[0].src = newValue;
+    videoUrl: function () {
+      this.setVideoUrl();
     },
     currentTrack: function(index) {
       this.lastDisplayedVideoTime = -1;
@@ -66,9 +71,25 @@ export default {
     },
   },
   mounted: function () {
-    this.$data.playerOptions.sources[0].src = this.videoUrl;
+    this.setVideoUrl();
+    window.addEventListener('resize', this.onResize);
+    this.onResize();
+  },
+  beforeDestroy() {
+    // Unregister the event listener before destroying this Vue instance
+    window.removeEventListener('resize', this.onResize);
   },
   methods: {
+    setVideoUrl() {
+      // first must make sure the width to be loaded is also correct.
+      const width = this.$refs.canvas.clientWidth;
+      this.playerOptions.width = width + "px";
+      this.$data.playerOptions.sources[0].src = this.videoUrl;
+    },
+    onResize() {
+      const width = this.$refs.canvas.clientWidth;
+      this.$refs.player.player.width(width);
+    },
     setTimeAndRedraw(time) {
       this.lastTrackFrame = 0;
       this.$refs.player.player.currentTime(time);
@@ -149,14 +170,10 @@ export default {
 
         const canvas = this.$refs.canvas;
         const context = canvas.getContext('2d');
-
-        const container = this.$refs.container;
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
-        const ss = 4;
+        const ss = this.scale;
 
         // Clear the canvas before each new frame
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
         // Translate the context so the top left corner of the rectangle is always (0,0)
         context.save();
@@ -194,6 +211,14 @@ export default {
   .video .video-js .vjs-fullscreen-control {
     display: none;
   }
+
+  /* .video .video-js {
+    height: 510px;
+  }
+
+  .video .video-js .vjs-tech {
+    margin-top: -15px;
+  } */
 
   .audio {
     display: block;

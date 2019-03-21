@@ -16,13 +16,25 @@
           v-html="what(row.item.what)"/>
       </template>
       <template
-        slot="deleteButton"
+        slot="who"
         slot-scope="row">
-        <font-awesome-icon
+        <div
+          v-if="row.item.User"
+          v-html="row.item.User.username"/>
+      </template>
+      <template
+        slot="deleteButton"
+        slot-scope="row"
+        class="delect-cell">
+        <div
           v-b-popover.hover.bottom="'Delete tag'"
-          icon="trash"
-          style="cursor: pointer;"
-          @click="$emit('deleteTag', row.item)"/>
+          class="delete-button"
+          @click="$emit('deleteTag', row.item)">
+          <font-awesome-icon
+            v-if="!row.item.automatic"
+            icon="trash"
+            style="cursor: pointer;"/>
+        </div>
       </template>
       <template
         slot="confirmButton"
@@ -81,7 +93,7 @@ export default {
       }
       try {
         const link = require('../../assets/video/' + image);
-        return `<img src="${link}"/><div>${what}</div>`;
+        return `<img src="${link}"/><div class="d-inline d-lg-block">${what}</div>`;
       } catch (e) {
         return '';
       }
@@ -97,13 +109,10 @@ export default {
 </script>
 
 <style scoped>
-.what-image >>> img {
+.what-image >>> img
+{
   max-width: 30px;
   max-height: 30px;
-}
-
-.what-image {
-  font-size: 80%;
 }
 
 .track-tag-table {
@@ -114,7 +123,12 @@ export default {
   padding: 1px 0px;
 }
 
-table td .what-image {
-  margin: -10px 0px;
+table td .what-image,
+table td .delete-button {
+  margin: -12px;
+}
+
+.delete-button {
+  padding: 12px;
 }
 </style>

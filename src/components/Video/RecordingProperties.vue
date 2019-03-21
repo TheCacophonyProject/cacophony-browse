@@ -2,7 +2,7 @@
   <div>
     <b-form>
       <b-form-group>
-        <h3>Properties &nbsp;
+        <h3>Technical details &nbsp;
           <span
             v-if="!display"
             title="Show details"
@@ -96,7 +96,7 @@ import config from '../../config';
 import BatteryLevel from '../BatteryLevel.vue';
 
 export default {
-  name: 'VideoProperties',
+  name: 'RecordingProperties',
   components: {
     BatteryLevel,
   },

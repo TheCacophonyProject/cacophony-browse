@@ -14,18 +14,6 @@
             :video-url="fileSource"
             :tracks="tracks"
             :current-track="selectedTrack"/>
-          <QuickTag
-            v-show="!showAddObservation"
-            @addTag="addTag($event)"
-            @displayAddObservation="showAddObservation = true"/>
-          <AddObservation
-            v-show="showAddObservation"
-            ref = "addObs"
-            :current-video-time="0"
-            @get-current-video-time="getCurrentVideoTime()"
-            @set-current-video-time="setCurrentVideoTime($event)"
-            @addTag="addTag($event)"
-            @hideAddObservations="showAddObservation = false" />
         </template>
         <template v-if="isAudio">
           <audio
@@ -43,18 +31,34 @@
           :variant="alertVariant"
           dismissible
           @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
-        <ObservedAnimals
-          v-if="isVideo"
-          :items="tagItems"
-          @deleteTag="deleteTag($event)"
-          @addTag="addTag($event)"/>
+        <template v-if="isVideo">
+          <QuickTag
+            v-show="!showAddObservation"
+            class="d-none d-lg-block"
+            @addTag="addTag($event)"
+            @displayAddObservation="showAddObservation = true"/>
+          <AddObservation
+            v-show="showAddObservation"
+            ref = "addObs"
+            :current-video-time="0"
+            @get-current-video-time="getCurrentVideoTime()"
+            @set-current-video-time="setCurrentVideoTime($event)"
+            @addTag="addTag($event)"
+            @hideAddObservations="showAddObservation = false" />
+          <ObservedAnimals
+            :items="tagItems"
+            class="d-none d-lg-block"
+            @deleteTag="deleteTag($event)"
+            @addTag="addTag($event)"/>
+        </template>
       </b-col>
 
       <b-col
         cols="12"
         lg="4">
-        <div>
-          <h3>Tracks</h3>
+        <div
+          v-if="isVideo">
+          <h2 class="d-none d-lg-block">Tracks</h2>
           <div
             v-if="tracks">
             <!-- This Orderby no longer going to work either -->
@@ -65,20 +69,46 @@
               <TrackInfo
                 :track="track"
                 :index="index"
+                :num-tracks="tracks.length"
                 :recording-id="getRecordingId()"
                 :show="index==selectedTrack"
                 @trackSelected="trackSelected($event)"/>
             </div>
           </div>
         </div>
-        <VideoProperties
+        <h2>Recording</h2>
+        <RecordingProperties
           v-model="recording.comment"
           :download-raw="downloadRawJWT"
           :download-file="downloadFileJWT"
           :recording="recording"
           :tracks="tracks"
           @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
+        <template
+          v-if="isVideo">
+          <QuickTag
+            v-show="!showAddObservation"
+            class="d-lg-none"
+            @addTag="addTag($event)"
+            @displayAddObservation="showAddObservation = true"/>
+          <AddObservation
+            v-show="showAddObservation"
+            ref = "addObs"
+            :current-video-time="0"
+            class="d-lg-none"
+            @get-current-video-time="getCurrentVideoTime()"
+            @set-current-video-time="setCurrentVideoTime($event)"
+            @addTag="addTag($event)"
+            @hideAddObservations="showAddObservation = false" />
+          <ObservedAnimals
+            v-if="isVideo"
+            :items="tagItems"
+            class="d-lg-none"
+            @deleteTag="deleteTag($event)"
+            @addTag="addTag($event)"/>
+        </template>
         <VideoHelp class="mt-2" />
+
       </b-col>
 
       <b-col cols="12"/>
@@ -95,12 +125,12 @@ import AddObservation from '../components/Video/AddObservation.vue';
 import ObservedAnimals from '../components/Video/ObservedAnimals.vue';
 import ThermalVideoPlayer from '../components/Video/ThermalVideoPlayer.vue';
 import TrackInfo from '../components/Video/Track.vue';
-import VideoProperties from '../components/Video/VideoProperties.vue';
+import RecordingProperties from '../components/Video/RecordingProperties.vue';
 import VideoHelp from '../components/Video/VideoHelp.vue';
 
 export default {
   name: 'RecordingView',
-  components: {QuickTag, PrevNext, AddObservation, ObservedAnimals, VideoProperties, VideoHelp, ThermalVideoPlayer, TrackInfo},
+  components: {QuickTag, PrevNext, AddObservation, ObservedAnimals, RecordingProperties, VideoHelp, ThermalVideoPlayer, TrackInfo},
   props: {},
   data () {
     return {
@@ -148,9 +178,9 @@ export default {
     }),
   watch: {
     '$route' () {
-      this.getRecordingDetails();
       this.recording = null;
       this.tracks = null;
+      this.getRecordingDetails();
     },
   },
   created: async function() {
@@ -232,7 +262,10 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+  .tag-buttons, .img-buttons {
+    padding: 0 5px;
+  }
 </style>
 
 <style src="video.js/dist/video-js.css"></style>
