@@ -148,13 +148,6 @@ export default {
         if (whereClause.DeviceId) {
           this.devices = [...this.devices, ...whereClause.DeviceId];
         }
-      } else {
-        // Old behaviour, may be redundant now.
-        // Not even sure when this case can be hit?
-        this.devices = (query.deviceId ? [JSON.parse(query.deviceId)] : []);
-        this.recordingType = (query.recordingType ? JSON.parse(query.recordingType) : 'both');
-        this.fromDate = (query.fromDate ? this.parseDate(new Date(query.fromDate)) : '');
-        this.toDate = (query.toDate ? this.parseDate(new Date(query.toDate)) : '');
       }
       this.buildQuery();
     }
