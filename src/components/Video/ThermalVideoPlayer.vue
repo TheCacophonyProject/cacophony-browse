@@ -11,7 +11,6 @@
       ref="player"
       :key="videoUrl"
       :options="playerOptions"
-      height="auto"
       class="video vjs-custom-skin"
       @seeking="seeking"
       @play="draw"/>
@@ -71,9 +70,9 @@ export default {
     },
   },
   mounted: function () {
+    this.calculateSizes();
     this.setVideoUrl();
     window.addEventListener('resize', this.onResize);
-    this.onResize();
   },
   beforeDestroy() {
     // Unregister the event listener before destroying this Vue instance
@@ -82,13 +81,24 @@ export default {
   methods: {
     setVideoUrl() {
       // first must make sure the width to be loaded is also correct.
-      const width = this.$refs.canvas.clientWidth;
-      this.playerOptions.width = width + "px";
+      this.playerOptions.width = this.canvasWidth + "px";
+      this.playerOptions.height = this.canvasHeight + "px";
       this.$data.playerOptions.sources[0].src = this.videoUrl;
     },
     onResize() {
-      const width = this.$refs.canvas.clientWidth;
-      this.$refs.player.player.width(width);
+      const oldWidth = this.canvasWidth;
+      this.calculateSizes();
+      if (oldWidth != this.canvasWidth) {
+        this.currentVideoTime += 10;
+        this.draw(true);
+      }
+    },
+    calculateSizes() {
+      this.canvasWidth = this.$refs.canvas.clientWidth;
+      this.scale = this.canvasWidth /160;
+      this.canvasHeight = (this.scale * 120) + 30;
+      this.$refs.player.player.width(this.canvasWidth);
+      this.$refs.player.player.height(this.canvasHeight);
     },
     setTimeAndRedraw(time) {
       this.lastTrackFrame = 0;
@@ -157,15 +167,15 @@ export default {
       if (v === undefined || v.paused || v.ended) {
         return false;
       }
-      this.draw();
+      this.draw(false);
     },
-    draw() {
+    draw(mustRedraw) {
       const v = this.$refs.player;
       this.currentVideoTime = v.player.currentTime();
 
       // Only update the canvas if the video time has changed as this means a new
       // video frame is being displayed.
-      if (v.player.currentTime() !== this.lastDisplayedVideoTime) {
+      if (mustRedraw || (v.player.currentTime() !== this.lastDisplayedVideoTime)) {
         const frameData = this.getCurrentVideoFrameData(v.player.currentTime());
 
         const canvas = this.$refs.canvas;
@@ -212,13 +222,9 @@ export default {
     display: none;
   }
 
-  /* .video .video-js {
-    height: 510px;
-  }
-
   .video .video-js .vjs-tech {
     margin-top: -15px;
-  } */
+  }
 
   .audio {
     display: block;
