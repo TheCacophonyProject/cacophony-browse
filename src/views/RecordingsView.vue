@@ -2,8 +2,9 @@
   <div>
     <b-container>
       <QueryRecordings
-        v-model="query"
-        @searchButton="searchButton"/>
+        :query="query"
+        @input="updateQueryString"
+      />
 
       <b-form-row class="information-line">
         <b-col lg="4">
@@ -65,7 +66,21 @@ export default {
   props: {},
   data() {
     return {
-      query: {},
+      query: {
+        where: {
+          DeviceId: [],
+          duration: {
+            "$gte": "0",
+            "$lte": ""
+          },
+          recordingDateTime: {
+            "$gt": "",
+            "$lt": ""
+          }
+        },
+        tagMode: 'any',
+        tags: []
+      },
       recordings: [],
       tableItems: [],
       count: null,
@@ -83,50 +98,57 @@ export default {
       ]
     };
   },
+  watch: {
+    '$route' () {
+      for (const [key, val] of Object.entries(this.$route.query)) {
+        this.query[key] = val;
+      }
+      if (this.$route.query.where) {
+        const whereClause = JSON.parse(this.$route.query.where);
+        this.query.where = whereClause;
+      }
+      this.query.tags = JSON.parse(this.$route.query.tags);
+      this.countMessage = "";
+      // TODO respect existing pagination offset
+      this.currentPage = 1;
+      this.getRecordings();
+    }
+  },
   methods: {
-    searchButton() {
-      // Loading wheel here
+    pagination() {
+      this.updateQueryString();
+    },
+    updateQueryString(query) {
+      // Update the url query params string so that this search can be easily shared.
       this.countMessage = "";
       this.currentPage = 1;
-
-      this.updateQueryString();
-      this.getRecordings();
-    },
-    pagination() {
-      // Only get recordings if there is a where query ie will only run after
-      // "Search" has been pushed at least once
-      if (this.query.where) {
-        this.updateQueryString();
-        this.getRecordings();
-      }
-    },
-    updateQueryString() {
-      // Update the url query params string so that this search can be easily shared.
       this.$router.push({
         path: 'recordings',
-        query: this.getParamsForQuery(),
+        query: this.getParamsForQuery(query || this.query),
       });
+      this.getRecordings();
     },
-    getParamsForQuery(useForApiCall = false) {
+    getParamsForQuery(query, useForApiCall = false) {
       // Create query params object
-      let whereClause = this.query.where;
+      let whereClause = query.where;
       if (useForApiCall) {
         // Remove the group param, since the API doesn't handle that, we're just using
         // it to accurately share search parameters via urls.
-        whereClause = {...this.query.where};
+        whereClause = {...query.where};
+        whereClause.DeviceId = whereClause.DeviceId.map(({id}) => (id));
         delete whereClause.DeviceGroups;
       }
       const params = {
         where: JSON.stringify(whereClause),
         limit: this.perPage,
-        offset: (this.currentPage - 1) * this.perPage
+        offset: Math.max(0, (this.currentPage - 1) * this.perPage)
       };
 
-      if (this.query.tagMode) {
-        params.tagMode = this.query.tagMode;
+      if (query.tagMode) {
+        params.tagMode = query.tagMode;
       }
-      if (this.query.tags) {
-        params.tags = JSON.stringify(this.query.tags);
+      if (query.tags) {
+        params.tags = JSON.stringify(query.tags);
       }
       return params;
     },
@@ -135,9 +157,8 @@ export default {
       this.recordings = [];
       this.tableItems = [];
 
-
       // Call API and process results
-      const response = await api.recording.query(this.getParamsForQuery(true));
+      const response = await api.recording.query(this.getParamsForQuery(this.query, true));
 
       if (!response.success) {
         response.messages && response.messages.forEach(message => {
