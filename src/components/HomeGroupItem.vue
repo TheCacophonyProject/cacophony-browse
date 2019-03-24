@@ -1,6 +1,6 @@
 <template>
   <b-list-group-item
-    to="todo"
+    :to="{ path: 'recordings', query: query}"
     class="d-flex justify-content-between align-items-center"
   >
     {{ group.groupname }}
@@ -32,9 +32,16 @@ export default {
       count: 0
     };
   },
-  computed: mapState({
-    groups: state => state.Groups.groups,
-  }),
+  computed: {
+    ...mapState({
+      groups: state => state.Groups.groups,
+    }),
+    query() {
+      return {
+        where: JSON.stringify({DeviceId: this.group.Devices.map(d => d.id)}),
+      };
+    },
+  },
   async mounted () {
     // Last 24 hours
     const toDate = new Date();
