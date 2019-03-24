@@ -3,7 +3,7 @@
     <b-container>
       <QueryRecordings
         :query="query"
-        @input="updateQueryString"
+        @submit="updateRouteQuery"
       />
 
       <b-form-row class="information-line">
@@ -100,14 +100,8 @@ export default {
   },
   watch: {
     '$route' () {
-      for (const [key, val] of Object.entries(this.$route.query)) {
-        this.query[key] = val;
-      }
-      if (this.$route.query.where) {
-        const whereClause = JSON.parse(this.$route.query.where);
-        this.query.where = whereClause;
-      }
-      this.query.tags = JSON.parse(this.$route.query.tags);
+      // Create/update the query object from the route string
+      this.deserialiseRouteIntoQuery(this.$route.query);
       this.countMessage = "";
       // TODO respect existing pagination offset
       this.currentPage = 1;
@@ -116,19 +110,32 @@ export default {
   },
   methods: {
     pagination() {
-      this.updateQueryString();
+      this.updateRouteQuery();
     },
-    updateQueryString(query) {
+    updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
       this.countMessage = "";
       this.currentPage = 1;
       this.$router.push({
         path: 'recordings',
-        query: this.getParamsForQuery(query || this.query),
+        query: this.serialiseQuery(this.query),
       });
       this.getRecordings();
     },
-    getParamsForQuery(query, useForApiCall = false) {
+    deserialiseRouteIntoQuery(routeQuery) {
+      for (const [key, val] of Object.entries(routeQuery)) {
+        this.query[key] = val;
+      }
+      if (routeQuery.where) {
+        this.query.where = JSON.parse(routeQuery.where);
+      }
+      if (routeQuery.tags) {
+        this.query.tags = JSON.parse(routeQuery.tags);
+      }
+    },
+    serialiseQuery(query, useForApiCall = false) {
+      // Serialise query object back into a route string
+
       // Create query params object
       let whereClause = query.where;
       if (useForApiCall) {
@@ -158,7 +165,7 @@ export default {
       this.tableItems = [];
 
       // Call API and process results
-      const response = await api.recording.query(this.getParamsForQuery(this.query, true));
+      const response = await api.recording.query(this.serialiseQuery(this.query, true));
 
       if (!response.success) {
         response.messages && response.messages.forEach(message => {

@@ -50,7 +50,7 @@
       <b-button
         block
         variant="primary"
-        @click="buildQuery">Search</b-button>
+        @click="() => $emit('submit')">Search</b-button>
     </b-col>
   </b-form-row>
 </template>
@@ -174,81 +174,6 @@ export default {
       const year = date.getFullYear();
       return year + "-" + month + "-" + day;
     },
-    // loadFromUrlQuery: function () {
-    //   const query = this.$route.query;
-    //   if (query && Object.keys(query).length > 0) {
-    //     this.tagTypes = query.tagMode || 'any';
-    //     this.animals = (query.tags && JSON.parse(query.tags)) || [];
-    //     if (query.where) {
-    //       const whereClause = JSON.parse(query.where);
-    //       let type = 'both';
-    //       if (whereClause.type) {
-    //         type = whereClause.type === 'thermalRaw' ? 'video' : whereClause.type;
-    //       }
-    //       this.recordingType = type;
-    //       this.duration = (whereClause.duration && {
-    //         low: whereClause.duration["$gte"] || "0",
-    //         high: whereClause.duration["$lte"] || null,
-    //       }) || this.duration;
-    //       this.fromDate = (
-    //         whereClause.recordingDateTime &&
-    //         whereClause.recordingDateTime["$gt"]
-    //       ) || '';
-    //       this.toDate = (
-    //         whereClause.recordingDateTime &&
-    //         whereClause.recordingDateTime["$lt"] &&
-    //         whereClause.recordingDateTime["$lt"].replace(" 23:59:59", '')
-    //       ) || '';
-    //       this.deviceGroups = whereClause.DeviceGroups || [];
-    //       this.devices = [...this.devices, ...this.deviceGroups];
-    //       if (whereClause.DeviceId) {
-    //         this.devices = [...this.devices, ...whereClause.DeviceId];
-    //       }
-    //     }
-    //     this.buildQuery();
-    //   }
-    //},
-    buildQuery() {
-
-      // const query = {
-      //   where: {}
-      // };
-      // // Add devices
-      // if (this.devices.length !== 0) {
-      //   const deviceIds = [];
-      //   for (const device of this.devices) {
-      //     if (typeof device === 'object') {
-      //       if (typeof device.id === 'number') {
-      //         // Add single devices
-      //         deviceIds.push(device.id);
-      //       } else {
-      //         // NOTE: if the device is a group, the id is a string.
-      //         // Add groups of devices
-      //         query.where.DeviceGroups = query.where.DeviceGroups || [];
-      //         query.where.DeviceGroups.push(device.id);
-      //         if (device.devices) {
-      //           for (const item of device.devices) {
-      //             deviceIds.push(item.id);
-      //           }
-      //         }
-      //       }
-      //     } else if (typeof device === 'number') {
-      //       // We're reconstituting this from the query params, so we only have
-      //       // device ids at this stage, we don't have the labels.
-      //       deviceIds.push(device);
-      //     }
-      //   }
-      //   // Dedupe ids.
-      //   query.where.DeviceId = deviceIds.reduce((acc, id) => {
-      //     !acc.includes(id) && acc.push(id);
-      //     return acc;
-      //   }, []);
-      // }
-      // Any changes just alter the route, which is watched by the parent component,
-      // and will instigate any api calls required.
-
-      this.$emit('input', this.query);
-    }
   }
 };
 
