@@ -88,22 +88,36 @@ export default {
       // Loading wheel here
       this.countMessage = "";
       this.currentPage = 1;
+
+      this.updateQueryString();
       this.getRecordings();
     },
     pagination() {
       // Only get recordings if there is a where query ie will only run after
       // "Search" has been pushed at least once
       if (this.query.where) {
+        this.updateQueryString();
         this.getRecordings();
       }
     },
-    async getRecordings() {
-      // Remove previous values
-      this.recordings = [];
-      this.tableItems = [];
+    updateQueryString() {
+      // Update the url query params string so that this search can be easily shared.
+      this.$router.push({
+        path: 'recordings',
+        query: this.getParamsForQuery(),
+      });
+    },
+    getParamsForQuery(useForApiCall = false) {
       // Create query params object
+      let whereClause = this.query.where;
+      if (useForApiCall) {
+        // Remove the group param, since the API doesn't handle that, we're just using
+        // it to accurately share search parameters via urls.
+        whereClause = {...this.query.where};
+        delete whereClause.DeviceGroups;
+      }
       const params = {
-        where: JSON.stringify(this.query.where),
+        where: JSON.stringify(whereClause),
         limit: this.perPage,
         offset: (this.currentPage - 1) * this.perPage
       };
@@ -114,9 +128,16 @@ export default {
       if (this.query.tags) {
         params.tags = JSON.stringify(this.query.tags);
       }
+      return params;
+    },
+    async getRecordings() {
+      // Remove previous values
+      this.recordings = [];
+      this.tableItems = [];
+
 
       // Call API and process results
-      const response = await api.recording.query(params);
+      const response = await api.recording.query(this.getParamsForQuery(true));
 
       if (!response.success) {
         response.messages && response.messages.forEach(message => {

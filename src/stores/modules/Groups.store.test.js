@@ -53,7 +53,7 @@ describe('Actions', () => {
     });
   });
 
-  describe('ADD_GROUP', async () => {
+  describe('ADD_GROUP', () => {
 
     const testString = "some string";
 
@@ -72,7 +72,7 @@ describe('Actions', () => {
     });
   });
 
-  describe('ADD_GROUP failure (eg. groupname already used)', async () => {
+  describe('ADD_GROUP failure (eg. groupname already used)', () => {
 
     const testString = "some string";
 
@@ -91,7 +91,7 @@ describe('Actions', () => {
     });
   });
 
-  describe('ADD_GROUP_USER', async () => {
+  describe('ADD_GROUP_USER', () => {
     const testObject = {groupName: 'x', userName: "y", isAdmin: "z"};
     beforeEach(async () => {
       await GroupsStore.actions.ADD_GROUP_USER({commit, state}, testObject);
@@ -107,7 +107,7 @@ describe('Actions', () => {
     });
   });
 
-  describe('REMOVE_GROUP_USER', async () => {
+  describe('REMOVE_GROUP_USER', () => {
 
     const testObject = {groupName: 'x', userName: "y"};
 
