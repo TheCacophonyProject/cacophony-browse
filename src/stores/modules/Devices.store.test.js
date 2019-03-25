@@ -54,7 +54,7 @@ describe('Actions', () => {
     });
   });
 
-  describe('ADD_USER', async () => {
+  describe('ADD_USER', () => {
     const testObject = {username: 'x', device: {id: 1}, admin: true};
     beforeEach(async () => {
       await DevicesStore.actions.ADD_USER({commit, state}, testObject);
@@ -70,7 +70,7 @@ describe('Actions', () => {
     });
   });
 
-  describe('REMOVE_USER', async () => {
+  describe('REMOVE_USER', () => {
 
     const testObject = {device: {id: 21}, userName: "Bob"};
 
