@@ -153,6 +153,9 @@ export default {
       if (routeQuery.where) {
         this.query.where = JSON.parse(routeQuery.where);
         this.query.where.recordingDateTime = this.query.where.recordingDateTime || {};
+        if (!this.query.where.DeviceId) {
+          this.$set(this.query.where, 'DeviceId', []);
+        }
         if (this.query.where.DeviceId && this.query.where.DeviceGroups) {
           this.query.where.DeviceId = [...this.query.where.DeviceId, ...this.query.where.DeviceGroups];
         } else if (this.query.where.DeviceGroups) {

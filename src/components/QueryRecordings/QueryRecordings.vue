@@ -86,8 +86,7 @@ export default {
   },
   data () {
     return {
-      isAudio: true,
-      deviceGroups: [],
+      isAudio: true
     };
   },
   computed: {
@@ -149,7 +148,7 @@ export default {
     },
     devices: {
       get () {
-        return this.query.where.DeviceId || [];
+        return this.query.where.DeviceId;
       },
       set (value) {
         this.query.where.DeviceId = value;
