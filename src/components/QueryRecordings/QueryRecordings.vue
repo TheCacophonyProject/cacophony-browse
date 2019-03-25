@@ -86,23 +86,20 @@ export default {
   },
   data () {
     return {
+      isAudio: true,
       deviceGroups: [],
     };
   },
   computed: {
-    isAudio: function () {
-      // If it is an audio recording, then animals and tag types should be
-      // disabled as these filters do not apply to audio recordings
-      return this.recordingType !== "video";
-    },
     recordingType: {
-      // TODO This should probably also be stored in the url, since it needs to be shared.
       get () {
         return this.query.where.type || 'both';
       },
       set (value) {
-        // this.$store.commit('User/updateRecordingTypePref', value);
         this.query.where.type = value;
+        // If it is an audio recording, then animals and tag types should be
+        // disabled as these filters do not apply to audio recordings
+        this.isAudio = value !== 'video';
       }
     },
     duration: {
