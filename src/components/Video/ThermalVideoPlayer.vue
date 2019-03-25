@@ -13,7 +13,8 @@
       :options="playerOptions"
       class="video vjs-custom-skin"
       @seeking="seeking"
-      @play="draw"/>
+      @play="draw"
+      @ready="selectTrack"/>
   </div>
 </template>
 
@@ -64,10 +65,12 @@ export default {
     videoUrl: function () {
       this.setVideoUrl();
     },
-    currentTrack: function(index) {
-      this.lastDisplayedVideoTime = -1;
-      this.setTimeAndRedraw(this.tracks[index].data.start_s);
+    currentTrack: function() {
+      this.selectTrack();
     },
+    tracks: function() {
+      this.selectTrack();
+    }
   },
   mounted: function () {
     this.calculateSizes();
@@ -84,6 +87,14 @@ export default {
       this.playerOptions.width = this.canvasWidth + "px";
       this.playerOptions.height = this.canvasHeight + "px";
       this.$data.playerOptions.sources[0].src = this.videoUrl;
+      // if tracks is loaded then select the first track
+      this.currentTrack = 0;
+    },
+    selectTrack() {
+      this.lastDisplayedVideoTime = -1;
+      if (this.tracks && this.currentTrack < this.tracks.length) {
+        this.setTimeAndRedraw(this.tracks[this.currentTrack].data.start_s);
+      }
     },
     onResize() {
       const oldWidth = this.canvasWidth;
@@ -248,3 +259,4 @@ export default {
   }
 
 </style>
+<style src="video.js/dist/video-js.css"></style>

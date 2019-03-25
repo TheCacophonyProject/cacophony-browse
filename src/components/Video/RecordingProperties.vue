@@ -92,7 +92,6 @@
 
 <script>
 import api from '../../api/index';
-import config from '../../config';
 import BatteryLevel from '../BatteryLevel.vue';
 
 export default {
@@ -105,11 +104,11 @@ export default {
       type: String,
       default: "",
     },
-    downloadRaw: {
+    downloadRawUrl: {
       type: String,
       default: "",
     },
-    downloadFile: {
+    downloadFileUrl: {
       type: String,
       default: "",
     },
@@ -151,12 +150,6 @@ export default {
     };
   },
   computed: {
-    downloadRawUrl: function () {
-      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadRaw}`;
-    },
-    downloadFileUrl: function () {
-      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadFile}`;
-    },
     parseLocation: function () {
       if (this.recording.location.type === 'Point') {
         return `Lat: ${this.recording.location.coordinates[0].toFixed(2)}, Long: ${this.recording.location.coordinates[1].toFixed(2)}`;
