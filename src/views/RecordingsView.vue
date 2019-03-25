@@ -2,6 +2,7 @@
   <div>
     <b-container>
       <QueryRecordings
+        :disabled="queryPending"
         :query="query"
         @submit="submitNewQuery"
       />
@@ -66,22 +67,8 @@ export default {
   props: {},
   data() {
     return {
-      query: {
-        where: {
-          DeviceId: [],
-          duration: {
-            "$gte": "0",
-            "$lte": ""
-          },
-          recordingDateTime: {
-            "$gt": "",
-            "$lt": ""
-          },
-        },
-        tagMode: 'any',
-        tags: [],
-        type: ''
-      },
+      query: this.resetQuery(),
+      queryPending: false,
       recordings: [],
       tableItems: [],
       count: null,
@@ -106,10 +93,39 @@ export default {
     }
   },
   mounted() {
+    this.updateRouteQuery();
     this.parseCurrentRoute();
   },
   methods: {
+    resetQuery() {
+      return {
+        where: {
+          DeviceId: [],
+          duration: {
+            "$gte": "0",
+            "$lte": ""
+          },
+          recordingDateTime: {
+            "$gt": "",
+            "$lt": ""
+          },
+        },
+        tagMode: 'any',
+        tags: [],
+        type: ''
+      };
+    },
+    resetPagination() {
+      this.currentPage = 1;
+      this.countMessage = "";
+    },
     parseCurrentRoute() {
+      if (Object.keys(this.$route.query).length === 0) {
+        // Populate the url params if we got here without them, ie. /recordings
+        this.resetPagination();
+        this.query = this.resetQuery();
+        this.updateRouteQuery();
+      }
       this.deserialiseRouteIntoQuery(this.$route.query);
       if (this.$route.query.offset) {
         this.currentPage = Math.ceil(this.$route.query.offset / this.perPage) + 1;
@@ -121,8 +137,7 @@ export default {
     },
     submitNewQuery() {
       // New query, so reset pagination.
-      this.countMessage = "";
-      this.currentPage = 1;
+      this.resetPagination();
       this.updateRouteQuery();
     },
     updateRouteQuery() {
@@ -131,7 +146,6 @@ export default {
         path: 'recordings',
         query: this.serialiseQuery(this.query),
       });
-      this.getRecordings();
     },
     deserialiseRouteIntoQuery(routeQuery) {
       for (const [key, val] of Object.entries(routeQuery)) {
@@ -251,7 +265,14 @@ export default {
       this.tableItems = [];
 
       // Call API and process results
+      this.queryPending = true;
       const response = await api.recording.query(this.serialiseQuery(this.query, true));
+      this.queryPending = false;
+
+      // Remove previous values *again* since it's possible for the query to have been called twice
+      // since it's async, and then you'd append values twice.
+      this.recordings = [];
+      this.tableItems = [];
 
       if (!response.success) {
         response.messages && response.messages.forEach(message => {

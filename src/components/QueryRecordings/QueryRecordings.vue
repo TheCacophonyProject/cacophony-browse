@@ -48,6 +48,7 @@
     </b-col>
     <b-col cols="12">
       <b-button
+        :disabled="disabled"
         block
         variant="primary"
         @click="() => $emit('submit')">Search</b-button>
@@ -70,6 +71,10 @@ export default {
     SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate, SelectRecordingType
   },
   props: {
+    disabled: {
+      type: Boolean,
+      required: true
+    },
     query: {
       type: Object,
       required: true
@@ -162,14 +167,6 @@ export default {
         this.tagTypes = 'any';
       }
     }
-  },
-  methods: {
-    parseDate (date) {
-      const day = (0 + date.getDate().toString()).slice(-2);
-      const month = (0 + (date.getMonth() + 1).toString()).slice(-2);
-      const year = date.getFullYear();
-      return year + "-" + month + "-" + day;
-    },
   }
 };
 
