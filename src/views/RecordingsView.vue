@@ -117,7 +117,6 @@ export default {
     },
     resetPagination() {
       this.currentPage = 1;
-      this.countMessage = "";
     },
     parseCurrentRoute() {
       if (Object.keys(this.$route.query).length === 0) {
@@ -261,6 +260,7 @@ export default {
     },
     async getRecordings() {
       // Remove previous values
+      this.countMessage = "";
       this.recordings = [];
       this.tableItems = [];
 
@@ -286,21 +286,19 @@ export default {
         } else if (response.count === 0) {
           this.countMessage = 'No matches';
         }
-        response.rows.map((row) => {
-          this.tableItems.push({
-            id: row.id,
-            type: row.type,
-            devicename: row.Device.devicename,
-            groupname: row.Group.groupname,
-            location: this.parseLocation(row.location),
-            date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
-            time: new Date(row.recordingDateTime).toLocaleTimeString(),
-            duration: row.duration,
-            tags: this.collateTags(row.Tags),
-            other: this.parseOther(row),
-            processing_state: this.parseProcessingState(row.processingState)
-          });
-        });
+        this.tableItems = response.rows.map((row) => ({
+          id: row.id,
+          type: row.type,
+          devicename: row.Device.devicename,
+          groupname: row.Group.groupname,
+          location: this.parseLocation(row.location),
+          date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
+          time: new Date(row.recordingDateTime).toLocaleTimeString(),
+          duration: row.duration,
+          tags: this.collateTags(row.Tags),
+          other: this.parseOther(row),
+          processing_state: this.parseProcessingState(row.processingState)
+        }));
       }
     },
     parseLocation(location) {

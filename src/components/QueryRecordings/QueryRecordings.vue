@@ -51,7 +51,11 @@
         :disabled="disabled"
         block
         variant="primary"
-        @click="() => $emit('submit')">Search</b-button>
+        @click="() => $emit('submit')"
+      >
+        <span v-if="!disabled">Search</span>
+        <span v-else>Searching...</span>
+      </b-button>
     </b-col>
   </b-form-row>
 </template>
