@@ -93,8 +93,9 @@ export default {
     }
   },
   mounted() {
-    this.updateRouteQuery();
     this.parseCurrentRoute();
+    this.updateRouteQuery();
+
   },
   methods: {
     resetQuery() {
@@ -152,8 +153,10 @@ export default {
       }
       if (routeQuery.where) {
         this.query.where = JSON.parse(routeQuery.where);
-        this.query.where.recordingDateTime = this.query.where.recordingDateTime || {};
-        if (!this.query.where.DeviceId) {
+        if (!this.query.where.recordingDateTime) {
+          this.$set(this.query.where, 'recordingDateTime', {});
+        }
+        if (!this.query.where.hasOwnProperty('DeviceId')) {
           this.$set(this.query.where, 'DeviceId', []);
         }
         if (this.query.where.DeviceId && this.query.where.DeviceGroups) {
@@ -190,7 +193,6 @@ export default {
       };
       // Deep copy of query object.
       const whereClause = JSON.parse(JSON.stringify(query.where));
-
       if (whereClause.DeviceId && whereClause.DeviceId.length !== 0) {
         const deviceIds = [];
         for (const device of whereClause.DeviceId) {
@@ -250,7 +252,6 @@ export default {
         tagMode: query.tagMode,
         tags: query.tags
       };
-
       stripEmptyProps(params);
 
       for (const [key, val] of Object.entries(params)) {
