@@ -84,23 +84,16 @@ export default {
     isAudio: function () {
       // If it is an audio recording, then animals and tag types should be
       // disabled as these filters do not apply to audio recordings
-      return this.recordingType !== "thermalRaw";
+      return this.recordingType !== "video";
     },
     recordingType: {
       // TODO This should probably also be stored in the url, since it needs to be shared.
       get () {
-        const recordingPref = this.$store.state.User.recordingTypePref;
-        if (recordingPref === 'video') {
-          return 'thermalRaw';
-        }
-        return recordingPref || 'both';
+        return this.query.where.type || 'both';
       },
       set (value) {
-        // Store video/audio/both
-        if (value === 'thermalRaw') {
-          value = 'video';
-        }
-        this.$store.commit('User/updateRecordingTypePref', value);
+        // this.$store.commit('User/updateRecordingTypePref', value);
+        this.query.where.type = value;
       }
     },
     duration: {
@@ -131,7 +124,10 @@ export default {
     },
     toDate: {
       get () {
-        return this.query.where.recordingDateTime["$lt"].replace(' 23:59:59', '') || '';
+        return (
+          this.query.where.recordingDateTime["$lt"] &&
+          this.query.where.recordingDateTime["$lt"].replace(' 23:59:59', '')
+        ) || '';
       },
       set (value) {
         this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
@@ -147,7 +143,7 @@ export default {
     },
     devices: {
       get () {
-        return this.query.where.DeviceId;
+        return this.query.where.DeviceId || [];
       },
       set (value) {
         this.query.where.DeviceId = value;

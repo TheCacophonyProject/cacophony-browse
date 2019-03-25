@@ -3,7 +3,7 @@
     <b-container>
       <QueryRecordings
         :query="query"
-        @submit="updateRouteQuery"
+        @submit="submitNewQuery"
       />
 
       <b-form-row class="information-line">
@@ -76,10 +76,11 @@ export default {
           recordingDateTime: {
             "$gt": "",
             "$lt": ""
-          }
+          },
         },
         tagMode: 'any',
-        tags: []
+        tags: [],
+        type: ''
       },
       recordings: [],
       tableItems: [],
@@ -101,21 +102,31 @@ export default {
   watch: {
     '$route' () {
       // Create/update the query object from the route string
-      this.deserialiseRouteIntoQuery(this.$route.query);
-      this.countMessage = "";
-      // TODO respect existing pagination offset
-      this.currentPage = 1;
-      this.getRecordings();
+      this.parseCurrentRoute();
     }
   },
+  mounted() {
+    this.parseCurrentRoute();
+  },
   methods: {
+    parseCurrentRoute() {
+      this.deserialiseRouteIntoQuery(this.$route.query);
+      if (this.$route.query.offset) {
+        this.currentPage = Math.ceil(this.$route.query.offset / this.perPage) + 1;
+      }
+      this.getRecordings();
+    },
     pagination() {
+      this.updateRouteQuery();
+    },
+    submitNewQuery() {
+      // New query, so reset pagination.
+      this.countMessage = "";
+      this.currentPage = 1;
       this.updateRouteQuery();
     },
     updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
-      this.countMessage = "";
-      this.currentPage = 1;
       this.$router.push({
         path: 'recordings',
         query: this.serialiseQuery(this.query),
@@ -128,6 +139,12 @@ export default {
       }
       if (routeQuery.where) {
         this.query.where = JSON.parse(routeQuery.where);
+        this.query.where.recordingDateTime = this.query.where.recordingDateTime || {};
+        if (this.query.where.DeviceId && this.query.where.DeviceGroups) {
+          this.query.where.DeviceId = [...this.query.where.DeviceId, ...this.query.where.DeviceGroups];
+        } else if (this.query.where.DeviceGroups) {
+          this.query.where.DeviceId = [...this.query.where.DeviceGroups];
+        }
       }
       if (routeQuery.tags) {
         this.query.tags = JSON.parse(routeQuery.tags);
@@ -135,28 +152,97 @@ export default {
     },
     serialiseQuery(query, useForApiCall = false) {
       // Serialise query object back into a route string
+      const stripEmptyProps = (obj) => {
+        for (const [key, val] of Object.entries(obj)) {
+          if (
+            // Remove empty arrays
+            (Array.isArray(val) && val.length === 0) ||
+            // Remove empty strings
+            typeof val === 'string' && val.trim() === ''
+          ) {
+            delete obj[key];
+          } else if (typeof val === 'object') {
+            // Recurse
+            const propsLeft = stripEmptyProps(val);
+            // Remove any empty objects
+            if (propsLeft === 0) {
+              delete obj[key];
+            }
+          }
+        }
+        return Object.entries(obj).length;
+      };
+      // Deep copy of query object.
+      const whereClause = JSON.parse(JSON.stringify(query.where));
 
-      // Create query params object
-      let whereClause = query.where;
+      if (whereClause.DeviceId && whereClause.DeviceId.length !== 0) {
+        const deviceIds = [];
+        for (const device of whereClause.DeviceId) {
+          if (typeof device === 'object') {
+            if (typeof device.id === 'number') {
+              // Add single devices
+              deviceIds.push(device.id);
+            } else {
+              // NOTE: if the device is a group, the id is a string.
+              // Add groups of devices
+              whereClause.DeviceGroups = whereClause.DeviceGroups || [];
+              whereClause.DeviceGroups.push(device.id);
+              if (device.devices) {
+                for (const item of device.devices) {
+                  deviceIds.push(item.id);
+                }
+              }
+            }
+          } else if (typeof device === 'number') {
+            // We're reconstituting this from the query params, so we only have
+            // device ids at this stage, we don't have the labels.
+            deviceIds.push(device);
+          }
+        }
+        // Dedupe ids.
+        whereClause.DeviceId = deviceIds.reduce((acc, id) => {
+          !acc.includes(id) && acc.push(id);
+          return acc;
+        }, []);
+        if (whereClause.DeviceGroups && whereClause.DeviceGroups.length !== 0) {
+          // Dedupe ids.
+          whereClause.DeviceGroups = whereClause.DeviceGroups.reduce((acc, id) => {
+            !acc.includes(id) && acc.push(id);
+            return acc;
+          }, []);
+        }
+      }
+
       if (useForApiCall) {
+        // Map between the mismatch in video type types between frontend and backend
+        whereClause.type = whereClause.type === 'video' ? 'thermalRaw' : whereClause.type;
+        if (whereClause.type === 'both') {
+          // This is implied on the API side, so remove it.
+          delete whereClause.type;
+        }
         // Remove the group param, since the API doesn't handle that, we're just using
         // it to accurately share search parameters via urls.
-        whereClause = {...query.where};
-        whereClause.DeviceId = whereClause.DeviceId.map(({id}) => (id));
         delete whereClause.DeviceGroups;
       }
+
+      // Work out current pagination offset.
+      const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
       const params = {
-        where: JSON.stringify(whereClause),
+        where: whereClause,
         limit: this.perPage,
-        offset: Math.max(0, (this.currentPage - 1) * this.perPage)
+        offset: newOffset,
+        tagMode: query.tagMode,
+        tags: query.tags
       };
 
-      if (query.tagMode) {
-        params.tagMode = query.tagMode;
+      stripEmptyProps(params);
+
+      for (const [key, val] of Object.entries(params)) {
+        if (typeof val === 'object') {
+          params[key] = JSON.stringify(val);
+        }
       }
-      if (query.tags) {
-        params.tags = JSON.stringify(query.tags);
-      }
+
       return params;
     },
     async getRecordings() {
