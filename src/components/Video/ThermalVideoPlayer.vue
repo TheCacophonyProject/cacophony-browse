@@ -221,11 +221,7 @@ export default {
   }
 
   .vjs-big-play-button {
-    z-index: 1000;
-  }
-
-  .vjs-control-bar {
-    z-index: 1000;
+    z-index: 990;
   }
 
   .video .video-js .vjs-volume-panel,
@@ -249,7 +245,7 @@ export default {
     top: 0px;
     width: 100%;
     height: 100%;
-    z-index: 999;
+    z-index: 900;
   }
 
   .container {

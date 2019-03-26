@@ -139,53 +139,6 @@ export default {
     deleteTag(tagId) {
       this.$store.dispatch('Video/DELETE_TAG', tagId);
     },
-    async gotoNextRecording(direction, tagMode, tags, skipMessage) {
-      if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
-        this.$router.push({path: `/recording/${this.recording.id}`});
-      }
-    },
-    async getNextRecording(direction, tagMode, tags, skipMessage) {
-      let where = {
-        DeviceId: this.recording.Device.id
-      };
-
-      let order;
-      switch (direction) {
-      case "next":
-        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
-        order = "ASC";
-        break;
-      case "previous":
-        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
-        order = "DESC";
-        break;
-      case "either":
-        if (await this.getNextRecording('next', tagMode, tags, true)) {
-          return true;
-        }
-        return await this.getNextRecording('previous', tagMode, tags, skipMessage);
-      default:
-        throw `invalid direction: '${direction}'`;
-      }
-      order  = JSON.stringify([["recordingDateTime", order]]);
-      where = JSON.stringify(where);
-
-      const params ={
-        where,
-        order,
-        limit: 1,
-        offset: 0
-      };
-
-      if (tags) {
-        params.tags = JSON.stringify(tags);
-      }
-      if (tagMode) {
-        params.tagMode = tagMode;
-      }
-
-      return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
-    },
     getCurrentVideoTime() {
       this.$refs.addObs.currentVideoTime = this.$refs.thermalPlayer.player.currentTime;
     },

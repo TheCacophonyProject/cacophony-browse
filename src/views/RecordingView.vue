@@ -9,36 +9,14 @@
           dismissible
           @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
       </b-col>
-      <template v-if="isAudio">
-        <b-col
-          cols="12"
-          lg="8">
-          <audio
-            ref="player"
-            :src="fileSource"
-            controls
-            autoplay
-            class="audio"/>
-          <PrevNext
-            :recording="recording"
-            @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>
-        </b-col>
-
-        <b-col
-          cols="12"
-          lg="4">
-          <h2>Recording</h2>
-          <RecordingProperties
-            v-model="recording.comment"
-            :download-raw-url="fileSource"
-            :download-file-url="rawSource"
-            :recording="recording"
-            :tracks="tracks"
-            @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
-          <VideoHelp class="mt-2" />
-        </b-col>
-      </template>
     </b-row>
+
+    <template v-if="isAudio">
+      <AudioRecording
+        :recording="recording"
+        :audio-url="fileSource"
+        :audio-raw-url="rawSource"/>
+    </template>
 
     <template v-if="isVideo">
       <VideoRecording
@@ -54,14 +32,12 @@
 <script>
 import config from '../config';
 import {mapState} from 'vuex';
-import PrevNext from '../components/Video/PrevNext.vue';
 import VideoRecording from '../components/Video/VideoRecording.vue';
-import RecordingProperties from '../components/Video/RecordingProperties.vue';
-import VideoHelp from '../components/Video/VideoHelp.vue';
+import AudioRecording from '../components/Video/AudioRecording.vue';
 
 export default {
   name: 'RecordingView',
-  components: {PrevNext, RecordingProperties, VideoHelp, VideoRecording},
+  components: {VideoRecording, AudioRecording},
   props: {},
   data () {
     return {
@@ -110,58 +86,8 @@ export default {
     await this.getRecordingDetails();
   },
   methods: {
-    getRecordingId() {
-      return Number(this.$route.params.id);
-    },
     getRecordingDetails() {
       this.$store.dispatch('Video/GET_RECORDING', this.$route.params.id);
-    },
-    async gotoNextRecording(direction, tagMode, tags, skipMessage) {
-      if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
-        this.$router.push({path: `/recording/${this.recording.id}`});
-      }
-    },
-    async getNextRecording(direction, tagMode, tags, skipMessage) {
-      let where = {
-        DeviceId: this.recording.Device.id
-      };
-
-      let order;
-      switch (direction) {
-      case "next":
-        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
-        order = "ASC";
-        break;
-      case "previous":
-        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
-        order = "DESC";
-        break;
-      case "either":
-        if (await this.getNextRecording('next', tagMode, tags, true)) {
-          return true;
-        }
-        return await this.getNextRecording('previous', tagMode, tags, skipMessage);
-      default:
-        throw `invalid direction: '${direction}'`;
-      }
-      order  = JSON.stringify([["recordingDateTime", order]]);
-      where = JSON.stringify(where);
-
-      const params ={
-        where,
-        order,
-        limit: 1,
-        offset: 0
-      };
-
-      if (tags) {
-        params.tags = JSON.stringify(tags);
-      }
-      if (tagMode) {
-        params.tagMode = tagMode;
-      }
-
-      return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
     },
   }
 };
