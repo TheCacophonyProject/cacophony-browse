@@ -1,57 +1,71 @@
 <template>
   <div>
-    <b-container>
-      <QueryRecordings
-        :disabled="queryPending"
-        :query="query"
-        @submit="submitNewQuery"
-      />
-
-      <b-form-row class="information-line">
-        <b-col lg="4">
-          <b-form-text>
-            <h5
-              v-if="countMessage"
-              style="text-align: center;">
-              {{ countMessage }}
-            </h5>
-          </b-form-text>
-        </b-col>
-
+    <b-container fluid>
+      <b-row
+        :class="[
+          'search-container',
+          {'has-pagination': count > perPage},
+        ]"
+      >
         <b-col
-          md="6"
-          lg="4">
-          <!-- Pagination used to go here, now just an empty space to keep things
-              aligned until the rest of the UI gets its redesign -->
+          class="search-col"
+          md="3"
+        >
+          <QueryRecordings
+            :disabled="queryPending"
+            :query="query"
+            @submit="submitNewQuery"
+          />
         </b-col>
+        <b-col class="content">
+          <b-row class="information-line">
+            <b-col>
+              <b-form-text>
+                <h5
+                  v-if="countMessage"
+                  style="text-align: center;">
+                  {{ countMessage }}
+                </h5>
+              </b-form-text>
+            </b-col>
 
-        <b-col
-          md="6"
-          lg="4">
-          <b-form-group>
-            <b-form-select
-              v-model="perPage"
-              :options="perPageOptions"
-              style="text-align: center;"
-              @input="pagination"
+            <b-col>
+              <b-form-group>
+                <b-form-select
+                  v-model="perPage"
+                  :options="perPageOptions"
+                  style="text-align: center;"
+                  @input="pagination"
+                />
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row class="results">
+            <RecordingSummary
+              v-for="item in tableItems"
+              :item="item"
+              :key="item.id"
             />
-          </b-form-group>
+          </b-row>
+          <b-row>
+            <b-col
+              v-if="count > perPage"
+              class="footer"
+            >
+              <b-pagination
+                :total-rows="count"
+                v-model="currentPage"
+                :per-page="perPage"
+                :limit="limitPaginationButtons"
+                class="pagination-buttons"
+                align="center"
+                @input="pagination"
+              />
+            </b-col>
+          </b-row>
         </b-col>
-      </b-form-row>
-
+      </b-row>
     </b-container>
-    <TableRecordings :items="tableItems"/>
-    <div class="sticky-footer">
-      <b-pagination
-        v-if="count > perPage"
-        :total-rows="count"
-        v-model="currentPage"
-        :per-page="perPage"
-        :limit="limitPaginationButtons"
-        class="pagination-buttons"
-        align="center"
-        @input="pagination"/>
-    </div>
   </div>
 </template>
 
@@ -59,11 +73,12 @@
 
 import QueryRecordings from '../components/QueryRecordings/QueryRecordings.vue';
 import TableRecordings from '../components/TableRecordings.vue';
+import RecordingSummary from "../components/RecordingSummary.vue";
 import api from '../api/index';
 
 export default {
   name: 'RecordingsView',
-  components: {QueryRecordings, TableRecordings},
+  components: {RecordingSummary, QueryRecordings, TableRecordings},
   props: {},
   data() {
     return {
@@ -388,16 +403,33 @@ export default {
 </script>
 
 <style scoped>
+  .search-container {
+    overflow: hidden;
+    flex-wrap: nowrap;
+    /* NOTE: this cannot be shortened to just 0, it must have px units */
+    --pagination-height: 0px;
+    --info-height: 64px;
+  }
   .information-line {
     padding-top: 5px;
     padding-bottom: 5px;
+    max-height: var(--info-height);
+  }
+  .search-container.has-pagination {
+    --pagination-height: 59px;
   }
 
-  .sticky-footer {
-    position: fixed;
+  .search-col {
+    background-color: #f0f2ef;
+  }
+  .results {
+    overflow-y: auto;
+    max-height: calc(100vh - (var(--info-height) + var(--navbar-height) + var(--pagination-height)));
+    min-height: calc(100vh - (var(--info-height) + var(--navbar-height) + var(--pagination-height)));
+  }
+
+  .footer {
     width: 100%;
-    bottom: 0;
-    left: auto;
     padding-top: 10px;
     padding-bottom: 10px;
     background-color: white;
@@ -405,6 +437,6 @@ export default {
   }
 
   .pagination-buttons {
-    margin-bottom: 0px;
+    margin-bottom: 0;
   }
 </style>

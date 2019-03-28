@@ -23,7 +23,7 @@ import {
   faWrench,
   faUsers,
   faMicrochip,
-  faPowerOff
+  faPowerOff,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
@@ -31,7 +31,11 @@ import {
   faCaretSquareRight,
   faCaretSquareUp,
   faWindowClose,
-  faUserCircle
+  faUserCircle,
+  faCalendar,
+  faClock,
+  faFileVideo,
+  faFileAudio,
 } from '@fortawesome/free-regular-svg-icons';
 
 // https://www.npmjs.com/package/@fortawesome/vue-fontawesome
@@ -64,7 +68,11 @@ library.add(
   faUsers,
   faMicrochip,
   faUserCircle,
-  faPowerOff
+  faPowerOff,
+  faClock,
+  faCalendar,
+  faFileVideo,
+  faFileAudio,
 );
 
 export default FontAwesomeIcon;

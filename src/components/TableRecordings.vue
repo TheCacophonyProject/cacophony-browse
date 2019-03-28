@@ -124,7 +124,4 @@ export default {
   td.table-xtra {
     color: red;
   }
-  .recording-table {
-    padding-top: 15px;
-  }
 </style>
