@@ -33,17 +33,17 @@ export default {
     }
   },
   methods: {
-    updateHigh: function () {
+    updateHigh: function (event) {
       const newValue = {
-        high: event.target.value,
+        high: event,
         low: this.value.low
       };
       this.$emit('input', newValue);
     },
-    updateLow: function () {
+    updateLow: function (event) {
       const newValue = {
         high: this.value.high,
-        low: event.target.value
+        low: event
       };
       this.$emit('input', newValue);
     }

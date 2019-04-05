@@ -149,7 +149,7 @@ export default {
       context.stroke();
     },
     getCurrentVideoFrameData(currentTime) {
-      if (this.tracks) {
+      if (!this.tracks || this.tracks.length == 0) {
         return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
       }
 
