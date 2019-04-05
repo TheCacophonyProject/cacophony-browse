@@ -12,14 +12,15 @@
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
+  background-size: cover;
   position: relative;
-  margin-top: -15px;
-  margin-bottom: 15px;
 }
 
 /* Mobiles */
 .hero {
-  height: 200px;
+  height: 70px;
+  width: 100%;
+  object-fit: contain;
 }
 
 /* Large screens */
