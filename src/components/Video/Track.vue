@@ -1,6 +1,7 @@
 <template>
   <div
-    :class="trackClass()">
+    :class="trackClass()"
+    :style="getBorderStyle()">
     <b-row
       class="track-header">
       <b-col
@@ -19,9 +20,10 @@
         class="track-title">
         <h3
           @click="trackSelected(0)">
-          <span
-            v-html="trackImage()"/>
-          Track {{ index + 1 }} - {{ track.data.label }}
+          <img
+            :style="getIconStyle()"
+            class="track-image">
+          Track {{ index + 1 }}
         </h3>
       </b-col>
       <b-col
@@ -31,7 +33,7 @@
         class="next-track"
         @click="trackSelected(1)">
         <font-awesome-icon
-          v-if="index < numTracks - 1"
+          v-if="index < numTracks - 1 && show"
           class="fa-2x"
           icon="angle-right"/>
       </b-col>
@@ -40,20 +42,19 @@
     <div
       v-if="show"
       class="track-details">
+      <p>
+        <span class="title">Time:</span> {{ track.data.start_s }} - {{ track.data.end_s }}s
+        <span class="delta"> (&#916; {{ (track.data.end_s - track.data.start_s) | currency('', 1) }}s) </span>
+      </p>
+      <QuickTagTrack
+        :add-ref="makeAddRef()"
+        :tags="track.TrackTags"
+        @addTag="addTag($event)"/>
       <TrackData
         :track-data="track.data"/>
-      <QuickTagButtons
-        v-show="true"
-        @addTag="addTag($event)"
-        @displayAddObservation="showAddObservation = true"/>
-      <!-- <AddObservation
-        v-show="showFullAddTag"
-        ref = "addObs"
-        :current-video-time="0"
-        @get-current-video-time="getCurrentVideoTime()"
-        @set-current-video-time="setCurrentVideoTime($event)"
-        @addTag="addTag($event)"
-        @hideAddObservations="showAddObservation = false" /> -->
+      <AddCustomTrackTag
+        :ref-tag="makeAddRef()"
+        @addTag="addTag($event)"/>
       <TrackTags
         :items="track.TrackTags"
         @addTag="addTag($event)"
@@ -65,13 +66,14 @@
 <script>
 /* global require */
 import TrackData from './TrackData.vue';
-import QuickTagButtons from './QuickTagButtons.vue';
+import QuickTagTrack from './QuickTagTrack.vue';
 import TrackTags from './TrackTags.vue';
+import AddCustomTrackTag from './AddCustomTrackTag.vue';
 
 export default {
   name: 'Track',
   components: {
-    TrackData, QuickTagButtons, TrackTags,
+    TrackData, QuickTagTrack, TrackTags, AddCustomTrackTag,
   },
   props: {
     track: {
@@ -93,6 +95,10 @@ export default {
     show: {
       type: Boolean,
       default: false,
+    },
+    colour: {
+      type: String,
+      default: 'yellow',
     }
   },
   data() {
@@ -131,6 +137,12 @@ export default {
       }
       return `<img class="track-image"/>`;
     },
+    getIconStyle() {
+      return `background-color: ${this.colour}`;
+    },
+    getBorderStyle() {
+      return `border-color: ${this.colour}`;
+    },
     addTag(tag) {
       const recordingId = this.recordingId;
       const trackId = this.track.id;
@@ -149,6 +161,9 @@ export default {
     headerClass() {
       return "selected-" + this.show;
     },
+    makeAddRef() {
+      return "add-custom-tag-" + this.track.id;
+    }
   },
 };
 </script>
@@ -168,9 +183,7 @@ export default {
 
   .track-details {
     font-size: 90%;
-    margin-left: 30px;
-    margin-top: -10px;
-    padding: 5px;
+    padding: 0 10px;
     /* border: 1px solid lightgray; */
   }
 
@@ -184,7 +197,13 @@ export default {
   }
 
   .selected-true {
-    border: 1px solid lightgrey;
+    border: 3px solid lightgrey;
+    margin: -3px;
+  }
+
+  .track-header {
+    margin: 0px;
+    padding: 10px 10px 0 10px;
   }
 
   @media only screen and (max-width: 991px) {
@@ -202,6 +221,7 @@ export default {
   .prev-track,
   .next-track {
     color: grey;
+    margin-top: -4px;
   }
 
   table {
@@ -236,14 +256,10 @@ export default {
   .tag-buttons {
     padding: 12px 0;
   }
-</style>
 
-<style>
  .track-image {
-    max-width: 30px;
-    max-height: 30px;
-    width: auto;
-    height: auto;
+    width: 30px;
+    height: 20px;
  }
 </style>
 

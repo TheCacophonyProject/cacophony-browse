@@ -6,22 +6,14 @@
       <ThermalVideoPlayer
         ref = "thermalPlayer"
         :video-url="videoUrl"
-        :tracks="tracks"
-        :current-track="selectedTrack"/>
+        :tracks="orderedTracks()"
+        :current-track="selectedTrack"
+        :colours="colours"/>
       <PrevNext
         :recording="recording"
         @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>
-      <QuickTag
-        v-show="!showAddObservation"
-        class="d-none d-lg-block"
-        @addTag="addTag($event)"
-        @displayAddObservation="showAddObservation = true"/>
       <AddObservation
-        v-show="showAddObservation"
         ref = "addObs"
-        :current-video-time="0"
-        @get-current-video-time="getCurrentVideoTime()"
-        @set-current-video-time="setCurrentVideoTime($event)"
         @addTag="addTag($event)"
         @hideAddObservations="showAddObservation = false" />
       <ObservedAnimals
@@ -34,11 +26,11 @@
     <b-col
       cols="12"
       lg="4">
-      <h2 class="d-none d-lg-block">Tracks</h2>
       <div
-        v-if="tracks">
+        v-if="tracks && tracks.length > 0">
+        <h2 class="d-none d-lg-block">Tracks</h2>
         <div
-          v-for="(track, index) in orderBy(tracks, 'data.start_s')"
+          v-for="(track, index) in orderedTracks()"
           :key="index">
           <TrackInfo
             :track="track"
@@ -46,10 +38,11 @@
             :num-tracks="tracks.length"
             :recording-id="getRecordingId()"
             :show="index==selectedTrack"
+            :colour="colours[index % colours.length]"
             @trackSelected="trackSelected($event)"/>
         </div>
       </div>
-      <h2>Recording</h2>
+      <h2 class="recording">Recording</h2>
       <RecordingProperties
         v-model="recording.comment"
         :download-raw-url="videoRawUrl"
@@ -57,20 +50,6 @@
         :recording="recording"
         :tracks="tracks"
         @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
-      <QuickTag
-        v-show="!showAddObservation"
-        class="d-lg-none"
-        @addTag="addTag($event)"
-        @displayAddObservation="showAddObservation = true"/>
-      <AddObservation
-        v-show="showAddObservation"
-        ref = "addObs"
-        :current-video-time="0"
-        class="d-lg-none"
-        @get-current-video-time="getCurrentVideoTime()"
-        @set-current-video-time="setCurrentVideoTime($event)"
-        @addTag="addTag($event)"
-        @hideAddObservations="showAddObservation = false" />
       <ObservedAnimals
         :items="tagItems"
         class="d-lg-none"
@@ -83,7 +62,6 @@
 
 <script>
 import {mapState} from 'vuex';
-import QuickTag from './QuickTag.vue';
 import PrevNext from './PrevNext.vue';
 import AddObservation from './AddObservation.vue';
 import ObservedAnimals from './ObservedAnimals.vue';
@@ -91,12 +69,10 @@ import ThermalVideoPlayer from './ThermalVideoPlayer.vue';
 import TrackInfo from './Track.vue';
 import RecordingProperties from './RecordingProperties.vue';
 import VideoHelp from './VideoHelp.vue';
-import Vue2Filters from 'vue2-filters';
 
 export default {
   name: 'VideoRecording',
-  components: {QuickTag, PrevNext, AddObservation, ObservedAnimals, RecordingProperties, VideoHelp, ThermalVideoPlayer, TrackInfo},
-  mixins: [Vue2Filters.mixin],
+  components: {PrevNext, AddObservation, ObservedAnimals, RecordingProperties, VideoHelp, ThermalVideoPlayer, TrackInfo},
   props: {
     recording: {
       type: Object,
@@ -120,14 +96,25 @@ export default {
       showAddObservation: false,
       selectedTrack: 0,
       startVideoTime: 0,
+      colours: [
+        'yellow',
+        'orange',
+        'red',
+        'purple',
+        'lightblue',
+        'limegreen',
+        'black',
+        'white',
+      ],
     };
   },
-  computed:
-    mapState({
+  computed: {
+    ...mapState({
       tagItems() {
         return this.$store.getters['Video/getTagItems'];
-      }
+      },
     }),
+  },
   methods: {
     getRecordingId() {
       return Number(this.$route.params.id);
@@ -139,24 +126,25 @@ export default {
     deleteTag(tagId) {
       this.$store.dispatch('Video/DELETE_TAG', tagId);
     },
-    getCurrentVideoTime() {
-      this.$refs.addObs.currentVideoTime = this.$refs.thermalPlayer.player.currentTime;
-    },
-    setCurrentVideoTime(time) {
-      this.startVideoTime = time;
-    },
     trackSelected(track) {
       if (track != this.selectedTrack) {
         this.selectedTrack = track;
       }
-    }
-  }
+    },
+    orderedTracks: function() {
+      return this.tracks.slice().sort((a, b) => a.data.start_s - b.data.start_s );
+    },
+  },
 };
 </script>
 
 <style scoped>
   .tag-buttons, .img-buttons {
     padding: 0 5px;
+  }
+
+  .recording {
+    margin-top: 20px;
   }
 </style>
 

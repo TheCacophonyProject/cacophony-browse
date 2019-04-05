@@ -1,9 +1,7 @@
 <template>
   <div class="details">
-    <p>
-      <span class="title">Time:</span> {{ trackData.start_s }} - {{ trackData.end_s }}s
-      <span class="delta"> ({{ (trackData.end_s - trackData.start_s) | currency('', 1) }}s) </span>
-    </p>
+    <h5>Classification</h5>
+    <p><span class="title">Label:</span> {{ trackData.label }}</p>
     <p>
       <span class="title">Confidence:</span>
       {{ trackData.confidence }} <span class="delta">(&#916; {{ trackData.clarity }})</span>
@@ -57,11 +55,6 @@ export default {
     return {
       display_all: false,
     };
-  },
-  computed: {
-    orderedTracks: function () {
-      return this.tracks.slice().sort((a, b) => a.start_s - b.start_s );
-    }
   },
 };
 </script>

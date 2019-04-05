@@ -93,9 +93,9 @@ export default {
       }
       try {
         const link = require('../../assets/video/' + image);
-        return `<img src="${link}"/><div class="d-inline d-lg-block">${what}</div>`;
+        return `<img src="${link}"><div class="d-inline d-lg-block">${what}</div>`;
       } catch (e) {
-        return '';
+        return `<img><div>${what}</div>`;
       }
     },
     confirmTag: function (rowItem) {

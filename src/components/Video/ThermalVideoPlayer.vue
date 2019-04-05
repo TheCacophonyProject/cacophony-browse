@@ -39,6 +39,10 @@ export default {
       type: Number,
       default: 0,
     },
+    colours: {
+      type: Array,
+      required: true,
+    }
   },
   data () {
     return {
@@ -93,7 +97,7 @@ export default {
     selectTrack() {
       this.lastDisplayedVideoTime = -1;
       if (this.tracks && this.currentTrack < this.tracks.length) {
-        this.setTimeAndRedraw(this.tracks[this.currentTrack].data.start_s);
+        this.setTimeAndRedraw(this.tracks[this.currentTrack].data.start_s + .01);
       }
     },
     onResize() {
@@ -139,11 +143,16 @@ export default {
     },
     displayBox(context, width, height) {
       context.beginPath();
-      context.rect(0, 0, width, height);
-      context.strokeStyle = 'yellow';
+      context.rect(-2, -2, width + 2, height + 2);
+      context.strokeStyle = this.colours[this.currentTrack % this.colours.length];
+      context.lineWidth = 3;
       context.stroke();
     },
     getCurrentVideoFrameData(currentTime) {
+      if (this.tracks) {
+        return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
+      }
+
       const trackPos = this.tracks[this.currentTrack].data.positions;
       if (currentTime < trackPos[this.lastTrackFrame][0]) {
         this.lastTrackFrame = 0;
@@ -169,7 +178,7 @@ export default {
       const rectHeight = rect[3] - rect[1];
       const x = rect[0];
       const y = rect[1];
-      const text = 'Possum';
+      const text = `Track ${this.currentTrack + 1}`;
 
       return {rectWidth, rectHeight, x, y, text};
     },
@@ -220,7 +229,7 @@ export default {
     height: auto;
   }
 
-  .vjs-big-play-button {
+  .vjs-big-play-button, .vjs-control-bar {
     z-index: 990;
   }
 

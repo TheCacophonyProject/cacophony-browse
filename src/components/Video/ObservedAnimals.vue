@@ -2,44 +2,56 @@
 
 <template>
   <div>
-    <b-table
-      :items="items"
-      :fields="fields"
-      striped
-      hover
-      responsive>
-      <template
-        slot="animalImage"
-        slot-scope="row">
-        <span v-html="animalImage(row.item.animal, row.item.event)"/>
-      </template>
-      <template
-        slot="additionalInfo"
-        slot-scope="row">
-        <span v-html="additionalInfo(row.item.tag)"/>
-      </template>
-      <template
-        slot="deleteButton"
-        slot-scope="row">
-        <font-awesome-icon
-          v-b-popover.hover.bottom="'Delete tag'"
-          icon="trash"
-          size="2x"
-          style="cursor: pointer;"
-          @click="$emit('deleteTag', row.item.tag.id)"/>
-      </template>
-      <template
-        slot="confirmButton"
-        slot-scope="row">
-        <font-awesome-icon
-          v-b-popover.hover.bottom="'Confirm the automatic tag'"
-          v-if="row.item.tag.automatic && row.item.tag.animal !== 'unidentified'"
-          icon="check-circle"
-          size="2x"
-          style="cursor: pointer;"
-          @click="confirmTag(row.item)"/>
-      </template>
-    </b-table>
+    <h2 class="tags-header">Recording tags</h2>
+    <div class="video-tags">
+      <b-button
+        v-b-modal.video-tag
+        class="tag-button">
+        <img
+          class="add-image"
+          title="Open form to add other animal and/or extra details"
+          src="../../assets/video/plus.png">
+        <div>Add tag</div>
+      </b-button>
+      <b-table
+        :items="items"
+        :fields="fields"
+        striped
+        hover
+        responsive>
+        <template
+          slot="animalImage"
+          slot-scope="row">
+          <span v-html="animalImage(row.item.animal, row.item.event)"/>
+        </template>
+        <template
+          slot="additionalInfo"
+          slot-scope="row">
+          <span v-html="additionalInfo(row.item.tag)"/>
+        </template>
+        <template
+          slot="deleteButton"
+          slot-scope="row">
+          <font-awesome-icon
+            v-b-popover.hover.bottom="'Delete tag'"
+            icon="trash"
+            size="2x"
+            style="cursor: pointer;"
+            @click="$emit('deleteTag', row.item.tag.id)"/>
+        </template>
+        <template
+          slot="confirmButton"
+          slot-scope="row">
+          <font-awesome-icon
+            v-b-popover.hover.bottom="'Confirm the automatic tag'"
+            v-if="row.item.tag.automatic && row.item.tag.animal !== 'unidentified'"
+            icon="check-circle"
+            size="2x"
+            style="cursor: pointer;"
+            @click="confirmTag(row.item)"/>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -53,7 +65,7 @@ export default {
     items: {
       type: Array,
       required: true
-    }
+    },
   },
   data () {
     return {
@@ -139,6 +151,32 @@ export default {
 };
 </script>
 
+<style scoped>
+.tags-header {
+  margin-top: 20px;
+}
+
+.video-tags {
+  position: relative;
+}
+
+.tag-button.btn {
+  background: white;
+  color: black;
+  font-size: 80%;
+  padding: 0;
+  border-width: 1px;
+  position: absolute;
+  z-index: 100;
+}
+
+.add-image {
+  max-width: 50px;
+  max-height: 50px;
+  width: auto;
+  height: auto;
+}
+</style>
 <style>
 .animal-image {
   max-width: 50px;
