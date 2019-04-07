@@ -4,6 +4,11 @@
   <div>
     <h2 class="tags-header">Recording tags</h2>
     <div class="video-tags">
+      <div
+        v-if="items.length == 0"
+        class="no-tags">
+        There are no video tags yet.
+      </div>
       <b-button
         v-b-modal.video-tag
         class="tag-button">
@@ -14,6 +19,7 @@
         <div>Add tag</div>
       </b-button>
       <b-table
+        v-if="items.length > 0"
         :items="items"
         :fields="fields"
         striped
@@ -70,7 +76,7 @@ export default {
   data () {
     return {
       fields: [
-        {key: 'animalImage', label: ''},
+        {key: 'animalImage', label: '', thStyle: {minWidth: '60px'}},
         {key: 'animal', label: 'Animal'},
         {key: 'confidence', label: 'Confidence'},
         {key: 'who', label: 'By Who'},
