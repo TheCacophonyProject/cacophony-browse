@@ -42,6 +42,11 @@
             @trackSelected="trackSelected($event)"/>
         </div>
       </div>
+      <div
+        v-if="recording && recording['processingState'] != 'FINISHED'"
+        class="processing">
+        Recording still processing...
+      </div>
       <h2 class="recording">Recording</h2>
       <RecordingProperties
         v-model="recording.comment"
@@ -145,6 +150,12 @@ export default {
 
   .recording {
     margin-top: 20px;
+  }
+
+  .processing {
+    color: darkred;
+    font-weight: 600;
+    font-size: 120%
   }
 </style>
 
