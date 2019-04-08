@@ -6,7 +6,7 @@
   "license": "GPLv3",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
+    "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
     "dev:skip-tests": "webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
     "release": "webpack --config webpack/webpack.release.js --progress --hide-modules",
     "test": "jest",
