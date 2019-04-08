@@ -14,27 +14,92 @@ import RegisterView from '../views/RegisterView.vue';
 import RecordingVue from '../views/RecordingView.vue';
 import AddEmailView from '../views/AddEmailView.vue';
 import AnalysisView from '../views/AnalysisView.vue';
+import AudioTaggingView from '../views/AudioTaggingView.vue';
 
 Vue.use(Router);
 
 function createRouter() {
-  const router =  new Router({
-    mode:'history',
-    fallback:false,
-    scrollBehavior:() => ({y:0}),
-    routes:[
-      {path:'/devices', name: 'devices',component:DevicesView},
-      {path:'/devices/:devicename', name: 'device', component: DeviceView},
-      {path:'/error',component:ErrorView},
-      {path:'/groups', name: 'groups', component:GroupsView},
-      {path:'/groups/:groupname', name: 'group', component: GroupView},
-      {path:'/', name: 'home', component:HomeView},
-      {path:'/login', name: 'login', component:LoginView, meta: {noAuth: true}},
-      {path:'/recordings',component:RecordingsView},
-      {path:'/register',component:RegisterView, meta: {noAuth: true}},
-      {path:'/recording/:id', component: RecordingVue},
-      {path:'/add_email', name: 'addEmail', component: AddEmailView, meta: {noEmail: true}},
-      {path:'/analysis', name: 'analysis', component: AnalysisView},
+  const router = new Router({
+    mode: 'history',
+    fallback: false,
+    scrollBehavior: () => ({
+      y: 0
+    }),
+    routes: [{
+      path: '/devices',
+      name: 'devices',
+      component: DevicesView
+    },
+    {
+      path: '/devices/:devicename',
+      name: 'device',
+      component: DeviceView
+    },
+    {
+      path: '/error',
+      component: ErrorView
+    },
+    {
+      path: '/groups',
+      name: 'groups',
+      component: GroupsView
+    },
+    {
+      path: '/groups/:groupname',
+      name: 'group',
+      component: GroupView
+    },
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+      meta: {
+        noAuth: true
+      }
+    },
+    {
+      path: '/recordings',
+      component: RecordingsView
+    },
+    {
+      path: '/register',
+      component: RegisterView,
+      meta: {
+        noAuth: true
+      }
+    },
+    {
+      path: '/recording/:id',
+      component: RecordingVue
+    },
+    {
+      path: '/add_email',
+      name: 'addEmail',
+      component: AddEmailView,
+      meta: {
+        noEmail: true
+      }
+    },
+    {
+      path: '/analysis',
+      name: 'analysis',
+      component: AnalysisView
+    },
+    {
+      path: '/audiotagging',
+      name: 'audioTagging',
+      component: AudioTaggingView
+    },
+    {
+      path: '/audiotagging',
+      name: 'audioTagging',
+      component: AudioTaggingView
+    },
     ]
   });
 
@@ -42,23 +107,29 @@ function createRouter() {
     const isLoggedIn = store.getters['User/isLoggedIn'];
     const hasEmail = store.getters['User/hasEmail'];
     if (isLoggedIn && hasEmail) {
-      if(['login','register','addEmail'].includes(to.name)) {
-        return next({ name: 'home'});
+      if (['login', 'register', 'addEmail'].includes(to.name)) {
+        return next({
+          name: 'home'
+        });
       } else {
         return next();
       }
     } else if (isLoggedIn && !hasEmail) {
       if (to.name !== 'addEmail') {
-        return next({ name: 'addEmail' });
+        return next({
+          name: 'addEmail'
+        });
       } else {
         return next();
       }
-    } else if(to.matched.some(record => record.meta.noAuth)) {
+    } else if (to.matched.some(record => record.meta.noAuth)) {
       return next();
     }
     next({
       path: '/login',
-      params: { nextUrl: to.fullPath }
+      params: {
+        nextUrl: to.fullPath
+      }
     });
   });
 
