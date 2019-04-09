@@ -2,34 +2,48 @@
   <div>
     <b-form>
       <b-form-group>
-        <h3>Properties</h3>
-        <div
-          v-for="prop of properties"
-          :key="prop.key">
-          <p v-if="recording.batteryLevel && prop.key === 'batteryLevel'">
-            <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
-          </p>
-          <p v-else-if="recording.location && prop.key === 'location'">
-            <strong>Location: </strong>{{ parseLocation }}
-          </p>
-          <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
-            <div
-              v-for="(value, key) of recording.additionalMetadata"
-              :key="key">
-              <p v-if="key != 'tracks'">
-                <strong>{{ key }}:</strong> {{ value }}
-              </p>
+        <h3>Technical details &nbsp;
+          <span
+            v-if="!display"
+            title="Show details"
+            @click="display=true">
+            <font-awesome-icon
+              icon="angle-down"
+              class="fa-1x"/>
+          </span>
+          <span
+            v-if="display"
+            title="Hide details"
+            @click="display=false">
+            <font-awesome-icon
+              icon="angle-up"
+              class="fa-1x"/>
+          </span>
+        </h3>
+        <div v-if="display">
+          <div
+            v-for="prop of properties"
+            :key="prop.key">
+            <p v-if="recording.batteryLevel && prop.key === 'batteryLevel'">
+              <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
+            </p>
+            <p v-else-if="recording.location && prop.key === 'location'">
+              <strong>Location: </strong>{{ parseLocation }}
+            </p>
+            <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
+              <div
+                v-for="(value, key) of recording.additionalMetadata"
+                :key="key">
+                <p v-if="key != 'tracks'">
+                  <strong>{{ key }}:</strong> {{ value }}
+                </p>
+              </div>
             </div>
+            <p v-else-if="recording[prop.key] != null" >
+              <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
+            </p>
           </div>
-          <p v-else-if="recording[prop.key] != null" >
-            <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
-          </p>
         </div>
-        <p v-if="recording['additionalMetadata']">
-          <TrackData
-            v-if="recording['additionalMetadata']['tracks']"
-            :tracks="recording['additionalMetadata']['tracks']"/>
-        </p>
       </b-form-group>
 
       <b-form-group
@@ -78,35 +92,38 @@
 
 <script>
 import api from '../../api/index';
-import config from '../../config';
 import BatteryLevel from '../BatteryLevel.vue';
-import TrackData from './TrackData.vue';
 
 export default {
-  name: 'VideoProperties',
+  name: 'RecordingProperties',
   components: {
-    BatteryLevel, TrackData
+    BatteryLevel,
   },
   props: {
     value: {
       type: String,
-      default: ""
+      default: "",
     },
-    downloadRaw: {
+    downloadRawUrl: {
       type: String,
-      default: ""
+      default: "",
     },
-    downloadFile: {
+    downloadFileUrl: {
       type: String,
-      default: ""
+      default: "",
     },
     recording: {
       type: Object,
-      required: true
+      required: true,
+    },
+    tracks: {
+      type: Array,
+      required: true,
     }
   },
   data () {
     return {
+      display: false,
       showCommentAlert: false,
       showDeleteAlert: false,
       properties: [
@@ -133,12 +150,6 @@ export default {
     };
   },
   computed: {
-    downloadRawUrl: function () {
-      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadRaw}`;
-    },
-    downloadFileUrl: function () {
-      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadFile}`;
-    },
     parseLocation: function () {
       if (this.recording.location.type === 'Point') {
         return `Lat: ${this.recording.location.coordinates[0].toFixed(2)}, Long: ${this.recording.location.coordinates[1].toFixed(2)}`;
