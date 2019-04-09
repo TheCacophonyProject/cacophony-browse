@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <b-table/>
+  <div>    
+    <b-table/>    
   </div>
 </template>
 

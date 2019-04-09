@@ -95,11 +95,6 @@ function createRouter() {
       name: 'audioTagging',
       component: AudioTaggingView
     },
-    {
-      path: '/audiotagging',
-      name: 'audioTagging',
-      component: AudioTaggingView
-    },
     ]
   });
 
