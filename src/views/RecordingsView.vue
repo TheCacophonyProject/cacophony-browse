@@ -1,12 +1,7 @@
 <template>
   <div>
     <b-container fluid>
-      <b-row
-        :class="[
-          'search-container',
-          {'has-pagination': count > perPage},
-        ]"
-      >
+      <b-row>
         <b-col
           class="search-col"
           md="3"
@@ -19,49 +14,73 @@
         </b-col>
         <b-col class="content">
           <b-row class="information-line">
-            <b-col>
-              <b-form-text>
-                <h5
-                  v-if="countMessage"
-                  style="text-align: center;">
-                  {{ countMessage }}
-                </h5>
-              </b-form-text>
-            </b-col>
-
-            <b-col>
-              <b-form-group>
-                <b-form-select
-                  v-model="perPage"
-                  :options="perPageOptions"
-                  style="text-align: center;"
-                  @input="pagination"
-                />
-              </b-form-group>
-            </b-col>
+            <b-row class="results-summary">
+              <b-col>
+                <b-row>
+                  <h1>Recordings</h1>
+                </b-row>
+                <b-row>
+                  <b-form-text>
+                    <h5
+                      v-if="countMessage"
+                    >
+                      {{ countMessage }}
+                    </h5>
+                    <h5 v-else>
+                      Loading...
+                    </h5>
+                    <p
+                      class="search-description"
+                      v-html="searchDescription"
+                    />
+                  </b-form-text>
+                </b-row>
+                <b-row>
+                  <b-form-group>
+                    <b-form-select
+                      v-model="perPage"
+                      :options="perPageOptions"
+                      style="text-align: center;"
+                      @input="pagination"
+                    />
+                  </b-form-group>
+                </b-row>
+              </b-col>
+            </b-row>
           </b-row>
-          <b-row class="results">
+          <div
+            v-if="!queryPending"
+            class="results"
+          >
             <RecordingSummary
-              v-for="item in tableItems"
+              v-for="(item, index) in tableItems"
               :item="item"
-              :key="item.id"
+              :key="index"
             />
-          </b-row>
-          <b-row>
-            <b-col
-              v-if="count > perPage"
-              class="footer"
-            >
-              <b-pagination
-                :total-rows="count"
-                v-model="currentPage"
-                :per-page="perPage"
-                :limit="limitPaginationButtons"
-                class="pagination-buttons"
-                align="center"
-                @input="pagination"
-              />
-            </b-col>
+          </div>
+          <div
+            v-else
+            class="results loading"
+          >
+            <b-row
+              v-for="i in 10"
+              :style="{ background: `rgba(240, 240, 240, ${1 / i}` }"
+              :key="i"
+              class="recording-placeholder"
+            />
+          </div>
+          <b-row
+            v-if="count > perPage"
+            class="sticky-footer"
+          >
+            <b-pagination
+              :total-rows="count"
+              v-model="currentPage"
+              :per-page="perPage"
+              :limit="limitPaginationButtons"
+              class="pagination-buttons"
+              @input="pagination"
+            />
           </b-row>
         </b-col>
       </b-row>
@@ -101,6 +120,26 @@ export default {
       ]
     };
   },
+  computed: {
+    searchDescription() {
+      // Get the current search query, not the live updated one.
+      const query = this.resetQuery();
+      this.deserialiseRouteIntoQuery(this.$route.query, query);
+      const numDevices = query.where.DeviceId.length;
+      const multipleDeviceSuffix = numDevices > 1 ? 's' : '';
+      const devices = numDevices !== 0 ? `${numDevices} device${multipleDeviceSuffix}` : 'All devices';
+      query.where.type = query.where.type || 'both';
+      const recordings = query.where.type === 'both' ? 'audio and video' : query.where.type;
+      const numAnimals = query.tags.length;
+      const multipleAnimalSuffix = numAnimals > 1 ? 's' : '';
+      const tagsText = numAnimals === 0 ? 'all animals' : `${numAnimals} animal${multipleAnimalSuffix}`;
+      const timespan = 'last 24 hours';
+      return (
+        `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> in ` +
+        `the <strong>${timespan}</strong>`
+      );
+    }
+  },
   watch: {
     '$route' () {
       // Create/update the query object from the route string
@@ -110,7 +149,6 @@ export default {
   mounted() {
     this.parseCurrentRoute();
     this.updateRouteQuery();
-
   },
   methods: {
     resetQuery() {
@@ -162,26 +200,27 @@ export default {
         query: this.serialiseQuery(this.query),
       });
     },
-    deserialiseRouteIntoQuery(routeQuery) {
+    deserialiseRouteIntoQuery(routeQuery, target) {
+      target = target || this.query;
       for (const [key, val] of Object.entries(routeQuery)) {
-        this.query[key] = val;
+        target[key] = val;
       }
       if (routeQuery.where) {
-        this.query.where = JSON.parse(routeQuery.where);
-        if (!this.query.where.recordingDateTime) {
-          this.$set(this.query.where, 'recordingDateTime', {});
+        target.where = JSON.parse(routeQuery.where);
+        if (!target.where.recordingDateTime) {
+          this.$set(target.where, 'recordingDateTime', {});
         }
-        if (!this.query.where.hasOwnProperty('DeviceId')) {
-          this.$set(this.query.where, 'DeviceId', []);
+        if (!target.where.hasOwnProperty('DeviceId')) {
+          this.$set(target.where, 'DeviceId', []);
         }
-        if (this.query.where.DeviceId && this.query.where.DeviceGroups) {
-          this.query.where.DeviceId = [...this.query.where.DeviceId, ...this.query.where.DeviceGroups];
-        } else if (this.query.where.DeviceGroups) {
-          this.query.where.DeviceId = [...this.query.where.DeviceGroups];
+        if (target.where.DeviceId && target.where.DeviceGroups) {
+          target.where.DeviceId = [...target.where.DeviceId, ...target.where.DeviceGroups];
+        } else if (target.where.DeviceGroups) {
+          target.where.DeviceId = [...target.where.DeviceGroups];
         }
       }
       if (routeQuery.tags) {
-        this.query.tags = JSON.parse(routeQuery.tags);
+        target.tags = JSON.parse(routeQuery.tags);
       }
     },
     serialiseQuery(query, useForApiCall = false) {
@@ -403,39 +442,55 @@ export default {
 </script>
 
 <style scoped>
-  .search-container {
-    overflow: hidden;
-    flex-wrap: nowrap;
-    /* NOTE: this cannot be shortened to just 0, it must have px units */
-    --pagination-height: 0px;
-    --info-height: 64px;
-  }
-  .information-line {
-    padding-top: 5px;
-    padding-bottom: 5px;
-    max-height: var(--info-height);
-  }
-  .search-container.has-pagination {
-    --pagination-height: 59px;
-  }
-
   .search-col {
     background-color: #f0f2ef;
   }
+  .information-line h5 {
+    font-size: 16px;
+  }
   .results {
+    width: 100%;
+    display: block;
     overflow-y: auto;
-    max-height: calc(100vh - (var(--info-height) + var(--navbar-height) + var(--pagination-height)));
-    min-height: calc(100vh - (var(--info-height) + var(--navbar-height) + var(--pagination-height)));
+  }
+  .recording-placeholder {
+    min-height: 109px;
+  }
+  .results > .row, .information-line > .row {
+    max-width: 635px;
+    min-width: 635px;
+    margin: 15px auto;
+  }
+  .content {
+    position: relative;
+    overflow: hidden;
+    overflow-y: scroll;
+    padding: 0;
+    margin: 0;
+    max-height: calc(100vh - var(--navbar-height));
+    min-height: calc(100vh - var(--navbar-height));
   }
 
-  .footer {
+  .search-description {
+    color: #111;
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  .sticky-footer {
     width: 100%;
     padding-top: 10px;
     padding-bottom: 10px;
-    background-color: white;
     border-top: solid rgb(222, 226, 230) 1px;
+    display: flex;
+    justify-content: center;
+    min-width: 100%;
+    max-width: 100%;
+    background: white;
+    position: sticky;
+    bottom: 0;
+    margin: 0;
   }
-
   .pagination-buttons {
     margin-bottom: 0;
   }

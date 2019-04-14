@@ -1,31 +1,26 @@
 <template>
-  <b-form-row>
-    <b-col
-      sm="6"
-      md="4">
-      <SelectDevice
-        v-model="devices"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="2" >
-      <SelectRecordingType
-        v-model="recordingType"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="2">
+  <div>
+    <h2>Search recordings</h2>
+    <b-row>
+      <SelectDevice v-model="devices" />
+    </b-row>
+    <b-row>
+      <SelectRecordingType v-model="recordingType" />
+    </b-row>
+    <b-row v-if="advanced">
       <SelectTagTypes
         v-model="tagTypes"
-        :disabled="isAudio"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="4">
+        :disabled="isAudio"
+      />
+    </b-row>
+    <b-row>
       <SelectAnimal
         v-model="animals"
         :disabled="isAudio"/>
-    </b-col>
+    </b-row>
+    <b-row>
+      <div>Date range</div>
+    </b-row>
     <b-col
       sm="6"
       md="4">
@@ -57,7 +52,7 @@
         <span v-else>Searching...</span>
       </b-button>
     </b-col>
-  </b-form-row>
+  </div>
 </template>
 
 <script>
@@ -86,7 +81,8 @@ export default {
   },
   data () {
     return {
-      isAudio: true
+      isAudio: true,
+      advanced: false,
     };
   },
   computed: {
