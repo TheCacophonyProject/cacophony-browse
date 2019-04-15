@@ -24,7 +24,8 @@
       md="4">
       <SelectAnimal
         v-model="animals"
-        :disabled="isAudio"/>
+        :disabled="isAudio"
+        :can-have-sub-tags="canHaveTags"/>
     </b-col>
     <b-col
       sm="6"
@@ -86,7 +87,9 @@ export default {
   },
   data () {
     return {
-      isAudio: true
+      isAudio: true,
+      hasSpecifiedTags: false,
+      canHaveTags: false,
     };
   },
   computed: {
@@ -117,6 +120,10 @@ export default {
       },
       set (value) {
         this.query.tagMode = value;
+        this.canHaveTags = this.canHaveSpecifiedTags(value);
+        if (!this.canHaveTags) {
+          this.animals = [];
+        }
       }
     },
     fromDate: {
@@ -144,6 +151,12 @@ export default {
       },
       set (value) {
         this.query.tags = value;
+        this.hasSpecifiedTags = this.query.tags.length > 0;
+        if (this.hasSpecifiedTags) {
+          if (!this.canHaveTags) {
+            this.tagTypes = 'tagged';
+          }
+        }
       }
     },
     devices: {
@@ -166,8 +179,21 @@ export default {
         this.animals = [];
         this.tagTypes = 'any';
       }
+    },
+  },
+  methods: {
+    canHaveSpecifiedTags: function(tagType) {
+      switch (tagType) {
+      case 'tagged':
+      case 'human-tagged':
+      case 'automatic-tagged':
+      case 'both-tagged':
+        return true;
+      default:
+        return false;
+      }
     }
-  }
+  },
 };
 
 </script>

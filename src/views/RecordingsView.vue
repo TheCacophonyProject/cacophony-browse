@@ -299,7 +299,7 @@ export default {
           date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
           time: new Date(row.recordingDateTime).toLocaleTimeString(),
           duration: row.duration,
-          tags: this.collateTags(row.Tags),
+          tags: this.collateTags(row.Tags, row.Tracks),
           other: this.parseOther(row),
           processing_state: this.parseProcessingState(row.processingState)
         }));
@@ -325,21 +325,20 @@ export default {
       const string = result.toLowerCase();
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
-    collateTags: function (tags) {
+    collateTags: function (tags, tracks) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
       for (const tag of tags) {
-        const animal = tag.animal === null ? tag.event : tag.animal;
-        if (!tagItems[animal]) {
-          // Animal has not been seen yet
-          tagItems[animal] = {};
-        }
-        if (tag.automatic) {
-          tagItems[animal].automatic = true;
-        } else {
-          tagItems[animal].human = true;
+        const tagName = tag.animal === null ? tag.event : tag.animal;
+        this.addToListOfTags(tagItems, tagName, tag.automatic);
+      }
+
+      for (const track of tracks) {
+        for (const tag of track.TrackTags) {
+          this.addToListOfTags(tagItems, tag.what, tag.automatic);
         }
       }
+
       // Use automatic and human status to create an ordered array of objects
       // suitable for parsing into coloured spans
       const result = [];
@@ -382,8 +381,19 @@ export default {
         return a.order - b.order;
       });
       return result;
-    }
-  }
+    },
+    addToListOfTags: function (allTags, tagName, isAutomatic) {
+      if (!allTags[tagName]) {
+        allTags[tagName] = {};
+      }
+
+      if (isAutomatic) {
+        allTags[tagName].automatic = true;
+      } else {
+        allTags[tagName].human = true;
+      }
+    },
+  },
 };
 </script>
 

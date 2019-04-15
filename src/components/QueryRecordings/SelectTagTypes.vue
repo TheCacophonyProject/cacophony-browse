@@ -1,7 +1,7 @@
 <template>
   <b-form-group
     v-b-tooltip.hover="tooltipTitle">
-    <label>Tag Types</label>
+    <label>Videos </label>
 
     <b-form-select
       :value="value"
@@ -29,13 +29,17 @@ export default {
   data () {
     return {
       options: [
-        { value: 'any', text: 'any' },
+        { value: 'any', text: 'all' },
         { value: 'untagged', text: 'untagged only' },
-        { value: 'tagged', text: 'tagged only' },
-        { value: 'automatic-only', text: 'automatic only' },
-        { value: 'human-only', text: 'manual only'},
-        { value: 'automatic+human', text: 'both automatic & manual'}
-      ]
+        { value: 'tagged', text: 'tagged as...' },
+        { value: 'human-tagged', text: 'human tagged as...' },
+        { value: 'automatic-tagged', text: 'ai tagged as...' },
+        { value: 'both-tagged', text: 'ai and human tagged as...' },
+        { value: 'automatic-only', text: 'ai tagged only' },
+        { value: 'human-only', text: 'human tagged only'},
+        { value: 'automatic+human', text: 'both ai & human tagged'},
+        { value: 'no-human', text: 'not tagged by human'}
+      ],
     };
   },
   computed: {
@@ -45,7 +49,7 @@ export default {
       } else {
         return "";
       }
-    }
+    },
   }
 };
 

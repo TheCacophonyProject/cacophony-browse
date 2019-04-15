@@ -24,6 +24,10 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    canHaveSubTags: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -33,8 +37,6 @@ export default {
         "possum",
         "rat",
         "stoat",
-        "ferret",
-        "weasel",
         "hedgehog",
         "cat",
         "bird",
@@ -43,7 +45,6 @@ export default {
         "hare",
         "human",
         "insect",
-        "mouse",
         "rabbit",
         "spider",
         "other",
@@ -55,8 +56,10 @@ export default {
     placeholder: function () {
       if (this.value.length > 0) {
         return "add more animals";
+      } else if (this.canHaveSubTags) {
+        return "anything";
       } else {
-        return "all animals";
+        return "";
       }
     },
     tooltipTitle: function () {
