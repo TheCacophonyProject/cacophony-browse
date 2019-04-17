@@ -1,7 +1,9 @@
 <template>
   <div>
-    <h3>Add animal observation</h3>
-    <b-form>
+    <b-modal
+      id="video-tag"
+      title="Add tag to video"
+      @ok="addManualTag()">
 
       <b-form-group
         label="Animal:"
@@ -61,12 +63,6 @@
             :state="startTimeState"
             class="col m-1"
             placeholder="min:sec" />
-          <b-button
-            class="col-md-3 m-1"
-            @click="setCurrentVideoTime('start')">go to start time</b-button>
-          <b-button
-            class="col-md-3 m-1"
-            @click="setTimeAsCurrentTime('startTime')">set to current time</b-button>
         </b-form-row>
       </b-form-group>
 
@@ -79,26 +75,16 @@
             :state="endTimeState"
             class="col m-1"
             placeholder="min:sec" />
-          <b-button
-            class="col-md-3 m-1"
-            @click="setCurrentVideoTime('end')">go to end time</b-button>
-          <b-button
-            class="col-md-3 m-1"
-            @click="setTimeAsCurrentTime('endTime')">set to current time</b-button>
         </b-form-row>
       </b-form-group>
 
-      <b-button
-        :block="true"
-        variant="primary"
-        @click="addManualTag()">Add new tag</b-button>
       <b-alert
         :show="showAlert"
         variant="warning"
         dismissible
         class="mt-2"
         @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
-    </b-form>
+    </b-modal>
   </div>
 </template>
 
@@ -106,12 +92,6 @@
 
 export default {
   name: 'AddObservation',
-  props: {
-    currentVideoTime: {
-      type: Number,
-      default: 0
-    }
-  },
   data () {
     return {
       animalTag: null,

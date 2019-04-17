@@ -20,13 +20,18 @@ import {
   faQuestion,
   faAsterisk,
   faExclamationTriangle,
+  faWrench,
+  faUsers,
+  faMicrochip,
+  faPowerOff
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
   faCaretSquareLeft,
   faCaretSquareRight,
   faCaretSquareUp,
-  faWindowClose
+  faWindowClose,
+  faUserCircle
 } from '@fortawesome/free-regular-svg-icons';
 
 // https://www.npmjs.com/package/@fortawesome/vue-fontawesome
@@ -54,7 +59,12 @@ library.add(
   faAngleDown,
   faQuestion,
   faAsterisk,
-  faExclamationTriangle
+  faExclamationTriangle,
+  faWrench,
+  faUsers,
+  faMicrochip,
+  faUserCircle,
+  faPowerOff
 );
 
 export default FontAwesomeIcon;

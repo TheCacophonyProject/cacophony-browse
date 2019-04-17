@@ -1,37 +1,47 @@
 <template>
   <div>
     <b-navbar toggleable="lg">
+
       <b-navbar-brand>
         <router-link
           class="navbar-brand"
           to="/"
           alt="home" />
       </b-navbar-brand>
+
       <b-navbar-toggle target="navbarToggler"/>
+
       <b-collapse
         id="navbarToggler"
         is-nav>
+
         <b-navbar-nav v-if="isLoggedIn">
           <b-nav-item to="/analysis">Analysis</b-nav-item>
           <b-nav-item to="/recordings">Recordings</b-nav-item>
           <b-nav-item to="/audiotagging">Audio tagging</b-nav-item>
         </b-navbar-nav>
-        <b-navbar-nav
-          v-if="isLoggedIn"
-          class="ml-auto mr-auto d-none d-lg-block">
-          <b-nav-text>Hello {{ userName }}</b-nav-text>
-        </b-navbar-nav>
+
         <b-navbar-nav
           v-if="isLoggedIn"
           class="ml-auto">
-          <b-nav-item-dropdown
-            text="Admin"
-            style="padding-left: 0.5rem;">
-            <b-dropdown-item href="/groups">Groups</b-dropdown-item>
-            <b-dropdown-item href="/devices">Devices</b-dropdown-item>
+
+          <b-nav-item-dropdown>
+            <template slot="button-content">
+              <font-awesome-icon icon="wrench" />&nbsp;Admin
+            </template>
+            <b-dropdown-item href="/groups"><font-awesome-icon icon="users" />&nbsp;Groups</b-dropdown-item>
+            <b-dropdown-item href="/devices"><font-awesome-icon icon="microchip" />&nbsp;Devices</b-dropdown-item>
           </b-nav-item-dropdown>
-          <b-nav-item @click="logout">Logout</b-nav-item>
+
+          <b-nav-item-dropdown class="profile">
+            <template slot="button-content">
+              <font-awesome-icon :icon="['far', 'user-circle']" />&nbsp;{{ userName }}
+            </template>
+            <b-dropdown-item @click="logout"><font-awesome-icon icon="power-off" />&nbsp;Logout</b-dropdown-item>
+          </b-nav-item-dropdown>
+
         </b-navbar-nav>
+
         <b-navbar-nav
           v-if="!isLoggedIn"
           class="ml-auto">
@@ -66,6 +76,13 @@ export default {
 </script>
 
 <style scoped>
+  .navbar {
+    border-bottom: solid rgb(222, 226, 230) 1px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    color: black;
+  }
+
   .navbar-brand {
     width: 70%;
   }
@@ -74,21 +91,12 @@ export default {
     width: 100%;
   }
 
-  .navbar-nav .nav-link {
-    padding-left: 0.5rem;
-  }
-
-  .navbar {
-    border-top: solid 12px green;
-    border-bottom: solid 1px green;
-    margin-bottom: 15px;
-  }
-
   .active {
     background-color: #eeeeee;
     color: #555;
     border-radius: 2px;
   }
+
 
   @media only screen and (min-width: 576px) {
     .navbar-brand {
@@ -97,6 +105,10 @@ export default {
 
     .navbar-brand img {
       width: auto;
+    }
+
+    .profile {
+      border-left: solid rgb(222, 226, 230) 1px;
     }
   }
 </style>

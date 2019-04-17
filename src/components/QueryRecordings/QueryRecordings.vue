@@ -48,9 +48,14 @@
     </b-col>
     <b-col cols="12">
       <b-button
+        :disabled="disabled"
         block
         variant="primary"
-        @click="buildQuery">Search</b-button>
+        @click="() => $emit('submit')"
+      >
+        <span v-if="!disabled">Search</span>
+        <span v-else>Searching...</span>
+      </b-button>
     </b-col>
   </b-form-row>
 </template>
@@ -70,36 +75,83 @@ export default {
     SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate, SelectRecordingType
   },
   props: {
-    value: {
+    disabled: {
+      type: Boolean,
+      required: true
+    },
+    query: {
       type: Object,
       required: true
     }
   },
   data () {
     return {
-      duration: {
-        low: "0",
-        high: null
-      },
-      devices: [],
-      animals: [],
-      fromDate: "",
-      toDate: "",
-      tagTypes: 'any'
+      isAudio: true
     };
   },
   computed: {
-    isAudio: function () {
-      // If it is an audio recording, then animals and tag types should be
-      // disabled as these filters do not apply to audio recordings
-      return this.recordingType !== "video";
-    },
     recordingType: {
       get () {
-        return this.$store.state.User.recordingTypePref;
+        return this.query.where.type || 'both';
       },
       set (value) {
-        this.$store.commit('User/updateRecordingTypePref', value);
+        this.query.where.type = value;
+        // If it is an audio recording, then animals and tag types should be
+        // disabled as these filters do not apply to audio recordings
+        this.isAudio = value !== 'video';
+      }
+    },
+    duration: {
+      get () {
+        const duration = this.query.where.duration;
+        return {low: duration["$gte"], high: duration["$lte"]};
+      },
+      set (value) {
+        this.query.where.duration["$gte"] = value.low;
+        this.query.where.duration["$lte"] = value.high;
+      }
+    },
+    tagTypes: {
+      get () {
+        return this.query.tagMode;
+      },
+      set (value) {
+        this.query.tagMode = value;
+      }
+    },
+    fromDate: {
+      get () {
+        return this.query.where.recordingDateTime["$gt"] || "";
+      },
+      set (value) {
+        this.query.where.recordingDateTime["$gt"] = value;
+      }
+    },
+    toDate: {
+      get () {
+        return (
+          this.query.where.recordingDateTime["$lt"] &&
+          this.query.where.recordingDateTime["$lt"].replace(' 23:59:59', '')
+        ) || '';
+      },
+      set (value) {
+        this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
+      }
+    },
+    animals: {
+      get () {
+        return this.query.tags;
+      },
+      set (value) {
+        this.query.tags = value;
+      }
+    },
+    devices: {
+      get () {
+        return this.query.where.DeviceId;
+      },
+      set (value) {
+        this.query.where.DeviceId = value;
       }
     },
     groups: function() {
@@ -114,83 +166,6 @@ export default {
         this.animals = [];
         this.tagTypes = 'any';
       }
-    }
-  },
-  mounted: function () {
-    const query = this.$route.query;
-    if (query && Object.keys(query).length > 0) {
-      this.devices = (query.deviceId ? [JSON.parse(query.deviceId)] : []);
-      this.recordingType = (query.recordingType ? JSON.parse(query.recordingType) : 'both');
-      this.fromDate = (query.fromDate ? this.parseDate(new Date(query.fromDate)) : '');
-      this.toDate = (query.toDate ? this.parseDate(new Date(query.toDate)) : '');
-    }
-    this.buildQuery();
-  },
-  methods: {
-    parseDate (date) {
-      const day = (0 + date.getDate().toString()).slice(-2);
-      const month = (0 + (date.getMonth() + 1).toString()).slice(-2);
-      const year = date.getFullYear();
-      return year + "-" + month + "-" + day;
-    },
-    buildQuery() {
-      const query = {
-        where: {}
-      };
-      // Add devices
-      if (this.devices.length !== 0) {
-        query.where.DeviceId = [];
-        for (const device of this.devices) {
-          if (typeof device.id === 'number') {
-            // Add single devices
-            query.where.DeviceId.push(device.id);
-          } else {
-            // Add groups of devices
-            for (const item of device.devices) {
-              query.where.DeviceId.push(item.id);
-            }
-          }
-        }
-      }
-      // Add duration
-      if (this.duration.low || this.duration.high) {
-        query.where.duration = {};
-      }
-      if (this.duration.low) {
-        query.where.duration["$gt"] = this.duration.low;
-      }
-      if (this.duration.high) {
-        query.where.duration["$lt"] = this.duration.high;
-      }
-      // Add date
-      if (this.fromDate || this.toDate ) {
-        query.where.recordingDateTime = {};
-      }
-      if (this.fromDate) {
-        query.where.recordingDateTime["$gt"] = this.fromDate;
-      }
-      if (this.toDate) {
-        query.where.recordingDateTime["$lt"] = this.toDate + " 23:59:59";
-      }
-      // Add tag mode
-      if (this.tagTypes !== 'any') {
-        query.tagMode = this.tagTypes.text;
-      }
-      // Add animal tags
-      if (this.animals.length !== 0) {
-        query.tags = [];
-        for (const animal of this.animals) {
-          query.tags.push(animal);
-        }
-      }
-      // Add recording type
-      if (this.recordingType == 'video') {
-        query.where.type = 'thermalRaw';
-      } else if (this.recordingType == 'audio') {
-        query.where.type = 'audio';
-      }
-      this.$emit('input', query);
-      this.$emit('searchButton');
     }
   }
 };
