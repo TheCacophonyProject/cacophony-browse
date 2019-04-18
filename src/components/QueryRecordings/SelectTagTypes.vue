@@ -30,15 +30,12 @@ export default {
     return {
       options: [
         { value: 'any', text: 'all' },
-        { value: 'untagged', text: 'untagged only' },
+        { value: 'no-human', text: 'not tagged by human'},
         { value: 'tagged', text: 'tagged as...' },
         { value: 'human-tagged', text: 'human tagged as...' },
         { value: 'automatic-tagged', text: 'ai tagged as...' },
         { value: 'both-tagged', text: 'ai and human tagged as...' },
-        { value: 'automatic-only', text: 'ai tagged only' },
-        { value: 'human-only', text: 'human tagged only'},
-        { value: 'automatic+human', text: 'both ai & human tagged'},
-        { value: 'no-human', text: 'not tagged by human'}
+        { value: 'untagged', text: 'untagged only' },
       ],
     };
   },
