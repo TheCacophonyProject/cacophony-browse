@@ -12,7 +12,21 @@
       <PrevNext
         :recording="recording"
         @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>
+
+      <b-col 
+        offset="2"
+        class="mt-2">   
+        <BasicTags />              
+      </b-col>
+
+      <b-col 
+        offset="2"
+        class="mt-2">   
+        <CustomTags />
+      </b-col>
+
     </b-col>
+
 
     <b-col
       cols="12"
@@ -26,6 +40,8 @@
         @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
       <VideoHelp class="mt-2" />
     </b-col>
+    
+
   </b-row>
 </template>
 
@@ -33,10 +49,12 @@
 import PrevNext from './PrevNext.vue';
 import RecordingProperties from './RecordingProperties.vue';
 import VideoHelp from './VideoHelp.vue';
+import BasicTags from '../Audio/BasicTags.vue';
+import CustomTags from '../Audio/CustomTags.vue';
 
 export default {
   name: 'AudioRecording',
-  components: {PrevNext, RecordingProperties, VideoHelp},
+  components: {CustomTags, BasicTags, PrevNext, RecordingProperties, VideoHelp},
   props: {
     recording: {
       type: Object,

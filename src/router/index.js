@@ -14,7 +14,6 @@ import RegisterView from '../views/RegisterView.vue';
 import RecordingVue from '../views/RecordingView.vue';
 import AddEmailView from '../views/AddEmailView.vue';
 import AnalysisView from '../views/AnalysisView.vue';
-import AudioTaggingView from '../views/AudioTaggingView.vue';
 
 Vue.use(Router);
 
@@ -89,11 +88,6 @@ function createRouter() {
       path: '/analysis',
       name: 'analysis',
       component: AnalysisView
-    },
-    {
-      path: '/audiotagging',
-      name: 'audioTagging',
-      component: AudioTaggingView
     },
     ]
   });
