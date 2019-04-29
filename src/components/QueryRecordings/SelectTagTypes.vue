@@ -33,8 +33,8 @@ export default {
         { value: 'no-human', text: 'not tagged by human'},
         { value: 'tagged', text: 'tagged as...' },
         { value: 'human-tagged', text: 'human tagged as...' },
-        { value: 'automatic-tagged', text: 'ai tagged as...' },
-        { value: 'both-tagged', text: 'ai and human tagged as...' },
+        { value: 'automatic-tagged', text: 'AI tagged as...' },
+        { value: 'both-tagged', text: 'AI and human tagged as...' },
         { value: 'untagged', text: 'untagged only' },
       ],
     };

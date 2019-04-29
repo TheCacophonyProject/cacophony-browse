@@ -383,8 +383,9 @@ export default {
       return result;
     },
     addToListOfTags: function (allTags, tagName, isAutomatic) {
-      if (!allTags[tagName]) {
-        allTags[tagName] = {};
+      var tag = allTags[tagName];
+      if (!tag) {
+        allTags[tagName] = tag = {};
       }
 
       if (isAutomatic) {
