@@ -32,6 +32,7 @@
       cols="12"
       lg="4">
       <h2>Recording</h2>
+      <!--
       <RecordingProperties
         v-model="recording.comment"
         :download-raw-url="audioRawUrl"
@@ -39,6 +40,7 @@
         :recording="recording"
         @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
       <VideoHelp class="mt-2" />
+      -->
     </b-col>
     
 
@@ -46,6 +48,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 import PrevNext from './PrevNext.vue';
 import RecordingProperties from './RecordingProperties.vue';
 import VideoHelp from './VideoHelp.vue';
@@ -69,6 +72,12 @@ export default {
       required: true,
     },
   },
+  methods:{
+    addAudioTag: function(tag){
+      console.log("addAudioTag Method Called");
+      console.log(tag);
+    }
+  }
 };
 </script>
 

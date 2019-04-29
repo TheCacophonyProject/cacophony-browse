@@ -4,7 +4,9 @@
       v-model="text"
       class="w-50 mt-4 d-inline align-bottom" 
       placeholder="Enter custom tag"/>
-    <b-button class="mt-0">Apply</b-button>
+    <b-button 
+      class="mt-0" 
+      @click="addCustomTag()">Apply</b-button>
   </div>
 </template>
 
@@ -17,9 +19,10 @@ export default {
     };
   },
   methods: {
-    customTag(customTag) {
+    addCustomTag() {
       const tag = {};
-      tag.type = customTag;
+      tag.type = this.text;
+      this.$parent.addAudioTag(tag);
     }
   }
 };

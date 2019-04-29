@@ -16,12 +16,14 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 export default {
   name: 'BasicTag',
   methods: {
-    basicTag(tagType) {
+    basicTag(tagType) {      
       const tag = {};
       tag.type = tagType;
+      this.$parent.addAudioTag(tag);
     }
   }
 };

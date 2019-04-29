@@ -66,6 +66,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 import {mapState} from 'vuex';
 import PrevNext from './PrevNext.vue';
 import AddObservation from './AddObservation.vue';
@@ -125,6 +126,7 @@ export default {
       return Number(this.$route.params.id);
     },
     addTag(tag) {
+      console.log("addTag");
       const id = Number(this.$route.params.id);
       this.$store.dispatch('Video/ADD_TAG', { tag, id });
     },
