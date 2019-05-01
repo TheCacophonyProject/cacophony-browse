@@ -333,11 +333,14 @@ export default {
         this.addToListOfTags(tagItems, tagName, tag.automatic);
       }
 
-      for (const track of tracks) {
-        for (const tag of track.TrackTags) {
-          this.addToListOfTags(tagItems, tag.what, tag.automatic);
+      if (tracks) {
+        for (const track of tracks) {
+          for (const tag of track.TrackTags) {
+            this.addToListOfTags(tagItems, tag.what, tag.automatic);
+          }
         }
       }
+
 
       // Use automatic and human status to create an ordered array of objects
       // suitable for parsing into coloured spans
