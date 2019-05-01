@@ -20,9 +20,9 @@
     </div>
     <div
       :class="getClass('false-positive')"
-      @click="quickTag('false-positive')">
+      @click="quickTag('false positive')">
       <img
-        title="Mark as nothing or false-positive (meaning there is no animal)"
+        title="Mark as nothing or false positive (meaning there is no animal)"
         src="../../assets/video/none.png">
       <div class="tag-name">nothing</div>
     </div>
