@@ -6,6 +6,7 @@
       <audio
         ref="player"
         :src="audioUrl"
+        volume="0.75"
         controls
         autoplay
         class="audio"/>
@@ -13,14 +14,37 @@
         :recording="recording"
         @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>
 
+
       <b-col 
-        offset="2"
+        cols="1" 
+        class="mt-3">
+        <b-button-group 
+          class="ml-4"
+          vertical>
+          <b-button 
+            class="mt-1" 
+            @click="volumeLoudest">Loudest</b-button>
+          <b-button 
+            class="mt-1" 
+            @click="volumeLouder">Louder</b-button>
+          <b-button class="mt-1">Default</b-button>
+          <b-button 
+            class="mt-1" 
+            @click="volumeQuieter">Quieter</b-button>
+          <b-button 
+            class="mt-1" 
+            @click="volumeQuietest">Quietest</b-button>
+        </b-button-group>
+      </b-col>
+
+      <b-col 
+        offset="3"
         class="mt-2">   
         <BasicTags />              
       </b-col>
 
       <b-col 
-        offset="2"
+        offset="3"
         class="mt-2">   
         <CustomTags />
       </b-col>
@@ -76,6 +100,26 @@ export default {
     addAudioTag: function(tag){
       console.log("addAudioTag Method Called");
       console.log(tag);
+    },
+    volumeLoudest(){
+      console.log(this.$refs);
+      this.$refs.player.volume = 1.0;
+    },
+    volumeLouder(){      
+      if ((this.$refs.player.volume + 0.1) <= 1.0) {
+        this.$refs.player.volume += 0.1;
+      }
+    },
+    volumeDefault(){      
+      this.$refs.player.volume = 0.75;
+    },
+    volumeQuieter(){
+      if ((this.$refs.player.volume - 0.1) >= 0) {
+        this.$refs.player.volume -= 0.1;
+      }
+    },
+    volumeQuietest(){
+      this.$refs.player.volume = 0.25;
     }
   }
 };

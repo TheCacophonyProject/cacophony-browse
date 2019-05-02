@@ -1,7 +1,7 @@
 <template>
   <div >
     <b-form-input 
-      v-model="text"
+      v-model="tagType"
       class="w-50 mt-4 d-inline align-bottom" 
       placeholder="Enter custom tag"/>
     <b-button 
@@ -15,15 +15,16 @@ export default {
   name: 'CustomTag',
   data: function() {
     return {
-      text:''
+      tagType:''
     };
   },
   methods: {
     addCustomTag() {
       const tag = {};
-      tag.type = this.text;
+      tag.type = this.tagType;
       this.$parent.addAudioTag(tag);
-    }
+    },
+    
   }
 };
 </script>

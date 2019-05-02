@@ -193,7 +193,7 @@ export default {
           }
           tag.duration = this.duration;
           tag.trapType = this.trap;
-
+          
           // save user tag defaults.
           // user.setTagDefault('tagAnimalInput', tag.animal);
           // user.setTagDefault('tagEventInput', tag.event);

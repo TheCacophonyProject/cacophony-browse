@@ -32,7 +32,7 @@ export default {
     };
   },
   methods:{
-    addTag(tag, time){
+    addTag(tag){
       
     }
   }

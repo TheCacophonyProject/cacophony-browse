@@ -25,7 +25,7 @@ export default {
       tag.type = tagType;
       this.$parent.addAudioTag(tag);
     }
-  }
+  },
 };
 </script>
 
