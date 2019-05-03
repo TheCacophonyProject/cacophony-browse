@@ -14,6 +14,7 @@ describe('Actions', () => {
         {groupname: 'b'}
       ]
     },
+    testResponse = {result: testResult},
     commit = jest.fn(),
     state = {
       currentGroup: testResult.groups[0],
@@ -21,7 +22,7 @@ describe('Actions', () => {
     };
 
   beforeEach(() => {
-    api.getGroups.mockReturnValueOnce(testResult);
+    api.getGroups.mockReturnValueOnce(testResponse);
   });
 
   function _expectGetGroupsCalled(commit) {
@@ -36,7 +37,7 @@ describe('Actions', () => {
   describe('GET_GROUPS', () => {
 
     beforeEach(async () => {
-      api.getGroups.mockReturnValueOnce(testResult);
+      api.getGroups.mockReturnValueOnce(testResponse);
       await GroupsStore.actions.GET_GROUPS({commit, state});
     });
 
@@ -77,7 +78,7 @@ describe('Actions', () => {
     const testString = "some string";
 
     beforeEach(async () => {
-      api.addNewGroup.mockReturnValueOnce({errors: "an error", success: false});
+      api.addNewGroup.mockReturnValueOnce({result: {errors: "an error"}, success: false});
     });
 
     test('calls api.groups.addNewGroup()', async () => {
