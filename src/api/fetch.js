@@ -24,9 +24,11 @@ export async function fetch() {
 
   const response = await crossFetch.apply(this, args);
 
-  if(requiresAuth && response.status === 401) { // TODO: The API returns a 422 for an invalid JWT, is that an API bug or do we handle the fairly broad 422 as well? https://tree.taiga.io/project/the-cacophony-project/us/361
+  if(requiresAuth && response.status === 401) {
     store.dispatch('User/LOGOUT');
+    store.dispatch('Messaging/ERROR', 'Error accessing your account.   Please log in again.');
     router.push('login');
+    return;
   }
 
   const result = await response.json();
