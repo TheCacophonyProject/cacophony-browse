@@ -2,6 +2,17 @@
   <div>
     <b-form>
       <b-form-group>
+        <div v-if="'user-entered' in recording.additionalMetadata">
+          <h3>Properties</h3>
+          <div
+            v-for="(value, key) of recording.additionalMetadata['user-entered']"
+            :key="key">
+            <p>
+              <strong>{{ key }}</strong>{{ value }}
+            </p>
+          </div>
+        </div>
+
         <h3>Technical details &nbsp;
           <span
             v-if="!display"
@@ -34,7 +45,7 @@
               <div
                 v-for="(value, key) of recording.additionalMetadata"
                 :key="key">
-                <p v-if="key != 'tracks'">
+                <p v-if="key != 'tracks' && key != 'user-entered'">
                   <strong>{{ key }}:</strong> {{ value }}
                 </p>
               </div>
