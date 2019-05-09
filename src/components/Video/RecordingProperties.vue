@@ -173,14 +173,14 @@ export default {
   },
   methods: {
     async updateComment() {
-      const result = await api.recording.comment(this.value, this.$route.params.id);
-      if(result.success) {
+      const {success} = await api.recording.comment(this.value, this.$route.params.id);
+      if(success) {
         this.showCommentAlert = true;
       }
     },
     async deleteRecording() {
-      const result = await api.recording.del(this.$route.params.id);
-      if(result.success) {
+      const {success} = await api.recording.del(this.$route.params.id);
+      if(success) {
         this.showDeleteAlert = true;
         this.$emit('nextOrPreviousRecording');
       }

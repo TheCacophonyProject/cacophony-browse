@@ -270,7 +270,7 @@ export default {
 
       // Call API and process results
       this.queryPending = true;
-      const response = await api.recording.query(this.serialiseQuery(this.query, true));
+      const {result, success} = await api.recording.query(this.serialiseQuery(this.query, true));
       this.queryPending = false;
 
       // Remove previous values *again* since it's possible for the query to have been called twice
@@ -278,19 +278,19 @@ export default {
       this.recordings = [];
       this.tableItems = [];
 
-      if (!response.success) {
-        response.messages && response.messages.forEach(message => {
+      if (!success) {
+        result.messages && result.messages.forEach(message => {
           this.$store.dispatch('Messaging/WARN', message);
         });
       } else {
-        this.recordings = response.rows;
-        this.count = response.count;
-        if (response.count > 0) {
-          this.countMessage = `${response.count} matches found (total)`;
-        } else if (response.count === 0) {
+        this.recordings = result.rows;
+        this.count = result.count;
+        if (result.count > 0) {
+          this.countMessage = `${result.count} matches found (total)`;
+        } else if (result.count === 0) {
           this.countMessage = 'No matches';
         }
-        this.tableItems = response.rows.map((row) => ({
+        this.tableItems = result.rows.map((row) => ({
           id: row.id,
           type: row.type,
           devicename: row.Device.devicename,

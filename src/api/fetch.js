@@ -8,6 +8,12 @@ const defaults = {
   headers: {}
 };
 
+/**
+ * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
+ * The result field is the JSON blob from the response body.
+ * These fields can easily be resolved using object destructuring to directly assign the required information.
+ * @returns {Promise<{result: any, success: boolean, status: number}>}
+ */
 export async function fetch() {
 
   const args = [].slice.call(arguments, 0);
@@ -23,15 +29,16 @@ export async function fetch() {
   };
 
   const response = await crossFetch.apply(this, args);
+  const status = response.status;
 
-  if(requiresAuth && response.status === 401) { // TODO: The API returns a 422 for an invalid JWT, is that an API bug or do we handle the fairly broad 422 as well? https://tree.taiga.io/project/the-cacophony-project/us/361
+  if(requiresAuth && status === 401) {
     store.dispatch('User/LOGOUT');
     router.push('login');
   }
 
   const result = await response.json();
-  handleMessages(result, response.status);
-  return result;
+  handleMessages(result, status);
+  return {result, status, success: response.ok};
 }
 
 function handleMessages(result, status) {
