@@ -17,6 +17,7 @@ describe('Actions', () => {
           ]
       }
     },
+    testResponse = {result: testResult},
     commit = jest.fn(),
     state = {
       currentDevice: testResult.devices[0],
@@ -24,7 +25,7 @@ describe('Actions', () => {
     };
 
   beforeEach(() => {
-    api.getDevices.mockReturnValueOnce(testResult);
+    api.getDevices.mockReturnValueOnce(testResponse);
   });
 
   function _expectGetDevicesCalled(commit) {

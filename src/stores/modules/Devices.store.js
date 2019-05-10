@@ -9,7 +9,7 @@ const state = {
 const getters = {};
 
 async function _getDevice(devicename, commit) {
-  const result = await api.device.getDevices();
+  const {result} = await api.device.getDevices();
   const device = result.devices.rows.find(device => device.devicename === devicename);
   commit('setCurrentDevice', device);
 }
@@ -17,7 +17,7 @@ async function _getDevice(devicename, commit) {
 const actions = {
   async GET_DEVICES({commit}) {
     commit('fetching');
-    const result = await api.device.getDevices();
+    const {result} = await api.device.getDevices();
     commit('receiveDevices', result.devices.rows);
     commit('fetched');
   },
