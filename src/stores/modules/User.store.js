@@ -40,8 +40,8 @@ const actions = {
   async LOGIN({commit,}, payload) {
     commit('invalidateLogin');
 
-    const result = await api.user.login(payload.username, payload.password);
-    if(result.success) {
+    const {result, success} = await api.user.login(payload.username, payload.password);
+    if(success) {
       api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
       commit('receiveLogin', result);
     }
@@ -52,17 +52,17 @@ const actions = {
   },
   async REGISTER({commit}, payload) {
 
-    const result = await api.user.register(payload.username, payload.password, payload.email);
+    const {result, success} = await api.user.register(payload.username, payload.password, payload.email);
 
 
-    if(result.success) {
+    if(success) {
       api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
       commit('receiveLogin', result);
     }
   },
   async UPDATE ({ commit }, payload) {
-    const result = await api.user.updateFields(payload);
-    if (result.success) {
+    const {result, success} = await api.user.updateFields(payload);
+    if (success) {
       api.user.persistFields(payload);
       commit('updateFields', payload);
       return true;

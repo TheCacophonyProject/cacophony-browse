@@ -58,7 +58,7 @@ test('fetch(url, paramsObject) handles response with general errors', async () =
     json: () => Promise.resolve(testResultObject)
   });
 
-  const result = await fetch('', {});
+  const {result} = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(2);
   expect(store.dispatch).toHaveBeenCalledWith('Messaging/ERROR', testResultObject.errors.someErrorKey.msg);
@@ -82,7 +82,7 @@ test('fetch(url, paramsObject) handles response with authentication error', asyn
     json: () => Promise.resolve(testResultObject)
   });
 
-  const result = await fetch('', {});
+  const {result} = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(2);
   expect(store.dispatch).toHaveBeenCalledWith('User/LOGOUT');
@@ -106,7 +106,7 @@ test('fetch(url, paramsObject) handles response with "success" result', async ()
     }
   });
 
-  const result = await fetch('', {});
+  const {result} = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(1);
   expect(store.dispatch).toHaveBeenCalledWith('Messaging/SUCCESS', testResultObject.messages[0]);
