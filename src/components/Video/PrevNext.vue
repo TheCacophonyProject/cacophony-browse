@@ -130,8 +130,8 @@ export default {
 </script>
 
 <style scoped>
-.img-buttons {
-  padding: 1em;
+div.img-buttons {
+  padding: 0.5em;
   text-align: center;
 }
 .img-buttons
@@ -143,6 +143,14 @@ export default {
     display: inline-block;
     opacity: 0.6;
   }
+
+  @media only screen and (max-width: 575px) {
+    div.img-buttons {
+      font-size: 80%;
+    }
+  }
+
+
   span:hover {
     opacity: 1;
   }

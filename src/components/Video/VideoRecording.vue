@@ -157,5 +157,18 @@ export default {
     font-weight: 600;
     font-size: 120%
   }
+
+</style>
+
+<style>
+  @media only screen and (max-width: 575px) {
+    .view .row {
+      margin: 0;
+    }
+
+    .view .row .col-12 {
+      padding: 0 5px;
+    }
+  }
 </style>
 
