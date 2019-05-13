@@ -23,7 +23,7 @@
           <img
             :style="getIconStyle()"
             class="track-image">
-          Track {{ index + 1 }}
+          Track {{ index + 1 }} <span class="out-of-tracks">/ {{ numTracks }}</span>
         </h3>
       </b-col>
       <b-col
@@ -213,8 +213,16 @@ export default {
   }
 
   @media only screen and (min-width: 992px) {
+    .out-of-tracks,
     .prev-track {
       display: none;
+    }
+  }
+
+  @media only screen and (max-width: 575px) {
+    .prev-track,
+    .next-track {
+      padding-left: 0;
     }
   }
 
