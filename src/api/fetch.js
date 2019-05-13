@@ -31,13 +31,14 @@ export async function fetch() {
   const response = await crossFetch.apply(this, args);
   const status = response.status;
 
+  const result = await response.json();
   if(requiresAuth && status === 401) {
     store.dispatch('User/LOGOUT');
+    store.dispatch('Messaging/ERROR', 'Error accessing your account.   Please log in again.');
     router.push('login');
+  } else {
+    handleMessages(result, status);
   }
-
-  const result = await response.json();
-  handleMessages(result, status);
   return {result, status, success: response.ok};
 }
 
