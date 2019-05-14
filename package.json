@@ -7,6 +7,7 @@
   "private": true,
   "scripts": {
     "dev": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
+    "dev:publish": "npm test && webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress --host 0.0.0.0",
     "dev:skip-tests": "webpack-dev-server --config webpack/webpack.dev.js --open --hot --progress",
     "release": "webpack --config webpack/webpack.release.js --progress --hide-modules",
     "test": "jest",
