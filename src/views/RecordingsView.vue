@@ -228,7 +228,7 @@ export default {
         // Map between the mismatch in video type types between frontend and backend
         if (where.type === 'video') {
           where.type = 'thermalRaw';
-        } else if (where.type !== 'both') {
+        } else if (where.type === 'both') {
           delete where.type;
         }
         // Remove the group param, since the API doesn't handle that, we're just using
