@@ -120,6 +120,11 @@ export default {
       },
     }),
   },
+  watch: {
+    recording: function() {
+      this.trackSelected(0);
+    },
+  },
   methods: {
     getRecordingId() {
       return Number(this.$route.params.id);
