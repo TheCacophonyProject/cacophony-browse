@@ -91,6 +91,7 @@ export default {
         {value: "missed track", text: 'Missed animal track'},
         {value: "multiple animals", text: 'Multiple animals in video'},
         {value: "trapped in trap", text: 'Animal in trap'},
+        {value: "cool", text: 'Cool video'},
         {value: "animal", text: 'Untracked animal (please specify animal)'},
         "other"
       ],
