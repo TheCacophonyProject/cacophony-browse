@@ -2,7 +2,7 @@
   <div class="img-buttons">
     <span
       title="Previous for device, skipping bird &amp; false-positives"
-      @click="gotoNextRecording('previous', 'any', ['interesting'])">
+      @click="gotoNextRecording('previous', 'tagged', ['interesting'])">
       <font-awesome-icon
         icon="asterisk"
         style="color: red"
@@ -52,7 +52,7 @@
     </span>
     <span
       title="Next for device, skipping birds &amp; false-positives"
-      @click="gotoNextRecording('next', 'any', ['interesting'])">
+      @click="gotoNextRecording('next', 'tagged', ['interesting'])">
       <font-awesome-icon
         class="fa-3x"
         icon="angle-double-right" />

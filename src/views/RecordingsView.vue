@@ -244,8 +244,11 @@ export default {
         limit: this.perPage,
         offset: newOffset,
         tagMode: query.tagMode,
-        tags: query.tags
       };
+
+      if (query.tags && query.tags.length > 0) {
+        params.tags = query.tags;
+      }
 
       for (const key in params) {
         const val = params[key];
