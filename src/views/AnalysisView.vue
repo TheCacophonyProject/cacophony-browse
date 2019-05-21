@@ -183,7 +183,7 @@ export default {
       // Count the number of recordings for each device
       this.devices.map((device) => this.deviceCount[device.id] = 0);
       for (const row of allData.rows) {
-        this.deviceCount[row.Device.id] += 1;
+        this.deviceCount[row.DeviceId] += 1;
       }
       // Create data and label variables
       const labels = [];
