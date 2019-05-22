@@ -142,7 +142,11 @@ export default {
         ) || '';
       },
       set (value) {
-        this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
+        if (value && value.trim() !== "") {
+          this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
+        } else {
+          this.query.where.recordingDateTime["$lt"] = "";
+        }
       }
     },
     animals: {

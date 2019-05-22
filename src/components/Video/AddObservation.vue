@@ -6,22 +6,6 @@
       @ok="addManualTag()">
 
       <b-form-group
-        label="Animal:"
-        horizontal>
-        <b-form-select
-          v-model="animalTag"
-          :options="animalOptions" />
-      </b-form-group>
-
-      <b-form-group
-        label="Number:"
-        horizontal>
-        <b-input
-          v-model="number"
-          type="number" />
-      </b-form-group>
-
-      <b-form-group
         label="Event:"
         horizontal>
         <b-form-select
@@ -30,28 +14,19 @@
       </b-form-group>
 
       <b-form-group
+        label="Animal:"
+        horizontal>
+        <b-form-select
+          v-model="animalTag"
+          :options="animalOptions" />
+      </b-form-group>
+
+      <b-form-group
         label="Confidence:"
         horizontal>
         <b-form-radio-group
           v-model="confidence"
           :options="confidenceOptions" />
-      </b-form-group>
-
-      <b-form-group
-        label="Age:"
-        horizontal>
-        <b-input
-          v-model="age"
-          :state="ageState"
-          placeholder="Years:Months"/>
-      </b-form-group>
-
-      <b-form-group
-        label="Trap type:"
-        horizontal>
-        <b-form-select
-          v-model="trap"
-          :options="trapOptions" />
       </b-form-group>
 
       <b-form-group
@@ -96,24 +71,35 @@ export default {
     return {
       animalTag: null,
       animalOptions: [
-        {value: null, text: 'Choose an animal'}, "bird", "bird/kiwi", "rat", "possum", "hedgehog", "stoat", "ferret", "weasel", "mouse", "cat", "dog", "rabbit", "hare", "human", "spider", "insect", "other", "unidentified"
+        {value: null, text: 'none'},
+        "possum",
+        "hedgehog",
+        {value: "rat", text: 'rat or mouse'},
+        {value: "stoat", text: 'stoat, weasel or ferret (mustelid)'},
+        "bird",
+        "bird/kiwi",
+        "cat",
+        "dog",
+        "rabbit",
+        "human",
+        {value: "insect", text: 'spider or insect (on camera lens or flying)'},
+        {value: "pest", text: 'unidentified animal but not bird'},
       ],
-      number: 1,
-      event: "just wandering about",
+      event: null,
       eventOptions: [
-        "just wandering about", "false positive", "multiple animals", "interaction with lure", "interaction with trap", "set trap to activate", "trapped in trap", "other"
+        {value: null, text: 'Please select tag type...'},
+        {value: "missed track", text: 'Missed animal track'},
+        {value: "multiple animals", text: 'Multiple animals in video'},
+        {value: "trapped in trap", text: 'Animal in trap'},
+        {value: "cool", text: 'Cool video'},
+        {value: "animal", text: 'Untracked animal (please specify animal)'},
+        "other"
       ],
       confidence: 0.8,
       confidenceOptions: [
         {value: 0.4, text: "low"},
         {value: 0.6, text: "mid"},
         {value: 0.8, text: "high"}
-      ],
-      age: null,
-      trap: null,
-      trapOptions: [
-        {value: null, text: 'Choose a trap'},
-        "Good Nature possums", "Good nature rat", "Short live capture", "Long live capture", "Timms", "Doc 200", "Trapinator", "Rat poison station", "other"
       ],
       startTime: null,
       endTime: null,
@@ -122,14 +108,6 @@ export default {
     };
   },
   computed: {
-    ageState () {
-      const pattern = /(\d)?(\d):(\d)?(\d)/;
-      if (this.age) {
-        return pattern.test(this.age);
-      } else {
-        return null;
-      }
-    },
     startTimeState () {
       const pattern = /(\d)?(\d):[0-5][0-9]/;
       if (this.startTime) {
@@ -160,36 +138,32 @@ export default {
       }
       return duration;
     },
-    ageMonths () {
-      if (this.age) {
-        const ageString = this.age;
-        const ageYears = parseInt(ageString.split(':')[0]);
-        const ageMonths = parseInt(ageString.split(':')[1]);
-        return ageYears * 12 + ageMonths;
-      } else {
-        return null;
-      }
-    },
   },
   methods: {
     addManualTag() {
-      if (this.ageState === false || this.startTimeState === false || this.endTimeState === false) {
+      if (this.event == null) {
+        this.showAlert = true;
+        this.alertMessage = "Please select a tag type.";
+        return;
+      } else if (this.startTimeState === false || this.endTimeState === false) {
         this.showAlert = true;
         this.alertMessage = "Invalid form.";
         return;
       } else {
         const tag = {};
         try {
-          tag.animal = this.animalTag;
-          tag.number = this.number;
+          tag.animal = null;
           tag.event = this.event;
+          if (tag.event == 'animal') {
+            tag.event = 'just wandering about';
+            tag.animal = this.animalTag;
+          }
+
           tag.confidence = this.confidence;
-          tag.age = this.ageMonths;
           if (this.startTime) {
             tag.startTime = this.parseTimeString(this.startTime);
           }
           tag.duration = this.duration;
-          tag.trapType = this.trap;
 
           // save user tag defaults.
           // user.setTagDefault('tagAnimalInput', tag.animal);

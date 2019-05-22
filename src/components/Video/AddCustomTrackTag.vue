@@ -5,7 +5,7 @@
     @ok="quickTag()">
     <b-form>
       <b-form-group
-        label="Animal:"
+        label="Tag:"
         horizontal>
         <b-form-select
           v-model="whatTag"
@@ -42,7 +42,22 @@ export default {
     return {
       whatTag: "cat",
       whatOptions: [
-        {value: null, text: 'Choose an animal'}, "bird", "bird/kiwi", "rat", "possum", "hedgehog", "stoat", "cat", "dog", "rabbit", "human", "insect", "other", "part of animal (eg tail)", "unidentified"
+        {value: null, text: 'Choose a tag...'},
+        "possum",
+        "hedgehog",
+        {value: "rat", text: 'rat or mouse'},
+        {value: "stoat", text: 'stoat, weasel or ferret (mustelid)'},
+        "bird",
+        "bird/kiwi",
+        "cat",
+        "dog",
+        "rabbit",
+        "human",
+        {value: "insect", text: 'spider or insect (on camera lens or flying)'},
+        {value: "pest", text: 'unidentified animal but not bird'},
+        {value: "part", text: 'just part of animal (eg tail)'},
+        {value: "bad track", text: 'poor tracking'},
+        "other",
       ],
       confidence: 0.8,
       confidenceOptions: [
