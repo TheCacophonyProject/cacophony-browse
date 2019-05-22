@@ -4,11 +4,12 @@
       <b-form-group>
         <div v-if="'user-entered' in recording.additionalMetadata">
           <h3>Properties</h3>
-          <div
-            v-for="(value, key) of recording.additionalMetadata['user-entered']"
-            :key="key">
-            <p>
-              <strong>{{ key }}</strong>{{ value }}
+          <div>
+            <p
+              v-for="(value, key) of recording.additionalMetadata['user-entered']"
+              :key="key"
+              class="user-prop">
+              <strong>{{ key }}:</strong> {{ value }}
             </p>
           </div>
         </div>
@@ -35,22 +36,30 @@
           <div
             v-for="prop of properties"
             :key="prop.key">
-            <p v-if="recording.batteryLevel && prop.key === 'batteryLevel'">
+            <p
+              v-if="recording.batteryLevel && prop.key === 'batteryLevel'"
+              class="prop">
               <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
             </p>
-            <p v-else-if="recording.location && prop.key === 'location'">
+            <p
+              v-else-if="recording.location && prop.key === 'location'"
+              class="prop">
               <strong>Location: </strong>{{ parseLocation }}
             </p>
             <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
               <div
                 v-for="(value, key) of recording.additionalMetadata"
                 :key="key">
-                <p v-if="key != 'tracks' && key != 'user-entered'">
+                <p
+                  v-if="key != 'tracks' && key != 'user-entered'"
+                  class="prop">
                   <strong>{{ key }}:</strong> {{ value }}
                 </p>
               </div>
             </div>
-            <p v-else-if="recording[prop.key] != null" >
+            <p
+              v-else-if="recording[prop.key] != null"
+              class="prop">
               <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
             </p>
           </div>
@@ -83,6 +92,7 @@
           variant="danger"
           @click="deleteRecording()">Delete Recording</b-button>
       </b-form-group>
+
       <b-alert
         :show="showDeleteAlert"
         variant="success"
@@ -201,4 +211,18 @@ export default {
 </script>
 
 <style scoped>
+  .user-prop,
+  .prop{
+    padding-left: 15px;
+  }
+
+  .user-prop,
+  .prop{
+    margin-bottom: .4rem;
+  }
+
+  .user-prop:last-child {
+    margin-bottom: 1.5rem;
+  }
+
 </style>
