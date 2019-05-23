@@ -27,7 +27,8 @@
               Create a group for your devices. Groups allow you to manage devices, users, and consolidate all the information about recordings in one handy place<br >
               <b-button
                 variant="primary"
-                class="mt-3">Create a group</b-button>
+                class="mt-3"
+                to="/groups">Create a group</b-button>
             </b-card>
           </b-col>
           <b-col
