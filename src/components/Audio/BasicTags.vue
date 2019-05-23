@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-1">
+  <b-col>
     <b-button 
       class="basicTags" 
       @click="basicTag('unknown')">Unknown</b-button>
@@ -12,7 +12,7 @@
     <b-button 
       class="basicTags" 
       @click="basicTag('human')">Human</b-button>
-  </div>
+  </b-col>
 </template>
 
 <script>
@@ -20,10 +20,14 @@
 export default {
   name: 'BasicTag',
   methods: {
-    basicTag(tagType) {      
+    basicTag(tagValue) {      
       const tag = {};
-      tag.type = tagType;
-      this.$parent.addAudioTag(tag);
+      tag.tagValue = tagValue;
+      tag.confidence = 0.5;
+      tag.startTime = 0.5;
+      tag.duration = 0.5;
+      tag.automatic = false;    
+      this.$emit('addAudioTag', tag);
     }
   },
 };

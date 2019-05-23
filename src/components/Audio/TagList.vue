@@ -1,40 +1,41 @@
 <template>
   <div>
-    <h2 class="tags-header">List of Audio Tags</h2>
-    <b-table/>  
-    <!--
+    <h2 class="tags-header">List of Tags</h2>
+    <div 
+      v-if="items.length == 0" 
+      class="no-tags">
+      There are no audio tags for this recording
+    </div>
 
-      slot-scope - reference for parent template to refer to child template slots
-      v-html inject html
 
-      -->
-    <template 
+    <ul
       v-if="items.length > 0"
-      slot="tag"
-      slot-scope="row" 
       :items="items"
-      :fields="fields" >        
-      <span v-html="(row.fields.tagType, row.item.tagType)"/>
-    </template>
-    <b-table/>
+      striped
+      hover
+      responsive />
+    
+    <li
+      v-for="item in items" 
+      :items="items"
+      :key="item.id">
+      {{ item.tagValue }}
+    </li>
+    <ul/>
   </div>
 </template>
 
 <script>
+
 export default {
   name: 'TagList',
-  data () {
-    return {
-      fields: [
-        {key: 'tagType', label: 'type'},
-        {key: 'timeAt', label: 'tagged On'} 
-      ]
-    };
-  },
+  props: {
+    items: {
+      type: Array,
+      required: true
+    },
+  },  
   methods:{
-    addTag(tag){
-      
-    }
   }
 };
 

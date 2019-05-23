@@ -1,5 +1,3 @@
-
-
 <template>
   <div>
     <h2 class="tags-header">Recording tags</h2>
