@@ -18,7 +18,8 @@
         horizontal>
         <b-form-select
           v-model="animalTag"
-          :options="animalOptions" />
+          :options="animalOptions"
+          :disabled="animalDisabled"/>
       </b-form-group>
 
       <b-form-group
@@ -104,7 +105,8 @@ export default {
       startTime: null,
       endTime: null,
       showAlert: false,
-      alertMessage: ""
+      alertMessage: "",
+      animalDisabled: true,
     };
   },
   computed: {
@@ -137,6 +139,15 @@ export default {
         throw { message: "Negative duration. (Start time is after end time!)" };
       }
       return duration;
+    },
+  },
+  watch: {
+    event: function (value) {
+      const disableAnimal = (value !== 'animal');
+      if (disableAnimal) {
+        this.animalTag = null;
+      }
+      this.animalDisabled = disableAnimal;
     },
   },
   methods: {
