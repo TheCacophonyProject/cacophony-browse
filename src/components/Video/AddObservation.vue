@@ -145,7 +145,7 @@ export default {
     event: function (value) {
       const disableAnimal = (value !== 'animal');
       if (disableAnimal) {
-        this.animalTag = 'none';
+        this.animalTag = null;
       }
       this.animalDisabled = disableAnimal;
     },
