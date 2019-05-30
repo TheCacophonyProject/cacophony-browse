@@ -6,7 +6,7 @@
       placeholder="Enter custom tag"/>
     <b-button 
       class="mt-0" 
-      @click="addCustomTag()">Apply</b-button>
+      @click="addCustomTag()">Add</b-button>
   </div>
 </template>
 
@@ -20,7 +20,10 @@ export default {
   },
   methods: {
     addCustomTag() {
-      if((String.trim(this.customTagValue)).length == 0) {
+      // eslint-disable-next-line no-console
+      console.log("here again");
+      if(((this.customTagValue).trim()).length == 0) {
+        this.customTagValue = "";
         return;
       } 
       const tag = {};
@@ -30,6 +33,7 @@ export default {
       tag.duration = 0.5;
       tag.automatic = false;                
       this.$emit('addAudioTag', tag);
+      this.customTagValue = "";
     },    
   }
 };

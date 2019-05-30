@@ -8,7 +8,7 @@
     </b-col>
     <b-col>
       duration
-    </b-col>
+    </b-col>    
   </b-row>
 </template>
 <script>

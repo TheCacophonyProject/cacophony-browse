@@ -117,6 +117,9 @@ export default {
       // schemaVersion - integer 0000 MMnn MAJORminor - Future proofing for schema changes Starts with 0100 (v1.00) COMPULSORY
       
     },
+    deleteTag(tagId) {
+      this.$store.dispatch('Video/DELETE_TAG', tagId);
+    },
     volumeLoudest(){
       this.$refs.player.volume = 1.0;
     },
