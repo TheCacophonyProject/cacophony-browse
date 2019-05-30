@@ -1,5 +1,6 @@
 <template>
-  <div >
+  <div 
+    class="db d-inline">
     <b-form-input 
       v-model="customTagValue"
       class="w-50 mt-4 d-inline align-bottom" 
@@ -20,8 +21,6 @@ export default {
   },
   methods: {
     addCustomTag() {
-      // eslint-disable-next-line no-console
-      console.log("here again");
       if(((this.customTagValue).trim()).length == 0) {
         this.customTagValue = "";
         return;

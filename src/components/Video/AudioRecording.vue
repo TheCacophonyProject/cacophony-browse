@@ -3,7 +3,8 @@
     <b-row>
       <b-col
         cols="12"
-        lg="8">
+        lg="8"
+        class="mb-2">
         <audio
           ref="player"
           :src="audioUrl"
@@ -15,8 +16,8 @@
     </b-row>
     <b-row>
       <b-col 
-        cols="1" 
-        class="mt-3 mr-0 db">
+        cols="2" 
+        class="db">
         <b-button-group 
           class="pl-4"
           vertical>
@@ -38,16 +39,15 @@
       <b-row class="db m-0 ">
         <b-col 
           offset="1"
-          class="mt-2 ml-5 db"
-          cols="8">   
+          class="mt-0 ml-0 db"
+          cols="19">   
           <BasicTags @addAudioTag="addAudioTag($event)"/>              
-        </b-col>
-
-        <b-col 
-          offset="1"
-          class="mt-2 ml-5 db"
-          cols="5">   
           <CustomTags @addAudioTag="addAudioTag($event)"/>
+          <b-button 
+            class="db ml-5"
+            size="lg" 
+            @click="closeTab()">Done</b-button>
+                              
         </b-col>
       </b-row>
     </b-row>
@@ -55,13 +55,13 @@
       <TagList 
         :items="tagItems" 
         @deleteTag="deleteTag($event)"
+        @replay="replay($event)"
       />
     </b-row>
   </b-container>
 </template>
 
 <script>
-/* eslint-disable no-console */
 import {mapState} from 'vuex';
 import PrevNext from './PrevNext.vue';
 import RecordingProperties from './RecordingProperties.vue';
@@ -91,16 +91,18 @@ export default {
     ...mapState({
       tagItems() {
         const result = this.$store.getters['Video/getTagItems'];
-        console.log(result);
         return result;
       },
     }),
   },
   methods:{
     addAudioTag: function(tag){
-      console.log("addAudioTag Method Called");
       const id = Number(this.$route.params.id);
-      console.log(tag, id);
+      if (this.$refs.player.currentTime == this.$refs.player.duration){
+        tag.startTime = 0;
+      } else {
+        tag.startTime = this.$refs.player.currentTime.toFixed(2);
+      }
       this.$store.dispatch('Video/ADD_TAG', { tag, id });
       
       // https://api-test.cacophony.org.nz/api/v1/tags
@@ -119,6 +121,13 @@ export default {
     },
     deleteTag(tagId) {
       this.$store.dispatch('Video/DELETE_TAG', tagId);
+    },
+    closeTab(){
+      window.close();
+    },
+    replay(time){            
+      this.$refs.player.currentTime = time;
+      this.$refs.player.play();
     },
     volumeLoudest(){
       this.$refs.player.volume = 1.0;
@@ -148,7 +157,7 @@ export default {
     padding: 0 5px;
   }
   .db{
-    border: 0;
+    border: 0px;
   }
 </style>
 

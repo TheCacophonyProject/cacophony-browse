@@ -13,6 +13,24 @@
       striped
       responsive
       @deleteTag="deleteTag($event)">
+
+      <template
+        slot="startTime"
+        slot-scope="row">
+        {{ row.item.tag.startTime }} 
+      </template>
+
+      <template
+        slot="replayButton"
+        slot-scope="row">
+        <font-awesome-icon
+          v-b-popover.hover.bottom="'Replay'"
+          :icon="['fa', 'play']"
+          size="2x"
+          style="cursor: pointer;"
+          @click="$emit('replay', row.item.tag.startTime)"/>       
+      </template>
+
       <template
         slot="deleteButton"
         slot-scope="row">
@@ -41,8 +59,10 @@ export default {
     return {
       fields: [
         {key: 'animal', label: 'Tag Value'},
+        {key: 'startTime', label: 'Start Time'},
         {key: 'who', label: 'By Who'},
         {key: 'when', label: 'When'},
+        {key: 'replayButton', label: ''},
         {key: 'deleteButton', label: ''}
       ]
     };

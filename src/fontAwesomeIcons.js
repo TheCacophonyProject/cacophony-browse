@@ -23,7 +23,8 @@ import {
   faWrench,
   faUsers,
   faMicrochip,
-  faPowerOff
+  faPowerOff,
+  faPlay
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
@@ -64,7 +65,8 @@ library.add(
   faUsers,
   faMicrochip,
   faUserCircle,
-  faPowerOff
+  faPowerOff,
+  faPlay
 );
 
 export default FontAwesomeIcon;

@@ -1,5 +1,5 @@
 <template>
-  <b-col>
+  <div>
     <b-button 
       class="basicTags" 
       @click="basicTag('unknown')">Unknown</b-button>
@@ -12,7 +12,7 @@
     <b-button 
       class="basicTags" 
       @click="basicTag('human')">Human</b-button>
-  </b-col>
+  </div>
 </template>
 
 <script>
