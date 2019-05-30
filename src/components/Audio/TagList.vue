@@ -19,7 +19,7 @@
       v-for="item in items" 
       :items="items"
       :key="item.id">
-      {{ item.tagValue }}
+      {{ item.animal }} {{ item.who }} {{ item.when }}
     </li>
     <ul/>
   </div>

@@ -174,8 +174,6 @@ export default {
   },
   methods: {
     addManualTag() {
-      console.clear();
-      console.log("addManualTag");
       if (this.ageState === false || this.startTimeState === false || this.endTimeState === false) {
         this.showAlert = true;
         this.alertMessage = "Invalid form.";

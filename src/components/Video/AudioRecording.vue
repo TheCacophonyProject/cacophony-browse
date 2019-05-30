@@ -99,7 +99,6 @@ export default {
   methods:{
     addAudioTag: function(tag){
       console.log("addAudioTag Method Called");
-      // is this the user id or the record id? - id is used in route path: '/recording/:id',
       const id = Number(this.$route.params.id);
       console.log(tag, id);
       this.$store.dispatch('Video/ADD_TAG', { tag, id });
