@@ -6,7 +6,7 @@
       class="w-50 mt-4 d-inline align-bottom" 
       placeholder="Enter custom tag"/>
     <b-button 
-      class="mt-0" 
+      class="mt-0 align-bottom" 
       @click="addCustomTag()">Add</b-button>
   </div>
 </template>
