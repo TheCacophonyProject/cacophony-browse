@@ -264,7 +264,6 @@ export default {
       this.countMessage = "";
       this.recordings = [];
       this.tableItems = [];
-
       // Call API and process results
       this.queryPending = true;
       const {result, success} = await api.recording.query(this.serialiseQuery(this.query, true));

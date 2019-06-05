@@ -87,6 +87,7 @@ export default {
   },
   data () {
     return {
+      rawAnimal:[],
       isAudio: true,
       hasSpecifiedTags: false,
       canHaveTags: false,
@@ -151,10 +152,11 @@ export default {
     },
     animals: {
       get () {
-        return this.query.tags;
+        return this.rawAnimal;
       },
       set (value) {
-        this.query.tags = value;
+        this.rawAnimal = value;
+        this.query.tags = value.map(option => option.value? option.value : option.name );
         this.hasSpecifiedTags = this.query.tags.length > 0;
         if (this.hasSpecifiedTags) {
           if (!this.canHaveTags) {

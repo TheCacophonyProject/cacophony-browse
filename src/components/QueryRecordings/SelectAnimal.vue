@@ -2,12 +2,14 @@
   <b-form-group
     v-b-tooltip.hover="tooltipTitle">
     <label>Animals</label>
-    <multiselect
+    <multiselect 
       :value="value"
-      :options="options"
-      :multiple="true"
+      :options="options" 
+      :multiple="true" 
       :placeholder="placeholder"
       :disabled="disabled"
+      label="name" 
+      track-by="name"
       @input="$emit('input', $event)"/>
   </b-form-group>
 </template>
@@ -33,22 +35,25 @@ export default {
   data () {
     return {
       options: [
-        "interesting",
-        "possum",
-        "rat",
-        "stoat",
-        "hedgehog",
-        "cat",
-        "bird",
-        "bird/kiwi",
-        "dog",
-        "hare",
-        "human",
-        "insect",
-        "rabbit",
-        "spider",
-        "other",
-        "unidentified",
+        {name: "interesting"},
+        {name: "possum"},
+        {name: "rat"},
+        {name: "stoat"},
+        {name: "hedgehog"},
+        {name: "cat"},
+        {name: "bird"},
+        {name: "bird/kiwi"},
+        {name: "dog"},
+        {name: "hare"},
+        {name: "human"},
+        {name: "insect"},
+        {name: "rabbit"},
+        {name: "spider"},
+        {name: "other"},
+        {name: "unidentified"},
+        {name: "pest"},
+        {value: "part", name: 'part of animal (eg tail)'},
+        {value: "bad track", name: 'poor tracking'},      
       ]
     };
   },
