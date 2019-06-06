@@ -13,8 +13,8 @@
       @input="$emit('input', $event)"/>
   </b-form-group>
 </template>
-
 <script>
+import DefaultLabels from '../../const.js';
 
 export default {
   name: 'AnimalSelect',
@@ -34,27 +34,7 @@ export default {
   },
   data () {
     return {
-      options: [
-        {name: "interesting"},
-        {name: "possum"},
-        {name: "rat"},
-        {name: "stoat"},
-        {name: "hedgehog"},
-        {name: "cat"},
-        {name: "bird"},
-        {name: "bird/kiwi"},
-        {name: "dog"},
-        {name: "hare"},
-        {name: "human"},
-        {name: "insect"},
-        {name: "rabbit"},
-        {name: "spider"},
-        {name: "other"},
-        {name: "unidentified"},
-        {name: "pest"},
-        {value: "part", name: 'part of animal (eg tail)'},
-        {value: "bad track", name: 'poor tracking'},      
-      ]
+      options: DefaultLabels.searchLabels()
     };
   },
   computed: {

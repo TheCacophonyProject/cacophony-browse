@@ -9,7 +9,13 @@
         horizontal>
         <b-form-select
           v-model="whatTag"
-          :options="whatOptions" />
+          :options="whatOptions">
+          <template slot="first">
+            <option 
+              :value="null" 
+              disabled>Choose a tag..
+            </option>
+          </template>
       </b-form-group>
 
       <b-form-group
@@ -29,6 +35,7 @@
   </b-modal>
 </template>
 <script>
+import DefaultLabels from '../../const.js';
 
 export default {
   name: 'AddCustomTrackTag',
@@ -41,24 +48,7 @@ export default {
   data () {
     return {
       whatTag: "cat",
-      whatOptions: [
-        {value: null, text: 'Choose a tag...'},
-        "possum",
-        "hedgehog",
-        {value: "rat", text: 'rat or mouse'},
-        {value: "stoat", text: 'stoat, weasel or ferret (mustelid)'},
-        "bird",
-        "bird/kiwi",
-        "cat",
-        "dog",
-        "rabbit",
-        "human",
-        {value: "insect", text: 'spider or insect (on camera lens or flying)'},
-        {value: "pest", text: 'unidentified animal but not bird'},
-        {value: "part", text: 'just part of animal (eg tail)'},
-        {value: "bad track", text: 'poor tracking'},
-        "other",
-      ],
+      whatOptions: DefaultLabels.trackLabels(),
       confidence: 0.8,
       confidenceOptions: [
         {value: 0.4, text: "low"},
