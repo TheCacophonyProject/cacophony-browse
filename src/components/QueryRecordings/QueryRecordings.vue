@@ -62,7 +62,7 @@
 </template>
 
 <script>
-
+import DefaultLabels from '../../const.js';
 import SelectDevice from './SelectDevice.vue';
 import SelectTagTypes from './SelectTagTypes.vue';
 import SelectAnimal from './SelectAnimal.vue';
@@ -156,7 +156,7 @@ export default {
       },
       set (value) {
         this.rawAnimal = value;
-        this.query.tags = value.map(option => option.value? option.value : option.name );
+        this.query.tags = value.map(option => option.value? option.value : option.text );
         this.hasSpecifiedTags = this.query.tags.length > 0;
         if (this.hasSpecifiedTags) {
           if (!this.canHaveTags) {
@@ -188,17 +188,7 @@ export default {
     },
   },
   methods: {
-    canHaveSpecifiedTags: function(tagType) {
-      switch (tagType) {
-      case 'tagged':
-      case 'human-tagged':
-      case 'automatic-tagged':
-      case 'both-tagged':
-        return true;
-      default:
-        return false;
-      }
-    }
+    canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
   },
 };
 

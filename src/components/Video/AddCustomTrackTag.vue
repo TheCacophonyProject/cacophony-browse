@@ -16,6 +16,7 @@
               disabled>Choose a tag..
             </option>
           </template>
+        </b-form-select>
       </b-form-group>
 
       <b-form-group

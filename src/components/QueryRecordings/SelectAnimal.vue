@@ -8,8 +8,8 @@
       :multiple="true" 
       :placeholder="placeholder"
       :disabled="disabled"
-      label="name" 
-      track-by="name"
+      label="text" 
+      track-by="value"
       @input="$emit('input', $event)"/>
   </b-form-group>
 </template>

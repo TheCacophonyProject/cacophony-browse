@@ -12,8 +12,9 @@
     />
   </b-form-group>
 </template>
-
 <script>
+import DefaultLabels from '../../const.js';
+
 export default {
   name: 'SelectTagTypes',
   props: {
@@ -28,17 +29,10 @@ export default {
   },
   data () {
     return {
-      options: [
-        { value: 'any', text: 'all' },
-        { value: 'no-human', text: 'not tagged by human'},
-        { value: 'tagged', text: 'tagged as...' },
-        { value: 'human-tagged', text: 'human tagged as...' },
-        { value: 'automatic-tagged', text: 'AI tagged as...' },
-        { value: 'both-tagged', text: 'AI and human tagged as...' },
-        { value: 'untagged', text: 'untagged only' },
-      ],
+      options:DefaultLabels.searchRecordingLabels(),
     };
   },
+
   computed: {
     tooltipTitle: function () {
       if (this.disabled) {
