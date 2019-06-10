@@ -39,6 +39,8 @@
 </template>
 
 <script>
+
+import DefaultLabels from '../../const.js';
 export default {
   name: 'QuickTagTrack',
   props: {
@@ -53,7 +55,7 @@ export default {
   },
   data() {
     return {
-      animals: ["possum", "rat", "hedgehog", "cat", "bird"],
+      animals: DefaultLabels.quickTagLabels(),
       message: "",
     };
   },

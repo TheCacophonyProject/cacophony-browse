@@ -14,6 +14,7 @@
   </b-form-group>
 </template>
 <script>
+
 import DefaultLabels from '../../const.js';
 
 export default {

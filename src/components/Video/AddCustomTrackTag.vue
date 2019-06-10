@@ -2,14 +2,16 @@
   <b-modal
     :id="refTag"
     title="Add track tag"
-    @ok="quickTag()">
+    @ok="quickTag">
     <b-form>
       <b-form-group
         label="Tag:"
         horizontal>
         <b-form-select
           v-model="whatTag"
-          :options="whatOptions">
+          :options="whatOptions"
+          :state="dirty ? whatTag != null : null"
+          invalid-feedback="Animal is required">
           <template slot="first">
             <option 
               :value="null" 
@@ -48,6 +50,7 @@ export default {
   },
   data () {
     return {
+      dirty: null,
       whatTag: "cat",
       whatOptions: DefaultLabels.trackLabels(),
       confidence: 0.8,
@@ -60,7 +63,16 @@ export default {
     };
   },
   methods: {
-    quickTag() {
+    validate() {
+      const valid = this.whatTag != null;
+      this.dirty = true;
+      return valid;
+    },
+    quickTag(event) {
+      if(!this.validate()){
+        event.preventDefault();
+        return;
+      }
       const tag = {};
       tag.confidence = this.confidence;
       tag.what = this.whatTag;
