@@ -29,7 +29,7 @@ export default {
   },
   data () {
     return {
-      options:DefaultLabels.searchRecordingLabels(),
+      options: DefaultLabels.searchRecordingLabels(),
     };
   },
 
