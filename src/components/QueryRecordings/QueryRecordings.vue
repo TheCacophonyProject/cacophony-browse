@@ -156,7 +156,7 @@ export default {
       },
       set (value) {
         this.rawAnimals = value;
-        this.query.tags = value.map(option => option.value? option.value : option.text );
+        this.query.tags = value.map(option => option.value ? option.value : option.text );
         this.hasSpecifiedTags = this.query.tags.length > 0;
         if (this.hasSpecifiedTags) {
           if (!this.canHaveTags) {
