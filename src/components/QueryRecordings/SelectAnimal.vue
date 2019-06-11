@@ -2,17 +2,20 @@
   <b-form-group
     v-b-tooltip.hover="tooltipTitle">
     <label>Animals</label>
-    <multiselect
+    <multiselect 
       :value="value"
-      :options="options"
-      :multiple="true"
+      :options="options" 
+      :multiple="true" 
       :placeholder="placeholder"
       :disabled="disabled"
+      label="text" 
+      track-by="value"
       @input="$emit('input', $event)"/>
   </b-form-group>
 </template>
-
 <script>
+
+import DefaultLabels from '../../const.js';
 
 export default {
   name: 'AnimalSelect',
@@ -32,24 +35,7 @@ export default {
   },
   data () {
     return {
-      options: [
-        "interesting",
-        "possum",
-        "rat",
-        "stoat",
-        "hedgehog",
-        "cat",
-        "bird",
-        "bird/kiwi",
-        "dog",
-        "hare",
-        "human",
-        "insect",
-        "rabbit",
-        "spider",
-        "other",
-        "unidentified",
-      ]
+      options: DefaultLabels.searchLabels()
     };
   },
   computed: {
