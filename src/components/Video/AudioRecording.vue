@@ -36,7 +36,9 @@
             @click="volumeQuietest">Quietest</b-button>
         </b-button-group>
       </b-col>
-      <b-row class="db m-0 ">
+      <b-row 
+        class="db m-0 " 
+        no-gutters="true">
         <b-col 
           offset="1"
           class="mt-0 ml-0 db"
@@ -44,10 +46,9 @@
           <BasicTags @addAudioTag="addAudioTag($event)"/>              
           <CustomTags @addAudioTag="addAudioTag($event)"/>
           <b-button 
-            class="db ml-5"
-            size="lg" 
-            @click="closeTab()">Done</b-button>
-                              
+            class="float-right mt-3 mr-1"
+            size="lg"             
+            @click="closeTab()">Done</b-button>                              
         </b-col>
       </b-row>
     </b-row>
@@ -160,4 +161,3 @@ export default {
     border: 0px;
   }
 </style>
-
