@@ -26,7 +26,7 @@ export default {
         return;
       } 
       const tag = {};
-      tag.animal = this.customTagValue;
+      tag.what = this.customTagValue;
       tag.confidence = 0.5;
       tag.startTime = 0.5;
       tag.duration = 0.5;

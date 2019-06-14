@@ -22,7 +22,7 @@ export default {
   methods: {
     basicTag(tagValue) {      
       const tag = {};
-      tag.animal = tagValue;
+      tag.what = tagValue;
       tag.confidence = 0.5;
       tag.startTime = 0.5;
       tag.duration = 0.5;

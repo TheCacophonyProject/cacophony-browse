@@ -13,13 +13,11 @@
       striped
       responsive
       @deleteTag="deleteTag($event)">
-
       <template
         slot="startTime"
         slot-scope="row">
         {{ row.item.tag.startTime }} 
       </template>
-
       <template
         slot="replayButton"
         slot-scope="row">

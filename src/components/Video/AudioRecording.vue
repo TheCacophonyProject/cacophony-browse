@@ -37,8 +37,7 @@
         </b-button-group>
       </b-col>
       <b-row 
-        class="db m-0 " 
-        no-gutters="true">
+        class="db m-0 no-gutters">
         <b-col 
           offset="1"
           class="mt-0 ml-0 db"
@@ -70,6 +69,7 @@ import VideoHelp from './VideoHelp.vue';
 import BasicTags from '../Audio/BasicTags.vue';
 import CustomTags from '../Audio/CustomTags.vue';
 import TagList from '../Audio/TagList.vue';
+//import config from '../../config.js';
 
 export default {
   name: 'AudioRecording',
@@ -104,6 +104,12 @@ export default {
       } else {
         tag.startTime = this.$refs.player.currentTime.toFixed(2);
       }
+      
+      // eslint-disable-next-line no-console
+      // console.log(config.tagVersion);
+      // next line generates internal server error on test api - menno to follow up
+      // tag.version = config.tagVersion;
+
       this.$store.dispatch('Video/ADD_TAG', { tag, id });
       
       // https://api-test.cacophony.org.nz/api/v1/tags
