@@ -1,32 +1,28 @@
 <template>
-  <div>
-    <h2>Search recordings</h2>
-    <b-row>
+  <div class="query-recordings">
+    <b-form-col>
+      <h2>Search recordings</h2>
+    </b-form-col>
+    <b-form-col>
       <SelectDevice v-model="devices" />
-    </b-row>
-    <b-row>
+    </b-form-col>
+    <b-form-col>
       <SelectRecordingType v-model="recordingType" />
-    </b-row>
-    <b-row v-if="advanced">
-      <SelectTagTypes
-        v-model="tagTypes"
-        :disabled="isAudio"
-      />
-    </b-row>
-    <b-row>
+    </b-form-col>
+    <b-form-col>
       <SelectAnimal
         v-model="animals"
         :disabled="isAudio"/>
-    </b-row>
-    <b-row>
-      <div>Date range</div>
-    </b-row>
-    <b-col
+    </b-form-col>
+    <b-form-col>
+      <SelectDateRange v-model="dateRange" />
+    </b-form-col>
+    <b-row
       sm="6"
       md="4">
       <SelectDuration
         v-model="duration"/>
-    </b-col>
+    </b-row>
     <b-col
       sm="6"
       md="4">
@@ -52,6 +48,12 @@
         <span v-else>Searching...</span>
       </b-button>
     </b-col>
+    <b-col v-if="advanced">
+      <SelectTagTypes
+        v-model="tagTypes"
+        :disabled="isAudio"
+      />
+    </b-col>
   </div>
 </template>
 
@@ -63,10 +65,12 @@ import SelectAnimal from './SelectAnimal.vue';
 import SelectDuration from './SelectDuration.vue';
 import SelectDate from './SelectDate.vue';
 import SelectRecordingType from './SelectRecordingType.vue';
+import SelectDateRange from "./SelectDateRange.vue";
 
 export default {
   name: 'QueryRecordings',
   components: {
+    SelectDateRange,
     SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate, SelectRecordingType
   },
   props: {
@@ -167,3 +171,12 @@ export default {
 };
 
 </script>
+<style scoped>
+  .query-recordings {
+    /*padding: 15px;*/
+  }
+  h2 {
+    color: #666;
+    font-size: 18px;
+  }
+</style>

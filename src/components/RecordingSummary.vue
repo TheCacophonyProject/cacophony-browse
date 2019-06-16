@@ -56,6 +56,7 @@
             tag.class
           ]"
         >
+          <!-- TODO: Change icon when info is available from API about whether tag was applied by human or AI -->
           <span class="tag-icon">
             <font-awesome-icon
               icon="cog"
@@ -94,9 +95,18 @@
       v-if="item.location !== '(unknown)'"
       class="recording-location"
     >
-      {{ item.location }}
+      <!-- NOTE: Temporary link to google maps while we figure out a good source for a mapping thumbnail service  -->
+      <a
+        :href="`https://www.google.com/maps/@${item.location.replace(' ', '')},16z`"
+        target="_blank"
+        @click.stop.prevent="({currentTarget: {href, target}}) => window.open(href, target)"
+      >
+        <img
+          alt="View location"
+          src=""
+        >
+      </a>
     </b-col>
-    <!-- TODO: Something with processing state visually? -->
   </b-row>
 </template>
 
@@ -114,6 +124,11 @@ export default {
   computed: {
     hasBattery() {
       return this.item.other && this.item.other.batteryLevel;
+    },
+    window: {
+      get() {
+        return window;
+      }
     }
   },
   methods: {
@@ -121,8 +136,7 @@ export default {
       this.$router.push({
         path: `recording/${recordingId}`,
       });
-    },
-
+    }
   }
 };
 </script>
@@ -207,6 +221,12 @@ export default {
     height: 100%;
     width: 18px;
     text-align: center;
+  }
+  .tag {
+    background: #999;
+  }
+  .tag:not(:last-child) {
+    margin-right: 5px;
   }
   .tag.text-danger {
     background: #db0a24;

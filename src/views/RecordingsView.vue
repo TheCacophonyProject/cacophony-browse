@@ -4,7 +4,7 @@
       <b-row>
         <b-col
           class="search-col"
-          md="3"
+          md="2"
         >
           <QueryRecordings
             :disabled="queryPending"
