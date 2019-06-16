@@ -22,6 +22,7 @@ module.exports = {
     'semi': ['error', 'always'],
     'curly': ['error', 'all'],
     'no-console': ['warn'],
+    'no-debugger': ['warn'],
     'no-undef': ['error'],
     'no-unused-vars': ['error'],
     'brace-style': ['error'],

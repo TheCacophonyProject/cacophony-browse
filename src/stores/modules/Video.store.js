@@ -6,7 +6,8 @@ const state = {
   downloadRawJWT: null,
   recording: {
     Tags: []
-  }
+  },
+  tracks: []
 };
 
 // getters https://vuex.vuejs.org/guide/getters.html
@@ -39,11 +40,23 @@ const getters = {
   }
 };
 
+const getRecording = async function(commit, recordingId) {
+  const {result: recording} = await api.recording.id(recordingId);
+  commit('receiveRecording', recording);
+  return recording.success;
+};
+
+const getTracks = async function(commit, recordingId) {
+  const {result: tracks} = await api.recording.tracks(recordingId);
+  commit('receiveTracks', tracks);
+  return tracks.success;
+};
+
 const actions = {
 
   async QUERY_RECORDING(undefined, {params, direction, skipMessage}) {
-    const result = await api.recording.query(params);
-    if (!result.rows || result.rows.length == 0) {
+    const {result, success} = await api.recording.query(params);
+    if (!success || !result.rows || result.rows.length == 0) {
       if (!skipMessage) {
         store.dispatch('Messaging/WARN', `No ${direction} recording for this device.`);
       }
@@ -53,9 +66,13 @@ const actions = {
   },
 
   async GET_RECORDING({commit}, recordingId) {
-    const result = await api.recording.id(recordingId);
-    commit('receiveRecording', result);
-    return result.success;
+    const recording = getRecording(commit, recordingId);
+    const tracks = getTracks(commit, recordingId);
+
+    await recording;
+    await tracks;
+
+    return recording && tracks;
   },
 
   async DELETE_TAG({commit}, tag) {
@@ -63,11 +80,22 @@ const actions = {
     commit('deleteTag', tag);
   },
 
-  async ADD_TAG(undefined, {tag, id}) {
+  async ADD_TAG(commit, {tag, id}) {
     await api.tag.addTag(tag, id);
     store.dispatch('Video/GET_RECORDING', id);
-  }
+  },
+
+  async ADD_TRACK_TAG({commit}, {tag, recordingId, trackId}) {
+    await api.recording.addTrackTag(tag, recordingId, trackId);
+    return await getTracks(commit, recordingId);
+  },
+
+  async DELETE_TRACK_TAG({commit}, {tag, recordingId}) {
+    await api.recording.deleteTrackTag(tag, recordingId);
+    return await getTracks(commit, recordingId);
+  },
 };
+
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
@@ -78,6 +106,9 @@ const mutations = {
   },
   deleteTag(state, tagId) {
     state.recording.Tags = state.recording.Tags.filter(tag => tag.id != tagId);
+  },
+  receiveTracks(state, {tracks}) {
+    state.tracks = tracks;
   }
 };
 

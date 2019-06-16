@@ -173,17 +173,17 @@ export default {
       };
 
       // Get all data (first 1000 rows)
-      let allData = await api.query(params);
+      let {result: allData} = await api.query(params);
       // Check whether all data was fetched
       // if not, run again with increased limit to get all rows
       if (allData.count > limit) {
         params.limit = allData.count;
-        allData = await api.query(params);
+        ({result: allData} = await api.query(params));
       }
       // Count the number of recordings for each device
       this.devices.map((device) => this.deviceCount[device.id] = 0);
       for (const row of allData.rows) {
-        this.deviceCount[row.Device.id] += 1;
+        this.deviceCount[row.DeviceId] += 1;
       }
       // Create data and label variables
       const labels = [];

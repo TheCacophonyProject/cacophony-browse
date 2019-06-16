@@ -1,42 +1,45 @@
 <template>
   <div class="query-recordings">
-    <b-form-col>
+    <b-col>
       <h2>Search recordings</h2>
-    </b-form-col>
-    <b-form-col>
+    </b-col>
+    <b-col>
       <SelectDevice v-model="devices" />
-    </b-form-col>
-    <b-form-col>
+    </b-col>
+    <b-col>
       <SelectRecordingType v-model="recordingType" />
-    </b-form-col>
-    <b-form-col>
+    </b-col>
+    <b-col>
       <SelectAnimal
         v-model="animals"
-        :disabled="isAudio"/>
-    </b-form-col>
-    <b-form-col>
+        :disabled="isAudio"
+        :can-have-sub-tags="canHaveTags"/>
+    </b-col>
+    <b-col>
       <SelectDateRange v-model="dateRange" />
-    </b-form-col>
+    </b-col>
+    <b-col v-if="isCustomDateRange">
+      <b-col
+        sm="6"
+        md="4">
+        <SelectDate
+          v-model="fromDate"
+          title="From Date"/>
+      </b-col>
+      <b-col
+        sm="6"
+        md="4">
+        <SelectDate
+          v-model="toDate"
+          title="To Date"/>
+      </b-col>
+    </b-col>
     <b-row
       sm="6"
       md="4">
       <SelectDuration
         v-model="duration"/>
     </b-row>
-    <b-col
-      sm="6"
-      md="4">
-      <SelectDate
-        v-model="fromDate"
-        title="From Date"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="4">
-      <SelectDate
-        v-model="toDate"
-        title="To Date"/>
-    </b-col>
     <b-col cols="12">
       <b-button
         :disabled="disabled"
@@ -58,7 +61,7 @@
 </template>
 
 <script>
-
+import DefaultLabels from '../../const.js';
 import SelectDevice from './SelectDevice.vue';
 import SelectTagTypes from './SelectTagTypes.vue';
 import SelectAnimal from './SelectAnimal.vue';
@@ -85,8 +88,12 @@ export default {
   },
   data () {
     return {
+      rawAnimals:[],
+      hasSpecifiedTags: false,
+      canHaveTags: false,
       isAudio: true,
       advanced: false,
+      isCustomDateRange: false,
     };
   },
   computed: {
@@ -117,6 +124,19 @@ export default {
       },
       set (value) {
         this.query.tagMode = value;
+        this.canHaveTags = this.canHaveSpecifiedTags(value);
+        if (!this.canHaveTags) {
+          this.animals = [];
+        }
+      }
+    },
+    dateRange: {
+      get () {
+        return this.query.where.dateRange || {};
+      },
+      set (value) {
+        this.query.where.dateRange = value;
+        this.isCustomDateRange = (this.query.where.dateRange && this.query.where.dateRange.isCustom) || false;
       }
     },
     fromDate: {
@@ -135,15 +155,26 @@ export default {
         ) || '';
       },
       set (value) {
-        this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
+        if (value && value.trim() !== "") {
+          this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
+        } else {
+          this.query.where.recordingDateTime["$lt"] = "";
+        }
       }
     },
     animals: {
       get () {
-        return this.query.tags;
+        return this.rawAnimals;
       },
       set (value) {
-        this.query.tags = value;
+        this.rawAnimals = value;
+        this.query.tags = value.map(option => option.value ? option.value : option.text );
+        this.hasSpecifiedTags = this.query.tags.length > 0;
+        if (this.hasSpecifiedTags) {
+          if (!this.canHaveTags) {
+            this.tagTypes = 'tagged';
+          }
+        }
       }
     },
     devices: {
@@ -156,7 +187,7 @@ export default {
     },
     groups: function() {
       return this.$store.state.Groups;
-    }
+    },
   },
   watch: {
     isAudio: function () {
@@ -166,8 +197,11 @@ export default {
         this.animals = [];
         this.tagTypes = 'any';
       }
-    }
-  }
+    },
+  },
+  methods: {
+    canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
+  },
 };
 
 </script>

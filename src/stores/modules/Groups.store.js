@@ -9,7 +9,7 @@ const state = {
 const getters = {};
 
 async function _getGroup(groupname, commit) {
-  const result = await api.groups.getGroups(groupname);
+  const {result} = await api.groups.getGroups(groupname);
   const group = result.groups[0];
   commit('setCurrentGroup', group);
   commit('receiveGroups', result.groups);
@@ -18,7 +18,7 @@ async function _getGroup(groupname, commit) {
 const actions = {
   async GET_GROUPS({commit}) {
     commit('fetching');
-    const result = await api.groups.getGroups();
+    const {result} = await api.groups.getGroups();
     commit('receiveGroups', result.groups);
     commit('fetched');
   },
@@ -31,8 +31,8 @@ const actions = {
 
   async ADD_GROUP({commit, state}, groupname) {
     commit('fetching');
-    var result = await api.groups.addNewGroup(groupname);
-    if(result.errors) {
+    const {success} = await api.groups.addNewGroup(groupname);
+    if(!success) {
       commit('fetched');
       throw "There were errors";
     }

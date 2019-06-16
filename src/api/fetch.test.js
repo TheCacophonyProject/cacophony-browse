@@ -58,7 +58,7 @@ test('fetch(url, paramsObject) handles response with general errors', async () =
     json: () => Promise.resolve(testResultObject)
   });
 
-  const result = await fetch('', {});
+  const {result} = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(2);
   expect(store.dispatch).toHaveBeenCalledWith('Messaging/ERROR', testResultObject.errors.someErrorKey.msg);
@@ -72,11 +72,9 @@ test('fetch(url, paramsObject) handles response with general errors', async () =
 test('fetch(url, paramsObject) handles response with authentication error', async () => {
 
   const testResultObject = {
-    errors: {
-      authorization: {
-        msg: 'some error message'
-      }
-    }
+    messages: [
+      "Failed to log in.  Please try to log out and log in again."
+    ]
   };
 
   crossFetch.mockReturnValue({
@@ -84,15 +82,17 @@ test('fetch(url, paramsObject) handles response with authentication error', asyn
     json: () => Promise.resolve(testResultObject)
   });
 
-  const result = await fetch('', {});
+  const {result} = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(2);
   expect(store.dispatch).toHaveBeenCalledWith('User/LOGOUT');
-  expect(store.dispatch).toHaveBeenCalledWith('Messaging/ERROR', testResultObject.errors.authorization.msg);
+  expect(store.dispatch).toHaveBeenCalledWith(
+    'Messaging/ERROR',
+    'Error accessing your account.   Please log in again.'
+  );
 
   expect(router.push).toHaveBeenCalledTimes(1);
   expect(router.push).toHaveBeenCalledWith('login');
-  expect(result).toMatchObject(testResultObject);
 });
 
 test('fetch(url, paramsObject) handles response with "success" result', async () => {
@@ -106,7 +106,7 @@ test('fetch(url, paramsObject) handles response with "success" result', async ()
     }
   });
 
-  const result = await fetch('', {});
+  const {result} = await fetch('', {});
 
   expect(store.dispatch).toHaveBeenCalledTimes(1);
   expect(store.dispatch).toHaveBeenCalledWith('Messaging/SUCCESS', testResultObject.messages[0]);

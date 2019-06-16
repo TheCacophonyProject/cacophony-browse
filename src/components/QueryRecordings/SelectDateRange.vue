@@ -25,16 +25,16 @@ export default {
   data () {
     return {
       options: [
-        { value: {}, text: "Last 24 hours" },
-        { value: {}, text: "Last 3 days" },
-        { value: {}, text: "Last 7 days" },
-        { value: {}, text: "Custom range" },
+        { value: { relativeDateRange: -1 }, text: "Last 24 hours" },
+        { value: { relativeDateRange: -3 }, text: "Last 3 days" },
+        { value: { relativeDateRange: -7 }, text: "Last 7 days" },
+        { value: { isCustom: true }, text: "Custom range" },
       ]
     };
   },
   computed: {
     isCustomRange() {
-      return true;//this.value.
+      return this.value.hasOwnProperty('isCustom');
     }
   },
 };

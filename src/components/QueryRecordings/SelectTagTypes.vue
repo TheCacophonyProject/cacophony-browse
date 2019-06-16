@@ -1,7 +1,7 @@
 <template>
   <b-form-group
     v-b-tooltip.hover="tooltipTitle">
-    <label>Tag Types</label>
+    <label>Videos </label>
 
     <b-form-select
       :value="value"
@@ -12,8 +12,9 @@
     />
   </b-form-group>
 </template>
-
 <script>
+import DefaultLabels from '../../const.js';
+
 export default {
   name: 'SelectTagTypes',
   props: {
@@ -28,16 +29,10 @@ export default {
   },
   data () {
     return {
-      options: [
-        { value: 'any', text: 'any' },
-        { value: 'untagged', text: 'untagged only' },
-        { value: 'tagged', text: 'tagged only' },
-        { value: 'automatic-only', text: 'automatic only' },
-        { value: 'human-only', text: 'manual only'},
-        { value: 'automatic+human', text: 'both automatic & manual'}
-      ]
+      options: DefaultLabels.searchRecordingLabels(),
     };
   },
+
   computed: {
     tooltipTitle: function () {
       if (this.disabled) {
@@ -45,7 +40,7 @@ export default {
       } else {
         return "";
       }
-    }
+    },
   }
 };
 

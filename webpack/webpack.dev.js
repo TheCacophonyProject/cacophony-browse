@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const devConfig = require('../dev-config');
 
 
-const distDir = path.resolve(__dirname, '../dist')
+const distDir = path.resolve(__dirname, '../dist');
 
 module.exports = merge(common, {
   mode: 'development',

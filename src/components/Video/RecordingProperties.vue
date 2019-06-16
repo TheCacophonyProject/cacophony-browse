@@ -2,34 +2,68 @@
   <div>
     <b-form>
       <b-form-group>
-        <h3>Properties</h3>
-        <div
-          v-for="prop of properties"
-          :key="prop.key">
-          <p v-if="recording.batteryLevel && prop.key === 'batteryLevel'">
-            <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
-          </p>
-          <p v-else-if="recording.location && prop.key === 'location'">
-            <strong>Location: </strong>{{ parseLocation }}
-          </p>
-          <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
-            <div
-              v-for="(value, key) of recording.additionalMetadata"
-              :key="key">
-              <p v-if="key != 'tracks'">
-                <strong>{{ key }}:</strong> {{ value }}
-              </p>
-            </div>
+        <div v-if="'user-entered' in recording.additionalMetadata">
+          <h3>Properties</h3>
+          <div>
+            <p
+              v-for="(value, key) of recording.additionalMetadata['user-entered']"
+              :key="key"
+              class="user-prop">
+              <strong>{{ key }}:</strong> {{ value }}
+            </p>
           </div>
-          <p v-else-if="recording[prop.key] != null" >
-            <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
-          </p>
         </div>
-        <p v-if="recording['additionalMetadata']">
-          <TrackData
-            v-if="recording['additionalMetadata']['tracks']"
-            :tracks="recording['additionalMetadata']['tracks']"/>
-        </p>
+
+        <h3>Technical details &nbsp;
+          <span
+            v-if="!display"
+            title="Show details"
+            @click="display=true">
+            <font-awesome-icon
+              icon="angle-down"
+              class="fa-1x"/>
+          </span>
+          <span
+            v-if="display"
+            title="Hide details"
+            @click="display=false">
+            <font-awesome-icon
+              icon="angle-up"
+              class="fa-1x"/>
+          </span>
+        </h3>
+        <div v-if="display">
+          <div
+            v-for="prop of properties"
+            :key="prop.key">
+            <p
+              v-if="recording.batteryLevel && prop.key === 'batteryLevel'"
+              class="prop">
+              <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
+            </p>
+            <p
+              v-else-if="recording.location && prop.key === 'location'"
+              class="prop">
+              <strong>Location: </strong>{{ parseLocation }}
+            </p>
+            <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
+              <div
+                v-for="(value, key) of recording.additionalMetadata"
+                :key="key">
+                <p
+                  v-if="key != 'tracks' && key != 'user-entered'"
+                  class="prop">
+                  <strong>{{ key }}:</strong> {{ value }}
+                </p>
+              </div>
+            </div>
+            <p
+              v-else-if="recording[prop.key] != null"
+              class="prop">
+              <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
+            </p>
+          </div>
+        </div>
       </b-form-group>
 
       <b-form-group
@@ -58,6 +92,7 @@
           variant="danger"
           @click="deleteRecording()">Delete Recording</b-button>
       </b-form-group>
+
       <b-alert
         :show="showDeleteAlert"
         variant="success"
@@ -78,35 +113,38 @@
 
 <script>
 import api from '../../api/index';
-import config from '../../config';
 import BatteryLevel from '../BatteryLevel.vue';
-import TrackData from './TrackData.vue';
 
 export default {
-  name: 'VideoProperties',
+  name: 'RecordingProperties',
   components: {
-    BatteryLevel, TrackData
+    BatteryLevel,
   },
   props: {
     value: {
       type: String,
-      default: ""
+      default: "",
     },
-    downloadRaw: {
+    downloadRawUrl: {
       type: String,
-      default: ""
+      default: "",
     },
-    downloadFile: {
+    downloadFileUrl: {
       type: String,
-      default: ""
+      default: "",
     },
     recording: {
       type: Object,
-      required: true
+      required: true,
+    },
+    tracks: {
+      type: Array,
+      required: true,
     }
   },
   data () {
     return {
+      display: false,
       showCommentAlert: false,
       showDeleteAlert: false,
       properties: [
@@ -133,12 +171,6 @@ export default {
     };
   },
   computed: {
-    downloadRawUrl: function () {
-      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadRaw}`;
-    },
-    downloadFileUrl: function () {
-      return `${config.api}/api/v1/signedUrl?jwt=${this.downloadFile}`;
-    },
     parseLocation: function () {
       if (this.recording.location.type === 'Point') {
         return `Lat: ${this.recording.location.coordinates[0].toFixed(2)}, Long: ${this.recording.location.coordinates[1].toFixed(2)}`;
@@ -162,14 +194,14 @@ export default {
   },
   methods: {
     async updateComment() {
-      const result = await api.recording.comment(this.value, this.$route.params.id);
-      if(result.success) {
+      const {success} = await api.recording.comment(this.value, this.$route.params.id);
+      if(success) {
         this.showCommentAlert = true;
       }
     },
     async deleteRecording() {
-      const result = await api.recording.del(this.$route.params.id);
-      if(result.success) {
+      const {success} = await api.recording.del(this.$route.params.id);
+      if(success) {
         this.showDeleteAlert = true;
         this.$emit('nextOrPreviousRecording');
       }
@@ -179,4 +211,18 @@ export default {
 </script>
 
 <style scoped>
+  .user-prop,
+  .prop{
+    padding-left: 15px;
+  }
+
+  .user-prop,
+  .prop{
+    margin-bottom: .4rem;
+  }
+
+  .user-prop:last-child {
+    margin-bottom: 1.5rem;
+  }
+
 </style>
