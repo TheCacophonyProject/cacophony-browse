@@ -1,62 +1,57 @@
 <template>
   <div class="query-recordings">
-    <b-col>
-      <h2>Search recordings</h2>
-    </b-col>
-    <b-col>
-      <SelectDevice v-model="devices" />
-    </b-col>
-    <b-col>
-      <SelectRecordingType v-model="recordingType" />
-    </b-col>
-    <b-col>
-      <SelectAnimal
-        v-model="animals"
-        :disabled="isAudio"
-        :can-have-sub-tags="canHaveTags"/>
-    </b-col>
-    <b-col>
-      <SelectDateRange v-model="dateRange" />
-    </b-col>
-    <b-col v-if="isCustomDateRange">
-      <b-col
-        sm="6"
-        md="4">
-        <SelectDate
-          v-model="fromDate"
-          title="From Date"/>
-      </b-col>
-      <b-col
-        sm="6"
-        md="4">
-        <SelectDate
-          v-model="toDate"
-          title="To Date"/>
-      </b-col>
-    </b-col>
-    <b-row
-      sm="6"
-      md="4">
-      <SelectDuration
-        v-model="duration"/>
-    </b-row>
-    <b-col cols="12">
-      <b-button
-        :disabled="disabled"
-        block
-        variant="primary"
-        @click="() => $emit('submit')"
-      >
-        <span v-if="!disabled">Search</span>
-        <span v-else>Searching...</span>
-      </b-button>
-    </b-col>
-    <b-col v-if="advanced">
-      <SelectTagTypes
-        v-model="tagTypes"
-        :disabled="isAudio"
-      />
-    </b-col>
+    <b-form-group>
+      <b-form-col>
+        <h2>Search recordings</h2>
+        <SelectDevice v-model="devices" />
+        <SelectRecordingType v-model="recordingType" />
+        <SelectAnimal
+          v-model="animals"
+          :disabled="isAudio"
+          :can-have-sub-tags="canHaveTags"/>
+        <SelectDateRange v-model="dateRange" />
+        <b-form-row v-if="isCustomDateRange">
+          <b-col
+            sm="6"
+          >
+            <SelectDate
+              v-model="fromDate"
+              title="From Date"/>
+          </b-col>
+          <b-col
+            sm="6"
+          >
+            <SelectDate
+              v-model="toDate"
+              title="To Date"/>
+          </b-col>
+        </b-form-row>
+        <SelectDuration
+          v-model="duration"/>
+        <b-form-row>
+          <b-col>
+            <a
+              href="#"
+              @click.prevent="() => toggleAdvancedSearch()"
+            >Advanced search</a>
+          </b-col>
+        </b-form-row>
+        <SelectTagTypes
+          v-if="advanced"
+          v-model="tagTypes"
+          :disabled="isAudio"
+        />
+        <b-button
+          :disabled="disabled"
+          block
+          variant="primary"
+          @click="() => $emit('submit')"
+        >
+          <span v-if="!disabled">Search</span>
+          <span v-else>Searching...</span>
+        </b-button>
+      </b-form-col>
+    </b-form-group>
   </div>
 </template>
 
@@ -201,6 +196,9 @@ export default {
   },
   methods: {
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
+    toggleAdvancedSearch: function () {
+      this.advanced = !this.advanced;
+    },
   },
 };
 
