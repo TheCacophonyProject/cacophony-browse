@@ -2,7 +2,7 @@
   <div>
     <b-form>
       <b-form-group>
-        <div v-if="'user-entered' in recording.additionalMetadata">
+        <div v-if="recording.additionalMetadata && 'user-entered' in recording.additionalMetadata">
           <h3>Properties</h3>
           <div>
             <p
@@ -181,6 +181,9 @@ export default {
     metaItems: function () {
       const data = this.recording['additionalMetadata'];
       const items = [];
+      if (!data) {
+        return items;
+      }
       for (const key in data) {
         if (key != "tracks") {
           items.push({
