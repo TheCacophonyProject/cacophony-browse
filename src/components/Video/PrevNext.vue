@@ -2,7 +2,7 @@
   <div class="img-buttons">
     <span
       title="Previous for device, skipping bird &amp; false-positives"
-      @click="gotoNextRecording('previous', 'any', ['interesting'])">
+      @click="gotoNextRecording('previous', 'tagged', ['interesting'])">
       <font-awesome-icon
         icon="asterisk"
         style="color: red"
@@ -52,7 +52,7 @@
     </span>
     <span
       title="Next for device, skipping birds &amp; false-positives"
-      @click="gotoNextRecording('next', 'any', ['interesting'])">
+      @click="gotoNextRecording('next', 'tagged', ['interesting'])">
       <font-awesome-icon
         class="fa-3x"
         icon="angle-double-right" />
@@ -130,8 +130,8 @@ export default {
 </script>
 
 <style scoped>
-.img-buttons {
-  padding: 1em;
+div.img-buttons {
+  padding: 0.5em;
   text-align: center;
 }
 .img-buttons
@@ -143,6 +143,14 @@ export default {
     display: inline-block;
     opacity: 0.6;
   }
+
+  @media only screen and (max-width: 575px) {
+    div.img-buttons {
+      font-size: 80%;
+    }
+  }
+
+
   span:hover {
     opacity: 1;
   }

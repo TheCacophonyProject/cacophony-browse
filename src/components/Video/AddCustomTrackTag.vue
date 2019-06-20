@@ -2,14 +2,21 @@
   <b-modal
     :id="refTag"
     title="Add track tag"
-    @ok="quickTag()">
+    @ok="quickTag">
     <b-form>
       <b-form-group
-        label="Animal:"
+        label="Tag:"
         horizontal>
         <b-form-select
           v-model="whatTag"
-          :options="whatOptions" />
+          :options="whatOptions">
+          <template slot="first">
+            <option 
+              :value="null" 
+              disabled>Choose a tag..
+            </option>
+          </template>
+        </b-form-select>
       </b-form-group>
 
       <b-form-group
@@ -29,6 +36,7 @@
   </b-modal>
 </template>
 <script>
+import DefaultLabels from '../../const.js';
 
 export default {
   name: 'AddCustomTrackTag',
@@ -41,9 +49,7 @@ export default {
   data () {
     return {
       whatTag: "cat",
-      whatOptions: [
-        {value: null, text: 'Choose an animal'}, "bird", "bird/kiwi", "rat", "possum", "hedgehog", "stoat", "cat", "dog", "rabbit", "human", "insect", "other", "part of animal (eg tail)", "unidentified"
-      ],
+      whatOptions: DefaultLabels.trackLabels(),
       confidence: 0.8,
       confidenceOptions: [
         {value: 0.4, text: "low"},

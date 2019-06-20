@@ -6,7 +6,6 @@
         :query="query"
         @submit="submitNewQuery"
       />
-
       <b-form-row class="information-line">
         <b-col lg="4">
           <b-form-text>
@@ -148,8 +147,8 @@ export default {
       });
     },
     deserialiseRouteIntoQuery(routeQuery) {
-      for (const [key, val] of Object.entries(routeQuery)) {
-        this.query[key] = val;
+      for (const key in routeQuery) {
+        this.query[key] = routeQuery[key];
       }
       if (routeQuery.where) {
         this.query.where = JSON.parse(routeQuery.where);
@@ -158,6 +157,9 @@ export default {
         }
         if (!this.query.where.hasOwnProperty('DeviceId')) {
           this.$set(this.query.where, 'DeviceId', []);
+        }
+        if (!this.query.where.duration) {
+          this.$set(this.query.where, 'duration', {});
         }
         if (this.query.where.DeviceId && this.query.where.DeviceGroups) {
           this.query.where.DeviceId = [...this.query.where.DeviceId, ...this.query.where.DeviceGroups];
@@ -169,33 +171,24 @@ export default {
         this.query.tags = JSON.parse(routeQuery.tags);
       }
     },
+    addIfSet(map, value, submap, key) {
+      if (value && value.trim() !== "") {
+        map[submap] = map[submap] || {};
+        map[submap][key] = value;
+      }
+    },
     serialiseQuery(query, useForApiCall = false) {
-      // Serialise query object back into a route string
-      const stripEmptyProps = (obj) => {
-        for (const [key, val] of Object.entries(obj)) {
-          if (
-            // Remove empty arrays
-            (Array.isArray(val) && val.length === 0) ||
-            // Remove empty strings
-            typeof val === 'string' && val.trim() === ''
-          ) {
-            delete obj[key];
-          } else if (typeof val === 'object') {
-            // Recurse
-            const propsLeft = stripEmptyProps(val);
-            // Remove any empty objects
-            if (propsLeft === 0) {
-              delete obj[key];
-            }
-          }
-        }
-        return Object.entries(obj).length;
-      };
-      // Deep copy of query object.
-      const whereClause = JSON.parse(JSON.stringify(query.where));
-      if (whereClause.DeviceId && whereClause.DeviceId.length !== 0) {
+      const where = {};
+      where.type = query.where.type;
+      this.addIfSet(where, query.where.recordingDateTime["$gt"], "recordingDateTime", "$gt");
+      this.addIfSet(where, query.where.recordingDateTime["$lt"], "recordingDateTime", "$lt");
+      this.addIfSet(where, query.where.duration["$gte"], "duration", "$gte");
+      this.addIfSet(where, query.where.duration["$lte"], "duration", "$lte");
+
+      // add devices and devices from groups
+      if (query.where.DeviceId.length !== 0) {
         const deviceIds = [];
-        for (const device of whereClause.DeviceId) {
+        for (const device of query.where.DeviceId) {
           if (typeof device === 'object') {
             if (typeof device.id === 'number') {
               // Add single devices
@@ -203,8 +196,8 @@ export default {
             } else {
               // NOTE: if the device is a group, the id is a string.
               // Add groups of devices
-              whereClause.DeviceGroups = whereClause.DeviceGroups || [];
-              whereClause.DeviceGroups.push(device.id);
+              where.DeviceGroups = where.DeviceGroups || [];
+              where.DeviceGroups.push(device.id);
               if (device.devices) {
                 for (const item of device.devices) {
                   deviceIds.push(item.id);
@@ -218,13 +211,13 @@ export default {
           }
         }
         // Dedupe ids.
-        whereClause.DeviceId = deviceIds.reduce((acc, id) => {
+        where.DeviceId = deviceIds.reduce((acc, id) => {
           !acc.includes(id) && acc.push(id);
           return acc;
         }, []);
-        if (whereClause.DeviceGroups && whereClause.DeviceGroups.length !== 0) {
+        if (where.DeviceGroups && where.DeviceGroups.length !== 0) {
           // Dedupe ids.
-          whereClause.DeviceGroups = whereClause.DeviceGroups.reduce((acc, id) => {
+          where.DeviceGroups = where.DeviceGroups.reduce((acc, id) => {
             !acc.includes(id) && acc.push(id);
             return acc;
           }, []);
@@ -233,28 +226,32 @@ export default {
 
       if (useForApiCall) {
         // Map between the mismatch in video type types between frontend and backend
-        whereClause.type = whereClause.type === 'video' ? 'thermalRaw' : whereClause.type;
-        if (whereClause.type === 'both') {
-          // This is implied on the API side, so remove it.
-          delete whereClause.type;
+        if (where.type === 'video') {
+          where.type = 'thermalRaw';
+        } else if (where.type === 'both') {
+          delete where.type;
         }
         // Remove the group param, since the API doesn't handle that, we're just using
         // it to accurately share search parameters via urls.
-        delete whereClause.DeviceGroups;
+        delete where.DeviceGroups;
       }
 
       // Work out current pagination offset.
       const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
+
       const params = {
-        where: whereClause,
+        where: where,
         limit: this.perPage,
         offset: newOffset,
         tagMode: query.tagMode,
-        tags: query.tags
       };
-      stripEmptyProps(params);
 
-      for (const [key, val] of Object.entries(params)) {
+      if (query.tags && query.tags.length > 0) {
+        params.tags = query.tags;
+      }
+
+      for (const key in params) {
+        const val = params[key];
         if (typeof val === 'object') {
           params[key] = JSON.stringify(val);
         }
@@ -267,10 +264,9 @@ export default {
       this.countMessage = "";
       this.recordings = [];
       this.tableItems = [];
-
       // Call API and process results
       this.queryPending = true;
-      const response = await api.recording.query(this.serialiseQuery(this.query, true));
+      const {result, success} = await api.recording.query(this.serialiseQuery(this.query, true));
       this.queryPending = false;
 
       // Remove previous values *again* since it's possible for the query to have been called twice
@@ -278,19 +274,19 @@ export default {
       this.recordings = [];
       this.tableItems = [];
 
-      if (!response.success) {
-        response.messages && response.messages.forEach(message => {
+      if (!success) {
+        result.messages && result.messages.forEach(message => {
           this.$store.dispatch('Messaging/WARN', message);
         });
       } else {
-        this.recordings = response.rows;
-        this.count = response.count;
-        if (response.count > 0) {
-          this.countMessage = `${response.count} matches found (total)`;
-        } else if (response.count === 0) {
+        this.recordings = result.rows;
+        this.count = result.count;
+        if (result.count > 0) {
+          this.countMessage = `${result.count} matches found (total)`;
+        } else if (result.count === 0) {
           this.countMessage = 'No matches';
         }
-        this.tableItems = response.rows.map((row) => ({
+        this.tableItems = result.rows.map((row) => ({
           id: row.id,
           type: row.type,
           devicename: row.Device.devicename,
@@ -299,7 +295,7 @@ export default {
           date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
           time: new Date(row.recordingDateTime).toLocaleTimeString(),
           duration: row.duration,
-          tags: this.collateTags(row.Tags),
+          tags: this.collateTags(row.Tags, row.Tracks),
           other: this.parseOther(row),
           processing_state: this.parseProcessingState(row.processingState)
         }));
@@ -325,21 +321,23 @@ export default {
       const string = result.toLowerCase();
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
-    collateTags: function (tags) {
+    collateTags: function (tags, tracks) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
       for (const tag of tags) {
-        const animal = tag.animal === null ? tag.event : tag.animal;
-        if (!tagItems[animal]) {
-          // Animal has not been seen yet
-          tagItems[animal] = {};
-        }
-        if (tag.automatic) {
-          tagItems[animal].automatic = true;
-        } else {
-          tagItems[animal].human = true;
+        const tagName = tag.animal === null ? tag.event : tag.animal;
+        this.addToListOfTags(tagItems, tagName, tag.automatic);
+      }
+
+      if (tracks) {
+        for (const track of tracks) {
+          for (const tag of track.TrackTags) {
+            this.addToListOfTags(tagItems, tag.what, tag.automatic);
+          }
         }
       }
+
+
       // Use automatic and human status to create an ordered array of objects
       // suitable for parsing into coloured spans
       const result = [];
@@ -382,8 +380,20 @@ export default {
         return a.order - b.order;
       });
       return result;
-    }
-  }
+    },
+    addToListOfTags: function (allTags, tagName, isAutomatic) {
+      var tag = allTags[tagName];
+      if (!tag) {
+        allTags[tagName] = tag = {};
+      }
+
+      if (isAutomatic) {
+        allTags[tagName].automatic = true;
+      } else {
+        allTags[tagName].human = true;
+      }
+    },
+  },
 };
 </script>
 

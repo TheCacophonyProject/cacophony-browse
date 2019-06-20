@@ -2,6 +2,18 @@
   <div>
     <b-form>
       <b-form-group>
+        <div v-if="recording.additionalMetadata && 'user-entered' in recording.additionalMetadata">
+          <h3>Properties</h3>
+          <div>
+            <p
+              v-for="(value, key) of recording.additionalMetadata['user-entered']"
+              :key="key"
+              class="user-prop">
+              <strong>{{ key }}:</strong> {{ value }}
+            </p>
+          </div>
+        </div>
+
         <h3>Technical details &nbsp;
           <span
             v-if="!display"
@@ -24,22 +36,30 @@
           <div
             v-for="prop of properties"
             :key="prop.key">
-            <p v-if="recording.batteryLevel && prop.key === 'batteryLevel'">
+            <p
+              v-if="recording.batteryLevel && prop.key === 'batteryLevel'"
+              class="prop">
               <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
             </p>
-            <p v-else-if="recording.location && prop.key === 'location'">
+            <p
+              v-else-if="recording.location && prop.key === 'location'"
+              class="prop">
               <strong>Location: </strong>{{ parseLocation }}
             </p>
             <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
               <div
                 v-for="(value, key) of recording.additionalMetadata"
                 :key="key">
-                <p v-if="key != 'tracks'">
+                <p
+                  v-if="key != 'tracks' && key != 'user-entered'"
+                  class="prop">
                   <strong>{{ key }}:</strong> {{ value }}
                 </p>
               </div>
             </div>
-            <p v-else-if="recording[prop.key] != null" >
+            <p
+              v-else-if="recording[prop.key] != null"
+              class="prop">
               <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
             </p>
           </div>
@@ -72,6 +92,7 @@
           variant="danger"
           @click="deleteRecording()">Delete Recording</b-button>
       </b-form-group>
+
       <b-alert
         :show="showDeleteAlert"
         variant="success"
@@ -160,6 +181,9 @@ export default {
     metaItems: function () {
       const data = this.recording['additionalMetadata'];
       const items = [];
+      if (!data) {
+        return items;
+      }
       for (const key in data) {
         if (key != "tracks") {
           items.push({
@@ -173,14 +197,14 @@ export default {
   },
   methods: {
     async updateComment() {
-      const result = await api.recording.comment(this.value, this.$route.params.id);
-      if(result.success) {
+      const {success} = await api.recording.comment(this.value, this.$route.params.id);
+      if(success) {
         this.showCommentAlert = true;
       }
     },
     async deleteRecording() {
-      const result = await api.recording.del(this.$route.params.id);
-      if(result.success) {
+      const {success} = await api.recording.del(this.$route.params.id);
+      if(success) {
         this.showDeleteAlert = true;
         this.$emit('nextOrPreviousRecording');
       }
@@ -190,4 +214,18 @@ export default {
 </script>
 
 <style scoped>
+  .user-prop,
+  .prop{
+    padding-left: 15px;
+  }
+
+  .user-prop,
+  .prop{
+    margin-bottom: .4rem;
+  }
+
+  .user-prop:last-child {
+    margin-bottom: 1.5rem;
+  }
+
 </style>

@@ -24,7 +24,8 @@
       md="4">
       <SelectAnimal
         v-model="animals"
-        :disabled="isAudio"/>
+        :disabled="isAudio"
+        :can-have-sub-tags="canHaveTags"/>
     </b-col>
     <b-col
       sm="6"
@@ -61,7 +62,7 @@
 </template>
 
 <script>
-
+import DefaultLabels from '../../const.js';
 import SelectDevice from './SelectDevice.vue';
 import SelectTagTypes from './SelectTagTypes.vue';
 import SelectAnimal from './SelectAnimal.vue';
@@ -86,7 +87,10 @@ export default {
   },
   data () {
     return {
-      isAudio: true
+      rawAnimals:[],
+      isAudio: true,
+      hasSpecifiedTags: false,
+      canHaveTags: false,
     };
   },
   computed: {
@@ -117,6 +121,10 @@ export default {
       },
       set (value) {
         this.query.tagMode = value;
+        this.canHaveTags = this.canHaveSpecifiedTags(value);
+        if (!this.canHaveTags) {
+          this.animals = [];
+        }
       }
     },
     fromDate: {
@@ -135,15 +143,26 @@ export default {
         ) || '';
       },
       set (value) {
-        this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
+        if (value && value.trim() !== "") {
+          this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
+        } else {
+          this.query.where.recordingDateTime["$lt"] = "";
+        }
       }
     },
     animals: {
       get () {
-        return this.query.tags;
+        return this.rawAnimals;
       },
       set (value) {
-        this.query.tags = value;
+        this.rawAnimals = value;
+        this.query.tags = value.map(option => option.value ? option.value : option.text );
+        this.hasSpecifiedTags = this.query.tags.length > 0;
+        if (this.hasSpecifiedTags) {
+          if (!this.canHaveTags) {
+            this.tagTypes = 'tagged';
+          }
+        }
       }
     },
     devices: {
@@ -166,8 +185,11 @@ export default {
         this.animals = [];
         this.tagTypes = 'any';
       }
-    }
-  }
+    },
+  },
+  methods: {
+    canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
+  },
 };
 
 </script>

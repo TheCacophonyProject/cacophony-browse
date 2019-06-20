@@ -50,7 +50,7 @@ export default {
       currentVideoTime: 0,
       lastTrackFrame: 0,
       playerOptions: {
-        autoplay: false,
+        autoplay: true,
         muted: true,
         width: '720px',
         playbackRates: [0.5, 1, 2, 4, 8],

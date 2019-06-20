@@ -20,9 +20,9 @@
     </div>
     <div
       :class="getClass('false-positive')"
-      @click="quickTag('false-positive')">
+      @click="quickTag('false positive')">
       <img
-        title="Mark as nothing or false-positive (meaning there is no animal)"
+        title="Mark as nothing or false positive (meaning there is no animal)"
         src="../../assets/video/none.png">
       <div class="tag-name">nothing</div>
     </div>
@@ -39,6 +39,8 @@
 </template>
 
 <script>
+
+import DefaultLabels from '../../const.js';
 export default {
   name: 'QuickTagTrack',
   props: {
@@ -53,7 +55,7 @@ export default {
   },
   data() {
     return {
-      animals: ["possum", "rat", "hedgehog", "cat", "bird"],
+      animals: DefaultLabels.quickTagLabels(),
       message: "",
     };
   },

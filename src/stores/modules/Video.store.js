@@ -68,13 +68,13 @@ const getters = {
 };
 
 const getRecording = async function(commit, recordingId) {
-  const recording = await api.recording.id(recordingId);
+  const {result: recording} = await api.recording.id(recordingId);
   commit('receiveRecording', recording);
   return recording.success;
 };
 
 const getTracks = async function(commit, recordingId) {
-  const tracks = await api.recording.tracks(recordingId);
+  const {result: tracks} = await api.recording.tracks(recordingId);
   commit('receiveTracks', tracks);
   return tracks.success;
 };
@@ -82,8 +82,8 @@ const getTracks = async function(commit, recordingId) {
 const actions = {
 
   async QUERY_RECORDING(undefined, {params, direction, skipMessage}) {
-    const result = await api.recording.query(params);
-    if (!result.rows || result.rows.length == 0) {
+    const {result, success} = await api.recording.query(params);
+    if (!success || !result.rows || result.rows.length == 0) {
       if (!skipMessage) {
         store.dispatch('Messaging/WARN', `No ${direction} recording for this device.`);
       }

@@ -2,17 +2,20 @@
   <b-form-group
     v-b-tooltip.hover="tooltipTitle">
     <label>Animals</label>
-    <multiselect
+    <multiselect 
       :value="value"
-      :options="options"
-      :multiple="true"
+      :options="options" 
+      :multiple="true" 
       :placeholder="placeholder"
       :disabled="disabled"
+      label="text" 
+      track-by="value"
       @input="$emit('input', $event)"/>
   </b-form-group>
 </template>
-
 <script>
+
+import DefaultLabels from '../../const.js';
 
 export default {
   name: 'AnimalSelect',
@@ -24,39 +27,25 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    canHaveSubTags: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
     return {
-      options: [
-        "interesting",
-        "possum",
-        "rat",
-        "stoat",
-        "ferret",
-        "weasel",
-        "hedgehog",
-        "cat",
-        "bird",
-        "bird/kiwi",
-        "dog",
-        "hare",
-        "human",
-        "insect",
-        "mouse",
-        "rabbit",
-        "spider",
-        "other",
-        "unidentified",
-      ]
+      options: DefaultLabels.searchLabels()
     };
   },
   computed: {
     placeholder: function () {
       if (this.value.length > 0) {
         return "add more animals";
+      } else if (this.canHaveSubTags) {
+        return "anything";
       } else {
-        return "all animals";
+        return "";
       }
     },
     tooltipTitle: function () {

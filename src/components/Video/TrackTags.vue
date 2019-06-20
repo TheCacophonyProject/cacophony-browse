@@ -24,17 +24,14 @@
       </template>
       <template
         slot="deleteButton"
-        slot-scope="row"
-        class="delect-cell">
-        <div
+        slot-scope="row">
+        <font-awesome-icon
           v-b-popover.hover.bottom="'Delete tag'"
-          class="delete-button"
-          @click="$emit('deleteTag', row.item)">
-          <font-awesome-icon
-            v-if="!row.item.automatic"
-            icon="trash"
-            style="cursor: pointer;"/>
-        </div>
+          v-if="!row.item.automatic"
+          icon="trash"
+          style="cursor: pointer;"
+          size="2x"
+          @click="$emit('deleteTag', row.item)"/>
       </template>
       <template
         slot="confirmButton"
@@ -44,6 +41,7 @@
           v-if="row.item.automatic"
           icon="check-circle"
           style="cursor: pointer;"
+          size="2x"
           @click="confirmTag(row.item)"/>
       </template>
     </b-table>
@@ -65,11 +63,11 @@ export default {
   data () {
     return {
       fields: [
-        {key: 'what', label: 'Tags'},
+        {key: 'what', label: 'Tags', variant: 'what'},
         {key: 'confidence', label: ''},
         {key: 'who', label: ''},
-        {key: 'deleteButton', label: ''},
-        {key: 'confirmButton', label: ''}
+        {key: 'deleteButton', label: '', variant: 'delete'},
+        {key: 'confirmButton', label: '', variant: 'confirm'}
       ]
     };
   },
@@ -122,13 +120,15 @@ export default {
 .track-tag-table >>> thead tr td {
   padding: 1px 0px;
 }
+</style>
 
-table td .what-image,
-table td .delete-button {
-  margin: -12px;
-}
+<style>
+  td.table-delete,
+  td.table-confirm {
+    padding: 6px;
+  }
 
-.delete-button {
-  padding: 12px;
-}
+  td.table-what {
+    padding: 0px;
+  }
 </style>
