@@ -161,6 +161,7 @@ export default {
             tag.startTime = this.parseTimeString(this.startTime);
           }
           tag.duration = this.duration;
+          tag.trapType = this.trap;
 
           // save user tag defaults.
           // user.setTagDefault('tagAnimalInput', tag.animal);

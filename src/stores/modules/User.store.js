@@ -54,7 +54,6 @@ const actions = {
 
     const {result, success} = await api.user.register(payload.username, payload.password, payload.email);
 
-
     if(success) {
       api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
       commit('receiveLogin', result);

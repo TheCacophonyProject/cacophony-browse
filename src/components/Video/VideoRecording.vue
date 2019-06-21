@@ -66,6 +66,7 @@
 </template>
 
 <script>
+/* eslint-disable no-console */
 import {mapState} from 'vuex';
 import PrevNext from './PrevNext.vue';
 import AddObservation from './AddObservation.vue';
