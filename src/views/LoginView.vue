@@ -1,55 +1,67 @@
 <template>
-  <div>
-    <hero/>
-    <b-container class="col-md-6 col-lg-5">
-      <h1>Login</h1>
+  <b-container class="sign-wrapper">
+    <b-form-row class="align-items-center justify-content-center">
 
-      <b-form @submit="onSubmit">
-        <b-alert
-          :show="!!errorMessage"
-          variant="danger"
-          dismissible
-          @dismissed="errorMessage=undefined">
-          {{ errorMessage }}
-        </b-alert>
+      <div class="sign-form-wrapper bg-white rounded text-center">
 
-        <b-form-group
-          label="Username or Email"
-          label-for="input-username-or-email">
-          <b-form-input
-            id="input-username-or-email"
-            v-model="usernameOrEmail"
-            type="text"/>
-        </b-form-group>
+        <div class="logo" />
 
-        <b-form-group
-          label="Password"
-          label-for="input-password">
-          <b-form-input
-            id="input-password"
-            v-model="password"
-            type="password"/>
-        </b-form-group>
+        <h1>Login</h1>
 
-        <b-button
-          type="submit"
-          variant="primary">Sign in
-        </b-button>
+        <b-form @submit="onSubmit">
 
-      </b-form>
+          <b-alert
+            :show="!!errorMessage"
+            variant="danger"
+            dismissible
+            @dismissed="errorMessage=undefined">
+            {{ errorMessage }}
+          </b-alert>
 
-    </b-container>
-  </div>
+          <b-form-group
+            label="Username or Email"
+            label-class="sr-only"
+            label-for="input-username-or-email">
+            <b-form-input
+              id="input-username-or-email"
+              v-model="usernameOrEmail"
+              placeholder="Username or Email Address"
+              type="text"/>
+          </b-form-group>
+
+          <b-form-group
+            label="Password"
+            label-class="sr-only"
+            label-for="input-password">
+            <b-form-input
+              id="input-password"
+              v-model="password"
+              placeholder="Password"
+              type="password"/>
+          </b-form-group>
+
+          <b-button
+            :disabled="usernameOrEmail === '' || password === ''"
+            type="submit"
+            variant="primary"
+            class="btn-block"
+          >Sign in
+          </b-button>
+
+          <p class="small mt-4">Don't have an account yet? <b-link href="/register">Register here</b-link>.</p>
+
+        </b-form>
+      </div>
+
+    </b-form-row>
+  </b-container>
 </template>
 
 <script>
 
-import Hero from '../components/Hero.vue';
-
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
   name: 'LoginView',
-  components: { Hero },
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
   // https://vuejs.org/v2/style-guide/#Component-data-essential
@@ -66,24 +78,22 @@ export default {
     async onSubmit(evt) {
       evt.preventDefault();
 
-      if (this.usernameOrEmail && this.password) {
-        await this.$store.dispatch('User/LOGIN', {
-          username: this.usernameOrEmail,
-          password: this.password
-        });
+      await this.$store.dispatch('User/LOGIN', {
+        username: this.usernameOrEmail,
+        password: this.password
+      });
 
-        if(this.$store.getters['User/isLoggedIn']) {
-          this.$router.go('home');
-        }
-
-      } else {
-        this.errorMessage = "Username/email & password are required";
-        setTimeout(() => {
-          return this.errorMessage = false;
-        }, 3000);
+      if(this.$store.getters['User/isLoggedIn']) {
+        this.$router.go('home');
       }
     }
   }
 };
 
 </script>
+
+<style scoped>
+  .sign-form-wrapper {
+    max-width: 360px;
+  }
+</style>
