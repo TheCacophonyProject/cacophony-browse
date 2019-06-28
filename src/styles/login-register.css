@@ -1,0 +1,33 @@
+/* b-container for both login and register */
+.sign-wrapper .form-row {
+    min-height: 100vh;
+}
+
+.container.sign-wrapper {
+    max-width: 100%; /* Make it take the full width of the page */
+}
+
+@media (min-width: 576px) { /* Show bg image only if the device is larger than a phone */
+    .sign-wrapper {
+        background-image: url('../assets/login-bg.jpg');
+        background-position: center center;
+        background-size: cover;
+    }
+}
+
+.sign-form-wrapper .logo {
+    display: block;
+    margin: 0 auto;
+}
+
+/* wraps form */
+.sign-form-wrapper {
+    width: 100%;
+}
+
+@media (min-width: 576px) {
+    .sign-form-wrapper {
+        padding: 3rem 1.6rem 1rem;
+    }
+}
+
