@@ -34,7 +34,8 @@
     "vue-video-player": "^5.0.2",
     "vue2-filters": "^0.4.1",
     "vuelidate": "^0.7.4",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "lodash": "^4.17.13"
   },
   "browserslist": [
     "> 1%",
