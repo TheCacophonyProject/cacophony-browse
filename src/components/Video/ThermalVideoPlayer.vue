@@ -1,7 +1,7 @@
 <template>
   <div
     ref="container"
-    class="container">
+    class="video-container">
     <canvas
       ref="canvas"
       :width="canvasWidth"
@@ -257,10 +257,9 @@ export default {
     z-index: 900;
   }
 
-  .container {
+  .video-container {
+    margin: 0 auto;
     position: relative;
-    width: 100%;
-    padding: 0;
   }
 
 </style>
