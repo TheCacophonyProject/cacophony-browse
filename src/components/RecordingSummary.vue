@@ -7,14 +7,12 @@
       <span v-if="item.type === 'audio'">
         <font-awesome-icon
           :icon="['far', 'file-audio']"
-          :style="{ color: '#666' }"
           size="2x"
         />
       </span>
       <span v-else-if="item.type === 'thermalRaw'">
         <font-awesome-icon
           :icon="['far', 'file-video']"
-          :style="{ color: '#666' }"
           size="2x"
         />
       </span>
@@ -31,7 +29,6 @@
         </h3>
         <span class="recording-group">
           <font-awesome-icon
-            :style="{ color: '#666' }"
             icon="users"
             size="xs"
           />
@@ -39,7 +36,6 @@
         </span>
         <span class="recording-device">
           <font-awesome-icon
-            :style="{ color: '#666' }"
             icon="microchip"
             size="xs"
           />
@@ -73,7 +69,6 @@
         <div class="recording-time">
           <font-awesome-icon
             :icon="['far', 'calendar']"
-            :style="{ color: '#666' }"
             size="xs"
           />
           {{ item.date }} {{ item.time }}
@@ -81,7 +76,6 @@
         <div class="recording-duration">
           <font-awesome-icon
             :icon="['far', 'clock']"
-            :style="{ color: '#666' }"
             size="xs"
           />
           {{ item.duration }} seconds
@@ -151,6 +145,10 @@ export default {
 
   $recording-side-padding: 0.9rem;
 
+  .svg-inline--fa {
+    color: $gray-600;
+  }
+
   // the wrapper of the recording
   .recording-summary {
     display: flex;
@@ -217,13 +215,18 @@ export default {
           margin-right: 0.3rem;
           line-height: 0.7;
         }
+        &.text-danger,
+        &.text-success {
+          color: $white !important; //argh.
+          .svg-inline--fa {
+            color: $white;
+          }
+        }
         &.text-danger {
           background: $danger;
-          color: $white !important; //argh.
         }
         &.text-success {
           background: $success;
-          color: $white !important; //argh.
         }
       }
 
