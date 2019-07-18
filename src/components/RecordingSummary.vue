@@ -218,15 +218,15 @@ export default {
         &.text-danger,
         &.text-success {
           color: $white !important; //argh.
-          .svg-inline--fa {
-            color: $white;
-          }
         }
         &.text-danger {
           background: $danger;
         }
         &.text-success {
           background: $success;
+        }
+        .svg-inline--fa {
+          color: $white;
         }
       }
 
