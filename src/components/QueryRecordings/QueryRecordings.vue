@@ -15,67 +15,65 @@
       />
     </b-button>
     <b-form-group>
-      <b-form-col>
-        <h2>Search recordings</h2>
-        <SelectDevice v-model="devices" />
-        <SelectRecordingType v-model="recordingType" />
-        <SelectAnimal
-          v-model="animals"
-          :disabled="isAudio"
-          :can-have-sub-tags="canHaveTags"/>
-        <SelectDateRange v-model="dateRange" />
-        <b-form-row v-if="isCustomDateRange">
-          <b-col
-            sm="6"
-          >
-            <SelectDate
-              v-model="fromDate"
-              title="From Date"/>
-          </b-col>
-          <b-col
-            sm="6"
-          >
-            <SelectDate
-              v-model="toDate"
-              title="To Date"/>
-          </b-col>
-        </b-form-row>
-        <SelectDuration
-          v-model="duration"/>
-        <b-form-row>
-          <b-col>
-            <b-button
-              variant="link"
-              class="toggle-advanced-search-btn"
-              @click="() => toggleAdvancedSearch()"
-            >
-              Advanced search
-              <font-awesome-icon
-                v-if="!advanced"
-                :icon="['fas', 'caret-down']"
-              />
-              <font-awesome-icon
-                v-else
-                :icon="['fas', 'caret-up']"
-              />
-            </b-button>
-          </b-col>
-        </b-form-row>
-        <SelectTagTypes
-          v-if="advanced"
-          v-model="tagTypes"
-          :disabled="isAudio"
-        />
-        <b-button
-          :disabled="disabled"
-          block
-          variant="primary"
-          @click="() => $emit('submit')"
+      <h2>Search recordings</h2>
+      <SelectDevice v-model="devices" />
+      <SelectRecordingType v-model="recordingType" />
+      <SelectAnimal
+        v-model="animals"
+        :disabled="isAudio"
+        :can-have-sub-tags="canHaveTags"/>
+      <SelectDateRange v-model="dateRange" />
+      <b-form-row v-if="isCustomDateRange">
+        <b-col
+          sm="6"
         >
-          <span v-if="!disabled">Search</span>
-          <span v-else>Searching...</span>
-        </b-button>
-      </b-form-col>
+          <SelectDate
+            v-model="fromDate"
+            title="From Date"/>
+        </b-col>
+        <b-col
+          sm="6"
+        >
+          <SelectDate
+            v-model="toDate"
+            title="To Date"/>
+        </b-col>
+      </b-form-row>
+      <SelectDuration
+        v-model="duration"/>
+      <b-form-row>
+        <b-col>
+          <b-button
+            variant="link"
+            class="toggle-advanced-search-btn"
+            @click="() => toggleAdvancedSearch()"
+          >
+            Advanced search
+            <font-awesome-icon
+              v-if="!advanced"
+              :icon="['fas', 'caret-down']"
+            />
+            <font-awesome-icon
+              v-else
+              :icon="['fas', 'caret-up']"
+            />
+          </b-button>
+        </b-col>
+      </b-form-row>
+      <SelectTagTypes
+        v-if="advanced"
+        v-model="tagTypes"
+        :disabled="isAudio"
+      />
+      <b-button
+        :disabled="disabled"
+        block
+        variant="primary"
+        @click="() => $emit('submit')"
+      >
+        <span v-if="!disabled">Search</span>
+        <span v-else>Searching...</span>
+      </b-button>
     </b-form-group>
   </div>
 </template>
@@ -241,6 +239,12 @@ export default {
   @import "~bootstrap/scss/variables";
   @import "~bootstrap/scss/mixins";
   .query-recordings {
+    padding: 15px;
+    overflow: auto;
+    height: 100vh;
+    @include media-breakpoint-up(lg) {
+      max-height: calc(100vh - var(--navbar-height));
+    }
     h2 {
       font-size: 1.2rem;
       color: $gray-700;
@@ -251,13 +255,14 @@ export default {
   .search-panel-toggle-btn {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    transition: left 0.2s;
+    transition: transform 0.2s;
     @include media-breakpoint-down(lg) {
       position: fixed;
       top: 55px;
-      left: var(--search-panel-width);
+      left: 0;
+      transform: translate(var(--search-panel-width));
       &.is-collapsed {
-        left: 0;
+        transform: translate(var(--search-panel-width));
       }
     }
     @include media-breakpoint-up(lg) {

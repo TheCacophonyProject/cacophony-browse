@@ -1,11 +1,12 @@
 <template>
-  <b-form-group v-if="fetched">
+  <b-form-group>
     <label>Device</label>
     <multiselect
       :value="selectedValues"
       :options="options"
       :multiple="true"
       :placeholder="placeholder"
+      :disabled="!fetched"
       track-by="id"
       label="name"
       @input="$emit('input', $event)"
@@ -27,7 +28,9 @@ export default {
   },
   computed: {
     placeholder: function () {
-      if (this.value.length > 0) {
+      if (!this.fetched) {
+        return "loading";
+      } else if (this.value.length > 0) {
         return "add more devices";
       } else {
         return "all devices";

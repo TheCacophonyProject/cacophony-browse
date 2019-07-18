@@ -455,13 +455,8 @@ export default {
 
   .search-filter-wrapper {
     background: $gray-100;
-    padding: 15px;
     position: relative;
     border-right: 1px solid $gray-200;
-    @include media-breakpoint-up(lg) {
-      overflow: auto;
-      max-height: calc(100vh - var(--navbar-height));
-    }
   }
 
   .search-content-wrapper {
@@ -502,15 +497,14 @@ export default {
   @include media-breakpoint-down(md) {
     .search-filter-wrapper {
       position: fixed;
-      height: 100vh;
-      overflow: scroll;
       top: 0;
       left: 0;
+      transform: translate(0);
       max-width: var(--search-panel-width);
       z-index: 2;
-      transition: left 0.2s;
+      transition: transform 0.2s;
       &.is-collapsed {
-        left: var(--search-panel-offset);
+        transform: translate(var(--search-panel-offset));
       }
     }
   }
