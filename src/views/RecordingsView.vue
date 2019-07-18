@@ -1,53 +1,43 @@
+<script src="../../webpack/webpack.dev.js"></script>
 <template>
-  <div>
-    <b-container fluid>
-      <b-row>
-        <b-col
-          class="search-col"
-          md="2"
-        >
-          <QueryRecordings
-            :disabled="queryPending"
-            :query="query"
-            @submit="submitNewQuery"
-          />
-        </b-col>
-        <b-col class="content">
-          <b-row class="information-line">
-            <b-row class="results-summary">
-              <b-col>
-                <b-row>
-                  <h1>Recordings</h1>
-                </b-row>
-                <b-row>
-                  <b-form-text>
-                    <h5
-                      v-if="countMessage"
-                    >
-                      {{ countMessage }}
-                    </h5>
-                    <h5 v-else>
-                      Loading...
-                    </h5>
-                    <p
-                      class="search-description"
-                      v-html="searchDescription"
-                    />
-                  </b-form-text>
-                </b-row>
-                <b-row>
-                  <b-form-group>
-                    <b-form-select
-                      v-model="perPage"
-                      :options="perPageOptions"
-                      style="text-align: center;"
-                      @input="pagination"
-                    />
-                  </b-form-group>
-                </b-row>
-              </b-col>
-            </b-row>
-          </b-row>
+  <b-container fluid>
+    <b-row>
+      <div :class="['search-filter-wrapper', {'is-collapsed': searchPanelIsCollapsed}]">
+        <QueryRecordings
+          :disabled="queryPending"
+          :query="query"
+          :is-collapsed="searchPanelIsCollapsed"
+          @submit="submitNewQuery"
+          @toggled-search-panel="searchPanelIsCollapsed = !searchPanelIsCollapsed"
+        />
+      </div>
+      <div class="search-content-wrapper">
+        <div class="search-results">
+          <div class="results-summary">
+            <h1>Recordings</h1>
+            <h2
+              v-if="countMessage"
+            >
+              {{ countMessage }}
+            </h2>
+            <h5 v-else>
+              Loading...
+            </h5>
+            <p
+              class="search-description"
+              v-html="searchDescription"
+            />
+            <div class="form-inline justify-content-end">
+              <b-form-select
+                id="recordsPerPage"
+                v-model="perPage"
+                :options="perPageOptions"
+                class="form-control-sm"
+                @input="pagination"
+              />
+            </div>
+
+          </div>
           <div
             v-if="!queryPending"
             class="results"
@@ -62,30 +52,33 @@
             v-else
             class="results loading"
           >
-            <b-row
+            <div
               v-for="i in 10"
-              :style="{ background: `rgba(240, 240, 240, ${1 / i}` }"
+              :style="{
+                background: `rgba(240, 240, 240, ${1 / i}`,
+              }"
               :key="i"
               class="recording-placeholder"
             />
           </div>
-          <b-row
-            v-if="count > perPage"
-            class="sticky-footer"
-          >
-            <b-pagination
-              :total-rows="count"
-              v-model="currentPage"
-              :per-page="perPage"
-              :limit="limitPaginationButtons"
-              class="pagination-buttons"
-              @input="pagination"
-            />
-          </b-row>
-        </b-col>
-      </b-row>
-    </b-container>
-  </div>
+        </div>
+
+        <div
+          v-if="count > perPage"
+          class="sticky-footer"
+        >
+          <b-pagination
+            :total-rows="count"
+            v-model="currentPage"
+            :per-page="perPage"
+            :limit="limitPaginationButtons"
+            class="pagination-buttons"
+            @input="pagination"
+          />
+        </div>
+      </div>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
@@ -103,6 +96,7 @@ export default {
     return {
       query: this.resetQuery(),
       queryPending: false,
+      searchPanelIsCollapsed: true,
       recordings: [],
       tableItems: [],
       count: null,
@@ -454,57 +448,96 @@ export default {
 };
 </script>
 
-<style scoped>
-  .search-col {
-    background-color: #f0f2ef;
-  }
-  .information-line h5 {
-    font-size: 16px;
-  }
-  .results {
-    width: 100%;
-    display: block;
-    overflow-y: auto;
-  }
-  .recording-placeholder {
-    min-height: 109px;
-  }
-  .results > .row, .information-line > .row {
-    max-width: 635px;
-    min-width: 635px;
-    margin: 15px auto;
-  }
-  .content {
+<style scoped lang="scss">
+  @import "~bootstrap/scss/functions";
+  @import "~bootstrap/scss/variables";
+  @import "~bootstrap/scss/mixins";
+
+  .search-filter-wrapper {
+    background: $gray-100;
+    padding: 15px;
     position: relative;
-    overflow: hidden;
-    overflow-y: scroll;
-    padding: 0;
-    margin: 0;
-    max-height: calc(100vh - var(--navbar-height));
-    min-height: calc(100vh - var(--navbar-height));
+    border-right: 1px solid $gray-200;
+    @include media-breakpoint-up(lg) {
+      overflow: auto;
+      max-height: calc(100vh - var(--navbar-height));
+    }
   }
 
-  .search-description {
-    color: #111;
-    font-size: 14px;
-    line-height: 22px;
+  .search-content-wrapper {
+    margin: 0 auto;
+    flex-basis: 640px;
+    h1 {
+      margin: 2rem 0 1.2rem;
+    }
+    h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+      color: $gray-700;
+    }
+    .search-results {
+      max-width: 640px;
+      margin: 0 auto;
+      .results {
+        padding: 1rem 0;
+      }
+    }
+  }
+
+  .recording-placeholder {
+    height: 110px;
+    margin-bottom: 15px;
   }
 
   .sticky-footer {
-    width: 100%;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border-top: solid rgb(222, 226, 230) 1px;
-    display: flex;
-    justify-content: center;
-    min-width: 100%;
-    max-width: 100%;
-    background: white;
-    position: sticky;
-    bottom: 0;
-    margin: 0;
+    background: $white;
+    border-top: 1px solid $gray-200;
+    padding: 7px;
+    .pagination {
+      margin-bottom: 0;
+      justify-content: center;
+    }
   }
-  .pagination-buttons {
-    margin-bottom: 0;
+
+  @include media-breakpoint-down(md) {
+    .search-filter-wrapper {
+      position: fixed;
+      height: 100vh;
+      overflow: scroll;
+      top: 0;
+      left: 0;
+      max-width: var(--search-panel-width);
+      z-index: 2;
+      transition: left 0.2s;
+      &.is-collapsed {
+        left: var(--search-panel-offset);
+      }
+    }
   }
+
+  @include media-breakpoint-up(sm) {
+    .search-content-wrapper {
+      padding: 0 1.6rem;
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    .search-filter-wrapper {
+      flex: 0 0 320px;
+    }
+    .search-content-wrapper {
+      flex: 1 1 640px;
+      position: relative;
+      overflow: hidden;
+      overflow-y: scroll;
+      padding: 0;
+      margin: 0;
+      max-height: calc(100vh - var(--navbar-height));
+    }
+    .sticky-footer {
+      position: sticky;
+      bottom: 0;
+    }
+  }
+
 </style>

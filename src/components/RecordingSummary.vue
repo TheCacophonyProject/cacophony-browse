@@ -1,9 +1,9 @@
 <template>
-  <b-row
+  <div
     class="recording-summary"
     @click="e => navigateToRecording(item.id)"
   >
-    <b-col class="recording-type">
+    <div class="recording-type">
       <span v-if="item.type === 'audio'">
         <font-awesome-icon
           :icon="['far', 'file-audio']"
@@ -18,16 +18,18 @@
           size="2x"
         />
       </span>
-    </b-col>
-    <b-col class="recording-main">
-      <b-row class="recording-details">
-        <a
-          :href="`/recording/${item.id}`"
-          class="record-link"
-        >
-          {{ item.id }}
-        </a>
-        <span>
+    </div>
+    <div class="recording-main">
+      <div class="recording-details">
+        <h3 class="recording-title">
+          <a
+            :href="`/recording/${item.id}`"
+            class="record-link"
+          >
+            {{ item.id }}
+          </a>
+        </h3>
+        <span class="recording-group">
           <font-awesome-icon
             :style="{ color: '#666' }"
             icon="users"
@@ -35,7 +37,7 @@
           />
           {{ item.groupname }}
         </span>
-        <span>
+        <span class="recording-device">
           <font-awesome-icon
             :style="{ color: '#666' }"
             icon="microchip"
@@ -43,16 +45,17 @@
           />
           {{ item.devicename }}
         </span>
-      </b-row>
-      <b-row
+      </div>
+      <div
         v-if="item.tags.length !== 0"
         class="recording-tags"
       >
-        <div
+        <span
           v-for="(tag, index) in item.tags"
           :key="index"
           :class="[
             'tag',
+            'badge',
             tag.class
           ]"
         >
@@ -64,9 +67,9 @@
             />
           </span>
           <span class="tag-label">{{ tag.text }}</span>
-        </div>
-      </b-row>
-      <b-row class="time-duration">
+        </span>
+      </div>
+      <div class="recording-time-duration">
         <div class="recording-time">
           <font-awesome-icon
             :icon="['far', 'calendar']"
@@ -89,9 +92,9 @@
         >
           <BatteryLevel :battery-level="item.other.batteryLevel" />
         </div >
-      </b-row>
-    </b-col>
-    <b-col
+      </div>
+    </div>
+    <div
       v-if="item.location !== '(unknown)'"
       class="recording-location"
     >
@@ -106,8 +109,8 @@
           src=""
         >
       </a>
-    </b-col>
-  </b-row>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -141,94 +144,123 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+  @import "~bootstrap/scss/functions";
+  @import "~bootstrap/scss/variables";
+  @import "~bootstrap/scss/mixins";
 
+  $recording-side-padding: 0.9rem;
+
+  // the wrapper of the recording
   .recording-summary {
-    color: #333;
-    border: 1px solid #eee;
-    font-size: 14px;
+    display: flex;
+    flex-flow: row nowrap;
+    border: 1px solid $border-color;
+    margin-bottom: 1rem;
     cursor: pointer;
-    transition: border-color 0.3s;
-    --internal-border-color: #eee;
-    min-height: 109px;
   }
-  .recording-details > * {
-    padding-right: 15px;
-  }
-  .recording-summary:hover {
-    border: 1px solid #999;
-    box-shadow: 0 0 2px #999;
-  }
-  .record-link {
-    font-size: 115%;
-    font-weight: bold;
-  }
+
+  // wrapper of the icon on the left
   .recording-type {
-    background: #f2f2f2;
-    max-width: 52px;
-    min-width: 52px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 0.8rem $recording-side-padding;
+    background: $gray-100;
+    @include media-breakpoint-up(sm) {
+      padding: 1rem 1.1rem;
+    }
+    flex: 0 1 auto;
+    .fa-2x {
+      font-size: 1.5em;
+    }
   }
-  .recording-location {
-    max-width: 109px;
-    border-left: 1px solid var(--internal-border-color);
-  }
+
+  // main content in the middle
   .recording-main {
-    justify-content: space-between;
+    flex: 1 1 auto;
     display: flex;
-    flex-direction: column;
+    flex-flow: column nowrap;
+    min-height: 110px;
+    .svg-inline--fa { // set a fixed width on fontawesome icons so they align neatly when stacked
+      width: 16px;
+    }
+    .recording-details {
+      flex: 1 1 auto;
+      padding: 0.7rem $recording-side-padding;
+      .recording-title,
+      .recording-group,
+      .recording-device { // all elements that are the direct descendants of this div
+        display: inline-block;
+        word-break: break-word;
+        margin-right: 0.8rem;
+        @include media-breakpoint-down(xs) {
+          display: block;
+        }
+      }
+      .recording-title {
+        margin-bottom: 0;
+      }
+      .recording-group,
+      .recording-device {
+        font-size: 95%;
+        margin-right: 0.5rem;
+      }
+    }
+
+    .recording-tags {
+      padding: 0 $recording-side-padding 0.9rem;
+      margin-top: -0.4rem;
+      .tag {
+        &.badge {
+          font-weight: initial;
+          font-size: 90%;
+          color: $white;
+          background: $secondary;
+          margin-right: 0.3rem;
+          line-height: 0.7;
+        }
+        &.text-danger {
+          background: $danger;
+          color: $white !important; //argh.
+        }
+        &.text-success {
+          background: $success;
+          color: $white !important; //argh.
+        }
+      }
+
+    }
+    .recording-time-duration {
+      display: flex;
+      flex-flow: row wrap;
+      border-top: 1px solid $border-color;
+      > div {
+        padding: 0.5rem $recording-side-padding;
+        font-size: 80%;
+      }
+      .recording-duration,
+      .recording-battery {
+        border-left: 1px solid $border-color;
+      }
+      .recording-duration {
+        margin-right: auto;
+      }
+      @include media-breakpoint-down(xs) {
+        .recording-time {
+          width: 100%;
+          border-bottom: 1px solid $border-color;
+        }
+        .recording-duration {
+          border-left: none;
+        }
+      }
+    }
   }
-  .recording-tags, .recording-details, .recording-time, .recording-duration, .recording-battery {
-    padding: 0 16px;
-    line-height: 33px;
-  }
-  .recording-time {
-    border-right: 1px solid var(--internal-border-color);
-  }
-  .recording-battery {
-    border-left: 1px solid var(--internal-border-color);
-  }
-  .time-duration {
-    font-size: 85%;
-    border-top: 1px solid var(--internal-border-color);
-  }
-  .time-duration > div {
-    flex-grow: 1;
-    flex-basis: 33%;
-  }
-  .time-duration > div.recording-battery {
-    flex-grow: 1;
-    flex-basis: 10%;
-  }
-  .tag {
-    border-radius: 3px;
-    font-size: 85%;
-    padding: 0 5px 0 0;
-    line-height: 18px;
-  }
-  .tag-label {
-    text-transform: capitalize;
-    color: white;
-  }
-  .tag-icon {
-    color: white;
-    padding: 0 3px;
-    background: rgba(255, 255, 255, 0.3);
-    opacity: 0.9;
-    display: inline-block;
-    height: 100%;
-    width: 18px;
-    text-align: center;
-  }
-  .tag {
-    background: #999;
-  }
-  .tag:not(:last-child) {
-    margin-right: 5px;
-  }
-  .tag.text-danger {
-    background: #db0a24;
+
+  // map
+  .recording-location {
+    flex: 0 1 110px;
+    background: $gray-100;
+    @include media-breakpoint-between(xs,sm) {
+      display: none;
+    }
   }
 </style>

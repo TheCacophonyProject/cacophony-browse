@@ -17,6 +17,8 @@ import {
   faAngleDoubleRight,
   faAngleUp,
   faAngleDown,
+  faCaretDown,
+  faCaretUp,
   faQuestion,
   faAsterisk,
   faExclamationTriangle,
@@ -24,6 +26,8 @@ import {
   faUsers,
   faMicrochip,
   faPowerOff,
+  faSearch,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
@@ -45,6 +49,8 @@ library.add(
   faCaretSquareUp,
   faCaretSquareRight,
   faCaretSquareLeft,
+  faCaretDown,
+  faCaretUp,
   faWindowClose,
   faCog,
   faBatteryFull,
@@ -73,6 +79,8 @@ library.add(
   faCalendar,
   faFileVideo,
   faFileAudio,
+  faSearch,
+  faTimes,
 );
 
 export default FontAwesomeIcon;

@@ -1,5 +1,19 @@
 <template>
   <div class="query-recordings">
+    <b-button
+      :class="['search-panel-toggle-btn', {'is-collapsed': isCollapsed}]"
+      variant="primary"
+      @click="() => toggleSearchPanel()"
+    >
+      <font-awesome-icon
+        v-if="isCollapsed"
+        :icon="['fas', 'search']"
+      />
+      <font-awesome-icon
+        v-else
+        :icon="['fas', 'times']"
+      />
+    </b-button>
     <b-form-group>
       <b-form-col>
         <h2>Search recordings</h2>
@@ -30,10 +44,21 @@
           v-model="duration"/>
         <b-form-row>
           <b-col>
-            <a
-              href="#"
-              @click.prevent="() => toggleAdvancedSearch()"
-            >Advanced search</a>
+            <b-button
+              variant="link"
+              class="toggle-advanced-search-btn"
+              @click="() => toggleAdvancedSearch()"
+            >
+              Advanced search
+              <font-awesome-icon
+                v-if="!advanced"
+                :icon="['fas', 'caret-down']"
+              />
+              <font-awesome-icon
+                v-else
+                :icon="['fas', 'caret-up']"
+              />
+            </b-button>
           </b-col>
         </b-form-row>
         <SelectTagTypes
@@ -78,6 +103,10 @@ export default {
     },
     query: {
       type: Object,
+      required: true
+    },
+    isCollapsed: {
+      type: Boolean,
       required: true
     }
   },
@@ -199,16 +228,45 @@ export default {
     toggleAdvancedSearch: function () {
       this.advanced = !this.advanced;
     },
+    toggleSearchPanel: function () {
+      this.$emit('toggled-search-panel');
+    }
   },
 };
 
 </script>
-<style scoped>
+
+<style scoped lang="scss">
+  @import "~bootstrap/scss/functions";
+  @import "~bootstrap/scss/variables";
+  @import "~bootstrap/scss/mixins";
   .query-recordings {
-    /*padding: 15px;*/
+    h2 {
+      font-size: 1.2rem;
+      color: $gray-700;
+      margin: 1rem 0 0.8rem;
+    }
   }
-  h2 {
-    color: #666;
-    font-size: 18px;
+
+  .search-panel-toggle-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    transition: left 0.2s;
+    @include media-breakpoint-down(lg) {
+      position: fixed;
+      top: 55px;
+      left: var(--search-panel-width);
+      &.is-collapsed {
+        left: 0;
+      }
+    }
+    @include media-breakpoint-up(lg) {
+      display: none;
+    }
+  }
+
+  .toggle-advanced-search-btn {
+    margin-left: -0.75rem;
+    margin-bottom: 1rem;
   }
 </style>
