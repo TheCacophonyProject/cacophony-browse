@@ -5,14 +5,18 @@
       variant="primary"
       @click="() => toggleSearchPanel()"
     >
-      <font-awesome-icon
-        v-if="isCollapsed"
-        :icon="['fas', 'search']"
-      />
-      <font-awesome-icon
-        v-else
-        :icon="['fas', 'times']"
-      />
+      <span v-if="isCollapsed">
+        <font-awesome-icon
+          :icon="['fas', 'search']"
+        />
+        <span class="sr-only">Expand search panel</span>
+      </span>
+      <span v-else>
+        <font-awesome-icon
+          :icon="['fas', 'times']"
+        />
+        <span class="sr-only">Collapse search panel</span>
+      </span>
     </b-button>
     <b-form-group>
       <h2>Search recordings</h2>
