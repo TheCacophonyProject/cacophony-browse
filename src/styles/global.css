@@ -3,6 +3,7 @@ h1 {
     margin: 1.5rem 0;
 }
 
+.logo,
 .navbar-light .navbar-brand a {
   width: 220px;
   height: 46px;
@@ -25,3 +26,5 @@ h1 {
 .page-item.active .page-link {
   z-index: 0;
 }
+
+@import "login-register.css";

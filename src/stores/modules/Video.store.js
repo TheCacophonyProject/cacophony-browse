@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import api from '../../api';
 import store from '../index';
 
@@ -19,9 +20,8 @@ const getters = {
     tags.map((tag) => {
       const tagItem = {};
       if (tag.animal) {
-        tagItem.animal = tag.animal;
+        tagItem.animal = tag.animal;       
       }
-
       tagItem.event = tag.event;
       if (tag.confidence) {
         tagItem.confidence = tag.confidence.toFixed(2);
@@ -37,7 +37,34 @@ const getters = {
       tagItems.push(tagItem);
     });
     return tagItems;
-  }
+  },
+  getAudioTagItems(state){
+    const tags = state.recording.Tags;
+    const tagItems = [];
+    tags.map((tag) => {
+      const tagItem = {};
+      tagItem.event = tag.event;
+      if (tag.event == "AUDIO") {
+        // check for optional fields
+        if (tag.tagId){
+          tagItem.id = tag.id;
+        }
+        if (tag.recordingId){
+          tagItem.recordingId = tag.recordingId;
+        }        
+        // compulsory fields        
+        tagItem.tagValue = tag.tagValue;        
+        tagItem.startTime = tag.startTime;
+        tagItem.duration = tag.duration;
+        tagItem.confidence = tag.confidence;
+        tagItem.automatic = tag.automatic;
+        tagItem.schemaVersion = tag.schemaVersion;
+        tagItem.when = new Date(tag.createdAt).toLocaleString();
+        tagItem.who = tag.tagger;
+      }
+    });
+    return tagItems;
+  },
 };
 
 const getRecording = async function(commit, recordingId) {

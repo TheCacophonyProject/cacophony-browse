@@ -5,4 +5,5 @@ const config = {
   'api': "http://mocked-api-path"
 };
 
+config.tagVersion = 100;
 export default config;

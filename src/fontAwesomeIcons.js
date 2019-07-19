@@ -28,6 +28,7 @@ import {
   faPowerOff,
   faSearch,
   faTimes,
+  faPlay
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCaretSquareDown,
@@ -81,6 +82,7 @@ library.add(
   faFileAudio,
   faSearch,
   faTimes,
+  faPlay
 );
 
 export default FontAwesomeIcon;
