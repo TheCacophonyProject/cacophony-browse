@@ -420,6 +420,7 @@ export default {
   }
 
   .video-container {
+    margin: 0 auto;
     position: relative;
     width: 100%;
     padding: 0;
