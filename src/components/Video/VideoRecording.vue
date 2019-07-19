@@ -8,7 +8,9 @@
         :video-url="videoUrl"
         :tracks="orderedTracks()"
         :current-track="selectedTrack"
-        :colours="colours"/>
+        :colours="colours"
+        @trackSelected="trackSelected($event)"
+      />
       <PrevNext
         :recording="recording"
         @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>

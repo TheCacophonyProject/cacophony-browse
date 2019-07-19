@@ -190,6 +190,7 @@ export default {
   .track-title {
     padding-left: 0px;
     padding-right: 0px;
+    cursor: pointer;
   }
 
   .selected-false {

@@ -1,7 +1,7 @@
 <template>
   <div
     ref="container"
-    class="container">
+    class="video-container">
     <canvas
       ref="canvas"
       :width="canvasWidth"
@@ -14,7 +14,34 @@
       class="video vjs-custom-skin"
       @seeking="seeking"
       @play="draw"
+      @statechanged="stateChange"
       @ready="selectTrack"/>
+    <div
+      v-if="tracks && duration"
+      ref="scrubber"
+      :style="{
+        height: `${(10 * tracks.length) + 10}px`
+      }"
+      class="track-scrubber"
+    >
+      <div
+        v-for="(track, index) in tracks"
+        :key="index"
+        :style="{
+          background: colours[index % colours.length],
+          top: `${index * 10}px`,
+          width: getWidthForTrack(track),
+          left: getOffsetForTrack(track)
+        }"
+        class="scrub-track"
+      />
+      <div
+        :style="{
+          right: `${canvasWidth - getOffsetForTime(currentVideoTime)}px`,
+        }"
+        class="playhead"
+      />
+    </div>
   </div>
 </template>
 
@@ -45,10 +72,12 @@ export default {
     }
   },
   data () {
+    // Seems like we should wait until track data and video data has loaded to play video?
     return {
       lastDisplayedVideoTime: 0,
       currentVideoTime: 0,
       lastTrackFrame: 0,
+      duration: 0,
       playerOptions: {
         autoplay: true,
         muted: true,
@@ -72,8 +101,12 @@ export default {
     currentTrack: function() {
       this.selectTrack();
     },
-    tracks: function() {
+    tracks: function(tracks) {
+      for (let i = 0; i < tracks.length; i++) {
+        tracks[i].trackIndex = i;
+      }
       this.selectTrack();
+      this.maybeInitScrubber();
     }
   },
   mounted: function () {
@@ -86,6 +119,125 @@ export default {
     window.removeEventListener('resize', this.onResize);
   },
   methods: {
+    stateChange(event) {
+      if (event.hasOwnProperty('canplay') && event.canplay) {
+        // Try to get the video length:
+        this.duration = document.getElementsByTagName('video')[0].duration;
+        this.maybeInitScrubber();
+      }
+    },
+    maybeInitScrubber() {
+      if (this.tracks && this.duration && this.tracks.length) {
+        this.$nextTick(() => {
+          const scrubber = this.$refs.scrubber;
+          const canvas = this.$refs.canvas;
+          const passive = { passive: false };
+          let wasPaused = false;
+
+          const touchMove = (event) => {
+            event.preventDefault();
+            const x = event.targetTouches[0].x - scrubber.getBoundingClientRect().x;
+            const timeOffset = x / this.canvasWidth;
+            this.setTimeAndRedraw(timeOffset * this.duration);
+          };
+
+          const touchEnd = (event) => {
+            event.preventDefault();
+            if (!wasPaused) {
+              this.$refs.player.player.play();
+            }
+            window.removeEventListener('touchend', touchEnd);
+            window.removeEventListener('touchmove', touchMove);
+          };
+
+          scrubber.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            const player = this.$refs.player;
+            const htmlPlayer = player.$refs.video;
+            wasPaused = htmlPlayer.paused;
+            if (!wasPaused) {
+              player.player.pause();
+            }
+            touchMove(event);
+            window.addEventListener('touchmove', touchMove, passive);
+            window.addEventListener('touchend', touchEnd, passive);
+          }, passive);
+
+          const mouseMove = (event) => {
+            event.preventDefault();
+            const x = event.x - scrubber.getBoundingClientRect().x;
+            const timeOffset = x / this.canvasWidth;
+            this.setTimeAndRedraw(timeOffset * this.duration);
+          };
+
+          const mouseEnd = (event) => {
+            event.preventDefault();
+            if (!wasPaused) {
+              this.$refs.player.player.play();
+            }
+            window.removeEventListener('mouseup', mouseEnd);
+            window.removeEventListener('mousemove', mouseMove);
+          };
+
+          scrubber.addEventListener('mousedown', (event) => {
+            event.preventDefault();
+            const player = this.$refs.player;
+            const htmlPlayer = player.$refs.video;
+            wasPaused = htmlPlayer.paused;
+            if (!wasPaused) {
+              player.player.pause();
+            }
+            mouseMove(event);
+            window.addEventListener('mousemove', mouseMove);
+            window.addEventListener('mouseup', mouseEnd);
+          }, passive);
+
+          const hitTestPos = (x, y) => {
+            const allFrameData = this.getVideoFrameDataForAllTracksAtTime(this.currentVideoTime);
+            for (const rect of allFrameData) {
+              if (
+                (rect.x <= x && rect.x + rect.rectWidth > x) &&
+                (rect.y <= y && rect.y + rect.rectHeight > y)
+              ) {
+                return rect;
+              }
+            }
+            return null;
+          };
+
+          canvas.addEventListener('click', function (event) {
+            const canvasOffset = canvas.getBoundingClientRect();
+            const x = event.x - canvasOffset.x;
+            const y = event.y - canvasOffset.y;
+            const hitRect = hitTestPos(x, y);
+            if (hitRect) {
+              this.$emit('trackSelected', hitRect.trackIndex);
+            }
+          }.bind(this));
+
+          canvas.addEventListener('mousemove', (event) => {
+            const canvasOffset = canvas.getBoundingClientRect();
+            const x = event.x - canvasOffset.x;
+            const y = event.y - canvasOffset.y;
+            const hitRect = hitTestPos(x, y);
+            // set cursor
+            canvas.style.cursor = hitRect !== null ? 'pointer' : 'default';
+          });
+        });
+      }
+    },
+    getWidthForTrack(track) {
+      const trackDuration = track.data.end_s - track.data.start_s;
+      const ratio = trackDuration / this.duration;
+      return `${ratio * this.canvasWidth}px`;
+    },
+    getOffsetForTrack(track) {
+      return `${this.getOffsetForTime(track.data.start_s)}px`;
+    },
+    getOffsetForTime(time) {
+      const pixelsPerSecond = this.canvasWidth / this.duration;
+      return pixelsPerSecond * time;
+    },
     setVideoUrl() {
       // first must make sure the width to be loaded is also correct.
       this.playerOptions.width = this.canvasWidth + "px";
@@ -103,9 +255,9 @@ export default {
     onResize() {
       const oldWidth = this.canvasWidth;
       this.calculateSizes();
-      if (oldWidth != this.canvasWidth) {
+      if (oldWidth !== this.canvasWidth) {
         this.currentVideoTime += 10;
-        this.draw(true);
+        this.draw();
       }
     },
     calculateSizes() {
@@ -114,6 +266,16 @@ export default {
       this.canvasHeight = (this.scale * 120) + 30;
       this.$refs.player.player.width(this.canvasWidth);
       this.$refs.player.player.height(this.canvasHeight);
+
+      // Make canvas be sharp on retina displays:
+      const canvas = this.$refs.canvas;
+      const context = canvas.getContext('2d');
+      const devicePixelRatio = window.devicePixelRatio;
+      canvas.width = this.canvasWidth * devicePixelRatio;
+      canvas.height = this.canvasHeight * devicePixelRatio;
+      canvas.style.width = this.canvasWidth + "px";
+      canvas.style.height = this.canvasHeight + "px";
+      context.scale(devicePixelRatio, devicePixelRatio);
     },
     setTimeAndRedraw(time) {
       this.lastTrackFrame = 0;
@@ -127,96 +289,96 @@ export default {
         this.draw();
       }
     },
-    displayText(context, text, rectWidth, rectHeight) {
-      context.font = '12px Verdana';
-      context.fillStyle = 'white';
+    drawRectWithText(context, {trackIndex, rectWidth, rectHeight, x, y}) {
+      context.strokeStyle = this.colours[trackIndex % this.colours.length];
+      const lineWidth = trackIndex === this.currentTrack ? 3 : 1;
+      const halfLineWidth = lineWidth / 2;
+      context.lineWidth = lineWidth;
+      context.strokeRect(
+        x - halfLineWidth,
+        y - halfLineWidth,
+        rectWidth + halfLineWidth,
+        rectHeight + halfLineWidth
+      );
+      const selected = trackIndex === this.currentTrack;
+      if (selected) {
+        context.font = '12px Verdana';
+        context.fillStyle = 'white';
+        const text = `Track ${trackIndex + 1}`;
+        const textHeight = 12;
+        const textWidth = context.measureText(text).width;
 
-      const textHeight = 12;
-      const textWidth = context.measureText(text).width;
-
-      // TODO Determine if the box can be shown right at the bottom of the screen
-      // if it can then we probably need to detect this and display the text above
-      // or inside the box.
-      const x = rectWidth - textWidth;
-      const y = rectHeight + textHeight;
-      context.fillText(text, x, y);
-    },
-    displayBox(context, width, height) {
-      context.beginPath();
-      context.rect(-2, -2, width + 2, height + 2);
-      context.strokeStyle = this.colours[this.currentTrack % this.colours.length];
-      context.lineWidth = 3;
-      context.stroke();
-    },
-    getCurrentVideoFrameData(currentTime) {
-      if (!this.tracks || this.tracks.length == 0) {
-        return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
+        // TODO Determine if the box can be shown right at the bottom of the screen
+        // if it can then we probably need to detect this and display the text above
+        // or inside the box.
+        const textX = x  + (rectWidth - textWidth);
+        const textY = y + (rectHeight + textHeight);
+        context.fillText(text, textX, textY);
       }
-
-      const trackPos = this.tracks[this.currentTrack].data.positions;
-      if (currentTime < trackPos[this.lastTrackFrame][0]) {
-        this.lastTrackFrame = 0;
-      }
-
-      for (let i = this.lastTrackFrame + 1; i < trackPos.length; i++) {
-        if (currentTime > trackPos[i][0]) {
-          this.lastTrackFrame = i;
-        } else {
-          break;
+    },
+    getVideoFrameDataForAllTracksAtTime(currentTime) {
+      const search = (positions, currentTime) => {
+        // TODO(jon): Optimise this lookup, binary search?
+        // Probably doesn't really matter
+        let i = positions.length - 1;
+        while (positions[i][0] > currentTime) {
+          i--;
         }
-      }
-
-      if (this.lastTrackFrame == 0 && currentTime < trackPos[0][0]) {
-        return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
-      }
-
-      if (this.lastTrackFrame == trackPos.length - 1 && currentTime > trackPos[this.lastTrackFrame][0] + 0.112) {
-        return {rectWidth: 0, rectHeight: 0, x: 0, y: 0, text:""};
-      }
-      const rect = trackPos[this.lastTrackFrame][1];
-      const rectWidth = rect[2] - rect[0];
-      const rectHeight = rect[3] - rect[1];
-      const x = rect[0];
-      const y = rect[1];
-      const text = `Track ${this.currentTrack + 1}`;
-
-      return {rectWidth, rectHeight, x, y, text};
+        return positions[i];
+      };
+      // First check if the last position we got is still the current position?
+      // See if tracks are in range.
+      return (
+        this.tracks
+          .filter(({data: {start_s, end_s}}) => (
+            start_s <= currentTime && end_s >= currentTime
+          ))
+          .map(({data: {positions}, trackIndex}) => {
+            const item = search(positions, currentTime)[1];
+            return {
+              rectWidth: (item[2] - item[0]) * this.scale,
+              rectHeight: (item[3] - item[1]) * this.scale,
+              x: item[0] * this.scale,
+              y: item[1] * this.scale,
+              trackIndex,
+            };
+          })
+      );
     },
-    shouldDraw() {
+    draw() {
       const v = this.$refs.player;
-      if (v === undefined || v.paused || v.ended) {
-        return false;
-      }
-      this.draw(false);
-    },
-    draw(mustRedraw) {
-      const v = this.$refs.player;
-      this.currentVideoTime = v.player.currentTime();
-
       // Only update the canvas if the video time has changed as this means a new
       // video frame is being displayed.
-      if (mustRedraw || (v.player.currentTime() !== this.lastDisplayedVideoTime)) {
-        const frameData = this.getCurrentVideoFrameData(v.player.currentTime());
+      const frameTime = 1 / 9;
+      const currentFrame = Math.floor(v.player.currentTime() / frameTime);
+      // NOTE: Since our video is 9fps, we're don't need to update this at 60fps.
+      this.isScrubbing = false;
+      if (v && currentFrame !== this.lastDisplayedVideoTime || this.isScrubbing) {
+        this.currentVideoTime = v.player.currentTime();
 
+        if (this.$refs.playhead) {
+          this.$refs.playhead.style.right = `${this.canvasWidth - this.getOffsetForTime(this.currentVideoTime)}px`;
+        }
+        const allFrameData = this.getVideoFrameDataForAllTracksAtTime(v.player.currentTime());
         const canvas = this.$refs.canvas;
         const context = canvas.getContext('2d');
-        const ss = this.scale;
+        const devicePixelRatio = window.devicePixelRatio;
+        canvas.width = this.canvasWidth * devicePixelRatio;
+        canvas.height = this.canvasHeight * devicePixelRatio;
+        canvas.style.width = this.canvasWidth + "px";
+        canvas.style.height = this.canvasHeight + "px";
+        context.scale(devicePixelRatio, devicePixelRatio);
 
         // Clear the canvas before each new frame
         context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-
-        // Translate the context so the top left corner of the rectangle is always (0,0)
-        context.save();
-        if (frameData) {
-          context.translate(frameData.x * ss, frameData.y * ss);
-          this.displayBox(context, frameData.rectWidth * ss, frameData.rectHeight * ss);
-          this.displayText(context, frameData.text, frameData.rectWidth * ss, frameData.rectHeight * ss);
+        if (allFrameData.length) {
+          for (const rect of allFrameData) {
+            this.drawRectWithText(context, rect);
+          }
         }
-        context.restore();
-
-        this.lastDisplayedVideoTime = v.player.currentTime();
+        this.lastDisplayedVideoTime = currentFrame;
       }
-      requestAnimationFrame(this.shouldDraw);
+      requestAnimationFrame(this.draw);
     },
   },
 };
@@ -257,11 +419,25 @@ export default {
     z-index: 900;
   }
 
-  .container {
+  .video-container {
     position: relative;
     width: 100%;
     padding: 0;
   }
 
+  .track-scrubber {
+    position: relative;
+    background: #2B333F;
+  }
+  .scrub-track {
+    position: absolute;
+    height: 10px;
+  }
+  .playhead {
+    height: 100%;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.35);
+    left: 0;
+  }
 </style>
 <style src="video.js/dist/video-js.css"></style>
