@@ -1,4 +1,3 @@
-<script src="../../webpack/webpack.dev.js"></script>
 <template>
   <b-container fluid>
     <b-row>
@@ -127,10 +126,50 @@ export default {
       const numAnimals = query.tags.length;
       const multipleAnimalSuffix = numAnimals > 1 ? 's' : '';
       const tagsText = numAnimals === 0 ? 'all animals' : `${numAnimals} animal${multipleAnimalSuffix}`;
-      const timespan = 'last 24 hours';
+      let timespan = 'last 24 hours';
+      const isCustom = query.where.dateRange.isCustom;
+      const relativeDateRange = Number(query.where.dateRange.relativeDateRange);
+      switch (relativeDateRange) {
+      case -1:
+        timespan = 'last 24 hours';
+        break;
+      case -3:
+        timespan = 'last 3 days';
+        break;
+      case -7:
+        timespan = 'last 7 days';
+        break;
+      }
+      const formatDate = (str) => {
+        str = str.replace(', ', '-');
+        const date = new Date();
+        let parts = str.split('-').map(str => str.trim());
+        let time = [];
+        const lastPart = parts.pop().split(' ').map(str => str.trim());
+        parts.push(lastPart.shift());
+        parts = parts.map(Number);
+        date.setFullYear(parts[0]);
+        date.setMonth(parts[1] - 1);
+        date.setDate(parts[2]);
+        if (lastPart.length) {
+          time = lastPart[0].split(":").map(Number);
+          date.setHours(time[0]);
+          date.setMinutes(time[1]);
+        }
+        return date.toLocaleString();
+      };
+      console.log(
+        query.where.recordingDateTime,
+        'from ', formatDate(query.where.recordingDateTime['$gt']),
+        'to', formatDate(query.where.recordingDateTime['$lt'])
+      );
+      timespan = !isCustom ?
+        `in the <strong>${timespan}</strong>` :
+        `between <strong>${formatDate(query.where.recordingDateTime['$gt'])}</strong> ` +
+        `and <strong>${formatDate(query.where.recordingDateTime['$lt'])}</strong>`;
       return (
-        `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> in ` +
-        `the <strong>${timespan}</strong>`
+        `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
+        `${timespan}`
       );
     }
   },
@@ -206,6 +245,13 @@ export default {
         if (!target.where.recordingDateTime) {
           this.$set(target.where, 'recordingDateTime', {});
         }
+        if (!target.where.dateRange) {
+          this.$set(target.where, 'dateRange', {});
+        } else {
+          if (target.where.dateRange === 'customDateRange') {
+            this.$set(target.where, 'dateRange', {isCustom: true});
+          }
+        }
         if (!target.where.hasOwnProperty('DeviceId')) {
           this.$set(target.where, 'DeviceId', []);
         }
@@ -231,11 +277,38 @@ export default {
     serialiseQuery(query, useForApiCall = false) {
       const where = {};
       where.type = query.where.type;
-      this.addIfSet(where, query.where.recordingDateTime["$gt"], "recordingDateTime", "$gt");
-      this.addIfSet(where, query.where.recordingDateTime["$lt"], "recordingDateTime", "$lt");
+      if (query.where.hasOwnProperty('dateRange')) {
+        // If it's a custom range, that can be inferred by the presence of recordingDateTime.
+        // Otherwise, we'll synthesise recordingDateTime here from relative time.
+        if (query.where.dateRange.hasOwnProperty('relativeDateRange')) {
+          const padLeft = (str, char, len) => {
+            while (str.length < len) {
+              str = `${char}${str}`;
+            }
+            return str;
+          };
+          const formatDate = (date) => (
+            `${date.getFullYear()}, ${padLeft(date.getMonth() + 1, '0', 2)}, ${padLeft(date.getDate(), '0', 2)} ${padLeft(date.getHours(), '0', 2)}:${padLeft(date.getMinutes(), '0', 2)}:${padLeft(date.getSeconds(), '0', 2)}`
+          );
+          const now = new Date();
+          const oneDay = 1000 * 60 * 60 * 24;
+          const relativeRangeDays = parseInt(query.where.dateRange.relativeDateRange);
+          // Add time here, since relative date is negative
+          const past = new Date(now.getTime() + (relativeRangeDays * oneDay));
+          where.dateRange = {relativeDateRange: relativeRangeDays};
+          where.recordingDateTime = {
+            "$lt": formatDate(now),
+            "$gt": formatDate(past),
+          };
+        } else if (query.where.hasOwnProperty('recordingDateTime')) {
+          where.dateRange = 'customDateRange';
+          // assume custom dateRange
+          this.addIfSet(where, query.where.recordingDateTime["$gt"], "recordingDateTime", "$gt");
+          this.addIfSet(where, query.where.recordingDateTime["$lt"], "recordingDateTime", "$lt");
+        }
+      }
       this.addIfSet(where, query.where.duration["$gte"], "duration", "$gte");
       this.addIfSet(where, query.where.duration["$lte"], "duration", "$lte");
-
       // add devices and devices from groups
       if (query.where.DeviceId.length !== 0) {
         const deviceIds = [];
@@ -285,6 +358,7 @@ export default {
         // Remove the group param, since the API doesn't handle that, we're just using
         // it to accurately share search parameters via urls.
         delete where.DeviceGroups;
+        delete where.dateRange;
       }
 
       // Work out current pagination offset.
