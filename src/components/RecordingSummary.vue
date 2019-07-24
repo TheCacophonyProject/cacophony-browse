@@ -195,6 +195,7 @@ export default {
       }
       .recording-title {
         margin-bottom: 0;
+        font-size: 110%;
       }
       .recording-group,
       .recording-device {
@@ -261,6 +262,8 @@ export default {
   // map
   .recording-location {
     flex: 0 1 110px;
+    min-width: 109px;
+    text-align: center;
     background: $gray-100;
     @include media-breakpoint-between(xs,sm) {
       display: none;
