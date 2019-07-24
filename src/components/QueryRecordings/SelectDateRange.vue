@@ -31,11 +31,6 @@ export default {
         { value: { isCustom: true }, text: "Custom range" },
       ]
     };
-  },
-  computed: {
-    isCustomRange() {
-      return this.value.hasOwnProperty('isCustom');
-    }
-  },
+  }
 };
 </script>

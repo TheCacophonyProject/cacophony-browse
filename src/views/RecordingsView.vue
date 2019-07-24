@@ -95,6 +95,7 @@ export default {
     return {
       query: this.resetQuery(),
       queryPending: false,
+      lastQuery: null,
       searchPanelIsCollapsed: true,
       recordings: [],
       tableItems: [],
@@ -116,62 +117,70 @@ export default {
   computed: {
     searchDescription() {
       // Get the current search query, not the live updated one.
-      const query = this.resetQuery();
-      this.deserialiseRouteIntoQuery(this.$route.query, query);
-      const numDevices = query.where.DeviceId.length;
-      const multipleDeviceSuffix = numDevices > 1 ? 's' : '';
-      const devices = numDevices !== 0 ? `${numDevices} device${multipleDeviceSuffix}` : 'All devices';
-      query.where.type = query.where.type || 'both';
-      const recordings = query.where.type === 'both' ? 'audio and video' : query.where.type;
-      const numAnimals = query.tags.length;
-      const multipleAnimalSuffix = numAnimals > 1 ? 's' : '';
-      const tagsText = numAnimals === 0 ? 'all animals' : `${numAnimals} animal${multipleAnimalSuffix}`;
-      let timespan = 'last 24 hours';
-      const isCustom = query.where.dateRange.isCustom;
-      const relativeDateRange = Number(query.where.dateRange.relativeDateRange);
-      switch (relativeDateRange) {
-      case -1:
-        timespan = 'last 24 hours';
-        break;
-      case -3:
-        timespan = 'last 3 days';
-        break;
-      case -7:
-        timespan = 'last 7 days';
-        break;
-      }
-      const formatDate = (str) => {
-        str = str.replace(', ', '-');
-        const date = new Date();
-        let parts = str.split('-').map(str => str.trim());
-        let time = [];
-        const lastPart = parts.pop().split(' ').map(str => str.trim());
-        parts.push(lastPart.shift());
-        parts = parts.map(Number);
-        date.setFullYear(parts[0]);
-        date.setMonth(parts[1] - 1);
-        date.setDate(parts[2]);
-        if (lastPart.length) {
-          time = lastPart[0].split(":").map(Number);
-          date.setHours(time[0]);
-          date.setMinutes(time[1]);
+      if (this.lastQuery !== null) {
+        const query = this.lastQuery;
+        const numDevices = query.where.DeviceId.length;
+        const multipleDeviceSuffix = numDevices > 1 ? 's' : '';
+        const devices = numDevices !== 0 ? `${numDevices} device${multipleDeviceSuffix}` : 'All devices';
+        query.where.type = query.where.type || 'both';
+        const recordings = query.where.type === 'both' ? 'audio and video' : query.where.type;
+        const numAnimals = query.tags.length;
+        const multipleAnimalSuffix = numAnimals > 1 ? 's' : '';
+        const tagsText = numAnimals === 0 ? 'all animals' : `${numAnimals} animal${multipleAnimalSuffix}`;
+        let timespan = 'last 24 hours';
+        const isCustom = (query.where.dateRange && query.where.dateRange.isCustom);
+        const relativeDateRange = Number(query.where.dateRange.relativeDateRange);
+        switch (relativeDateRange) {
+        case -1:
+          timespan = 'last 24 hours';
+          break;
+        case -3:
+          timespan = 'last 3 days';
+          break;
+        case -7:
+          timespan = 'last 7 days';
+          break;
         }
-        return date.toLocaleString();
-      };
-      console.log(
-        query.where.recordingDateTime,
-        'from ', formatDate(query.where.recordingDateTime['$gt']),
-        'to', formatDate(query.where.recordingDateTime['$lt'])
-      );
-      timespan = !isCustom ?
-        `in the <strong>${timespan}</strong>` :
-        `between <strong>${formatDate(query.where.recordingDateTime['$gt'])}</strong> ` +
-        `and <strong>${formatDate(query.where.recordingDateTime['$lt'])}</strong>`;
-      return (
-        `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
-        `${timespan}`
-      );
-    }
+
+        const duration = query.where.duration;
+        const durationFrom = duration.hasOwnProperty('$gte') && Number(duration['$gte']);
+        const durationTo = duration.hasOwnProperty('$lte') && Number(duration['$lte']);
+        let durationStr = '';
+        if (durationFrom !== false && durationTo !== false && durationTo !== 0) {
+          durationStr = ` with durations <strong>${durationFrom}</strong>&nbsp;&ndash;&nbsp;<strong>${durationTo}s</strong>`;
+        }
+
+        const formatDate = (str, addDays) => {
+          str = str.replace(', ', '-');
+          const date = new Date();
+          let parts = str.split('-').map(str => str.trim());
+          let time = [];
+          const lastPart = parts.pop().split(' ').map(str => str.trim());
+          parts.push(lastPart.shift());
+          parts = parts.map(Number);
+          date.setFullYear(parts[0]);
+          date.setMonth(parts[1] - 1);
+          date.setDate(parts[2] + addDays);
+          if (lastPart.length) {
+            time = lastPart[0].split(":").map(Number);
+            date.setHours(time[0]);
+            date.setMinutes(time[1]);
+            date.setSeconds(time[2]);
+          }
+          return date.toLocaleDateString('en-NZ').split(',')[0];
+        };
+        timespan = !isCustom ?
+          `in the <strong>${timespan}</strong>` :
+          `between <strong>${formatDate(query.where.recordingDateTime['$gt'], 0)}</strong>&nbsp;` +
+          `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
+        return (
+          `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
+          `${timespan}${durationStr}`
+        );
+      } else {
+        return '';
+      }
+    },
   },
   watch: {
     '$route' () {
@@ -196,6 +205,9 @@ export default {
             "$gt": "",
             "$lt": ""
           },
+          dateRange: {
+            relativeDateRange: -1,
+          }
         },
         tagMode: 'any',
         tags: [],
@@ -228,6 +240,7 @@ export default {
     },
     updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
+      this.lastQuery = JSON.parse(JSON.stringify(this.query));
       this.$router.push({
         path: 'recordings',
         query: this.serialiseQuery(this.query),

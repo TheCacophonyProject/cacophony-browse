@@ -43,8 +43,6 @@
             title="To Date"/>
         </b-col>
       </b-form-row>
-      <SelectDuration
-        v-model="duration"/>
       <b-form-row>
         <b-col>
           <b-button
@@ -64,6 +62,10 @@
           </b-button>
         </b-col>
       </b-form-row>
+      <SelectDuration
+        v-if="advanced"
+        v-model="duration"
+      />
       <SelectTagTypes
         v-if="advanced"
         v-model="tagTypes"

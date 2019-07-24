@@ -27,4 +27,9 @@ h1 {
   z-index: 0;
 }
 
+.custom-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
 @import "login-register.css";
