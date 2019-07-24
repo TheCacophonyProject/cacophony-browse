@@ -75,7 +75,7 @@
         :disabled="disabled"
         block
         variant="primary"
-        @click="() => $emit('submit')"
+        @click="submit"
       >
         <span v-if="!disabled">Search</span>
         <span v-else>Searching...</span>
@@ -228,6 +228,10 @@ export default {
     },
   },
   methods: {
+    submit: function () {
+      this.$emit('submit');
+      this.toggleSearchPanel();
+    },
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
     toggleAdvancedSearch: function () {
       this.advanced = !this.advanced;
