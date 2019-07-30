@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="item.kind == 'dataRow'"
     class="recording-summary"
     @click="e => navigateToRecording(item.id)"
   >
@@ -105,10 +106,25 @@
       </a>
     </div>
   </div>
+  <div v-else>
+    <h2>{{ relativeDay }}</h2>
+  </div>
 </template>
 
 <script>
 import BatteryLevel from "./BatteryLevel.vue";
+
+const roundDate = (date, toHour = false) => {
+  const d = new Date(date.getTime());
+  d.setSeconds(0);
+  d.setMinutes(0);
+  d.setMilliseconds(0);
+  if (!toHour) {
+    d.setHours(0);
+  }
+  return d;
+};
+
 export default {
   name: "RecordingSummary",
   components: {BatteryLevel},
@@ -125,6 +141,24 @@ export default {
     window: {
       get() {
         return window;
+      }
+    },
+    relativeDay() {
+      let todayDate = new Date();
+      const today = roundDate(todayDate);
+      const date = roundDate(this.item.date).getTime();
+      const dateWithHours = roundDate(this.item.date, true);
+
+      todayDate.setDate(todayDate.getDate() - 1);
+      const yesterday = roundDate(todayDate);
+      const hours = dateWithHours.getHours() + 1;
+      const hoursString = `${hours < 12 ? hours : hours - 13}${hours < 12 ? 'am' : 'pm'}`;
+      if (date === today.getTime()) {
+        return `Today, ${hoursString}`;
+      } else if (date === yesterday.getTime()) {
+        return `Yesterday, ${hoursString}`;
+      } else {
+        return `${this.item.date.toLocaleDateString()}, ${hoursString}`;
       }
     }
   },

@@ -87,6 +87,17 @@ import TableRecordings from '../components/TableRecordings.vue';
 import RecordingSummary from "../components/RecordingSummary.vue";
 import api from '../api/index';
 
+const roundDate = (date, toHour = false) => {
+  const d = new Date(date.getTime());
+  d.setSeconds(0);
+  d.setMinutes(0);
+  d.setMilliseconds(0);
+  if (!toHour) {
+    d.setHours(0);
+  }
+  return d;
+};
+
 export default {
   name: 'RecordingsView',
   components: {RecordingSummary, QueryRecordings, TableRecordings},
@@ -418,19 +429,32 @@ export default {
         } else if (result.count === 0) {
           this.countMessage = 'No matches';
         }
-        this.tableItems = result.rows.map((row) => ({
-          id: row.id,
-          type: row.type,
-          devicename: row.Device.devicename,
-          groupname: row.Group.groupname,
-          location: this.parseLocation(row.location),
-          date: new Date(row.recordingDateTime).toLocaleDateString('en-NZ'),
-          time: new Date(row.recordingDateTime).toLocaleTimeString(),
-          duration: row.duration,
-          tags: this.collateTags(row.Tags, row.Tracks),
-          other: this.parseOther(row),
-          processing_state: this.parseProcessingState(row.processingState)
-        }));
+        // New day, new hour.
+        let prevDate = new Date();
+        for (const row of result.rows) {
+          const thisDate = new Date(row.recordingDateTime);
+          if (roundDate(thisDate, true).getTime() !== roundDate(prevDate, true).getTime()) {
+            this.tableItems.push({
+              kind: 'dataSeparator',
+              date: thisDate,
+            });
+            prevDate = thisDate;
+          }
+          this.tableItems.push({
+            kind: 'dataRow',
+            id: row.id,
+            type: row.type,
+            devicename: row.Device.devicename,
+            groupname: row.Group.groupname,
+            location: this.parseLocation(row.location),
+            date: thisDate.toLocaleDateString('en-NZ'),
+            time: thisDate.toLocaleTimeString(),
+            duration: row.duration,
+            tags: this.collateTags(row.Tags, row.Tracks),
+            other: this.parseOther(row),
+            processing_state: this.parseProcessingState(row.processingState)
+          });
+        }
       }
     },
     parseLocation(location) {
