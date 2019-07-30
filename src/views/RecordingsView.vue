@@ -102,7 +102,7 @@ export default {
       count: null,
       countMessage: null,
       currentPage: null,
-      perPage: 300,
+      perPage: 100,
       limitPaginationButtons: 5,
       perPageOptions: [
         {value: 10, text: "10 per page"},
@@ -127,19 +127,13 @@ export default {
         const numAnimals = query.tags.length;
         const multipleAnimalSuffix = numAnimals > 1 ? 's' : '';
         const tagsText = numAnimals === 0 ? 'all animals' : `${numAnimals} animal${multipleAnimalSuffix}`;
-        let timespan = 'last 24 hours';
         const isCustom = (query.where.dateRange && query.where.dateRange.isCustom);
-        const relativeDateRange = Number(query.where.dateRange.relativeDateRange);
-        switch (relativeDateRange) {
-        case -1:
+        const relativeDateRange = Math.abs(Number(query.where.dateRange.relativeDateRange));
+        let timespan;
+        if (relativeDateRange === 1) {
           timespan = 'last 24 hours';
-          break;
-        case -3:
-          timespan = 'last 3 days';
-          break;
-        case -7:
-          timespan = 'last 7 days';
-          break;
+        } else {
+          timespan = `last ${relativeDateRange} days`;
         }
 
         const duration = query.where.duration;

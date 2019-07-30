@@ -41,9 +41,9 @@ export default {
   data () {
     return {
       options: [
-        { value: { low: "0", high: "10" }, text: "Short (<10 seconds)" },
-        { value: { low: "10", high: "60" }, text: "Medium (10 seconds - 1 minute)" },
-        { value: { low: "60", high: "" }, text: "Long (> 1 minute)" },
+        { value: { low: "0", high: "20" }, text: "Short (<20 seconds)" },
+        { value: { low: "20", high: "120" }, text: "Medium (20 seconds - 2 minutes)" },
+        { value: { low: "120", high: "" }, text: "Long (> 2 minutes)" },
         { value: { isCustom: true, low: "0", high: "" }, text: "Custom duration" },
       ],
     };
