@@ -434,10 +434,14 @@ export default {
         for (const row of result.rows) {
           const thisDate = new Date(row.recordingDateTime);
           if (roundDate(thisDate, true).getTime() !== roundDate(prevDate, true).getTime()) {
-            this.tableItems.push({
+            const item = {
               kind: 'dataSeparator',
-              date: thisDate,
-            });
+              hour: thisDate,
+            };
+            if (roundDate(thisDate).getTime() !== roundDate(prevDate).getTime()) {
+              item.date = thisDate;
+            }
+            this.tableItems.push(item);
             prevDate = thisDate;
           }
           this.tableItems.push({
