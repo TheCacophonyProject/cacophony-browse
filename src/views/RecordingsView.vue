@@ -41,11 +41,25 @@
             v-if="!queryPending"
             class="results"
           >
-            <RecordingSummary
-              v-for="(item, index) in tableItems"
-              :item="item"
+            <div
+              v-for="(itemsByDay, index) in tableItemsChunkedByDayAndHour"
               :key="index"
-            />
+            >
+              <div>
+                <h2>{{ relativeDay(itemsByDay[0][0].dateObj) }}</h2>
+              </div>
+              <div
+                v-for="(itemsByHour, index) in itemsByDay"
+                :key="index"
+              >
+                <h3>{{ hour(itemsByHour[index].dateObj) }}</h3>
+                <RecordingSummary
+                  v-for="(item, index) in itemsByHour"
+                  :item="item"
+                  :key="index"
+                />
+              </div>
+            </div>
           </div>
           <div
             v-else
@@ -79,7 +93,6 @@
     </b-row>
   </b-container>
 </template>
-
 <script>
 
 import QueryRecordings from '../components/QueryRecordings/QueryRecordings.vue';
@@ -126,6 +139,24 @@ export default {
     };
   },
   computed: {
+    tableItemsChunkedByDayAndHour() {
+      const chunks = [];
+      let current = chunks;
+      for (const item of this.tableItems) {
+        if (item.kind === 'dataSeparator') {
+          if (item.hasOwnProperty('date')) {
+            chunks.push([]);
+            current = chunks[chunks.length - 1];
+          }
+          if (item.hasOwnProperty('hour')) {
+            current.push([]);
+          }
+        } else {
+          current[current.length - 1].push(item);
+        }
+      }
+      return chunks;
+    },
     searchDescription() {
       // Get the current search query, not the live updated one.
       if (this.lastQuery !== null) {
@@ -218,6 +249,25 @@ export default {
         tags: [],
         type: ''
       };
+    },
+    relativeDay(itemDate) {
+      const todayDate = new Date();
+      const today = roundDate(todayDate);
+      const date = roundDate(itemDate).getTime();
+      todayDate.setDate(todayDate.getDate() - 1);
+      const yesterday = roundDate(todayDate);
+      if (date === today.getTime()) {
+        return "Today";
+      } else if (date === yesterday.getTime()) {
+        return "Yesterday";
+      } else {
+        return `${itemDate.toLocaleDateString()}`;
+      }
+    },
+    hour(itemDate) {
+      const dateWithHours = roundDate(itemDate, true);
+      const hours = dateWithHours.getHours() + 1;
+      return `${hours < 12 ? hours : hours - 13}${hours < 12 ? 'am' : 'pm'}`;
     },
     resetPagination() {
       this.currentPage = 1;
@@ -451,6 +501,7 @@ export default {
             devicename: row.Device.devicename,
             groupname: row.Group.groupname,
             location: this.parseLocation(row.location),
+            dateObj: thisDate,
             date: thisDate.toLocaleDateString('en-NZ'),
             time: thisDate.toLocaleTimeString(),
             duration: row.duration,

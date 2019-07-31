@@ -1,6 +1,5 @@
 <template>
   <div
-    v-if="item.kind == 'dataRow'"
     class="recording-summary"
     @click="e => navigateToRecording(item.id)"
   >
@@ -106,25 +105,10 @@
       </a>
     </div>
   </div>
-  <div v-else>
-    <h2 v-if="item.date">{{ relativeDay }}</h2>
-    <h3>{{ hour }}</h3>
-  </div>
 </template>
 
 <script>
 import BatteryLevel from "./BatteryLevel.vue";
-
-const roundDate = (date, toHour = false) => {
-  const d = new Date(date.getTime());
-  d.setSeconds(0);
-  d.setMinutes(0);
-  d.setMilliseconds(0);
-  if (!toHour) {
-    d.setHours(0);
-  }
-  return d;
-};
 
 export default {
   name: "RecordingSummary",
@@ -143,25 +127,6 @@ export default {
       get() {
         return window;
       }
-    },
-    relativeDay() {
-      const todayDate = new Date();
-      const today = roundDate(todayDate);
-      const date = roundDate(this.item.date).getTime();
-      todayDate.setDate(todayDate.getDate() - 1);
-      const yesterday = roundDate(todayDate);
-      if (date === today.getTime()) {
-        return "Today";
-      } else if (date === yesterday.getTime()) {
-        return "Yesterday";
-      } else {
-        return `${this.item.date.toLocaleDateString()}`;
-      }
-    },
-    hour() {
-      const dateWithHours = roundDate(this.item.hour, true);
-      const hours = dateWithHours.getHours() + 1;
-      return `${hours < 12 ? hours : hours - 13}${hours < 12 ? 'am' : 'pm'}`;
     }
   },
   methods: {
