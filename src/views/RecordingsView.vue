@@ -26,16 +26,6 @@
               class="search-description"
               v-html="searchDescription"
             />
-            <div class="form-inline justify-content-end">
-              <b-form-select
-                id="recordsPerPage"
-                v-model="perPage"
-                :options="perPageOptions"
-                class="form-control-sm"
-                @input="pagination"
-              />
-            </div>
-
           </div>
           <div
             v-if="!queryPending"
@@ -45,14 +35,12 @@
               v-for="(itemsByDay, index) in tableItemsChunkedByDayAndHour"
               :key="index"
             >
-              <div>
-                <h2>{{ relativeDay(itemsByDay[0][0].dateObj) }}</h2>
-              </div>
+              <h4 class="recordings-day">{{ relativeDay(itemsByDay[0][0].dateObj) }}</h4>
               <div
                 v-for="(itemsByHour, index) in itemsByDay"
                 :key="index"
               >
-                <h3>{{ hour(itemsByHour[index].dateObj) }}</h3>
+                <h5 class="recordings-hour">{{ hour(itemsByHour[index].dateObj) }}</h5>
                 <RecordingSummary
                   v-for="(item, index) in itemsByHour"
                   :item="item"
@@ -80,14 +68,23 @@
           v-if="count > perPage"
           class="sticky-footer"
         >
-          <b-pagination
-            :total-rows="count"
-            v-model="currentPage"
-            :per-page="perPage"
-            :limit="limitPaginationButtons"
-            class="pagination-buttons"
-            @input="pagination"
-          />
+          <div class="pagination-per-page">
+            <b-form-select
+              id="recordsPerPage"
+              v-model="perPage"
+              :options="perPageOptions"
+              class="results-per-page"
+              @input="pagination"
+            />
+            <b-pagination
+              :total-rows="count"
+              v-model="currentPage"
+              :per-page="perPage"
+              :limit="limitPaginationButtons"
+              class="pagination-buttons"
+              @input="pagination"
+            />
+          </div>
         </div>
       </div>
     </b-row>
@@ -613,6 +610,8 @@ export default {
   @import "~bootstrap/scss/variables";
   @import "~bootstrap/scss/mixins";
 
+  $main-content-width: 640px;
+
   .search-filter-wrapper {
     background: $gray-100;
     position: relative;
@@ -621,7 +620,7 @@ export default {
 
   .search-content-wrapper {
     margin: 0 auto;
-    flex-basis: 640px;
+    flex-basis: $main-content-width;
     h1 {
       margin: 2rem 0 1.2rem;
     }
@@ -630,12 +629,47 @@ export default {
       margin-bottom: 0.8rem;
       color: $gray-700;
     }
-    .search-results {
-      max-width: 640px;
-      margin: 0 auto;
-      .results {
-        padding: 1rem 0;
+
+    .recordings-day {
+      position: sticky;
+      top: 0;
+      background: transparentize($white, 0.15);
+      padding: 0.5rem 0;
+      font-size: 1em;
+      font-weight: 600;
+      border-bottom: 1px solid $gray-200;
+    }
+
+    .recordings-hour {
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+
+    @include media-breakpoint-down(md) {
+      .recordings-hour {
+        position: sticky;
+        top: 0;
+        right: 0;
+        text-align: right;
+        margin-top: -2.8rem;
+        padding: 0.7rem 0;
       }
+    }
+
+    @include media-breakpoint-up(md) {
+      .recordings-hour {
+        display: inline-block;
+        position: sticky;
+        float: left;
+        top: 40px;
+        margin-left: -60px;
+        margin-top: 15px;
+      }
+    }
+
+    .search-results {
+      max-width: $main-content-width;
+      margin: 0 auto;
     }
   }
 
@@ -648,6 +682,17 @@ export default {
     background: $white;
     border-top: 1px solid $gray-200;
     padding: 7px;
+    .pagination-per-page {
+      max-width: $main-content-width;
+      margin: 0 auto;
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      .results-per-page {
+        width: auto;
+        float: right;
+      }
+    }
     .pagination {
       margin-bottom: 0;
       justify-content: center;
@@ -680,7 +725,7 @@ export default {
       flex: 0 0 320px;
     }
     .search-content-wrapper {
-      flex: 1 1 640px;
+      flex: 1 1 $main-content-width;
       position: relative;
       overflow: hidden;
       overflow-y: scroll;

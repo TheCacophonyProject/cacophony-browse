@@ -19,14 +19,6 @@
     </div>
     <div class="recording-main">
       <div class="recording-details">
-        <h3 class="recording-title">
-          <a
-            :href="`/recording/${item.id}`"
-            class="record-link"
-          >
-            {{ item.id }}
-          </a>
-        </h3>
         <span class="recording-group">
           <font-awesome-icon
             icon="users"
@@ -157,6 +149,10 @@ export default {
     border: 1px solid $border-color;
     margin-bottom: 1rem;
     cursor: pointer;
+    transition: box-shadow 0.2s;
+    &:hover {
+      box-shadow: 0 1px 3px $gray-400;
+    }
   }
 
   // wrapper of the icon on the left
@@ -184,7 +180,6 @@ export default {
     .recording-details {
       flex: 1 1 auto;
       padding: 0.7rem $recording-side-padding;
-      .recording-title,
       .recording-group,
       .recording-device { // all elements that are the direct descendants of this div
         display: inline-block;
@@ -194,13 +189,8 @@ export default {
           display: block;
         }
       }
-      .recording-title {
-        margin-bottom: 0;
-        font-size: 110%;
-      }
       .recording-group,
       .recording-device {
-        font-size: 95%;
         margin-right: 0.5rem;
       }
     }
@@ -239,7 +229,7 @@ export default {
       border-top: 1px solid $border-color;
       > div {
         padding: 0.5rem $recording-side-padding;
-        font-size: 80%;
+        font-size: 85%;
       }
       .recording-duration,
       .recording-battery {
