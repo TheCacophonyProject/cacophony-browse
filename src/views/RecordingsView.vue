@@ -275,7 +275,7 @@ export default {
       if (hours === 0) {
         return '12am';
       }
-      return `${hours < 12 ? hours : hours - 12}${hours < 12 ? 'am' : 'pm'}`;
+      return `${hours <= 12 ? hours : hours - 12}${hours < 12 ? 'am' : 'pm'}`;
     },
     resetPagination() {
       this.currentPage = 1;
