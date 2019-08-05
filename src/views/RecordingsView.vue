@@ -35,12 +35,12 @@
               v-for="(itemsByDay, index) in tableItemsChunkedByDayAndHour"
               :key="index"
             >
-              <h4 class="recordings-day">{{ relativeDay(itemsByDay[0][0].dateObj) }}</h4>
+              <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
               <div
                 v-for="(itemsByHour, index) in itemsByDay"
                 :key="index"
               >
-                <h5 class="recordings-hour">{{ hour(itemsByHour[index].dateObj) }}</h5>
+                <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
                 <RecordingSummary
                   v-for="(item, index) in itemsByHour"
                   :item="item"
@@ -167,10 +167,13 @@ export default {
         const multipleAnimalSuffix = numAnimals > 1 ? 's' : '';
         const tagsText = numAnimals === 0 ? 'all animals' : `${numAnimals} animal${multipleAnimalSuffix}`;
         const isCustom = (query.where.dateRange && query.where.dateRange.isCustom);
+        const isAll = query.where.dateRange && query.where.dateRange.all;
         const relativeDateRange = Math.abs(Number(query.where.dateRange.relativeDateRange));
         let timespan;
         if (relativeDateRange === 1) {
           timespan = 'last 24 hours';
+        } else if (isAll) {
+          timespan = '';
         } else {
           timespan = `last ${relativeDateRange} days`;
         }
@@ -181,10 +184,11 @@ export default {
         let durationStr = '';
         if (durationFrom !== false && durationTo !== false && durationTo !== 0) {
           durationStr = ` with durations <strong>${durationFrom}</strong>&nbsp;&ndash;&nbsp;<strong>${durationTo}s</strong>`;
+        } else if (durationFrom !== false && durationFrom !== 0) {
+          durationStr = ` with durations <strong>> ${durationFrom}s</strong>`;
         }
 
         const formatDate = (str, addDays) => {
-          str = str.replace(', ', '-');
           const date = new Date();
           let parts = str.split('-').map(str => str.trim());
           let time = [];
@@ -202,10 +206,12 @@ export default {
           }
           return date.toLocaleDateString('en-NZ').split(',')[0];
         };
-        timespan = !isCustom ?
-          `in the <strong>${timespan}</strong>` :
-          `between <strong>${formatDate(query.where.recordingDateTime['$gt'], 0)}</strong>&nbsp;` +
-          `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
+        if (!isAll) {
+          timespan = !isCustom ?
+            `in the <strong>${timespan}</strong>` :
+            `between <strong>${formatDate(query.where.recordingDateTime['$gt'], 0)}</strong>&nbsp;` +
+            `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
+        }
         return (
           `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
           `${timespan}${durationStr}`
@@ -239,7 +245,7 @@ export default {
             "$lt": ""
           },
           dateRange: {
-            relativeDateRange: -1,
+            relativeDateRange: -30,
           }
         },
         tagMode: 'any',
@@ -248,6 +254,7 @@ export default {
       };
     },
     relativeDay(itemDate) {
+      itemDate = itemDate[0][0].dateObj;
       const todayDate = new Date();
       const today = roundDate(todayDate);
       const date = roundDate(itemDate).getTime();
@@ -258,13 +265,17 @@ export default {
       } else if (date === yesterday.getTime()) {
         return "Yesterday";
       } else {
-        return `${itemDate.toLocaleDateString()}`;
+        return `${itemDate.toDateString()}`;
       }
     },
     hour(itemDate) {
+      itemDate = itemDate[0].dateObj;
       const dateWithHours = roundDate(itemDate, true);
-      const hours = dateWithHours.getHours() + 1;
-      return `${hours < 12 ? hours : hours - 13}${hours < 12 ? 'am' : 'pm'}`;
+      const hours = dateWithHours.getHours();
+      if (hours === 0) {
+        return '12am';
+      }
+      return `${hours < 12 ? hours : hours - 12}${hours < 12 ? 'am' : 'pm'}`;
     },
     resetPagination() {
       this.currentPage = 1;
@@ -315,6 +326,8 @@ export default {
         } else {
           if (target.where.dateRange === 'customDateRange') {
             this.$set(target.where, 'dateRange', {isCustom: true});
+          } else if (target.where.dateRange === 'all') {
+            this.$set(target.where, 'dateRange', {all: true});
           }
         }
         if (!target.where.hasOwnProperty('DeviceId')) {
@@ -345,7 +358,9 @@ export default {
       if (query.where.hasOwnProperty('dateRange')) {
         // If it's a custom range, that can be inferred by the presence of recordingDateTime.
         // Otherwise, we'll synthesise recordingDateTime here from relative time.
-        if (query.where.dateRange.hasOwnProperty('relativeDateRange')) {
+        if (query.where.dateRange.hasOwnProperty('all')) {
+          where.dateRange = 'all';
+        } else if (query.where.dateRange.hasOwnProperty('relativeDateRange')) {
           const padLeft = (str, char, len) => {
             while (str.length < len) {
               str = `${char}${str}`;
@@ -353,7 +368,7 @@ export default {
             return str;
           };
           const formatDate = (date) => (
-            `${date.getFullYear()}, ${padLeft(date.getMonth() + 1, '0', 2)}, ${padLeft(date.getDate(), '0', 2)} ${padLeft(date.getHours(), '0', 2)}:${padLeft(date.getMinutes(), '0', 2)}:${padLeft(date.getSeconds(), '0', 2)}`
+            `${date.getFullYear()}-${padLeft(date.getMonth() + 1, '0', 2)}-${padLeft(date.getDate(), '0', 2)} ${padLeft(date.getHours(), '0', 2)}:${padLeft(date.getMinutes(), '0', 2)}:${padLeft(date.getSeconds(), '0', 2)}`
           );
           const now = new Date();
           const oneDay = 1000 * 60 * 60 * 24;
@@ -366,10 +381,15 @@ export default {
             "$gt": formatDate(past),
           };
         } else if (query.where.hasOwnProperty('recordingDateTime')) {
-          where.dateRange = 'customDateRange';
-          // assume custom dateRange
-          this.addIfSet(where, query.where.recordingDateTime["$gt"], "recordingDateTime", "$gt");
-          this.addIfSet(where, query.where.recordingDateTime["$lt"], "recordingDateTime", "$lt");
+          if (
+            query.where.recordingDateTime.hasOwnProperty("$gt") &&
+            query.where.recordingDateTime.hasOwnProperty("$lt")
+          ) {
+            where.dateRange = 'customDateRange';
+            // assume custom dateRange
+            this.addIfSet(where, query.where.recordingDateTime["$gt"], "recordingDateTime", "$gt");
+            this.addIfSet(where, query.where.recordingDateTime["$lt"], "recordingDateTime", "$lt");
+          }
         }
       }
       this.addIfSet(where, query.where.duration["$gte"], "duration", "$gte");

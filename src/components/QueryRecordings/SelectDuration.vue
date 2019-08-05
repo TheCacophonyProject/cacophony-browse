@@ -41,10 +41,11 @@ export default {
   data () {
     return {
       options: [
+        { value: { low: "0", high: "" }, text: "Any duration" },
         { value: { low: "0", high: "20" }, text: "Short (<20 seconds)" },
         { value: { low: "20", high: "120" }, text: "Medium (20 seconds - 2 minutes)" },
         { value: { low: "120", high: "" }, text: "Long (> 2 minutes)" },
-        { value: { isCustom: true, low: "0", high: "" }, text: "Custom duration" },
+        { value: { isCustom: true, low: "0", high: "100" }, text: "Custom duration" },
       ],
     };
   },
@@ -67,8 +68,8 @@ export default {
           return option.value;
         }
       }
-      // Fallback to the custom option.
-      return this.options[this.options.length - 1].value;
+      // Fallback to the any option.
+      return this.options[0].value;
     },
     updateHigh: function (event) {
       const newValue = {

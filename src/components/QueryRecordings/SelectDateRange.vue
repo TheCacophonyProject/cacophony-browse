@@ -30,6 +30,7 @@ export default {
         { value: { relativeDateRange: -7 }, text: "Last 7 days" },
         { value: { relativeDateRange: -30 }, text: "Last 30 days" },
         { value: { relativeDateRange: -90 }, text: "Last 90 days" },
+        { value: { all: true }, text: "All" },
         // TODO(jon): Support for "all", which is basically just no date range
         { value: { isCustom: true }, text: "Custom range" },
       ]

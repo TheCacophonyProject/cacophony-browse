@@ -22,10 +22,6 @@
       <h2>Search recordings</h2>
       <SelectDevice v-model="devices" />
       <SelectRecordingType v-model="recordingType" />
-      <SelectAnimal
-        v-model="animals"
-        :disabled="isAudio"
-        :can-have-sub-tags="canHaveTags"/>
       <SelectDateRange v-model="dateRange" />
       <b-form-row v-if="isCustomDateRange">
         <b-col
@@ -71,8 +67,13 @@
         v-model="tagTypes"
         :disabled="isAudio"
       />
+      <SelectAnimal
+        v-if="advanced"
+        v-model="animals"
+        :disabled="isAudio"
+        :can-have-sub-tags="canHaveTags"/>
       <b-button
-        :disabled="disabled"
+        :disabled="!isCustomDateRangeAndRangeIsValid || disabled"
         block
         variant="primary"
         @click="submit"
@@ -216,6 +217,15 @@ export default {
     groups: function() {
       return this.$store.state.Groups;
     },
+    isCustomDateRangeAndRangeIsValid: function () {
+      return (
+        !this.isCustomDateRange ||
+        (this.isCustomDateRange && (
+          this.query.where.recordingDateTime["$gt"] !== '' &&
+          this.query.where.recordingDateTime["$lt"] !== '')
+        )
+      );
+    },
   },
   watch: {
     isAudio: function () {
@@ -238,7 +248,7 @@ export default {
     },
     toggleSearchPanel: function () {
       this.$emit('toggled-search-panel');
-    }
+    },
   },
 };
 
