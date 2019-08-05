@@ -36,8 +36,15 @@
       <template
         slot="confirmButton"
         slot-scope="row">
+
+        <!-- using .top here to workaround a bug that caused the
+        popover to flicker otherwise - especaily on Chrome. Even
+        weirder, the popover still appears at the bottom.
+
+        See https://github.com/TheCacophonyProject/cacophony-browse/issues/180
+        -->
         <font-awesome-icon
-          v-b-popover.hover.bottom="'Confirm the automatic tag'"
+          v-b-popover.hover.top="'Confirm the automatic tag'"
           v-if="row.item.automatic"
           icon="check-circle"
           style="cursor: pointer;"
