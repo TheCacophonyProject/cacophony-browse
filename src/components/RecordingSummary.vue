@@ -1,7 +1,8 @@
 <template>
-  <div
+  <a
+    :href="`/recording/${item.id}`"
     class="recording-summary"
-    @click="e => navigateToRecording(item.id)"
+    @click.prevent="e => navigateToRecording(item.id)"
   >
     <div class="recording-type">
       <span v-if="item.type === 'audio'">
@@ -96,7 +97,7 @@
         >
       </a>
     </div>
-  </div>
+  </a>
 </template>
 
 <script>
@@ -150,8 +151,13 @@ export default {
     margin-bottom: 1rem;
     cursor: pointer;
     transition: box-shadow 0.2s;
+    color: unset;
+    div {
+      color: inherit;
+    }
     &:hover {
       box-shadow: 0 1px 3px $gray-400;
+      text-decoration: unset;
     }
   }
 
