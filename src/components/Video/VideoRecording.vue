@@ -11,7 +11,7 @@
         :colours="colours"/>
       <PrevNext
         :recording="recording"
-        @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>
+        @nextOrPreviousRecording="prevNext"/>
       <AddObservation
         ref = "addObs"
         @addTag="addTag($event)"
@@ -127,6 +127,55 @@ export default {
     },
   },
   methods: {
+    async gotoNextRecording(direction, tagMode, tags, skipMessage) {
+      if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
+        this.$router.push({path: `/recording/${this.recording.id}`});
+      }
+    },
+    async getNextRecording(direction, tagMode, tags, skipMessage) {
+      let where = {
+        DeviceId: this.recording.Device.id
+      };
+
+      let order;
+      switch (direction) {
+      case "next":
+        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
+        order = "ASC";
+        break;
+      case "previous":
+        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
+        order = "DESC";
+        break;
+      case "either":
+        if (await this.getNextRecording('next', tagMode, tags, true)) {
+          return true;
+        }
+        return await this.getNextRecording('previous', tagMode, tags, skipMessage);
+      default:
+        throw `invalid direction: '${direction}'`;
+      }
+      order  = JSON.stringify([["recordingDateTime", order]]);
+      where = JSON.stringify(where);
+
+      const params ={
+        where,
+        order,
+        limit: 1,
+        offset: 0
+      };
+
+      if (tags) {
+        params.tags = JSON.stringify(tags);
+      }
+      if (tagMode) {
+        params.tagMode = tagMode;
+      }
+      return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
+    },
+    prevNext(event) {
+      this.gotoNextRecording(event[0], event[1], event[2]);
+    },
     getRecordingId() {
       return Number(this.$route.params.id);
     },
