@@ -124,7 +124,7 @@ export default {
   },
   methods: {
     navigateToRecording(event, recordingId) {
-      if (!event.metaKey) {
+      if (!(event.metaKey || event.ctrlKey)) {
         // Don't change the route if we're ctrl-clicking
         this.$router.push({
           path: `recording/${recordingId}`,
