@@ -2,7 +2,7 @@
   <a
     :href="`/recording/${item.id}`"
     class="recording-summary"
-    @click.prevent="e => navigateToRecording(item.id)"
+    @click="event => navigateToRecording(event, item.id)"
   >
     <div class="recording-type">
       <span v-if="item.type === 'audio'">
@@ -123,10 +123,13 @@ export default {
     }
   },
   methods: {
-    navigateToRecording(recordingId) {
-      this.$router.push({
-        path: `recording/${recordingId}`,
-      });
+    navigateToRecording(event, recordingId) {
+      if (!event.metaKey) {
+        // Don't change the route if we're ctrl-clicking
+        this.$router.push({
+          path: `recording/${recordingId}`,
+        });
+      }
     }
   }
 };
