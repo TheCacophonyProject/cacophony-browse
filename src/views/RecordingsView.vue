@@ -497,15 +497,15 @@ export default {
           this.countMessage = 'No matches';
         }
         // New day, new hour.
-        let prevDate = new Date();
+        let prevDate = null;
         for (const row of result.rows) {
           const thisDate = new Date(row.recordingDateTime);
-          if (roundDate(thisDate, true).getTime() !== roundDate(prevDate, true).getTime()) {
+          if (prevDate === null || (roundDate(thisDate, true).getTime() !== roundDate(prevDate, true).getTime())) {
             const item = {
               kind: 'dataSeparator',
               hour: thisDate,
             };
-            if (roundDate(thisDate).getTime() !== roundDate(prevDate).getTime()) {
+            if (prevDate === null || (roundDate(thisDate).getTime() !== roundDate(prevDate).getTime())) {
               item.date = thisDate;
             }
             this.tableItems.push(item);
