@@ -69,16 +69,10 @@
       <b-form-group>
         <b-button
           :block="true"
+          :disabled="deleteDisabled"
           variant="danger"
           @click="deleteRecording()">Delete Recording</b-button>
       </b-form-group>
-
-      <b-alert
-        :show="showDeleteAlert"
-        variant="success"
-        dismissible
-        @dismissed="showDeleteAlert=false">Recording deleted.</b-alert>
-
     </b-form>
 
     <b-button
@@ -125,7 +119,7 @@ export default {
   data () {
     return {
       display: false,
-      showDeleteAlert: false,
+      deleteDisabled: false,
       properties: [
         {key: 'processingState', title: 'Processing State'},
         {key: 'location', title: 'Location'},
@@ -174,12 +168,19 @@ export default {
       return items;
     }
   },
+  watch: {
+    recording: function () {
+      this.deleteDisabled = false;
+    }
+  },
   methods: {
     async deleteRecording() {
+      this.deleteDisabled = true;
       const {success} = await api.recording.del(this.$route.params.id);
       if(success) {
-        this.showDeleteAlert = true;
         this.$emit('nextOrPreviousRecording');
+      } else {
+        this.deleteDisabled = true;
       }
     }
   }
