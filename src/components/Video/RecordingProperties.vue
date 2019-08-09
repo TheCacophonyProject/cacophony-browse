@@ -14,7 +14,7 @@
           </div>
         </div>
 
-        <h3>Technical details &nbsp;
+        <h4 id="technical-details">Technical details &nbsp;
           <span
             v-if="!display"
             title="Show details"
@@ -31,7 +31,7 @@
               icon="angle-up"
               class="fa-1x"/>
           </span>
-        </h3>
+        </h4>
         <div v-if="display">
           <div
             v-for="prop of properties"
@@ -214,6 +214,10 @@ export default {
 </script>
 
 <style scoped>
+  #technical-details {
+    padding-top: 15px;
+  }
+
   .user-prop,
   .prop{
     padding-left: 15px;

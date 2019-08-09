@@ -28,7 +28,6 @@
       lg="4">
       <div
         v-if="tracks && tracks.length > 0">
-        <h2 class="d-none d-lg-block">Tracks</h2>
         <div
           v-for="(track, index) in orderedTracks()"
           :key="index">
@@ -47,7 +46,6 @@
         class="processing">
         Recording still processing...
       </div>
-      <h2 class="recording">Recording</h2>
       <RecordingProperties
         v-model="recording.comment"
         :download-raw-url="videoRawUrl"
