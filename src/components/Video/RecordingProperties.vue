@@ -66,26 +66,6 @@
         </div>
       </b-form-group>
 
-      <b-form-group
-        label="Comment"
-        horizontal>
-        <b-form-row class="m-0">
-          <b-form-textarea
-            :value="value"
-            class="col"
-            @input="$emit('input', $event)" />
-          <div class="col-md-1" />
-          <b-button
-            class="col-md-3"
-            @click="updateComment">Save</b-button>
-        </b-form-row>
-      </b-form-group>
-      <b-alert
-        :show="showCommentAlert"
-        variant="success"
-        dismissible
-        @dismissed="showCommentAlert=false">Comment saved.</b-alert>
-
       <b-form-group>
         <b-button
           :block="true"
@@ -145,7 +125,6 @@ export default {
   data () {
     return {
       display: false,
-      showCommentAlert: false,
       showDeleteAlert: false,
       properties: [
         {key: 'processingState', title: 'Processing State'},
@@ -196,12 +175,6 @@ export default {
     }
   },
   methods: {
-    async updateComment() {
-      const {success} = await api.recording.comment(this.value, this.$route.params.id);
-      if(success) {
-        this.showCommentAlert = true;
-      }
-    },
     async deleteRecording() {
       const {success} = await api.recording.del(this.$route.params.id);
       if(success) {
