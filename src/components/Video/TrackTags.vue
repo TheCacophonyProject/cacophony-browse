@@ -22,11 +22,19 @@
           v-if="row.item.User"
           v-html="row.item.User.username"/>
       </template>
+      <!-- Be careful about changing the tooltips to use a placement
+           other than "left" here. This can cause the tooltips to be
+           positioned badly, causing flickering and leads to other
+           problems:
+
+           - https://github.com/TheCacophonyProject/cacophony-browse/issues/180
+           - ttps://github.com/TheCacophonyProject/cacophony-browse/issues/185
+        -->
       <template
         slot="deleteButton"
         slot-scope="row">
         <font-awesome-icon
-          v-b-popover.hover.bottom="'Delete tag'"
+          v-b-tooltip.left="'Delete tag'"
           v-if="!row.item.automatic"
           icon="trash"
           style="cursor: pointer;"
@@ -36,15 +44,8 @@
       <template
         slot="confirmButton"
         slot-scope="row">
-
-        <!-- using .top here to workaround a bug that caused the
-        popover to flicker otherwise - especaily on Chrome. Even
-        weirder, the popover still appears at the bottom.
-
-        See https://github.com/TheCacophonyProject/cacophony-browse/issues/180
-        -->
         <font-awesome-icon
-          v-b-popover.hover.top="'Confirm the automatic tag'"
+          v-b-tooltip.left="'Confirm the automatic tag'"
           v-if="row.item.automatic"
           icon="check-circle"
           style="cursor: pointer;"

@@ -37,7 +37,7 @@
           slot="deleteButton"
           slot-scope="row">
           <font-awesome-icon
-            v-b-popover.hover.bottom="'Delete tag'"
+            v-b-tooltip.left="'Delete tag'"
             icon="trash"
             size="2x"
             style="cursor: pointer;"
@@ -47,7 +47,7 @@
           slot="confirmButton"
           slot-scope="row">
           <font-awesome-icon
-            v-b-popover.hover.bottom="'Confirm the automatic tag'"
+            v-b-tooltip.left="'Confirm the automatic tag'"
             v-if="row.item.tag.automatic && row.item.tag.animal !== 'unidentified'"
             icon="check-circle"
             size="2x"
