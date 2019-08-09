@@ -1,8 +1,7 @@
 <template>
   <div class="img-buttons">
     <span
-      v-b-tooltip.bottomlef
-      t="'Previous for device, skipping bird &amp; false-positives'"
+      v-b-tooltip.bottomleft="'Previous for device, skipping bird &amp; false-positives'"
       @click="gotoNextRecording('previous', 'tagged', ['interesting'])">
       <font-awesome-icon
         icon="asterisk"
