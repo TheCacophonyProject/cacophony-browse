@@ -1,7 +1,8 @@
 <template>
   <div class="img-buttons">
     <span
-      title="Previous for device, skipping bird &amp; false-positives"
+      v-b-tooltip.bottomlef
+      t="'Previous for device, skipping bird &amp; false-positives'"
       @click="gotoNextRecording('previous', 'tagged', ['interesting'])">
       <font-awesome-icon
         icon="asterisk"
@@ -13,7 +14,7 @@
         icon="angle-double-left" />
     </span>
     <span
-      title="Previous for device, not manually tagged"
+      v-b-tooltip.bottomleft="'Previous for device, not manually tagged'"
       @click="gotoNextRecording('previous', 'no-human')">
       <font-awesome-icon
         icon="question"
@@ -25,21 +26,21 @@
         icon="angle-left" />
     </span>
     <span
-      title="Previous for device"
+      v-b-tooltip.bottomleft="'Previous for device'"
       @click="gotoNextRecording('previous', 'any')">
       <font-awesome-icon
         icon="angle-left"
         class="fa-3x" />
     </span>
     <span
-      title="Next for device"
+      v-b-tooltip.bottomleft="'Next for device'"
       @click="gotoNextRecording('next', 'any')">
       <font-awesome-icon
         icon="angle-right"
         class="fa-3x" />
     </span>
     <span
-      title="Next for device, not manually tagged"
+      v-b-tooltip.bottomleft="'Next for device, not manually tagged'"
       @click="gotoNextRecording('next', 'no-human')">
       <font-awesome-icon
         class="fa-3x"
@@ -51,7 +52,7 @@
         value="?" />
     </span>
     <span
-      title="Next for device, skipping birds &amp; false-positives"
+      v-b-tooltip.bottomleft="'Next for device, skipping birds &amp; false-positives'"
       @click="gotoNextRecording('next', 'tagged', ['interesting'])">
       <font-awesome-icon
         class="fa-3x"
