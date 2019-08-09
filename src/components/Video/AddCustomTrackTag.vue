@@ -1,6 +1,6 @@
 <template>
   <b-modal
-    :id="refTag"
+    id="custom-track-tag"
     title="Add track tag"
     @ok="quickTag">
     <b-form>
@@ -11,8 +11,8 @@
           v-model="whatTag"
           :options="whatOptions">
           <template slot="first">
-            <option 
-              :value="null" 
+            <option
+              :value="null"
               disabled>Choose a tag..
             </option>
           </template>
@@ -40,12 +40,6 @@ import DefaultLabels from '../../const.js';
 
 export default {
   name: 'AddCustomTrackTag',
-  props: {
-    refTag: {
-      type: String,
-      required: true,
-    }
-  },
   data () {
     return {
       whatTag: "cat",

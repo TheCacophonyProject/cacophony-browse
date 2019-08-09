@@ -1,6 +1,6 @@
 <template>
   <span
-    v-b-tooltip="helpTip"
+    v-b-tooltip.hover="helpTip"
     class="float-right help">?</span>
 </template>
 

@@ -47,13 +47,11 @@
         <span class="delta"> (&#916; {{ (track.data.end_s - track.data.start_s) | currency('', 1) }}s) </span>
       </p>
       <QuickTagTrack
-        :add-ref="makeAddRef()"
         :tags="track.TrackTags"
         @addTag="addTag($event)"/>
       <TrackData
         :track-data="track.data"/>
       <AddCustomTrackTag
-        :ref-tag="makeAddRef()"
         @addTag="addTag($event)"/>
       <TrackTags
         :items="track.TrackTags"
@@ -161,9 +159,6 @@ export default {
     headerClass() {
       return "selected-" + this.show;
     },
-    makeAddRef() {
-      return "add-custom-tag-" + this.track.id;
-    }
   },
 };
 </script>
