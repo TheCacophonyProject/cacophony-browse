@@ -1,64 +1,88 @@
 <template>
-  <b-form-row>
-    <b-col
-      sm="6"
-      md="4">
-      <SelectDevice
-        v-model="devices"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="2" >
-      <SelectRecordingType
-        v-model="recordingType"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="2">
+  <div class="query-recordings">
+    <b-button
+      :class="['search-panel-toggle-btn', {'is-collapsed': isCollapsed}]"
+      variant="primary"
+      @click="() => toggleSearchPanel()"
+    >
+      <span v-if="isCollapsed">
+        <font-awesome-icon
+          :icon="['fas', 'search']"
+        />
+        <span class="sr-only">Expand search panel</span>
+      </span>
+      <span v-else>
+        <font-awesome-icon
+          :icon="['fas', 'times']"
+        />
+        <span class="sr-only">Collapse search panel</span>
+      </span>
+    </b-button>
+    <b-form-group>
+      <h2>Search recordings</h2>
+      <SelectDevice v-model="devices" />
+      <SelectRecordingType v-model="recordingType" />
+      <SelectDateRange v-model="dateRange" />
+      <b-form-row v-if="isCustomDateRange">
+        <b-col
+          sm="6"
+        >
+          <SelectDate
+            v-model="fromDate"
+            title="From Date"/>
+        </b-col>
+        <b-col
+          sm="6"
+        >
+          <SelectDate
+            v-model="toDate"
+            title="To Date"/>
+        </b-col>
+      </b-form-row>
+      <b-form-row>
+        <b-col>
+          <b-button
+            variant="link"
+            class="toggle-advanced-search-btn"
+            @click="() => toggleAdvancedSearch()"
+          >
+            Advanced search
+            <font-awesome-icon
+              v-if="!advanced"
+              :icon="['fas', 'caret-down']"
+            />
+            <font-awesome-icon
+              v-else
+              :icon="['fas', 'caret-up']"
+            />
+          </b-button>
+        </b-col>
+      </b-form-row>
+      <SelectDuration
+        v-if="advanced"
+        v-model="duration"
+      />
       <SelectTagTypes
+        v-if="advanced"
         v-model="tagTypes"
-        :disabled="isAudio"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="4">
+        :disabled="isAudio"
+      />
       <SelectAnimal
+        v-if="advanced"
         v-model="animals"
         :disabled="isAudio"
         :can-have-sub-tags="canHaveTags"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="4">
-      <SelectDuration
-        v-model="duration"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="4">
-      <SelectDate
-        v-model="fromDate"
-        title="From Date"/>
-    </b-col>
-    <b-col
-      sm="6"
-      md="4">
-      <SelectDate
-        v-model="toDate"
-        title="To Date"/>
-    </b-col>
-    <b-col cols="12">
       <b-button
-        :disabled="disabled"
+        :disabled="!isCustomDateRangeAndRangeIsValid || disabled"
         block
         variant="primary"
-        @click="() => $emit('submit')"
+        @click="submit"
       >
         <span v-if="!disabled">Search</span>
         <span v-else>Searching...</span>
       </b-button>
-    </b-col>
-  </b-form-row>
+    </b-form-group>
+  </div>
 </template>
 
 <script>
@@ -69,10 +93,12 @@ import SelectAnimal from './SelectAnimal.vue';
 import SelectDuration from './SelectDuration.vue';
 import SelectDate from './SelectDate.vue';
 import SelectRecordingType from './SelectRecordingType.vue';
+import SelectDateRange from "./SelectDateRange.vue";
 
 export default {
   name: 'QueryRecordings',
   components: {
+    SelectDateRange,
     SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate, SelectRecordingType
   },
   props: {
@@ -83,14 +109,20 @@ export default {
     query: {
       type: Object,
       required: true
+    },
+    isCollapsed: {
+      type: Boolean,
+      required: true
     }
   },
   data () {
     return {
       rawAnimals:[],
-      isAudio: true,
       hasSpecifiedTags: false,
       canHaveTags: false,
+      isAudio: true,
+      advanced: false,
+      isCustomDateRange: false,
     };
   },
   computed: {
@@ -125,6 +157,15 @@ export default {
         if (!this.canHaveTags) {
           this.animals = [];
         }
+      }
+    },
+    dateRange: {
+      get () {
+        return this.query.where.dateRange || {};
+      },
+      set (value) {
+        this.query.where.dateRange = value;
+        this.isCustomDateRange = (this.query.where.dateRange && this.query.where.dateRange.isCustom) || false;
       }
     },
     fromDate: {
@@ -175,7 +216,16 @@ export default {
     },
     groups: function() {
       return this.$store.state.Groups;
-    }
+    },
+    isCustomDateRangeAndRangeIsValid: function () {
+      return (
+        !this.isCustomDateRange ||
+        (this.isCustomDateRange && (
+          this.query.where.recordingDateTime["$gt"] !== '' &&
+          this.query.where.recordingDateTime["$lt"] !== '')
+        )
+      );
+    },
   },
   watch: {
     isAudio: function () {
@@ -188,8 +238,60 @@ export default {
     },
   },
   methods: {
+    submit: function () {
+      this.$emit('submit');
+      this.toggleSearchPanel();
+    },
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
+    toggleAdvancedSearch: function () {
+      this.advanced = !this.advanced;
+    },
+    toggleSearchPanel: function () {
+      this.$emit('toggled-search-panel');
+    },
   },
 };
 
 </script>
+
+<style scoped lang="scss">
+  @import "~bootstrap/scss/functions";
+  @import "~bootstrap/scss/variables";
+  @import "~bootstrap/scss/mixins";
+  .query-recordings {
+    padding: 15px;
+    overflow: auto;
+    height: 100vh;
+    @include media-breakpoint-up(lg) {
+      max-height: calc(100vh - var(--navbar-height));
+    }
+    h2 {
+      font-size: 1.2rem;
+      color: $gray-700;
+      margin: 1rem 0 0.8rem;
+    }
+  }
+
+  .search-panel-toggle-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    transition: transform 0.2s;
+    @include media-breakpoint-down(lg) {
+      position: fixed;
+      top: 55px;
+      left: 0;
+      transform: translate(var(--search-panel-width));
+      &.is-collapsed {
+        transform: translate(var(--search-panel-width));
+      }
+    }
+    @include media-breakpoint-up(lg) {
+      display: none;
+    }
+  }
+
+  .toggle-advanced-search-btn {
+    margin-left: -0.75rem;
+    margin-bottom: 1rem;
+  }
+</style>

@@ -1,7 +1,7 @@
 <template>
   <b-form-group
     v-b-tooltip.hover="tooltipTitle">
-    <label>Videos </label>
+    <label>Video tags</label>
 
     <b-form-select
       :value="value"

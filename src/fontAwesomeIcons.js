@@ -17,6 +17,8 @@ import {
   faAngleDoubleRight,
   faAngleUp,
   faAngleDown,
+  faCaretDown,
+  faCaretUp,
   faQuestion,
   faAsterisk,
   faExclamationTriangle,
@@ -24,6 +26,8 @@ import {
   faUsers,
   faMicrochip,
   faPowerOff,
+  faSearch,
+  faTimes,
   faPlay
 } from '@fortawesome/free-solid-svg-icons';
 import {
@@ -32,7 +36,11 @@ import {
   faCaretSquareRight,
   faCaretSquareUp,
   faWindowClose,
-  faUserCircle
+  faUserCircle,
+  faCalendar,
+  faClock,
+  faFileVideo,
+  faFileAudio,
 } from '@fortawesome/free-regular-svg-icons';
 
 // https://www.npmjs.com/package/@fortawesome/vue-fontawesome
@@ -42,6 +50,8 @@ library.add(
   faCaretSquareUp,
   faCaretSquareRight,
   faCaretSquareLeft,
+  faCaretDown,
+  faCaretUp,
   faWindowClose,
   faCog,
   faBatteryFull,
@@ -66,6 +76,12 @@ library.add(
   faMicrochip,
   faUserCircle,
   faPowerOff,
+  faClock,
+  faCalendar,
+  faFileVideo,
+  faFileAudio,
+  faSearch,
+  faTimes,
   faPlay
 );
 
