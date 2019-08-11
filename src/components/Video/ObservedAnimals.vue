@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="tags-header">Recording tags</h2>
+    <h4 class="tags-header">Recording tags</h4>
     <div class="video-tags">
       <div
         v-if="items.length == 0"

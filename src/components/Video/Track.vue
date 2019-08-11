@@ -18,13 +18,13 @@
       <b-col
         cols="10"
         class="track-title">
-        <h3
+        <h5
           @click="trackSelected(0)">
           <img
             :style="getIconStyle()"
             class="track-image">
           Track {{ index + 1 }} <span class="out-of-tracks">/ {{ numTracks }}</span>
-        </h3>
+        </h5>
       </b-col>
       <b-col
         cols="1"
@@ -49,14 +49,14 @@
       <QuickTagTrack
         :tags="track.TrackTags"
         @addTag="addTag($event)"/>
-      <TrackData
-        :track-data="track.data"/>
       <AddCustomTrackTag
         @addTag="addTag($event)"/>
       <TrackTags
         :items="track.TrackTags"
         @addTag="addTag($event)"
         @deleteTag="deleteTag($event)"/>
+      <TrackData
+        :track-data="track.data"/>
     </div>
   </div>
 </template>

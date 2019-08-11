@@ -28,7 +28,6 @@
       lg="4">
       <div
         v-if="tracks && tracks.length > 0">
-        <h2 class="d-none d-lg-block">Tracks</h2>
         <div
           v-for="(track, index) in orderedTracks()"
           :key="index">
@@ -47,7 +46,6 @@
         class="processing">
         Recording still processing...
       </div>
-      <h2 class="recording">Recording</h2>
       <RecordingProperties
         v-model="recording.comment"
         :download-raw-url="videoRawUrl"
@@ -60,7 +58,6 @@
         class="d-lg-none"
         @deleteTag="deleteTag($event)"
         @addTag="addTag($event)"/>
-      <VideoHelp class="mt-2" />
     </b-col>
   </b-row>
 </template>
@@ -74,11 +71,10 @@ import ObservedAnimals from './ObservedAnimals.vue';
 import ThermalVideoPlayer from './ThermalVideoPlayer.vue';
 import TrackInfo from './Track.vue';
 import RecordingProperties from './RecordingProperties.vue';
-import VideoHelp from './VideoHelp.vue';
 
 export default {
   name: 'VideoRecording',
-  components: {PrevNext, AddObservation, ObservedAnimals, RecordingProperties, VideoHelp, ThermalVideoPlayer, TrackInfo},
+  components: {PrevNext, AddObservation, ObservedAnimals, RecordingProperties, ThermalVideoPlayer, TrackInfo},
   props: {
     recording: {
       type: Object,

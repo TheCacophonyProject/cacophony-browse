@@ -13,7 +13,7 @@
         icon="angle-double-left" />
     </span>
     <span
-      v-b-tooltip.hover.bottomleft="'Previous for device, not manually tagged'"
+      v-b-tooltip.hover.bottomleft="'Previous for device, needs tagging'"
       @click="gotoNextRecording('previous', 'no-human')">
       <font-awesome-icon
         icon="question"
@@ -39,7 +39,7 @@
         class="fa-3x" />
     </span>
     <span
-      v-b-tooltip.hover.bottomleft="'Next for device, not manually tagged'"
+      v-b-tooltip.hover.bottomleft="'Next for device, needs tagging'"
       @click="gotoNextRecording('next', 'no-human')">
       <font-awesome-icon
         class="fa-3x"

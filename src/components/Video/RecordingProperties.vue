@@ -14,7 +14,7 @@
           </div>
         </div>
 
-        <h3>Technical details &nbsp;
+        <h4 id="technical-details">Technical details &nbsp;
           <span
             v-if="!display"
             title="Show details"
@@ -31,7 +31,7 @@
               icon="angle-up"
               class="fa-1x"/>
           </span>
-        </h3>
+        </h4>
         <div v-if="display">
           <div
             v-for="prop of properties"
@@ -66,39 +66,13 @@
         </div>
       </b-form-group>
 
-      <b-form-group
-        label="Comment"
-        horizontal>
-        <b-form-row class="m-0">
-          <b-form-textarea
-            :value="value"
-            class="col"
-            @input="$emit('input', $event)" />
-          <div class="col-md-1" />
-          <b-button
-            class="col-md-3"
-            @click="updateComment">Save</b-button>
-        </b-form-row>
-      </b-form-group>
-      <b-alert
-        :show="showCommentAlert"
-        variant="success"
-        dismissible
-        @dismissed="showCommentAlert=false">Comment saved.</b-alert>
-
       <b-form-group>
         <b-button
           :block="true"
+          :disabled="deleteDisabled"
           variant="danger"
           @click="deleteRecording()">Delete Recording</b-button>
       </b-form-group>
-
-      <b-alert
-        :show="showDeleteAlert"
-        variant="success"
-        dismissible
-        @dismissed="showDeleteAlert=false">Recording deleted.</b-alert>
-
     </b-form>
 
     <b-button
@@ -145,8 +119,7 @@ export default {
   data () {
     return {
       display: false,
-      showCommentAlert: false,
-      showDeleteAlert: false,
+      deleteDisabled: false,
       properties: [
         {key: 'processingState', title: 'Processing State'},
         {key: 'location', title: 'Location'},
@@ -195,18 +168,19 @@ export default {
       return items;
     }
   },
+  watch: {
+    recording: function () {
+      this.deleteDisabled = false;
+    }
+  },
   methods: {
-    async updateComment() {
-      const {success} = await api.recording.comment(this.value, this.$route.params.id);
-      if(success) {
-        this.showCommentAlert = true;
-      }
-    },
     async deleteRecording() {
+      this.deleteDisabled = true;
       const {success} = await api.recording.del(this.$route.params.id);
       if(success) {
-        this.showDeleteAlert = true;
         this.$emit('nextOrPreviousRecording');
+      } else {
+        this.deleteDisabled = true;
       }
     }
   }
@@ -214,6 +188,10 @@ export default {
 </script>
 
 <style scoped>
+  #technical-details {
+    padding-top: 15px;
+  }
+
   .user-prop,
   .prop{
     padding-left: 15px;
