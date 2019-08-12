@@ -10,6 +10,7 @@
             variant="success"
             block
             @click="addCoolTag">
+            <font-awesome-icon icon="star"/>
             Cool
           </b-button>
         </b-col>
@@ -22,6 +23,7 @@
             variant="warning"
             block
             @click="addMissedTrackTag">
+            <font-awesome-icon icon="question-circle"/>
             Missed track
           </b-button>
         </b-col>
@@ -29,7 +31,7 @@
         <b-col
           sm="3">
           <b-button-group
-            v-b-tooltip.hover.bottomleft="'Download the files for this recording'"
+            v-b-tooltip.hover.top="'Download the files for this recording'"
             class="btn-block">
             <b-dropdown
               text="Download"
@@ -38,11 +40,13 @@
               <b-dropdown-item
                 :href="downloadFileUrl"
                 target="_blank">
-                MP4
+                <font-awesome-icon :icon="['far', 'file-video']"/>
+                Video
               </b-dropdown-item>
               <b-dropdown-item
                 :href="downloadRawUrl"
                 target="_blank">
+                <font-awesome-icon :icon="['far', 'file']"/>
                 CPTV
               </b-dropdown-item>
             </b-dropdown>
@@ -57,6 +61,7 @@
             variant="danger"
             block
             @click="deleteRecording()">
+            <font-awesome-icon icon="exclamation-triangle"/>
             Delete
           </b-button>
         </b-col>
