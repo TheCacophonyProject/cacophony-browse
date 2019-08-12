@@ -47,17 +47,11 @@
         Recording still processing...
       </div>
       <RecordingProperties
-        v-model="recording.comment"
         :download-raw-url="videoRawUrl"
         :download-file-url="videoUrl"
         :recording="recording"
         :tracks="tracks"
         @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
-      <ObservedAnimals
-        :items="tagItems"
-        class="d-lg-none"
-        @deleteTag="deleteTag($event)"
-        @addTag="addTag($event)"/>
     </b-col>
   </b-row>
 </template>
