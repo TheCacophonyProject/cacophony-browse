@@ -1,33 +1,39 @@
 <template>
   <div>
-    <h4 class="tags-header">Recording tags</h4>
     <div class="video-tags">
-      <div
-        v-if="items.length == 0"
-        class="no-tags">
-        There are no video tags yet.
-      </div>
-      <b-button
-        v-b-modal.video-tag
-        class="tag-button">
-        <img
-          class="add-image"
-          title="Open form to add other animal and/or extra details"
-          src="../../assets/video/plus.png">
-        <div>Add tag</div>
-      </b-button>
+      <b-row>
+        <b-col
+          sm="3">
+          <b-button
+            v-b-tooltip.hover.bottomleft="'Mark this as a cool or interesting recording'"
+            type="button"
+            variant="success"
+            block
+            @click="addCoolTag">
+            Cool Video
+          </b-button>
+        </b-col>
+        <b-col
+          sm="3">
+          <b-button
+            v-b-tooltip.hover.bottomleft="'Indicate that one or more animals do not have a corresponding track in this recording'"
+            type="button"
+            variant="warning"
+            block
+            @click="addMissedTrackTag">
+            Missed track
+          </b-button>
+        </b-col>
+      </b-row>
+
       <b-table
         v-if="items.length > 0"
         :items="items"
         :fields="fields"
+        class="pt-3"
         striped
         hover
         responsive>
-        <template
-          slot="animalImage"
-          slot-scope="row">
-          <span v-html="animalImage(row.item.animal, row.item.event)"/>
-        </template>
         <template
           slot="additionalInfo"
           slot-scope="row">
@@ -37,22 +43,11 @@
           slot="deleteButton"
           slot-scope="row">
           <font-awesome-icon
-            v-b-tooltip.hover.left="'Delete tag'"
+            v-b-tooltip.hover.left="'Delete'"
             icon="trash"
             size="2x"
             style="cursor: pointer;"
             @click="$emit('deleteTag', row.item.tag.id)"/>
-        </template>
-        <template
-          slot="confirmButton"
-          slot-scope="row">
-          <font-awesome-icon
-            v-b-tooltip.hover.left="'Confirm the automatic tag'"
-            v-if="row.item.tag.automatic && row.item.tag.animal !== 'unidentified'"
-            icon="check-circle"
-            size="2x"
-            style="cursor: pointer;"
-            @click="confirmTag(row.item)"/>
         </template>
       </b-table>
     </div>
@@ -74,12 +69,10 @@ export default {
   data () {
     return {
       fields: [
-        {key: 'animalImage', label: '', thStyle: {minWidth: '60px'}},
         {key: 'animal', label: 'Animal'},
-        {key: 'confidence', label: 'Confidence'},
-        {key: 'who', label: 'By Who'},
-        {key: 'when', label: 'When'},
         {key: 'additionalInfo', label: 'Additional Information'},
+        {key: 'who', label: 'By'},
+        {key: 'when', label: 'When'},
         {key: 'deleteButton', label: ''},
         {key: 'confirmButton', label: ''}
       ]
@@ -88,30 +81,6 @@ export default {
   computed: {
   },
   methods: {
-    animalImage: function (animal, event) {
-      // Struggling to get images to show correctly so using work-around
-      // suggested at bottom of this page.
-      // TODO implement alternative that doesn't use 'require' in this manner
-      // https://bootstrap-vue.js.org/docs/reference/images/
-      let image = null;
-      if (event == 'false positive') {
-        image = 'none.png';
-      } else if (event == 'multiple animals') {
-        image = 'multiple.png';
-      } else if (animal == 'bird/kiwi') {
-        image = 'kiwi.png';
-      } else if (animal == 'unidentified') {
-        image = 'unknown.png';
-      } else {
-        image = animal + '.png';
-      }
-      try {
-        const link = require('../../assets/video/' + image);
-        return `<img class="animal-image" src="${link}" />`;
-      } catch (e) {
-        return '';
-      }
-    },
     additionalInfo: function (tag) {
       let string = "";
 
@@ -144,14 +113,19 @@ export default {
       }
       return string;
     },
-    confirmTag: function (rowItem) {
-      const tag = {};
-      tag.event = rowItem.event;
-      tag.animal = rowItem.animal;
-      tag.confidence = rowItem.confidence;
-      this.$emit('addTag', tag);
+    addCoolTag: function () {
+      this.$emit('addTag', {
+        detail: "cool",
+        confidence: 0.9
+      });
+    },
+    addMissedTrackTag: function () {
+      this.$emit('addTag', {
+        detail: "missed track",
+        confidence: 0.9
+      });
     }
-  },
+  }
 };
 </script>
 
@@ -175,14 +149,6 @@ export default {
 }
 
 .add-image {
-  max-width: 50px;
-  max-height: 50px;
-  width: auto;
-  height: auto;
-}
-</style>
-<style>
-.animal-image {
   max-width: 50px;
   max-height: 50px;
   width: auto;

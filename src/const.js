@@ -134,14 +134,6 @@ const DefaultLabels = {
     allLabels.pest,
     allLabels.part,
   ],
-  recordingLabels: [
-    allLabels.missedTrack,
-    allLabels.multipleAnimals,
-    allLabels.inTrap,
-    allLabels.cool,
-    allLabels.animal,
-    allLabels.other,
-  ],
   tagTypes: [
     allLabels.any,
     allLabels.noHuman,

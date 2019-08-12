@@ -12,10 +12,6 @@
       <PrevNext
         :recording="recording"
         @nextOrPreviousRecording="prevNext"/>
-      <AddObservation
-        ref = "addObs"
-        @addTag="addTag($event)"
-        @hideAddObservations="showAddObservation = false" />
       <ObservedAnimals
         :items="tagItems"
         class="d-none d-lg-block"
@@ -60,7 +56,6 @@
 /* eslint-disable no-console */
 import {mapState} from 'vuex';
 import PrevNext from './PrevNext.vue';
-import AddObservation from './AddObservation.vue';
 import ObservedAnimals from './ObservedAnimals.vue';
 import ThermalVideoPlayer from './ThermalVideoPlayer.vue';
 import TrackInfo from './Track.vue';
@@ -68,7 +63,7 @@ import RecordingProperties from './RecordingProperties.vue';
 
 export default {
   name: 'VideoRecording',
-  components: {PrevNext, AddObservation, ObservedAnimals, RecordingProperties, ThermalVideoPlayer, TrackInfo},
+  components: {PrevNext, ObservedAnimals, RecordingProperties, ThermalVideoPlayer, TrackInfo},
   props: {
     recording: {
       type: Object,
