@@ -14,9 +14,12 @@
         @nextOrPreviousRecording="prevNext"/>
       <RecordingControls
         :items="tagItems"
+        :download-raw-url="videoRawUrl"
+        :download-file-url="videoUrl"
         class="d-none d-lg-block"
         @deleteTag="deleteTag($event)"
-        @addTag="addTag($event)"/>
+        @addTag="addTag($event)"
+        @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
     </b-col>
 
     <b-col
@@ -43,11 +46,7 @@
         Recording still processing...
       </div>
       <RecordingProperties
-        :download-raw-url="videoRawUrl"
-        :download-file-url="videoUrl"
-        :recording="recording"
-        :tracks="tracks"
-        @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
+        :recording="recording"/>
     </b-col>
   </b-row>
 </template>

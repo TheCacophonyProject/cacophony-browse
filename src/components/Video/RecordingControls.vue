@@ -13,6 +13,7 @@
             Cool
           </b-button>
         </b-col>
+
         <b-col
           sm="3">
           <b-button
@@ -22,6 +23,41 @@
             block
             @click="addMissedTrackTag">
             Missed track
+          </b-button>
+        </b-col>
+
+        <b-col
+          sm="3">
+          <b-button-group
+            v-b-tooltip.hover.bottomleft="'Download the files for this recording'"
+            class="btn-block">
+            <b-dropdown
+              text="Download"
+              right
+              class="btn-block">
+              <b-dropdown-item
+                :href="downloadFileUrl"
+                target="_blank">
+                MP4
+              </b-dropdown-item>
+              <b-dropdown-item
+                :href="downloadRawUrl"
+                target="_blank">
+                CPTV
+              </b-dropdown-item>
+            </b-dropdown>
+          </b-button-group>
+        </b-col>
+
+        <b-col
+          sm="3">
+          <b-button
+            v-b-tooltip.hover.bottomleft="'Delete this recording'"
+            :disabled="deleteDisabled"
+            variant="danger"
+            block
+            @click="deleteRecording()">
+            Delete
           </b-button>
         </b-col>
       </b-row>
@@ -56,6 +92,8 @@
 </template>
 
 <script>
+import api from '../../api/index';
+
 export default {
   name: 'RecordingControls',
   props: {
@@ -63,6 +101,14 @@ export default {
       type: Array,
       required: true
     },
+    downloadRawUrl: {
+      type: String,
+      default: "",
+    },
+    downloadFileUrl: {
+      type: String,
+      default: "",
+    }
   },
   data () {
     return {
@@ -71,10 +117,16 @@ export default {
         {key: 'who', label: 'By'},
         {key: 'when', label: 'When'},
         {key: 'deleteButton', label: ''}
-      ]
+      ],
+      deleteDisabled: false
     };
   },
   computed: {
+  },
+  watch: {
+    items: function () {
+      this.deleteDisabled = false;
+    }
   },
   methods: {
     addCoolTag: function () {
@@ -91,6 +143,13 @@ export default {
     },
     whatDetail: function (item) {
       return sentenceCase(item.what || item.detail || "-");
+    },
+    async deleteRecording() {
+      this.deleteDisabled = true;
+      const {success} = await api.recording.del(this.$route.params.id);
+      if(success) {
+        this.$emit('nextOrPreviousRecording');
+      }
     }
   }
 };
