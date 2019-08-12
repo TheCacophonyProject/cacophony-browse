@@ -10,7 +10,7 @@
             variant="success"
             block
             @click="addCoolTag">
-            Cool Video
+            Cool
           </b-button>
         </b-col>
         <b-col
@@ -28,6 +28,7 @@
 
       <b-table
         v-if="items.length > 0"
+        id="tags-table"
         :items="items"
         :fields="fields"
         class="pt-3"
@@ -35,9 +36,9 @@
         hover
         responsive>
         <template
-          slot="additionalInfo"
+          slot="whatDetail"
           slot-scope="row">
-          <span v-html="additionalInfo(row.item.tag)"/>
+          {{ whatDetail(row.item) }}
         </template>
         <template
           slot="deleteButton"
@@ -55,9 +56,6 @@
 </template>
 
 <script>
-
-/* global require */
-
 export default {
   name: 'ObservedAnimals',
   props: {
@@ -69,50 +67,16 @@ export default {
   data () {
     return {
       fields: [
-        {key: 'animal', label: 'Animal'},
-        {key: 'additionalInfo', label: 'Additional Information'},
+        {key: 'whatDetail', label: 'What'},
         {key: 'who', label: 'By'},
         {key: 'when', label: 'When'},
-        {key: 'deleteButton', label: ''},
-        {key: 'confirmButton', label: ''}
+        {key: 'deleteButton', label: ''}
       ]
     };
   },
   computed: {
   },
   methods: {
-    additionalInfo: function (tag) {
-      let string = "";
-
-      if (tag.number != null && tag.number > 1.5) {
-        string += "<p> Number of animals is '" + tag.number + "'</p>";
-      }
-
-      if (tag.event != null && tag.event != "just wandering about") {
-        string += "<p> Event is '<i>" + tag.event + "'</i></p>";
-      }
-
-      if (tag.trapType != null && tag.trapType != "") {
-        string += "<p> Trap type is '<i>" + tag.trapType + "'</i></p>";
-      }
-
-      if (tag.age != null && tag.age != "") {
-        string += "<p> Age is " + tag.age + "</p>";
-      }
-
-      if (tag.startTime != null || tag.duration != null) {
-        if (tag.startTime == null) {
-          tag.startTime == 0;
-        }
-        var timestring = "<p>Animal visible from " + (tag.startTime);
-        if (tag.duration != null) {
-          timestring += "&nbsp;-&nbsp;" + (tag.startTime + tag.duration); //tags.displayTime
-        }
-        timestring += "</p>";
-        string += timestring;
-      }
-      return string;
-    },
     addCoolTag: function () {
       this.$emit('addTag', {
         detail: "cool",
@@ -124,34 +88,23 @@ export default {
         detail: "missed track",
         confidence: 0.9
       });
+    },
+    whatDetail: function (item) {
+      return sentenceCase(item.what || item.detail || "-");
     }
   }
 };
+
+function sentenceCase(s) {
+  if (s.length > 0) {
+    return s[0].toUpperCase() + s.substr(1).toLowerCase();
+  }
+  return "";
+}
 </script>
 
 <style scoped>
-.tags-header {
-  margin-top: 20px;
-}
-
 .video-tags {
   position: relative;
-}
-
-.tag-button.btn {
-  background: white;
-  color: black;
-  font-size: 80%;
-  padding: 0;
-  border-width: 1px;
-  position: absolute;
-  z-index: 100;
-}
-
-.add-image {
-  max-width: 50px;
-  max-height: 50px;
-  width: auto;
-  height: auto;
 }
 </style>
