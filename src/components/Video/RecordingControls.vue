@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="video-tags">
-      <b-row>
+      <b-row class="pt-2">
         <b-col
           sm="3">
           <b-button
@@ -57,7 +57,7 @@
 
 <script>
 export default {
-  name: 'ObservedAnimals',
+  name: 'RecordingControls',
   props: {
     items: {
       type: Array,

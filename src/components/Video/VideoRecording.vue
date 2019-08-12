@@ -12,7 +12,7 @@
       <PrevNext
         :recording="recording"
         @nextOrPreviousRecording="prevNext"/>
-      <ObservedAnimals
+      <RecordingControls
         :items="tagItems"
         class="d-none d-lg-block"
         @deleteTag="deleteTag($event)"
@@ -56,14 +56,14 @@
 /* eslint-disable no-console */
 import {mapState} from 'vuex';
 import PrevNext from './PrevNext.vue';
-import ObservedAnimals from './ObservedAnimals.vue';
+import RecordingControls from './RecordingControls.vue';
 import ThermalVideoPlayer from './ThermalVideoPlayer.vue';
 import TrackInfo from './Track.vue';
 import RecordingProperties from './RecordingProperties.vue';
 
 export default {
   name: 'VideoRecording',
-  components: {PrevNext, ObservedAnimals, RecordingProperties, ThermalVideoPlayer, TrackInfo},
+  components: {PrevNext, RecordingControls, RecordingProperties, ThermalVideoPlayer, TrackInfo},
   props: {
     recording: {
       type: Object,
