@@ -12,15 +12,14 @@
       <PrevNext
         :recording="recording"
         @nextOrPreviousRecording="prevNext"/>
-      <AddObservation
-        ref = "addObs"
-        @addTag="addTag($event)"
-        @hideAddObservations="showAddObservation = false" />
-      <ObservedAnimals
+      <RecordingControls
         :items="tagItems"
+        :download-raw-url="videoRawUrl"
+        :download-file-url="videoUrl"
         class="d-none d-lg-block"
         @deleteTag="deleteTag($event)"
-        @addTag="addTag($event)"/>
+        @addTag="addTag($event)"
+        @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
     </b-col>
 
     <b-col
@@ -47,17 +46,7 @@
         Recording still processing...
       </div>
       <RecordingProperties
-        v-model="recording.comment"
-        :download-raw-url="videoRawUrl"
-        :download-file-url="videoUrl"
-        :recording="recording"
-        :tracks="tracks"
-        @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
-      <ObservedAnimals
-        :items="tagItems"
-        class="d-lg-none"
-        @deleteTag="deleteTag($event)"
-        @addTag="addTag($event)"/>
+        :recording="recording"/>
     </b-col>
   </b-row>
 </template>
@@ -66,15 +55,14 @@
 /* eslint-disable no-console */
 import {mapState} from 'vuex';
 import PrevNext from './PrevNext.vue';
-import AddObservation from './AddObservation.vue';
-import ObservedAnimals from './ObservedAnimals.vue';
+import RecordingControls from './RecordingControls.vue';
 import ThermalVideoPlayer from './ThermalVideoPlayer.vue';
 import TrackInfo from './Track.vue';
 import RecordingProperties from './RecordingProperties.vue';
 
 export default {
   name: 'VideoRecording',
-  components: {PrevNext, AddObservation, ObservedAnimals, RecordingProperties, ThermalVideoPlayer, TrackInfo},
+  components: {PrevNext, RecordingControls, RecordingProperties, ThermalVideoPlayer, TrackInfo},
   props: {
     recording: {
       type: Object,

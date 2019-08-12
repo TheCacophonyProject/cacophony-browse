@@ -65,23 +65,7 @@
           </div>
         </div>
       </b-form-group>
-
-      <b-form-group>
-        <b-button
-          :block="true"
-          :disabled="deleteDisabled"
-          variant="danger"
-          @click="deleteRecording()">Delete Recording</b-button>
-      </b-form-group>
     </b-form>
-
-    <b-button
-      :href="downloadRawUrl"
-      target="_blank">Download Raw</b-button>
-    <b-button
-      :href="downloadFileUrl"
-      target="_blank">Download File</b-button>
-
   </div>
 </template>
 
@@ -99,27 +83,14 @@ export default {
       type: String,
       default: "",
     },
-    downloadRawUrl: {
-      type: String,
-      default: "",
-    },
-    downloadFileUrl: {
-      type: String,
-      default: "",
-    },
     recording: {
       type: Object,
-      required: true,
-    },
-    tracks: {
-      type: Array,
       required: true,
     }
   },
   data () {
     return {
       display: false,
-      deleteDisabled: false,
       properties: [
         {key: 'processingState', title: 'Processing State'},
         {key: 'location', title: 'Location'},
@@ -168,22 +139,6 @@ export default {
       return items;
     }
   },
-  watch: {
-    recording: function () {
-      this.deleteDisabled = false;
-    }
-  },
-  methods: {
-    async deleteRecording() {
-      this.deleteDisabled = true;
-      const {success} = await api.recording.del(this.$route.params.id);
-      if(success) {
-        this.$emit('nextOrPreviousRecording');
-      } else {
-        this.deleteDisabled = true;
-      }
-    }
-  }
 };
 </script>
 

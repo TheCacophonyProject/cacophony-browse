@@ -19,10 +19,12 @@ const getters = {
     const tagItems = [];
     tags.map((tag) => {
       const tagItem = {};
-      if (tag.animal) {
-        tagItem.animal = tag.animal;       
+      if (tag.what) {
+        tagItem.what = tag.what;
+        tagItem.animal = tag.what;
       }
-      tagItem.event = tag.event;
+      tagItem.detail = tag.detail;
+      tagItem.event = tag.detail;
       if (tag.confidence) {
         tagItem.confidence = tag.confidence.toFixed(2);
       }
@@ -43,7 +45,6 @@ const getters = {
     const tagItems = [];
     tags.map((tag) => {
       const tagItem = {};
-      tagItem.event = tag.event;
       if (tag.event == "AUDIO") {
         // check for optional fields
         if (tag.tagId){
