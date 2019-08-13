@@ -552,6 +552,7 @@ export default {
     collateTags: function (tags, tracks) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
+      console.log(JSON.stringify(tags, ' '));
       for (const tag of tags) {
         const tagName = tag.animal === null ? tag.event : tag.animal;
         this.addToListOfTags(tagItems, tagName, tag.automatic);
