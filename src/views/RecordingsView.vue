@@ -552,19 +552,24 @@ export default {
     collateTags: function (tags, tracks) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
-      for (const tag of tags) {
+      for (let i = 0; i < tags.length; i++) {
+        const tag = tags[i];
         const tagName = tag.animal === null ? tag.event : tag.animal;
-        this.addToListOfTags(tagItems, tagName, tag.automatic);
+        const taggerId = taggerId;
+
+        this.addToListOfTags(tagItems, tagName, tag.automatic, taggerId);
       }
 
       if (tracks) {
-        for (const track of tracks) {
-          for (const tag of track.TrackTags) {
-            this.addToListOfTags(tagItems, tag.what, tag.automatic);
+        for (let j = 0; j < tracks.length; j++) {
+          const track = tracks[j];
+          for (let i = 0; i < track.TrackTags.length; i++) {
+            const tag = track.TrackTags[i];
+            const taggerId = tag.UserId || tag.taggerId;
+            this.addToListOfTags(tagItems, tag.what, tag.automatic, taggerId);
           }
         }
       }
-
 
       // Use automatic and human status to create an ordered array of objects
       // suitable for parsing into coloured spans
@@ -573,7 +578,7 @@ export default {
         const tagItem = tagItems[animal];
         let subOrder = 0;
         if (animal == "false positive") {
-          animal = "F/P";
+          animal = "false positive";
           subOrder = 3;
         } else if (animal == "multiple animals") {
           animal = "multiple";
@@ -586,19 +591,21 @@ export default {
         if (tagItem.automatic && tagItem.human) {
           result.push({
             text: animal,
-            class: 'text-success',
+            class: 'automatic human',
+            taggerIds: tagItem.taggerIds,
             order: subOrder
           });
         } else if (tagItem.human) {
           result.push({
             text: animal,
-            class: '',
+            class: 'human',
+            taggerIds: tagItem.taggerIds,
             order: 10 + subOrder
           });
         } else if (tagItem.automatic) {
           result.push({
             text: animal,
-            class: 'text-danger',
+            class: 'automatic',
             order: 20 + subOrder
           });
         }
@@ -609,17 +616,18 @@ export default {
       });
       return result;
     },
-    addToListOfTags: function (allTags, tagName, isAutomatic) {
-      var tag = allTags[tagName];
-      if (!tag) {
-        allTags[tagName] = tag = {};
+    addToListOfTags: function (allTags, tagName, isAutomatic, taggerId) {
+      const tag = allTags[tagName] || {};
+      tag.taggerIds = tag.taggerIds || [];
+      if (taggerId && tag.taggerIds.indexOf(taggerId) === -1) {
+        tag.taggerIds.push(taggerId);
       }
-
       if (isAutomatic) {
-        allTags[tagName].automatic = true;
+        tag.automatic = true;
       } else {
-        allTags[tagName].human = true;
+        tag.human = true;
       }
+      allTags[tagName] = tag;
     },
   },
 };
