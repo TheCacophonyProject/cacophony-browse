@@ -35,7 +35,7 @@
     "vue2-filters": "^0.4.1",
     "vuelidate": "^0.7.4",
     "vuex": "^3.0.1",
-    "lodash": "^4.17.13"
+    "lodash": "^4.17.14"
   },
   "browserslist": [
     "> 1%",
@@ -67,6 +67,8 @@
     "html-webpack-plugin": "^3.2.0",
     "jest": "^24.5.0",
     "jest-localstorage-mock": "^2.2.0",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^7.1.0",
     "uglifyjs-webpack-plugin": "^1.2.7",
     "vue-jest": "^2.6.0",
     "vue-loader": "^15.3.0",

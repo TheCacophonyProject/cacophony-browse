@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="nav-bar">
     <b-navbar toggleable="lg">
 
       <b-navbar-brand>

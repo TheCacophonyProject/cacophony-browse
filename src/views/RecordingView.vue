@@ -23,10 +23,12 @@
         :recording="recording"
         :tracks="tracks"
         :video-url="fileSource"
-        :video-raw-url="rawSource"/>
+        :video-raw-url="rawSource"
+      />
     </template>
 
   </b-container>
+  <b-container v-else>Loading...</b-container>
 </template>
 
 <script>
@@ -46,8 +48,8 @@ export default {
       alertVariant: "",
     };
   },
-  computed:
-    mapState({
+  computed: {
+    ...mapState({
       recording: state => state.Video.recording,
       tracks: state => state.Video.tracks,
       isVideo: state => state.Video.recording.type == "thermalRaw",
@@ -75,21 +77,10 @@ export default {
       fileSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
       rawSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
     }),
-  watch: {
-    '$route' () {
-      this.recording = null;
-      this.tracks = null;
-      this.getRecordingDetails();
-    },
   },
   created: async function() {
-    await this.getRecordingDetails();
+    await this.$store.dispatch('Video/GET_RECORDING', this.$route.params.id);
   },
-  methods: {
-    getRecordingDetails() {
-      this.$store.dispatch('Video/GET_RECORDING', this.$route.params.id);
-    },
-  }
 };
 </script>
 

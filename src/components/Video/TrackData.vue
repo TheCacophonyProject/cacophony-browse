@@ -1,6 +1,6 @@
 <template>
   <div class="details">
-    <h5>Classification</h5>
+    <h6>Classifier Detail</h6>
     <p><span class="title">Label:</span> {{ trackData.label }}</p>
     <p>
       <span class="title">Confidence:</span>
@@ -62,6 +62,7 @@ export default {
 <style scoped>
   .details {
     padding-bottom: 5px;
+    font-size: 80%;
   }
 
   table {

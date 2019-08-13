@@ -14,7 +14,7 @@
           </div>
         </div>
 
-        <h3>Technical details &nbsp;
+        <h4 id="technical-details">Technical details &nbsp;
           <span
             v-if="!display"
             title="Show details"
@@ -31,7 +31,7 @@
               icon="angle-up"
               class="fa-1x"/>
           </span>
-        </h3>
+        </h4>
         <div v-if="display">
           <div
             v-for="prop of properties"
@@ -65,49 +65,7 @@
           </div>
         </div>
       </b-form-group>
-
-      <b-form-group
-        label="Comment"
-        horizontal>
-        <b-form-row class="m-0">
-          <b-form-textarea
-            :value="value"
-            class="col"
-            @input="$emit('input', $event)" />
-          <div class="col-md-1" />
-          <b-button
-            class="col-md-3"
-            @click="updateComment">Save</b-button>
-        </b-form-row>
-      </b-form-group>
-      <b-alert
-        :show="showCommentAlert"
-        variant="success"
-        dismissible
-        @dismissed="showCommentAlert=false">Comment saved.</b-alert>
-
-      <b-form-group>
-        <b-button
-          :block="true"
-          variant="danger"
-          @click="deleteRecording()">Delete Recording</b-button>
-      </b-form-group>
-
-      <b-alert
-        :show="showDeleteAlert"
-        variant="success"
-        dismissible
-        @dismissed="showDeleteAlert=false">Recording deleted.</b-alert>
-
     </b-form>
-
-    <b-button
-      :href="downloadRawUrl"
-      target="_blank">Download Raw</b-button>
-    <b-button
-      :href="downloadFileUrl"
-      target="_blank">Download File</b-button>
-
   </div>
 </template>
 
@@ -125,28 +83,14 @@ export default {
       type: String,
       default: "",
     },
-    downloadRawUrl: {
-      type: String,
-      default: "",
-    },
-    downloadFileUrl: {
-      type: String,
-      default: "",
-    },
     recording: {
       type: Object,
-      required: true,
-    },
-    tracks: {
-      type: Array,
       required: true,
     }
   },
   data () {
     return {
       display: false,
-      showCommentAlert: false,
-      showDeleteAlert: false,
       properties: [
         {key: 'processingState', title: 'Processing State'},
         {key: 'location', title: 'Location'},
@@ -195,25 +139,14 @@ export default {
       return items;
     }
   },
-  methods: {
-    async updateComment() {
-      const {success} = await api.recording.comment(this.value, this.$route.params.id);
-      if(success) {
-        this.showCommentAlert = true;
-      }
-    },
-    async deleteRecording() {
-      const {success} = await api.recording.del(this.$route.params.id);
-      if(success) {
-        this.showDeleteAlert = true;
-        this.$emit('nextOrPreviousRecording');
-      }
-    }
-  }
 };
 </script>
 
 <style scoped>
+  #technical-details {
+    padding-top: 15px;
+  }
+
   .user-prop,
   .prop{
     padding-left: 15px;

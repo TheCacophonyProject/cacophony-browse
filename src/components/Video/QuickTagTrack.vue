@@ -27,7 +27,7 @@
       <div class="tag-name">nothing</div>
     </div>
     <div
-      v-b-modal="addRef"
+      v-b-modal="'custom-track-tag'"
       class="tag-div">
       <img
         class="tag-button"
@@ -44,10 +44,6 @@ import DefaultLabels from '../../const.js';
 export default {
   name: 'QuickTagTrack',
   props: {
-    addRef: {
-      type: String,
-      required: true,
-    },
     tags: {
       type: Array,
       required: true

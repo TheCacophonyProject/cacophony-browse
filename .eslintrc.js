@@ -16,15 +16,16 @@ module.exports = {
     }
   },
   rules: {
-    'indent': ['error', 2],
-    'linebreak-style': ['error', 'unix'],
+    'indent': ['warn', 2],
+    'linebreak-style': ['warn', 'unix'],
     'quotes': 'off',
-    'semi': ['error', 'always'],
-    'curly': ['error', 'all'],
+    'semi': ['warn', 'always'],
+    'curly': ['warn', 'all'],
     'no-console': ['warn'],
-    'no-undef': ['error'],
-    'no-unused-vars': ['error'],
-    'brace-style': ['error'],
-    'prefer-const': ['error']
+    'no-debugger': ['warn'],
+    'no-undef': ['warn'],
+    'no-unused-vars': ['warn'],
+    'brace-style': ['warn'],
+    'prefer-const': ['warn']
   },
 };

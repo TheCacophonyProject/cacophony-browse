@@ -22,7 +22,7 @@
         slot="replayButton"
         slot-scope="row">
         <font-awesome-icon
-          v-b-popover.hover.bottom="'Replay'"
+          v-b-tooltip.hover="'Replay'"
           :icon="['fa', 'play']"
           size="2x"
           style="cursor: pointer;"
@@ -33,7 +33,7 @@
         slot="deleteButton"
         slot-scope="row">
         <font-awesome-icon
-          v-b-popover.hover.bottom="'Delete tag'"
+          v-b-tooltip.hover="'Delete tag'"
           icon="trash"
           size="2x"
           style="cursor: pointer;"

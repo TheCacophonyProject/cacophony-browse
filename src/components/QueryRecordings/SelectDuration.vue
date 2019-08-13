@@ -1,7 +1,15 @@
 <template>
   <b-form-group>
     <label>Duration (sec)</label>
-    <b-form-row style="margin-left: 0px; margin-right: 0px;">
+    <b-form-select
+      :value="selectedOption"
+      :options="options"
+      @input="updateDurationType"
+    />
+    <b-form-row
+      v-if="isCustom"
+      style="margin-top: 15px; margin-left: 0; margin-right: 0;"
+    >
       <b-form-input
         :max="value.high"
         :value="value.low"
@@ -24,15 +32,45 @@
 
 export default {
   name: 'DurationSlider',
-  components: {
-  },
   props: {
     value: {
       type: Object,
       required: true
     }
   },
+  data () {
+    return {
+      options: [
+        { value: { low: "0", high: "" }, text: "Any duration" },
+        { value: { low: "0", high: "20" }, text: "Short (<20 seconds)" },
+        { value: { low: "20", high: "120" }, text: "Medium (20 seconds - 2 minutes)" },
+        { value: { low: "120", high: "" }, text: "Long (> 2 minutes)" },
+        { value: { isCustom: true, low: "0", high: "100" }, text: "Custom duration" },
+      ],
+    };
+  },
+  computed: {
+    selectedOption: function () {
+      return this.getOptionForValue(this.value);
+    },
+    isCustom: function () {
+      return this.selectedOption.isCustom;
+    }
+  },
   methods: {
+    getOptionForValue: function ({low, high}) {
+      low = Number(low);
+      high = Number(high) || Number.POSITIVE_INFINITY;
+      for (const option of this.options) {
+        const optionLow = Number(option.value.low);
+        const optionHigh = Number(option.value.high) || Number.POSITIVE_INFINITY;
+        if (optionLow === low && optionHigh === high) {
+          return option.value;
+        }
+      }
+      // Fallback to the any option.
+      return this.options[0].value;
+    },
     updateHigh: function (event) {
       const newValue = {
         high: event,
@@ -46,8 +84,17 @@ export default {
         low: event
       };
       this.$emit('input', newValue);
+    },
+    updateDurationType: function (val) {
+      val = val.hasOwnProperty('value') ? val.value : val;
+      const {low, high} = val;
+      const e = {
+        high,
+        low,
+      };
+      this.$emit('input', e);
     }
-  }
+  },
 };
 
 </script>

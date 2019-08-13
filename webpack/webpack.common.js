@@ -39,6 +39,16 @@ module.exports = {
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
         exclude: [/node_modules/]
+      },
+      // this will apply to both plain `.scss` files
+      // AND `<style lang="scss">` blocks in `.vue` files
+      {
+        test: /\.scss$/,
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          'sass-loader'
+        ]
       }
     ]
   },

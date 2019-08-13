@@ -13,16 +13,15 @@
       />
       <PrevNext
         :recording="recording"
-        @nextRecording="gotoNextRecording($event.direction, $event.tagMode, $event.tags)"/>
-      <AddObservation
-        ref = "addObs"
-        @addTag="addTag($event)"
-        @hideAddObservations="showAddObservation = false" />
-      <ObservedAnimals
+        @nextOrPreviousRecording="prevNext"/>
+      <RecordingControls
         :items="tagItems"
+        :download-raw-url="videoRawUrl"
+        :download-file-url="videoUrl"
         class="d-none d-lg-block"
         @deleteTag="deleteTag($event)"
-        @addTag="addTag($event)"/>
+        @addTag="addTag($event)"
+        @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
     </b-col>
 
     <b-col
@@ -30,7 +29,6 @@
       lg="4">
       <div
         v-if="tracks && tracks.length > 0">
-        <h2 class="d-none d-lg-block">Tracks</h2>
         <div
           v-for="(track, index) in orderedTracks()"
           :key="index">
@@ -49,20 +47,8 @@
         class="processing">
         Recording still processing...
       </div>
-      <h2 class="recording">Recording</h2>
       <RecordingProperties
-        v-model="recording.comment"
-        :download-raw-url="videoRawUrl"
-        :download-file-url="videoUrl"
-        :recording="recording"
-        :tracks="tracks"
-        @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
-      <ObservedAnimals
-        :items="tagItems"
-        class="d-lg-none"
-        @deleteTag="deleteTag($event)"
-        @addTag="addTag($event)"/>
-      <VideoHelp class="mt-2" />
+        :recording="recording"/>
     </b-col>
   </b-row>
 </template>
@@ -71,16 +57,14 @@
 /* eslint-disable no-console */
 import {mapState} from 'vuex';
 import PrevNext from './PrevNext.vue';
-import AddObservation from './AddObservation.vue';
-import ObservedAnimals from './ObservedAnimals.vue';
+import RecordingControls from './RecordingControls.vue';
 import ThermalVideoPlayer from './ThermalVideoPlayer.vue';
 import TrackInfo from './Track.vue';
 import RecordingProperties from './RecordingProperties.vue';
-import VideoHelp from './VideoHelp.vue';
 
 export default {
   name: 'VideoRecording',
-  components: {PrevNext, AddObservation, ObservedAnimals, RecordingProperties, VideoHelp, ThermalVideoPlayer, TrackInfo},
+  components: {PrevNext, RecordingControls, RecordingProperties, ThermalVideoPlayer, TrackInfo},
   props: {
     recording: {
       type: Object,
@@ -129,6 +113,55 @@ export default {
     },
   },
   methods: {
+    async gotoNextRecording(direction, tagMode, tags, skipMessage) {
+      if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
+        this.$router.push({path: `/recording/${this.recording.id}`});
+      }
+    },
+    async getNextRecording(direction, tagMode, tags, skipMessage) {
+      let where = {
+        DeviceId: this.recording.Device.id
+      };
+
+      let order;
+      switch (direction) {
+      case "next":
+        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
+        order = "ASC";
+        break;
+      case "previous":
+        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
+        order = "DESC";
+        break;
+      case "either":
+        if (await this.getNextRecording('next', tagMode, tags, true)) {
+          return true;
+        }
+        return await this.getNextRecording('previous', tagMode, tags, skipMessage);
+      default:
+        throw `invalid direction: '${direction}'`;
+      }
+      order  = JSON.stringify([["recordingDateTime", order]]);
+      where = JSON.stringify(where);
+
+      const params ={
+        where,
+        order,
+        limit: 1,
+        offset: 0
+      };
+
+      if (tags) {
+        params.tags = JSON.stringify(tags);
+      }
+      if (tagMode) {
+        params.tagMode = tagMode;
+      }
+      return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
+    },
+    prevNext(event) {
+      this.gotoNextRecording(event[0], event[1], event[2]);
+    },
     getRecordingId() {
       return Number(this.$route.params.id);
     },

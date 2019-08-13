@@ -1,7 +1,7 @@
 <template>
   <div class="img-buttons">
     <span
-      title="Previous for device, skipping bird &amp; false-positives"
+      v-b-tooltip.hover.bottomleft="'Previous for device, skipping bird &amp; false-positives'"
       @click="gotoNextRecording('previous', 'tagged', ['interesting'])">
       <font-awesome-icon
         icon="asterisk"
@@ -13,7 +13,7 @@
         icon="angle-double-left" />
     </span>
     <span
-      title="Previous for device, not manually tagged"
+      v-b-tooltip.hover.bottomleft="'Previous for device, needs tagging'"
       @click="gotoNextRecording('previous', 'no-human')">
       <font-awesome-icon
         icon="question"
@@ -25,21 +25,21 @@
         icon="angle-left" />
     </span>
     <span
-      title="Previous for device"
+      v-b-tooltip.hover.bottomleft="'Previous for device'"
       @click="gotoNextRecording('previous', 'any')">
       <font-awesome-icon
         icon="angle-left"
         class="fa-3x" />
     </span>
     <span
-      title="Next for device"
+      v-b-tooltip.hover.bottomleft="'Next for device'"
       @click="gotoNextRecording('next', 'any')">
       <font-awesome-icon
         icon="angle-right"
         class="fa-3x" />
     </span>
     <span
-      title="Next for device, not manually tagged"
+      v-b-tooltip.hover.bottomleft="'Next for device, needs tagging'"
       @click="gotoNextRecording('next', 'no-human')">
       <font-awesome-icon
         class="fa-3x"
@@ -51,7 +51,7 @@
         value="?" />
     </span>
     <span
-      title="Next for device, skipping birds &amp; false-positives"
+      v-b-tooltip.hover.bottomleft="'Next for device, skipping birds &amp; false-positives'"
       @click="gotoNextRecording('next', 'tagged', ['interesting'])">
       <font-awesome-icon
         class="fa-3x"
@@ -78,53 +78,9 @@ export default {
     }
   },
   methods: {
-    async gotoNextRecording(direction, tagMode, tags, skipMessage) {
-      if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
-        this.$router.push({path: `/recording/${this.recording.id}`});
-      }
-    },
-    async getNextRecording(direction, tagMode, tags, skipMessage) {
-      let where = {
-        DeviceId: this.recording.Device.id
-      };
-
-      let order;
-      switch (direction) {
-      case "next":
-        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
-        order = "ASC";
-        break;
-      case "previous":
-        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
-        order = "DESC";
-        break;
-      case "either":
-        if (await this.getNextRecording('next', tagMode, tags, true)) {
-          return true;
-        }
-        return await this.getNextRecording('previous', tagMode, tags, skipMessage);
-      default:
-        throw `invalid direction: '${direction}'`;
-      }
-      order  = JSON.stringify([["recordingDateTime", order]]);
-      where = JSON.stringify(where);
-
-      const params ={
-        where,
-        order,
-        limit: 1,
-        offset: 0
-      };
-
-      if (tags) {
-        params.tags = JSON.stringify(tags);
-      }
-      if (tagMode) {
-        params.tagMode = tagMode;
-      }
-
-      return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
-    },
+    gotoNextRecording(...args) {
+      this.$emit('nextOrPreviousRecording', {...args});
+    }
   },
 };
 </script>
