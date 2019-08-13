@@ -55,7 +55,7 @@
               size="xs"
             />
           </span>
-          <span class="tag-label">{{ tag.text }}</span>
+          <span class="tag-label">{{ JSON.stringify(item) }} {{ tag.text }}</span>
         </span>
       </div>
       <div class="recording-time-duration">
