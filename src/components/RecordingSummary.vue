@@ -40,6 +40,7 @@
         class="recording-tags"
       >
         <span
+          v-b-tooltip="getTagTitle(tag.class)"
           v-for="(tag, index) in item.tags"
           :key="index"
           :class="[
@@ -48,14 +49,25 @@
             tag.class
           ]"
         >
-          <!-- TODO: Change icon when info is available from API about whether tag was applied by human or AI -->
-          <span class="tag-icon">
+          <span
+            class="tag-icon">
             <font-awesome-icon
+              v-if="tag.class === 'automatic'"
               icon="cog"
               size="xs"
             />
+            <font-awesome-icon
+              v-else-if="tag.class === 'human'"
+              icon="user"
+              size="xs"
+            />
+            <font-awesome-icon
+              v-else-if="tag.class === 'automatic human'"
+              icon="user-cog"
+              size="xs"
+            />
           </span>
-          <span class="tag-label">{{ JSON.stringify(item) }} {{ tag.text }}</span>
+          <span class="tag-label">{{ tag.text }}</span>
         </span>
       </div>
       <div class="recording-time-duration">
@@ -129,6 +141,16 @@ export default {
         this.$router.push({
           path: `recording/${recordingId}`,
         });
+      }
+    },
+    getTagTitle(str) {
+      switch (str) {
+      case "automatic":
+        return "Tagged by Cacophony AI";
+      case "human":
+        return "Tagged by human";
+      case "automatic human":
+        return "Tagged by Cacophony AI and human";
       }
     }
   }
@@ -216,15 +238,14 @@ export default {
           margin-right: 0.3rem;
           line-height: 0.7;
         }
-        &.text-danger,
-        &.text-success {
-          color: $white !important; //argh.
-        }
-        &.text-danger {
+        &.automatic {
           background: $danger;
         }
-        &.text-success {
+        &.human {
           background: $success;
+        }
+        &.automatic.human {
+          background: $info;
         }
         .svg-inline--fa {
           color: $white;

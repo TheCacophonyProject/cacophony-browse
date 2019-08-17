@@ -62,6 +62,12 @@
               class="recording-placeholder"
             />
           </div>
+          <div
+            v-if="countMessage === 'No matches'"
+            class="no-results">
+            <h6 class="text-muted">No recordings found</h6>
+            <p class="small text-muted">Try modifying your search criteria.</p>
+          </div>
         </div>
 
         <div
@@ -704,6 +710,13 @@ export default {
   .recording-placeholder {
     height: 110px;
     margin-bottom: 15px;
+  }
+
+  .no-results {
+    display: flex;
+    flex-flow: column nowrap;
+    margin-top: 20vh;
+    text-align: center;
   }
 
   .sticky-footer {
