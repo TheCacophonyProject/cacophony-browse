@@ -11,7 +11,12 @@
         />
       </div>
       <div class="search-content-wrapper">
-        <div class="search-results">
+        <div
+          :class="[
+            'search-results',
+            {'display-rows': !showCards},
+          ]"
+        >
           <div class="results-summary">
             <h1>Recordings</h1>
             <h2
@@ -26,6 +31,7 @@
               class="search-description"
               v-html="searchDescription"
             />
+            <button @click="toggleResultsDisplayStyle">Display results as {{ showCards ? 'Rows' : 'Cards' }}</button>
           </div>
           <div
             v-if="!queryPending"
@@ -45,6 +51,7 @@
                   v-for="(item, index) in itemsByHour"
                   :item="item"
                   :key="index"
+                  :display-style="getResultsDisplayStyle"
                 />
               </div>
             </div>
@@ -124,6 +131,7 @@ export default {
       countMessage: null,
       currentPage: null,
       perPage: 100,
+      showCards: this.getPreferredResultsDisplayStyle(),
       limitPaginationButtons: 5,
       perPageOptions: [
         {value: 10, text: "10 per page"},
@@ -153,6 +161,9 @@ export default {
         }
       }
       return chunks;
+    },
+    getResultsDisplayStyle() {
+      return this.showCards ? 'card' : 'row';
     },
     searchDescription() {
       // Get the current search query, not the live updated one.
@@ -279,6 +290,13 @@ export default {
     },
     resetPagination() {
       this.currentPage = 1;
+    },
+    getPreferredResultsDisplayStyle() {
+      return localStorage.getItem('results-display-style') !== 'row';
+    },
+    toggleResultsDisplayStyle() {
+      this.showCards = !this.showCards;
+      localStorage.setItem('results-display-style', this.showCards ? 'card' : 'row');
     },
     parseCurrentRoute() {
       if (Object.keys(this.$route.query).length === 0) {
@@ -445,7 +463,6 @@ export default {
         delete where.DeviceGroups;
         delete where.dateRange;
       }
-
       // Work out current pagination offset.
       const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
 
@@ -698,6 +715,10 @@ export default {
     .search-results {
       max-width: $main-content-width;
       margin: 0 auto;
+      &.display-rows {
+        max-width: calc(100% - 100px);
+        margin-right: 0;
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 <template>
   <a
+    v-if="displayStyle === 'card'"
     :href="`/recording/${item.id}`"
     class="recording-summary"
     @click="event => navigateToRecording(event, item.id)"
@@ -98,6 +99,36 @@
       </a>
     </div>
   </a>
+  <div
+    v-else
+    class="recording-summary-row"
+  >
+    <a
+      :href="`/recording/${item.id}`"
+      @click="event => navigateToRecording(event, item.id)"
+    >
+      {{ item.id }}
+    </a>
+    <span v-if="item.type === 'audio'">
+      <font-awesome-icon
+        :icon="['far', 'file-audio']"
+        size="2x"
+      />
+    </span>
+    <span v-else-if="item.type === 'thermalRaw'">
+      <font-awesome-icon
+        :icon="['far', 'file-video']"
+        size="2x"
+      />
+    </span>
+    <span
+      v-for="(tag, index) in item.tags"
+      :class="tag.class"
+      :key="index"
+    >
+      {{ tag.text }}<span v-if="index + 1 < tags.length">,</span>
+    </span>
+  </div>
 </template>
 
 <script>
@@ -110,6 +141,11 @@ export default {
     item: {
       type: Object,
       required: true
+    },
+    displayStyle: {
+      type: String,
+      required: true,
+      default: 'cards',
     }
   },
   computed: {
@@ -120,7 +156,7 @@ export default {
       get() {
         return window;
       }
-    }
+    },
   },
   methods: {
     navigateToRecording(event, recordingId) {
@@ -162,6 +198,13 @@ export default {
       box-shadow: 0 1px 3px $gray-400;
       text-decoration: unset;
     }
+  }
+
+  // Row view variant
+  .recording-summary-row {
+    border: 1px solid $border-color;
+    border-bottom: 0;
+    border-collapse: collapse;
   }
 
   // wrapper of the icon on the left
