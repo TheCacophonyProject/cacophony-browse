@@ -70,7 +70,6 @@
 </template>
 
 <script>
-import api from '../../api/index';
 import BatteryLevel from '../BatteryLevel.vue';
 
 export default {
