@@ -79,6 +79,10 @@ var allLabels = {
     value: "trapped in trap",
     text: 'Animal in trap'
   },
+  trapInteraction: {
+    value: "interaction with trap",
+    text: 'Animal interacted with trap'
+  },
   cool: {
     value: "cool",
     text: 'Cool video'
@@ -146,12 +150,18 @@ const DefaultLabels = {
   quickTagLabels: function() {
     return [allLabels.possum.value, allLabels.rodent.value, allLabels.hedgehog.value, allLabels.cat.value, allLabels.bird.value];
   },
-  searchRecordingLabels: function() {
-    return this.tagTypes.concat([allLabels.missedTrack,
-      allLabels.multipleAnimals,
+  recordingLabels: function() {
+    return [
+      allLabels.missedTrack,
       allLabels.inTrap,
+      allLabels.trapInteraction,
       allLabels.cool
-    ]);
+    ];
+  },
+  searchRecordingLabels: function() {
+    return this.recordingLabels
+      .concat(this.tagTypes)
+      .concat([allLabels.multipleAnimals]);
   },
   searchLabels: function() {
     var searchLabels = this.animals.concat([allLabels.badTrack,
