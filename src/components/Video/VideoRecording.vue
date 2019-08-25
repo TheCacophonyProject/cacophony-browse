@@ -16,7 +16,6 @@
         :items="tagItems"
         :download-raw-url="videoRawUrl"
         :download-file-url="videoUrl"
-        class="d-none d-lg-block"
         @deleteTag="deleteTag($event)"
         @addTag="addTag($event)"
         @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>

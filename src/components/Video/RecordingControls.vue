@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="video-tags">
-      <b-row class="pt-2">
-        <b-col sm="5">
+      <b-row class="pt-2 pb-2">
+        <b-col cols="4">
           <b-button-group
             class="btn-block">
             <b-dropdown
@@ -38,8 +38,7 @@
           </b-button-group>
         </b-col>
 
-        <b-col
-          sm="4">
+        <b-col cols="4">
           <b-button-group
             v-b-tooltip.hover.top="'Download the files for this recording'"
             class="btn-block">
@@ -63,15 +62,16 @@
           </b-button-group>
         </b-col>
 
-        <b-col
-          sm="3">
+        <b-col cols="4">
           <b-button
             v-b-tooltip.hover.bottomleft="'Delete this recording'"
             :disabled="deleteDisabled"
             variant="danger"
             block
             @click="deleteRecording()">
-            <font-awesome-icon icon="exclamation-triangle"/>
+            <font-awesome-icon
+              icon="exclamation-triangle"
+              class="d-none d-md-inline"/>
             Delete
           </b-button>
         </b-col>
