@@ -104,8 +104,10 @@ const actions = {
   },
 
   async DELETE_TAG({commit}, tag) {
-    await api.tag.deleteTag(tag);
-    commit('deleteTag', tag);
+    const { success } = await api.tag.deleteTag(tag);
+    if (success) {
+      commit('deleteTag', tag);
+    }
   },
 
   async UPDATE_COMMENT({commit}, { comment, recordingId }) {
@@ -115,9 +117,22 @@ const actions = {
     }
   },
 
-  async ADD_TAG(commit, {tag, id}) {
-    await api.tag.addTag(tag, id);
-    store.dispatch('Video/GET_RECORDING', id);
+  async ADD_TAG({commit}, {tag, id}) {
+    var { success, result } = await api.tag.addTag(tag, id);
+    if (!success) {
+      return;
+    }
+
+    // Add an initial tag to update the UI more quickly.
+    tag.id = result.tagId;
+    tag.createdAt = new Date();
+    commit('addTag', tag);
+
+    // Resync all recording tags from the API server.
+    const apiResult  = await api.recording.id(id);
+    if (apiResult.success) {
+      commit('setTags', apiResult.result.recording.Tags);
+    }
   },
 
   async ADD_TRACK_TAG({commit}, {tag, recordingId, trackId}) {
@@ -141,6 +156,14 @@ const mutations = {
   },
   updateComment(state, comment) {
     state.recording.comment = comment;
+  },
+  addTag(state, tag) {
+    tag.createdAt = new Date();
+    state.recording.Tags.unshift(tag);
+  },
+  setTags(state, tags) {
+    console.log(tags);
+    state.recording.Tags = tags;
   },
   deleteTag(state, tagId) {
     state.recording.Tags = state.recording.Tags.filter(tag => tag.id != tagId);
