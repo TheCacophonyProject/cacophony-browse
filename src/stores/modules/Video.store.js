@@ -8,7 +8,16 @@ const state = {
   recording: {
     Tags: []
   },
-  tracks: []
+  tracks: [],
+
+  findTrack(trackId) {
+    for (const track of this.tracks) {
+      if (track.id == trackId) {
+        return track;
+      }
+    }
+    return null;
+  }
 };
 
 // getters https://vuex.vuejs.org/guide/getters.html
@@ -52,9 +61,9 @@ const getters = {
         }
         if (tag.recordingId){
           tagItem.recordingId = tag.recordingId;
-        }        
-        // compulsory fields        
-        tagItem.tagValue = tag.tagValue;        
+        }
+        // compulsory fields
+        tagItem.tagValue = tag.tagValue;
         tagItem.startTime = tag.startTime;
         tagItem.duration = tag.duration;
         tagItem.confidence = tag.confidence;
@@ -66,18 +75,6 @@ const getters = {
     });
     return tagItems;
   },
-};
-
-const getRecording = async function(commit, recordingId) {
-  const {result: recording} = await api.recording.id(recordingId);
-  commit('receiveRecording', recording);
-  return recording.success;
-};
-
-const getTracks = async function(commit, recordingId) {
-  const {result: tracks} = await api.recording.tracks(recordingId);
-  commit('receiveTracks', tracks);
-  return tracks.success;
 };
 
 const actions = {
@@ -104,8 +101,10 @@ const actions = {
   },
 
   async DELETE_TAG({commit}, tag) {
-    await api.tag.deleteTag(tag);
-    commit('deleteTag', tag);
+    const { success } = await api.tag.deleteTag(tag);
+    if (success) {
+      commit('deleteTag', tag);
+    }
   },
 
   async UPDATE_COMMENT({commit}, { comment, recordingId }) {
@@ -115,19 +114,54 @@ const actions = {
     }
   },
 
-  async ADD_TAG(commit, {tag, id}) {
-    await api.tag.addTag(tag, id);
-    store.dispatch('Video/GET_RECORDING', id);
+  async ADD_TAG({commit}, {tag, id}) {
+    const { success, result } = await api.tag.addTag(tag, id);
+    if (!success) {
+      return;
+    }
+
+    // Add an initial tag to update the UI more quickly.
+    tag.id = result.tagId;
+    tag.createdAt = new Date();
+    commit('addTag', tag);
+
+    // Resync all recording tags from the API.
+    const { success: syncSuccess, result: syncResult }  = await api.recording.id(id);
+    if (syncSuccess) {
+      commit('setTags', syncResult.recording.Tags);
+    }
   },
 
   async ADD_TRACK_TAG({commit}, {tag, recordingId, trackId}) {
-    await api.recording.addTrackTag(tag, recordingId, trackId);
-    return await getTracks(commit, recordingId);
+    const { success, result } = await api.recording.addTrackTag(tag, recordingId, trackId);
+    if (!success) {
+      return;
+    }
+
+    // Add an initial tag to update the UI more quickly.
+    tag.id = result.trackTagId;
+    tag.TrackId = trackId;
+    tag.createdAt = new Date();
+    commit('addTrackTag', tag);
+
+    // Resync all tags for the track from the API.
+    const { success: syncSuccess, result: syncResult } = await api.recording.tracks(recordingId);
+    if (!syncSuccess) {
+      return;
+    }
+    for (const track of syncResult.tracks) {
+      if (track.id == trackId) {
+        commit('setTrackTags', track);
+      }
+    }
   },
 
   async DELETE_TRACK_TAG({commit}, {tag, recordingId}) {
-    await api.recording.deleteTrackTag(tag, recordingId);
-    return await getTracks(commit, recordingId);
+    const { success } = await api.recording.deleteTrackTag(tag, recordingId);
+    if (!success) {
+      return;
+    }
+    return commit('deleteTrackTag', tag);
   },
 };
 
@@ -139,16 +173,58 @@ const mutations = {
     state.downloadFileJWT = downloadFileJWT;
     state.downloadRawJWT = downloadRawJWT;
   },
+
+  receiveTracks(state, {tracks}) {
+    state.tracks = tracks;
+  },
+
   updateComment(state, comment) {
     state.recording.comment = comment;
   },
+
+  addTag(state, tag) {
+    state.recording.Tags.unshift(tag);
+  },
+
+  setTags(state, tags) {
+    state.recording.Tags = tags;
+  },
+
   deleteTag(state, tagId) {
     state.recording.Tags = state.recording.Tags.filter(tag => tag.id != tagId);
   },
-  receiveTracks(state, {tracks}) {
-    state.tracks = tracks;
+
+  addTrackTag(state, tag) {
+    const track = state.findTrack(tag.TrackId);
+    track.TrackTags.push(tag);
+  },
+
+  setTrackTags(state, newTrack) {
+    const track = state.findTrack(newTrack.id);
+    if (track) {
+      track.TrackTags = newTrack.TrackTags;
+    }
+  },
+
+  deleteTrackTag(state, deletedTag) {
+    const track = state.findTrack(deletedTag.TrackId);
+    track.TrackTags = track.TrackTags.filter(tag => tag.id != deletedTag.id);
   }
 };
+
+
+const getRecording = async function(commit, recordingId) {
+  const {result: recording} = await api.recording.id(recordingId);
+  commit('receiveRecording', recording);
+  return recording.success;
+};
+
+const getTracks = async function(commit, recordingId) {
+  const {result: tracks} = await api.recording.tracks(recordingId);
+  commit('receiveTracks', tracks);
+  return tracks.success;
+};
+
 
 export default {
   namespaced: true,
