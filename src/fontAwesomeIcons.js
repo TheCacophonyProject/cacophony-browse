@@ -31,7 +31,9 @@ import {
   faTrash,
   faUsers,
   faVideo,
-  faWrench
+  faWrench,
+  faUser,
+  faUserCog,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faCalendar,
@@ -44,7 +46,7 @@ import {
   faFileAudio,
   faFileVideo,
   faUserCircle,
-  faWindowClose
+  faWindowClose,
 } from '@fortawesome/free-regular-svg-icons';
 
 // https://www.npmjs.com/package/@fortawesome/vue-fontawesome
@@ -90,7 +92,9 @@ library.add(
   faUsers,
   faVideo,
   faWindowClose,
-  faWrench
+  faWrench,
+  faUser,
+  faUserCog,
 );
 
 export default FontAwesomeIcon;
