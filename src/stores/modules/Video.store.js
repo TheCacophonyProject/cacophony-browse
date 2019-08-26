@@ -125,7 +125,7 @@ const actions = {
     tag.createdAt = new Date();
     commit('addTag', tag);
 
-    // Resync all recording tags from the API server.
+    // Resync all recording tags from the API.
     const { success: syncSuccess, result: syncResult }  = await api.recording.id(id);
     if (syncSuccess) {
       commit('setTags', syncResult.recording.Tags);
@@ -133,11 +133,18 @@ const actions = {
   },
 
   async ADD_TRACK_TAG({commit}, {tag, recordingId, trackId}) {
-    const { success } = await api.recording.addTrackTag(tag, recordingId, trackId);
+    const { success, result } = await api.recording.addTrackTag(tag, recordingId, trackId);
     if (!success) {
       return;
     }
 
+    // Add an initial tag to update the UI more quickly.
+    tag.id = result.trackTagId;
+    tag.TrackId = trackId;
+    tag.createdAt = new Date();
+    commit('addTrackTag', tag);
+
+    // Resync all tags for the track from the API.
     const { success: syncSuccess, result: syncResult } = await api.recording.tracks(recordingId);
     if (!syncSuccess) {
       return;
@@ -185,6 +192,11 @@ const mutations = {
 
   deleteTag(state, tagId) {
     state.recording.Tags = state.recording.Tags.filter(tag => tag.id != tagId);
+  },
+
+  addTrackTag(state, tag) {
+    const track = state.findTrack(tag.TrackId);
+    track.TrackTags.push(tag);
   },
 
   setTrackTags(state, newTrack) {
