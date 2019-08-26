@@ -113,7 +113,10 @@
   </a>
   <div
     v-else
-    class="recording-summary-row"
+    :class="[
+      'recording-summary-row',
+      {'even': isEvenRow},
+    ]"
   >
     <a
       :href="`/recording/${item.id}`"
@@ -138,7 +141,7 @@
       :class="tag.class"
       :key="index"
     >
-      {{ tag.text }}<span v-if="index + 1 < tags.length">,</span>
+      {{ tag.text }}<span v-if="index + 1 < item.tags.length">,</span>
     </span>
   </div>
 </template>
@@ -153,6 +156,10 @@ export default {
     item: {
       type: Object,
       required: true
+    },
+    isEvenRow: {
+      type: Boolean,
+      required: true,
     },
     displayStyle: {
       type: String,
@@ -224,6 +231,9 @@ export default {
 
   // Row view variant
   .recording-summary-row {
+    &.even {
+      background-color: #eee;
+    }
     border: 1px solid $border-color;
     border-bottom: 0;
     border-collapse: collapse;

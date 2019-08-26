@@ -47,19 +47,20 @@
             class="results"
           >
             <div
-              v-for="(itemsByDay, index) in tableItemsChunkedByDayAndHour"
-              :key="index"
+              v-for="(itemsByDay, index_a) in tableItemsChunkedByDayAndHour"
+              :key="index_a"
             >
               <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
               <div
-                v-for="(itemsByHour, index) in itemsByDay"
-                :key="index"
+                v-for="(itemsByHour, index_b) in itemsByDay"
+                :key="index_b"
               >
                 <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
                 <RecordingSummary
                   v-for="(item, index) in itemsByHour"
                   :item="item"
-                  :key="index"
+                  :is-even-row="(index_a + index_b + index) % 2 === 1"
+                  :key="`${index}_${getResultsDisplayStyle}`"
                   :display-style="getResultsDisplayStyle"
                 />
               </div>
