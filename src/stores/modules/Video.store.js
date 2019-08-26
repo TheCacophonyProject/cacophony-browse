@@ -108,6 +108,13 @@ const actions = {
     commit('deleteTag', tag);
   },
 
+  async UPDATE_COMMENT({commit}, { comment, recordingId }) {
+    const { success } = await api.recording.comment(comment, recordingId);
+    if (success) {
+      commit('updateComment', comment);
+    }
+  },
+
   async ADD_TAG(commit, {tag, id}) {
     await api.tag.addTag(tag, id);
     store.dispatch('Video/GET_RECORDING', id);
@@ -131,6 +138,9 @@ const mutations = {
     state.recording = recording;
     state.downloadFileJWT = downloadFileJWT;
     state.downloadRawJWT = downloadRawJWT;
+  },
+  updateComment(state, comment) {
+    state.recording.comment = comment;
   },
   deleteTag(state, tagId) {
     state.recording.Tags = state.recording.Tags.filter(tag => tag.id != tagId);

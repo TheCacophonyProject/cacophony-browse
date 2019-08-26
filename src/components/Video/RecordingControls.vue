@@ -1,16 +1,20 @@
 <template>
   <div>
+    <Comment
+      :initial-comment="comment"
+      @updateComment="updateComment($event)"/>
     <div class="video-tags">
       <b-row class="pt-2 pb-2">
-        <b-col cols="4">
+        <b-col
+          cols="6"
+          md="3">
           <b-button-group
-            class="btn-block">
+            class="btn-block pb-2">
             <b-dropdown
               text="Label"
               right
               variant="info"
               class="btn-block">
-
               <b-dropdown-item
                 v-b-tooltip.hover.left="'An animal is in a trap in this recording'"
                 @click="addTrappedTag">
@@ -38,7 +42,20 @@
           </b-button-group>
         </b-col>
 
-        <b-col cols="4">
+        <b-col
+          cols="6"
+          md="3">
+          <b-button
+            v-b-modal.update-comment
+            variant="info"
+            block>
+            Comment
+          </b-button>
+        </b-col>
+
+        <b-col
+          cols="6"
+          md="3">
           <b-button-group
             v-b-tooltip.hover.top="'Download the files for this recording'"
             class="btn-block">
@@ -62,7 +79,9 @@
           </b-button-group>
         </b-col>
 
-        <b-col cols="4">
+        <b-col
+          cols="6"
+          md="3">
           <b-button
             v-b-tooltip.hover.bottomleft="'Delete this recording'"
             :disabled="deleteDisabled"
@@ -108,13 +127,19 @@
 
 <script>
 import api from '../../api/index';
+import Comment from './Comment.vue';
 
 export default {
   name: 'RecordingControls',
+  components: {Comment},
   props: {
     items: {
       type: Array,
       required: true
+    },
+    comment: {
+      type: String,
+      default: "",
     },
     downloadRawUrl: {
       type: String,
@@ -135,8 +160,6 @@ export default {
       ],
       deleteDisabled: false,
     };
-  },
-  computed: {
   },
   watch: {
     items: function () {
@@ -171,6 +194,9 @@ export default {
       if(success) {
         this.$emit('nextOrPreviousRecording');
       }
+    },
+    updateComment(event) {
+      this.$emit("updateComment", event);
     }
   }
 };
