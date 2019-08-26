@@ -18,7 +18,16 @@
           ]"
         >
           <div class="results-summary">
-            <h1>Recordings</h1>
+            <div class="row align-items-center">
+              <div class="col-6">
+                <h1>Recordings</h1>
+              </div>
+              <div class="col-6">
+                <CsvDownload
+                  :params="serialisedQuery"
+                  class="float-right"/>
+              </div>
+            </div>
             <h2
               v-if="countMessage"
             >
@@ -106,6 +115,7 @@
 <script>
 
 import QueryRecordings from '../components/QueryRecordings/QueryRecordings.vue';
+import CsvDownload from '../components/QueryRecordings/CsvDownload.vue';
 import TableRecordings from '../components/TableRecordings.vue';
 import RecordingSummary from "../components/RecordingSummary.vue";
 import api from '../api/index';
@@ -123,7 +133,7 @@ const roundDate = (date, toHour = false) => {
 
 export default {
   name: 'RecordingsView',
-  components: {RecordingSummary, QueryRecordings, TableRecordings},
+  components: {RecordingSummary, QueryRecordings, TableRecordings, CsvDownload},
   props: {},
   data() {
     return {
@@ -237,6 +247,10 @@ export default {
         return '';
       }
     },
+    serialisedQuery() {
+      const query = this.lastQuery || this.query;
+      return this.serialiseQuery(query, true);
+    }
   },
   watch: {
     '$route' () {
