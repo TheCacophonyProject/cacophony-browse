@@ -136,6 +136,13 @@
         size="2x"
       />
     </span>
+
+    <span>{{ item.devicename }}</span>
+    <span>{{ item.groupname }}</span>
+    <span>{{ item.location }}</span>
+    <span>{{ item.date }}</span>
+    <span>{{ item.time }}</span>
+    <span>{{ item.duration }}</span>
     <span
       v-for="(tag, index) in item.tags"
       :class="tag.class"
@@ -143,6 +150,8 @@
     >
       {{ tag.text }}<span v-if="index + 1 < item.tags.length">,</span>
     </span>
+    <BatteryLevel :battery-level="item.other.batteryLevel"/>
+    <span>{{ item.processing_state }}</span>
   </div>
 </template>
 
@@ -234,9 +243,10 @@ export default {
     &.even {
       background-color: #eee;
     }
-    border: 1px solid $border-color;
-    border-bottom: 0;
-    border-collapse: collapse;
+    border-top: 1px solid $border-color;
+    &:first-of-type {
+      border: 0;
+    }
   }
 
   // wrapper of the icon on the left
