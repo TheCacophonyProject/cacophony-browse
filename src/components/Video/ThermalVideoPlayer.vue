@@ -17,11 +17,15 @@
       @statechanged="stateChange"
       @ready="selectTrack"/>
     <VideoTracksScrubber
+      ref="scrubber"
       :duration="duration"
       :tracks="tracks"
       :current-video-time="currentVideoTime"
       :colours="colours"
       :canvas-width="canvasWidth"
+      @start-scrub="startScrub"
+      @end-scrub="endScrub"
+      @set-playback-time="setTimeAndRedraw"
     />
   </div>
 </template>
@@ -59,7 +63,6 @@ export default {
     return {
       lastDisplayedVideoTime: 0,
       currentVideoTime: 0,
-      lastTrackFrame: 0,
       duration: 0,
       playerOptions: {
         autoplay: true,
@@ -75,6 +78,8 @@ export default {
       canvasWidth: 800,
       canvasHeight: 600,
       scale: 5,
+      wasPaused: false,
+      isScrubbing: false,
     };
   },
   watch: {
@@ -89,11 +94,10 @@ export default {
         tracks[i].trackIndex = i;
       }
       this.selectTrack();
-      this.maybeInitScrubber();
     }
   },
   mounted: function () {
-    this.calculateSizes();
+    this.initOverlayCanvas();
     this.setVideoUrl();
     window.addEventListener('resize', this.onResize);
   },
@@ -102,11 +106,25 @@ export default {
     window.removeEventListener('resize', this.onResize);
   },
   methods: {
+    startScrub() {
+      const player = this.$refs.player;
+      const htmlPlayer = player.$refs.video;
+      this.wasPaused = htmlPlayer.paused;
+      if (!this.wasPaused) {
+        player.player.pause();
+      }
+      this.isScrubbing = true;
+    },
+    endScrub() {
+      if (!this.wasPaused) {
+        this.$refs.player.player.play();
+      }
+      this.isScrubbing = false;
+    },
     stateChange(event) {
       if (event.hasOwnProperty('canplay') && event.canplay) {
         // Try to get the video length:
         this.duration = document.getElementsByTagName('video')[0].duration;
-        this.maybeInitScrubber();
       }
     },
     setVideoUrl() {
@@ -125,13 +143,13 @@ export default {
     },
     onResize() {
       const oldWidth = this.canvasWidth;
-      this.calculateSizes();
+      this.initOverlayCanvas();
       if (oldWidth !== this.canvasWidth) {
         this.currentVideoTime += 10;
         this.draw();
       }
     },
-    calculateSizes() {
+    initOverlayCanvas() {
       this.canvasWidth = this.$refs.canvas.clientWidth;
       this.scale = this.canvasWidth /160;
       this.canvasHeight = (this.scale * 120) + 30;
@@ -147,16 +165,47 @@ export default {
       canvas.style.width = this.canvasWidth + "px";
       canvas.style.height = this.canvasHeight + "px";
       context.scale(devicePixelRatio, devicePixelRatio);
+
+      // Hit-testing of track rects, so they are clickable.
+      const hitTestPos = (x, y) => {
+        const allFrameData = this.getVideoFrameDataForAllTracksAtTime(this.currentVideoTime);
+        for (const rect of allFrameData) {
+          if (
+            (rect.x <= x && rect.x + rect.rectWidth > x) &&
+            (rect.y <= y && rect.y + rect.rectHeight > y)
+          ) {
+            return rect;
+          }
+        }
+        return null;
+      };
+
+      canvas.addEventListener('click', function (event) {
+        const canvasOffset = canvas.getBoundingClientRect();
+        const x = event.x - canvasOffset.x;
+        const y = event.y - canvasOffset.y;
+        const hitRect = hitTestPos(x, y);
+        if (hitRect) {
+          this.$emit('trackSelected', hitRect.trackIndex);
+        }
+      }.bind(this));
+
+      canvas.addEventListener('mousemove', (event) => {
+        const canvasOffset = canvas.getBoundingClientRect();
+        const x = event.x - canvasOffset.x;
+        const y = event.y - canvasOffset.y;
+        const hitRect = hitTestPos(x, y);
+        // set cursor
+        canvas.style.cursor = hitRect !== null ? 'pointer' : 'default';
+      });
     },
     setTimeAndRedraw(time) {
-      this.lastTrackFrame = 0;
       this.$refs.player.player.currentTime(time);
     },
     seeking(event) {
       // If the user is moving the time slider on the video then update the canvas
       // as well so that it matches the underlying video frame.
       if(event.type === "seeking") {
-        this.lastTrackFrame = 0;
         this.draw();
       }
     },
@@ -187,40 +236,68 @@ export default {
         context.fillText(text, textX, textY);
       }
     },
+    getVideoFrameDataForAllTracksAtTime(currentTime) {
+      const search = (positions, currentTime) => {
+        let i = positions.length - 1;
+        while (positions[i][0] > currentTime) {
+          i--;
+        }
+        return positions[i];
+      };
+      // First check if the last position we got is still the current position?
+      // See if tracks are in range.
+      return (
+        this.tracks
+          .filter(({data: {start_s, end_s}}) => (
+            start_s <= currentTime && end_s >= currentTime
+          ))
+          .map(({data: {positions}, trackIndex}) => {
+            const item = search(positions, currentTime)[1];
+            return {
+              rectWidth: (item[2] - item[0]) * this.scale,
+              rectHeight: (item[3] - item[1]) * this.scale,
+              x: item[0] * this.scale,
+              y: item[1] * this.scale,
+              trackIndex,
+            };
+          })
+      );
+    },
     draw() {
-      const v = this.$refs.player;
-      // Only update the canvas if the video time has changed as this means a new
-      // video frame is being displayed.
-      const frameTime = 1 / 9;
-      const currentFrame = Math.floor(v.player.currentTime() / frameTime);
-      // NOTE: Since our video is 9fps, we're don't need to update this at 60fps.
-      this.isScrubbing = false;
-      if (v && currentFrame !== this.lastDisplayedVideoTime || this.isScrubbing) {
+      if (this.$refs.player) {
+        const v = this.$refs.player;
+        // NOTE: Since our video is 9fps, we're don't need to update this at 60fps.
+        const frameTime = 1 / 9;
         this.currentVideoTime = v.player.currentTime();
+        const currentFrame = Math.floor(this.currentVideoTime / frameTime);
+        if (currentFrame !== this.lastDisplayedVideoTime || this.isScrubbing) {
+          // Only update the canvas if the video time has changed as this means a new
+          // video frame is being displayed.
+          const allFrameData = this.getVideoFrameDataForAllTracksAtTime(this.currentVideoTime);
+          const canvas = this.$refs.canvas;
+          const context = canvas.getContext('2d');
+          const devicePixelRatio = window.devicePixelRatio;
+          canvas.width = this.canvasWidth * devicePixelRatio;
+          canvas.height = this.canvasHeight * devicePixelRatio;
 
-        if (this.$refs.playhead) {
-          this.$refs.playhead.style.right = `${this.canvasWidth - this.getOffsetForTime(this.currentVideoTime)}px`;
-        }
-        const allFrameData = this.getVideoFrameDataForAllTracksAtTime(v.player.currentTime());
-        const canvas = this.$refs.canvas;
-        const context = canvas.getContext('2d');
-        const devicePixelRatio = window.devicePixelRatio;
-        canvas.width = this.canvasWidth * devicePixelRatio;
-        canvas.height = this.canvasHeight * devicePixelRatio;
-        canvas.style.width = this.canvasWidth + "px";
-        canvas.style.height = this.canvasHeight + "px";
-        context.scale(devicePixelRatio, devicePixelRatio);
-
-        // Clear the canvas before each new frame
-        context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-        if (allFrameData.length) {
-          for (const rect of allFrameData) {
-            this.drawRectWithText(context, rect);
+          canvas.style.width = `${this.canvasWidth}px`;
+          canvas.style.height = `${this.canvasHeight}px`;
+          if (this.$refs.scrubber) {
+            this.$refs.scrubber.$el.style.width = canvas.style.width;
           }
+          context.scale(devicePixelRatio, devicePixelRatio);
+
+          // Clear the canvas before each new frame
+          context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+          if (allFrameData.length) {
+            for (const rect of allFrameData) {
+              this.drawRectWithText(context, rect);
+            }
+          }
+          this.lastDisplayedVideoTime = currentFrame;
         }
-        this.lastDisplayedVideoTime = currentFrame;
+        requestAnimationFrame(this.draw);
       }
-      requestAnimationFrame(this.draw);
     },
   },
 };
@@ -266,21 +343,6 @@ export default {
     position: relative;
     width: 100%;
     padding: 0;
-  }
-
-  .track-scrubber {
-    position: relative;
-    background: #2B333F;
-  }
-  .scrub-track {
-    position: absolute;
-    height: 10px;
-  }
-  .playhead {
-    height: 100%;
-    position: absolute;
-    background: rgba(0, 0, 0, 0.35);
-    left: 0;
   }
 </style>
 <style src="video.js/dist/video-js.css"></style>
