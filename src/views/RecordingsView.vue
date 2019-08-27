@@ -10,23 +10,31 @@
           @toggled-search-panel="searchPanelIsCollapsed = !searchPanelIsCollapsed"
         />
       </div>
-      <div class="search-content-wrapper">
-        <div
-          :class="[
-            'search-results',
-            {'display-rows': !showCards},
-          ]"
-        >
+      <div
+        :class="[
+          'search-content-wrapper',
+          {'display-rows': !showCards},
+        ]"
+      >
+        <div class="search-results">
           <div class="results-summary">
             <div class="row align-items-center">
               <div class="col-6">
                 <h1>Recordings</h1>
               </div>
+
               <div class="col-6">
                 <CsvDownload
                   :params="serialisedQuery"
                   class="float-right"/>
+                <b-button
+                  class="float-right display-toggle"
+                  @click="toggleResultsDisplayStyle"
+                >
+                  Display as {{ showCards ? 'rows' : 'cards' }}
+                </b-button>
               </div>
+
             </div>
             <h2
               v-if="countMessage"
@@ -40,26 +48,55 @@
               class="search-description"
               v-html="searchDescription"
             />
-            <button @click="toggleResultsDisplayStyle">Display results as {{ showCards ? 'Rows' : 'Cards' }}</button>
           </div>
           <div
             v-if="!queryPending"
             class="results"
           >
-            <div
-              v-for="(itemsByDay, index_a) in tableItemsChunkedByDayAndHour"
-              :key="index_a"
-            >
-              <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+            <div v-if="showCards">
               <div
-                v-for="(itemsByHour, index_b) in itemsByDay"
-                :key="index_b"
+                v-for="(itemsByDay, index_a) in tableItemsChunkedByDayAndHour"
+                :key="index_a"
               >
-                <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+                <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+                <div
+                  v-for="(itemsByHour, index_b) in itemsByDay"
+                  :key="index_b"
+                >
+                  <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+                  <RecordingSummary
+                    v-for="(item, index) in itemsByHour"
+                    :item="item"
+                    :key="`${index}_${getResultsDisplayStyle}`"
+                    :display-style="getResultsDisplayStyle"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              v-else
+              class="all-rows"
+            >
+              <div class="recordings-day">
+                <div>
+                  <span>ID</span>
+                  <span>Type</span>
+                  <span>Device</span>
+                  <span>Group</span>
+                  <span>Location</span>
+                  <span>Date</span>
+                  <span>Time</span>
+                  <span>Duration</span>
+                  <span>Tags</span>
+                  <span>Battery</span>
+                  <span>State</span>
+                </div>
+              </div>
+              <div class="results-rows">
                 <RecordingSummary
-                  v-for="(item, index) in itemsByHour"
+                  v-for="(item, index) in tableItems"
                   :item="item"
-                  :is-even-row="(index_a + index_b + index) % 2 === 1"
+                  :is-even-row="index % 2 === 1"
                   :key="`${index}_${getResultsDisplayStyle}`"
                   :display-style="getResultsDisplayStyle"
                 />
@@ -238,11 +275,11 @@ export default {
           timespan = !isCustom ?
             `in the <strong>${timespan}</strong>` :
             `between <strong>${formatDate(query.where.recordingDateTime['$gt'], 0)}</strong>&nbsp;` +
-            `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
+              `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
         }
         return (
           `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
-          `${timespan}${durationStr}`
+            `${timespan}${durationStr}`
         );
       } else {
         return '';
@@ -422,7 +459,7 @@ export default {
         } else if (query.where.hasOwnProperty('recordingDateTime')) {
           if (
             query.where.recordingDateTime.hasOwnProperty("$gt") &&
-            query.where.recordingDateTime.hasOwnProperty("$lt")
+              query.where.recordingDateTime.hasOwnProperty("$lt")
           ) {
             where.dateRange = 'customDateRange';
             // assume custom dateRange
@@ -678,6 +715,45 @@ export default {
 
   $main-content-width: 640px;
 
+  .display-rows .results-summary {
+    padding: 0 20px;
+    max-width: 100vw;
+  }
+  .display-rows .recordings-day {
+    margin-bottom: 0;
+    display: table-header-group;
+    > div {
+      display: table-row;
+
+      > span {
+        position: sticky;
+        top: 0;
+        background: transparentize($white, 0.15);
+        padding: 0 10px;
+        vertical-align: middle;
+        display: table-cell;
+        border-right: 1px solid $border-color;
+        border-bottom: 1px solid $border-color;
+      }
+    }
+  }
+  .display-rows.search-content-wrapper {
+    margin: 0;
+    padding: 0;
+    .search-results {
+      margin: 0;
+      width: 100%;
+      max-width: unset;
+    }
+  }
+  .results-rows {
+    display: table-row-group;
+  }
+  .all-rows {
+    display: table;
+    width: 100%;
+  }
+
   .search-filter-wrapper {
     background: $gray-100;
     position: relative;
@@ -737,8 +813,8 @@ export default {
       max-width: $main-content-width;
       margin: 0 auto;
       &.display-rows {
-        max-width: calc(100% - 100px);
-        margin-right: 0;
+        max-width: 100%;
+        margin: 0;
       }
     }
   }
@@ -814,6 +890,9 @@ export default {
       position: sticky;
       bottom: 0;
     }
+  }
+  .display-toggle {
+    margin-right: 5px;
   }
 
 </style>

@@ -112,15 +112,12 @@
     </div>
   </a>
   <div
-    v-else
-    :class="[
-      'recording-summary-row',
-      {'even': isEvenRow},
-    ]"
+    v-else-if="item && item.id"
+    class="recording-summary-row"
   >
     <a
       :href="`/recording/${item.id}`"
-      @click="event => navigateToRecording(event, item.id)"
+      target="_blank"
     >
       {{ item.id }}
     </a>
@@ -143,14 +140,20 @@
     <span>{{ item.date }}</span>
     <span>{{ item.time }}</span>
     <span>{{ item.duration }}</span>
-    <span
-      v-for="(tag, index) in item.tags"
-      :class="tag.class"
-      :key="index"
-    >
-      {{ tag.text }}<span v-if="index + 1 < item.tags.length">,</span>
+    <span>
+      <span
+        v-for="(tag, index) in item.tags"
+        :class="tag.class"
+        :key="index"
+      >
+        {{ tag.text }}<span v-if="index + 1 < item.tags.length">,</span>
+      </span>
     </span>
-    <BatteryLevel :battery-level="item.other.batteryLevel"/>
+    <BatteryLevel
+      v-if="item.other && item.other.batteryLevel"
+      :battery-level="item.other.batteryLevel"
+    />
+    <span v-else />
     <span>{{ item.processing_state }}</span>
   </div>
 </template>
@@ -165,10 +168,6 @@ export default {
     item: {
       type: Object,
       required: true
-    },
-    isEvenRow: {
-      type: Boolean,
-      required: true,
     },
     displayStyle: {
       type: String,
@@ -240,12 +239,20 @@ export default {
 
   // Row view variant
   .recording-summary-row {
-    &.even {
+    width: 100%;
+    &:nth-child(even) {
       background-color: #eee;
     }
     border-top: 1px solid $border-color;
-    &:first-of-type {
-      border: 0;
+    display: table-row;
+    > * {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0 5px;
+      border-right: 1px solid $border-color;
+        &:last-child {
+          padding-right: 5px;
+        }
     }
   }
 
