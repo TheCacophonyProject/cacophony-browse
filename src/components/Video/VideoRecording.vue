@@ -16,11 +16,12 @@
         @nextOrPreviousRecording="prevNext"/>
       <RecordingControls
         :items="tagItems"
+        :comment="recording.comment"
         :download-raw-url="videoRawUrl"
         :download-file-url="videoUrl"
-        class="d-none d-lg-block"
         @deleteTag="deleteTag($event)"
         @addTag="addTag($event)"
+        @updateComment="updateComment($event)"
         @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
     </b-col>
 
@@ -176,6 +177,10 @@ export default {
       if (track != this.selectedTrack) {
         this.selectedTrack = track;
       }
+    },
+    updateComment(comment) {
+      const recordingId = Number(this.$route.params.id);
+      this.$store.dispatch('Video/UPDATE_COMMENT', { comment, recordingId });
     },
     orderedTracks: function() {
       return this.tracks.slice().sort((a, b) => a.data.start_s - b.data.start_s );

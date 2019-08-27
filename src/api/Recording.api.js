@@ -98,4 +98,3 @@ function deleteTrackTag(tag, recordingId) {
     }
   );
 }
-
