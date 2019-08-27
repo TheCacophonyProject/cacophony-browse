@@ -1,51 +1,44 @@
 <template>
   <div
-    :class="trackClass()"
-    :style="getBorderStyle()">
-    <b-row
-      class="track-header">
-      <b-col
-        cols="1"
-        lg="0"
+    :class="['card', trackClass()]" >
+    <div class="card-header">
+      <button
+        v-if="index != 0"
         title="Previous track"
-        class="prev-track"
+        class="prev-track button btn"
         @click="trackSelected(-1)">
         <font-awesome-icon
-          v-if="index != 0"
-          class="fa-2x"
+
           icon="angle-left"/>
-      </b-col>
-      <b-col
-        cols="10"
-        class="track-title">
-        <h5
-          @click="trackSelected(0)">
-          <img
-            :style="getIconStyle()"
-            class="track-image">
-          Track {{ index + 1 }} <span class="out-of-tracks">/ {{ numTracks }}</span>
-        </h5>
-      </b-col>
-      <b-col
-        cols="1"
-        lg="2"
+      </button>
+      <h5
+        class="track-title"
+        @click="trackSelected(0)"
+      >
+        <span
+          :style="getIconStyle()"
+          class="track-image border"/>
+        Track {{ index + 1 }} <span class="out-of-tracks">/ {{ numTracks }}</span>
+      </h5>
+      <div
+        class="track-time"
+        @click="trackSelected(0)">
+        <span class="title">Time:</span> {{ track.data.start_s }} - {{ track.data.end_s }}s <br>
+        <span class="delta"> (&#916; {{ (track.data.end_s - track.data.start_s) | currency('', 1) }}s) </span>
+      </div>
+      <button
+        v-if="index < numTracks - 1 && show"
         title="Next track"
-        class="next-track"
+        class="next-track button btn"
         @click="trackSelected(1)">
         <font-awesome-icon
-          v-if="index < numTracks - 1 && show"
-          class="fa-2x"
           icon="angle-right"/>
-      </b-col>
+      </button>
       {{ message }}
-    </b-row>
+    </div>
     <div
       v-if="show"
-      class="track-details">
-      <p>
-        <span class="title">Time:</span> {{ track.data.start_s }} - {{ track.data.end_s }}s
-        <span class="delta"> (&#916; {{ (track.data.end_s - track.data.start_s) | currency('', 1) }}s) </span>
-      </p>
+      class="card-body">
       <QuickTagTrack
         :tags="track.TrackTags"
         @addTag="addTag($event)"/>
@@ -101,7 +94,7 @@ export default {
   },
   data() {
     return {
-      display_all: false,
+      show_details: false,
       showFullAddTag: false,
       message: "",
       tag: null
@@ -163,106 +156,133 @@ export default {
 };
 </script>
 
-<style scoped>
-  .tracks {
-    padding-left: 20px;
+<style lang="scss" scoped>
+  @import "~bootstrap/scss/functions";
+  @import "~bootstrap/scss/variables";
+  @import "~bootstrap/scss/mixins";
+
+  .card {
+    &.selected-true {
+      h5 {
+        font-weight: 600;
+      }
+    }
+    &.selected-false {
+      h5 {
+        color: $gray-700;
+      }
+    }
   }
 
-  .tracks h3 {
-    margin-bottom: 0;
+  .card-header,
+  .card-body {
+    padding-left: 1em;
+    padding-right: 1em;
   }
 
-  .track-details >>> p {
-    margin-bottom: .2em;
-  }
-
-  .track-details {
-    font-size: 90%;
-    padding: 0 10px;
-    /* border: 1px solid lightgray; */
+  .card-header {
+    display: flex;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
   }
 
   .track-title {
-    padding-left: 0px;
-    padding-right: 0px;
+    margin-bottom: 0;
+    margin-top: 0.1em;
+    flex: 1 1 auto;
   }
 
-  .selected-false {
-    color: grey;
+  .track-time {
+    margin-left: auto;
+    font-size: 0.7em;
+    text-align: right;
   }
 
-  .selected-true {
-    border: 3px solid lightgrey;
-    margin: -3px;
+  .track-title,
+  .track-time {
+    cursor: pointer;
   }
 
-  .track-header {
-    margin: 0px;
-    padding: 10px 10px 0 10px;
-  }
-
-  @media only screen and (max-width: 991px) {
-    .selected-false >>> .track-header {
-      display: none;
-    }
-  }
-
-  @media only screen and (min-width: 992px) {
-    .out-of-tracks,
-    .prev-track {
-      display: none;
-    }
-  }
-
-  @media only screen and (max-width: 575px) {
-    .prev-track,
-    .next-track {
-      padding-left: 0;
-    }
+  .track-image {
+    display: inline-block;
+    vertical-align: bottom;
+    width: 20px;
+    height: 20px;
   }
 
   .prev-track,
   .next-track {
     color: grey;
-    margin-top: -4px;
-  }
-
-  table {
-    margin: 10px 30px;
-    border-bottom: 1px solid #ddd;
-  }
-
-  th, td {
-    border-top: 1px solid #ddd;
-  }
-
-  td {
-    padding-right: 20px;
-  }
-
-  .title {
-    font-weight: 550;
-  }
-
-  .details p {
-    margin-bottom: 0;
   }
 
   .delta {
     color: gray;
   }
 
-  .ignored {
+  /*.ignored {
     color: gray;
+  }*/
+
+  @include media-breakpoint-down(lg) {
+
+    .accordion > .card:first-of-type,
+    .accordion > .card:not(:first-of-type):not(:last-of-type) {
+      @include border-bottom-left-radius($border-radius);
+      @include border-bottom-right-radius($border-radius);
+      border-bottom: 1px solid $border-color;
+    }
+
+    .selected-false {
+      display: none;
+    }
+
+    .prev-track {
+      margin-left: -0.5em;
+    }
+
+    .next-track {
+      margin-right: -0.5em;
+    }
+
   }
 
-  .tag-buttons {
-    padding: 12px 0;
+  @include media-breakpoint-up(lg) {
+    .prev-track,
+    .next-track,
+    .out-of-tracks {
+      display: none;
+    }
+
+    .accordion > .card:last-of-type {
+      @include border-bottom-left-radius($border-radius);
+      @include border-bottom-right-radius($border-radius);
+      border-bottom: 1px solid $border-color;
+    }
   }
 
- .track-image {
-    width: 30px;
-    height: 20px;
- }
+  // Set a height for container of the track information.
+  // TODO: Leave for now, figure out a better way of doing it with JS
+
+  // not ideal
+  $videoPlayerHeightXl: 585px;
+  $videoPlayerHeightLg: 495px;
+
+  @include media-breakpoint-up(lg) {
+    .card {
+      max-height: $videoPlayerHeightLg;
+      overflow: hidden;
+    }
+
+    .card-body {
+      overflow: auto;
+    }
+  }
+
+  @include media-breakpoint-up(xl) {
+    .card {
+      max-height: $videoPlayerHeightXl;
+    }
+  }
+
 </style>
 
