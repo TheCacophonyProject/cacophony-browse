@@ -80,6 +80,7 @@ export default {
       scale: 5,
       wasPaused: false,
       isScrubbing: false,
+      initedTrackHitRegions: false,
     };
   },
   watch: {
@@ -150,8 +151,8 @@ export default {
       }
     },
     initOverlayCanvas() {
-      this.canvasWidth = this.$refs.canvas.clientWidth;
-      this.scale = this.canvasWidth /160;
+      this.canvasWidth = this.$refs.container.clientWidth;
+      this.scale = this.canvasWidth / 160;
       this.canvasHeight = (this.scale * 120) + 30;
       this.$refs.player.player.width(this.canvasWidth);
       this.$refs.player.player.height(this.canvasHeight);
@@ -162,42 +163,49 @@ export default {
       const devicePixelRatio = window.devicePixelRatio;
       canvas.width = this.canvasWidth * devicePixelRatio;
       canvas.height = this.canvasHeight * devicePixelRatio;
-      canvas.style.width = this.canvasWidth + "px";
-      canvas.style.height = this.canvasHeight + "px";
+      canvas.style.width = `${this.canvasWidth}px`;
+      canvas.style.height = `${this.canvasHeight}px`;
       context.scale(devicePixelRatio, devicePixelRatio);
 
-      // Hit-testing of track rects, so they are clickable.
-      const hitTestPos = (x, y) => {
-        const allFrameData = this.getVideoFrameDataForAllTracksAtTime(this.currentVideoTime);
-        for (const rect of allFrameData) {
-          if (
-            (rect.x <= x && rect.x + rect.rectWidth > x) &&
-            (rect.y <= y && rect.y + rect.rectHeight > y)
-          ) {
-            return rect;
+      if (this.$refs.scrubber) {
+        this.$refs.scrubber.$el.style.width = canvas.style.width;
+      }
+
+      if (!this.initedTrackHitRegions) {
+        this.initedTrackHitRegions = true;
+        // Hit-testing of track rects, so they are clickable.
+        const hitTestPos = (x, y) => {
+          const allFrameData = this.getVideoFrameDataForAllTracksAtTime(this.currentVideoTime);
+          for (const rect of allFrameData) {
+            if (
+              (rect.x <= x && rect.x + rect.rectWidth > x) &&
+              (rect.y <= y && rect.y + rect.rectHeight > y)
+            ) {
+              return rect;
+            }
           }
-        }
-        return null;
-      };
+          return null;
+        };
 
-      canvas.addEventListener('click', function (event) {
-        const canvasOffset = canvas.getBoundingClientRect();
-        const x = event.x - canvasOffset.x;
-        const y = event.y - canvasOffset.y;
-        const hitRect = hitTestPos(x, y);
-        if (hitRect) {
-          this.$emit('trackSelected', hitRect.trackIndex);
-        }
-      }.bind(this));
+        canvas.addEventListener('click', function (event) {
+          const canvasOffset = canvas.getBoundingClientRect();
+          const x = event.x - canvasOffset.x;
+          const y = event.y - canvasOffset.y;
+          const hitRect = hitTestPos(x, y);
+          if (hitRect) {
+            this.$emit('trackSelected', hitRect.trackIndex);
+          }
+        }.bind(this));
 
-      canvas.addEventListener('mousemove', (event) => {
-        const canvasOffset = canvas.getBoundingClientRect();
-        const x = event.x - canvasOffset.x;
-        const y = event.y - canvasOffset.y;
-        const hitRect = hitTestPos(x, y);
-        // set cursor
-        canvas.style.cursor = hitRect !== null ? 'pointer' : 'default';
-      });
+        canvas.addEventListener('mousemove', (event) => {
+          const canvasOffset = canvas.getBoundingClientRect();
+          const x = event.x - canvasOffset.x;
+          const y = event.y - canvasOffset.y;
+          const hitRect = hitTestPos(x, y);
+          // set cursor
+          canvas.style.cursor = hitRect !== null ? 'pointer' : 'default';
+        });
+      }
     },
     setTimeAndRedraw(time) {
       this.$refs.player.player.currentTime(time);
