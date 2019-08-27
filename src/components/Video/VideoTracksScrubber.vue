@@ -3,7 +3,7 @@
     v-if="!isLoaded || isLoaded && hasTracks"
     ref="scrubber"
     :style="{
-      minHeight: `${(10 * numTracks) + 10}px`
+      height: `${(10 * numTracks) + 25}px`
     }"
     class="track-scrubber"
   >
@@ -168,6 +168,7 @@ export default {
   .scrub-track {
     position: absolute;
     height: 10px;
+    border-radius: 5px;
   }
   .playhead {
     height: 100%;
