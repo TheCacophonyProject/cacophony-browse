@@ -18,24 +18,20 @@
       >
         <div class="search-results">
           <div class="results-summary">
-            <div class="row align-items-center">
-              <div class="col-6">
-                <h1>Recordings</h1>
-              </div>
 
-              <div class="col-6">
-                <CsvDownload
-                  :params="serialisedQuery"
-                  class="float-right"/>
-                <b-button
-                  class="float-right display-toggle"
-                  @click="toggleResultsDisplayStyle"
-                >
-                  Display as {{ showCards ? 'rows' : 'cards' }}
-                </b-button>
-              </div>
-
+            <div class="float-right">
+              <b-button
+                class="display-toggle btn-sm"
+                @click="toggleResultsDisplayStyle"
+              >
+                Display as {{ showCards ? 'rows' : 'cards' }}
+              </b-button>
+              <CsvDownload
+                :params="serialisedQuery"
+              />
             </div>
+
+            <h1>Recordings</h1>
             <h2
               v-if="countMessage"
             >

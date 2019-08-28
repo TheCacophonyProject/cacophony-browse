@@ -2,6 +2,7 @@
   <b-button
     type="submit"
     variant="secondary"
+    class="btn-sm"
     @click="click">
     <font-awesome-icon
       icon="download"
