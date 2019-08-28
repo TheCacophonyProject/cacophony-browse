@@ -89,7 +89,6 @@
                   <span>Duration</span>
                   <span>Tags</span>
                   <span>Battery</span>
-                  <span>State</span>
                 </div>
               </div>
               <div class="results-rows">
