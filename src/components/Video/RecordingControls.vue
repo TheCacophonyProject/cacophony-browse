@@ -101,7 +101,7 @@
         id="tags-table"
         :items="items"
         :fields="fields"
-        class="pt-3"
+        class=""
         striped
         hover
         responsive>
@@ -113,12 +113,12 @@
         <template
           slot="deleteButton"
           slot-scope="row">
-          <font-awesome-icon
-            v-b-tooltip.hover.left="'Delete'"
-            icon="trash"
-            size="2x"
-            style="cursor: pointer;"
-            @click="$emit('deleteTag', row.item.tag.id)"/>
+          <button class="button btn">
+            <font-awesome-icon
+              v-b-tooltip.hover.left="'Delete'"
+              icon="trash"
+              @click="$emit('deleteTag', row.item.tag.id)"/>
+          </button>
         </template>
       </b-table>
     </div>
@@ -156,7 +156,7 @@ export default {
         {key: 'whatDetail', label: 'What'},
         {key: 'who', label: 'By'},
         {key: 'when', label: 'When'},
-        {key: 'deleteButton', label: ''}
+        {key: 'deleteButton', label: '', tdClass: 'tags-table-buttons'}
       ],
       deleteDisabled: false,
     };
@@ -213,4 +213,10 @@ function sentenceCase(s) {
 .video-tags {
   position: relative;
 }
+</style>
+
+<style>
+  .table td.tags-table-buttons {
+    padding: 0;
+  }
 </style>

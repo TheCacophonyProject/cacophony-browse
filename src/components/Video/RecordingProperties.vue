@@ -14,54 +14,60 @@
           </div>
         </div>
 
-        <h4 id="technical-details">Technical details &nbsp;
-          <span
-            v-if="!display"
-            title="Show details"
-            @click="display=true">
-            <font-awesome-icon
-              icon="angle-down"
-              class="fa-1x"/>
-          </span>
-          <span
-            v-if="display"
-            title="Hide details"
-            @click="display=false">
-            <font-awesome-icon
-              icon="angle-up"
-              class="fa-1x"/>
-          </span>
-        </h4>
-        <div v-if="display">
-          <div
-            v-for="prop of properties"
-            :key="prop.key">
-            <p
-              v-if="recording.batteryLevel && prop.key === 'batteryLevel'"
-              class="prop">
-              <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
-            </p>
-            <p
-              v-else-if="recording.location && prop.key === 'location'"
-              class="prop">
-              <strong>Location: </strong>{{ parseLocation }}
-            </p>
-            <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
-              <div
-                v-for="(value, key) of recording.additionalMetadata"
-                :key="key">
-                <p
-                  v-if="key != 'tracks' && key != 'user-entered'"
-                  class="prop">
-                  <strong>{{ key }}:</strong> {{ value }}
-                </p>
+        <div class="simple-accordion-wrapper">
+          <h5
+            id="technical-details"
+            class="simple-accordion-header"
+            @click="display=!display"
+          >Technical details &nbsp;
+            <span
+              v-if="!display"
+              title="Show details"
+              class="pointer">
+              <font-awesome-icon
+                icon="angle-down"
+                class="fa-1x"/>
+            </span>
+            <span
+              v-if="display"
+              title="Hide details"
+              class="pointer">
+              <font-awesome-icon
+                icon="angle-up"
+                class="fa-1x"/>
+            </span>
+          </h5>
+          <div v-if="display">
+            <div
+              v-for="prop of properties"
+              :key="prop.key">
+              <p
+                v-if="recording.batteryLevel && prop.key === 'batteryLevel'"
+                class="prop">
+                <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
+              </p>
+              <p
+                v-else-if="recording.location && prop.key === 'location'"
+                class="prop">
+                <strong>Location: </strong>{{ parseLocation }}
+              </p>
+              <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
+                <div
+                  v-for="(value, key) of recording.additionalMetadata"
+                  :key="key">
+                  <p
+                    v-if="key != 'tracks' && key != 'user-entered'"
+                    class="prop">
+                    <strong>{{ key }}:</strong> {{ value }}
+                  </p>
+                </div>
               </div>
+              <p
+                v-else-if="recording[prop.key] != null"
+                class="prop">
+                <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
+              </p>
             </div>
-            <p
-              v-else-if="recording[prop.key] != null"
-              class="prop">
-              <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
-            </p>
           </div>
         </div>
       </b-form-group>

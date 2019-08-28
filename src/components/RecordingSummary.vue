@@ -1,5 +1,6 @@
 <template>
   <a
+    v-if="displayStyle === 'card'"
     :href="`/recording/${item.id}`"
     class="recording-summary"
     @click="event => navigateToRecording(event, item.id)"
@@ -39,36 +40,11 @@
         v-if="item.tags.length !== 0"
         class="recording-tags"
       >
-        <span
-          v-b-tooltip="getTagTitle(tag.class)"
+        <TagBadge
           v-for="(tag, index) in item.tags"
           :key="index"
-          :class="[
-            'tag',
-            'badge',
-            tag.class
-          ]"
-        >
-          <span
-            class="tag-icon">
-            <font-awesome-icon
-              v-if="tag.class === 'automatic'"
-              icon="cog"
-              size="xs"
-            />
-            <font-awesome-icon
-              v-else-if="tag.class === 'human'"
-              icon="user"
-              size="xs"
-            />
-            <font-awesome-icon
-              v-else-if="tag.class === 'automatic human'"
-              icon="user-cog"
-              size="xs"
-            />
-          </span>
-          <span class="tag-label">{{ tag.text }}</span>
-        </span>
+          :tag="tag"
+        />
       </div>
       <div class="recording-time-duration">
         <div class="recording-time">
@@ -110,18 +86,66 @@
       </a>
     </div>
   </a>
+  <div
+    v-else-if="item && item.id"
+    class="recording-summary-row"
+  >
+    <a
+      :href="`/recording/${item.id}`"
+      target="_blank"
+    >
+      {{ item.id }}
+    </a>
+    <span v-if="item.type === 'audio'">
+      <font-awesome-icon
+        :icon="['far', 'file-audio']"
+        size="2x"
+      />
+    </span>
+    <span v-else-if="item.type === 'thermalRaw'">
+      <font-awesome-icon
+        :icon="['far', 'file-video']"
+        size="2x"
+      />
+    </span>
+
+    <span>{{ item.devicename }}</span>
+    <span>{{ item.groupname }}</span>
+    <span>{{ item.location }}</span>
+    <span>{{ item.date }}</span>
+    <span>{{ item.time }}</span>
+    <span>{{ item.duration }}s</span>
+    <span>
+      <TagBadge
+        v-for="(tag, index) in item.tags"
+        :key="index"
+        :tag="tag"
+      />
+    </span>
+    <BatteryLevel
+      v-if="item.other && item.other.batteryLevel"
+      :battery-level="item.other.batteryLevel"
+    />
+    <span v-else />
+  </div>
 </template>
 
 <script>
 import BatteryLevel from "./BatteryLevel.vue";
+import TagBadge from "./TagBadge.vue";
 
 export default {
   name: "RecordingSummary",
-  components: {BatteryLevel},
+  components: {TagBadge, BatteryLevel},
   props: {
     item: {
       type: Object,
       required: true
+    },
+    displayStyle: {
+      type: String,
+      required: true,
+      default: 'cards',
     }
   },
   computed: {
@@ -132,7 +156,7 @@ export default {
       get() {
         return window;
       }
-    }
+    },
   },
   methods: {
     navigateToRecording(event, recordingId) {
@@ -143,16 +167,6 @@ export default {
         });
       }
     },
-    getTagTitle(str) {
-      switch (str) {
-      case "automatic":
-        return "Tagged by Cacophony AI";
-      case "human":
-        return "Tagged by human";
-      case "automatic human":
-        return "Tagged by Cacophony AI and human";
-      }
-    }
   }
 };
 </script>
@@ -183,6 +197,28 @@ export default {
     &:hover {
       box-shadow: 0 1px 3px $gray-400;
       text-decoration: unset;
+    }
+  }
+
+  // Row view variant
+  .recording-summary-row {
+    width: 100%;
+    &:nth-child(even) {
+      background-color: #eee;
+    }
+    border-top: 1px solid $border-color;
+    display: table-row;
+    a:visited {
+      color: purple;
+    }
+    > * {
+      display: table-cell;
+      vertical-align: middle;
+      padding: 0 5px;
+      border-right: 1px solid $border-color;
+        &:last-child {
+          padding-right: 5px;
+        }
     }
   }
 
@@ -229,29 +265,6 @@ export default {
     .recording-tags {
       padding: 0 $recording-side-padding 0.9rem;
       margin-top: -0.4rem;
-      .tag {
-        &.badge {
-          font-weight: initial;
-          font-size: 90%;
-          color: $white;
-          background: $secondary;
-          margin-right: 0.3rem;
-          line-height: 0.7;
-        }
-        &.automatic {
-          background: $danger;
-        }
-        &.human {
-          background: $success;
-        }
-        &.automatic.human {
-          background: $info;
-        }
-        .svg-inline--fa {
-          color: $white;
-        }
-      }
-
     }
     .recording-time-duration {
       display: flex;

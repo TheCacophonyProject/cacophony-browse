@@ -10,16 +10,32 @@
           @toggled-search-panel="searchPanelIsCollapsed = !searchPanelIsCollapsed"
         />
       </div>
-      <div class="search-content-wrapper">
+      <div
+        :class="[
+          'search-content-wrapper',
+          {'display-rows': !showCards},
+        ]"
+      >
         <div class="search-results">
           <div class="results-summary">
+            <div class="row align-items-center">
+              <div class="col-6">
+                <h1>Recordings</h1>
+              </div>
 
-            <CsvDownload
-              :params="serialisedQuery"
-              class="float-right"/>
-            
-            <h1>Recordings</h1>
+              <div class="col-6">
+                <CsvDownload
+                  :params="serialisedQuery"
+                  class="float-right"/>
+                <b-button
+                  class="float-right display-toggle"
+                  @click="toggleResultsDisplayStyle"
+                >
+                  Display as {{ showCards ? 'rows' : 'cards' }}
+                </b-button>
+              </div>
 
+            </div>
             <h2
               v-if="countMessage"
             >
@@ -37,20 +53,51 @@
             v-if="!queryPending"
             class="results"
           >
-            <div
-              v-for="(itemsByDay, index) in tableItemsChunkedByDayAndHour"
-              :key="index"
-            >
-              <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+            <div v-if="showCards">
               <div
-                v-for="(itemsByHour, index) in itemsByDay"
-                :key="index"
+                v-for="(itemsByDay, index_a) in tableItemsChunkedByDayAndHour"
+                :key="index_a"
               >
-                <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+                <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+                <div
+                  v-for="(itemsByHour, index_b) in itemsByDay"
+                  :key="index_b"
+                >
+                  <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+                  <RecordingSummary
+                    v-for="(item, index) in itemsByHour"
+                    :item="item"
+                    :key="`${index}_${getResultsDisplayStyle}`"
+                    :display-style="getResultsDisplayStyle"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              v-else
+              class="all-rows"
+            >
+              <div class="recordings-day">
+                <div>
+                  <span>ID</span>
+                  <span>Type</span>
+                  <span>Device</span>
+                  <span>Group</span>
+                  <span>Location</span>
+                  <span>Date</span>
+                  <span>Time</span>
+                  <span>Duration</span>
+                  <span>Tags</span>
+                  <span>Battery</span>
+                </div>
+              </div>
+              <div class="results-rows">
                 <RecordingSummary
-                  v-for="(item, index) in itemsByHour"
+                  v-for="(item, index) in tableItems"
                   :item="item"
-                  :key="index"
+                  :is-even-row="index % 2 === 1"
+                  :key="`${index}_${getResultsDisplayStyle}`"
+                  :display-style="getResultsDisplayStyle"
                 />
               </div>
             </div>
@@ -137,6 +184,7 @@ export default {
       countMessage: null,
       currentPage: null,
       perPage: 100,
+      showCards: this.getPreferredResultsDisplayStyle(),
       limitPaginationButtons: 5,
       perPageOptions: [
         {value: 10, text: "10 per page"},
@@ -166,6 +214,9 @@ export default {
         }
       }
       return chunks;
+    },
+    getResultsDisplayStyle() {
+      return this.showCards ? 'card' : 'row';
     },
     searchDescription() {
       // Get the current search query, not the live updated one.
@@ -223,11 +274,11 @@ export default {
           timespan = !isCustom ?
             `in the <strong>${timespan}</strong>` :
             `between <strong>${formatDate(query.where.recordingDateTime['$gt'], 0)}</strong>&nbsp;` +
-            `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
+              `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
         }
         return (
           `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
-          `${timespan}${durationStr}`
+            `${timespan}${durationStr}`
         );
       } else {
         return '';
@@ -296,6 +347,13 @@ export default {
     },
     resetPagination() {
       this.currentPage = 1;
+    },
+    getPreferredResultsDisplayStyle() {
+      return localStorage.getItem('results-display-style') !== 'row';
+    },
+    toggleResultsDisplayStyle() {
+      this.showCards = !this.showCards;
+      localStorage.setItem('results-display-style', this.showCards ? 'card' : 'row');
     },
     parseCurrentRoute() {
       if (Object.keys(this.$route.query).length === 0) {
@@ -400,7 +458,7 @@ export default {
         } else if (query.where.hasOwnProperty('recordingDateTime')) {
           if (
             query.where.recordingDateTime.hasOwnProperty("$gt") &&
-            query.where.recordingDateTime.hasOwnProperty("$lt")
+              query.where.recordingDateTime.hasOwnProperty("$lt")
           ) {
             where.dateRange = 'customDateRange';
             // assume custom dateRange
@@ -462,7 +520,6 @@ export default {
         delete where.DeviceGroups;
         delete where.dateRange;
       }
-
       // Work out current pagination offset.
       const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
 
@@ -657,6 +714,45 @@ export default {
 
   $main-content-width: 640px;
 
+  .display-rows .results-summary {
+    padding: 0 20px;
+    max-width: 100vw;
+  }
+  .display-rows .recordings-day {
+    margin-bottom: 0;
+    display: table-header-group;
+    > div {
+      display: table-row;
+
+      > span {
+        position: sticky;
+        top: 0;
+        background: transparentize($white, 0.15);
+        padding: 0 10px;
+        vertical-align: middle;
+        display: table-cell;
+        border-right: 1px solid $border-color;
+        border-bottom: 1px solid $border-color;
+      }
+    }
+  }
+  .display-rows.search-content-wrapper {
+    margin: 0;
+    padding: 0;
+    .search-results {
+      margin: 0;
+      width: 100%;
+      max-width: unset;
+    }
+  }
+  .results-rows {
+    display: table-row-group;
+  }
+  .all-rows {
+    display: table;
+    width: 100%;
+  }
+
   .search-filter-wrapper {
     background: $gray-100;
     position: relative;
@@ -715,6 +811,10 @@ export default {
     .search-results {
       max-width: $main-content-width;
       margin: 0 auto;
+      &.display-rows {
+        max-width: 100%;
+        margin: 0;
+      }
     }
   }
 
@@ -789,6 +889,9 @@ export default {
       position: sticky;
       bottom: 0;
     }
+  }
+  .display-toggle {
+    margin-right: 5px;
   }
 
 </style>

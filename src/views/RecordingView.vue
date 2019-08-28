@@ -1,8 +1,24 @@
 <template>
-  <b-container v-if="recording">
+  <b-container
+    v-if="recording"
+  >
     <b-row>
-      <b-col cols="12">
-        <h4>'{{ devicename }}' - {{ date }}, {{ time }}</h4>
+      <b-col
+        cols="12"
+        lg="8"
+        class="recording-details"
+      >
+        <h4 class="recording-title">
+          <font-awesome-icon
+            icon="microchip"
+            size="xs"
+            style="color: #666; font-size: 16px"
+          />
+          {{ devicename }}
+        </h4>
+
+        <h5 class="text-muted">{{ date }}, {{ time }}</h5>
+
         <b-alert
           :show="showAlert"
           :variant="alertVariant"
@@ -57,7 +73,7 @@ export default {
       date: (state) => {
         if (state.Video.recording.recordingDateTime) {
           const date = new Date(state.Video.recording.recordingDateTime);
-          return date.toLocaleDateString('en-NZ');
+          return date.toDateString();
         }
         return "";
       },
@@ -84,9 +100,34 @@ export default {
 };
 </script>
 
-<style scoped>
-  .tag-buttons, .img-buttons {
-    padding: 0 5px;
+<style lang="scss" scoped>
+  @import "~bootstrap/scss/functions";
+  @import "~bootstrap/scss/variables";
+  @import "~bootstrap/scss/mixins";
+
+  .recording-details {
+    h4, h5 {
+      display: inline-block;
+    }
+    h4 {
+      margin-right: 0.2em;
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    .recording-details {
+      padding-top: 0.6rem;
+      padding-bottom: 0.6rem;
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    .recording-details {
+      padding-top: 1rem;
+      padding-bottom: 0.9rem;
+      h4, h5 {
+        display: inline-block;
+      }
+    }
   }
 </style>
-
