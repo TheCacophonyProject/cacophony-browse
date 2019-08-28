@@ -1,35 +1,61 @@
 <template>
   <div>
+    <Comment
+      :initial-comment="comment"
+      @updateComment="updateComment($event)"/>
     <div class="video-tags">
-      <b-row class="pt-2">
+      <b-row class="pt-2 pb-2">
         <b-col
-          sm="3">
+          cols="6"
+          md="3">
+          <b-button-group
+            class="btn-block pb-2">
+            <b-dropdown
+              text="Label"
+              right
+              variant="info"
+              class="btn-block">
+              <b-dropdown-item
+                v-b-tooltip.hover.left="'An animal is in a trap in this recording'"
+                @click="addTrappedTag">
+                Animal in trap
+              </b-dropdown-item>
+
+              <b-dropdown-item
+                v-b-tooltip.hover.left="'An animal interacted with a trap in this recording'"
+                @click="addTrapInteractionTag">
+                Animal interacted with trap
+              </b-dropdown-item>
+
+              <b-dropdown-item
+                v-b-tooltip.hover.left="'One or more animals do not have a corresponding track in this recording'"
+                @click="addMissedTrackTag">
+                Missed track
+              </b-dropdown-item>
+
+              <b-dropdown-item
+                v-b-tooltip.hover.left="'Mark this as a cool or interesting recording'"
+                @click="addCoolTag">
+                Cool
+              </b-dropdown-item>
+            </b-dropdown>
+          </b-button-group>
+        </b-col>
+
+        <b-col
+          cols="6"
+          md="3">
           <b-button
-            v-b-tooltip.hover.bottomleft="'Mark this as a cool or interesting recording'"
-            type="button"
-            variant="success"
-            block
-            @click="addCoolTag">
-            <font-awesome-icon icon="star"/>
-            Cool
+            v-b-modal.update-comment
+            variant="info"
+            block>
+            Comment
           </b-button>
         </b-col>
 
         <b-col
-          sm="3">
-          <b-button
-            v-b-tooltip.hover.bottomleft="'Indicate that one or more animals do not have a corresponding track in this recording'"
-            type="button"
-            variant="warning"
-            block
-            @click="addMissedTrackTag">
-            <font-awesome-icon icon="question-circle"/>
-            Missed track
-          </b-button>
-        </b-col>
-
-        <b-col
-          sm="3">
+          cols="6"
+          md="3">
           <b-button-group
             v-b-tooltip.hover.top="'Download the files for this recording'"
             class="btn-block">
@@ -54,14 +80,17 @@
         </b-col>
 
         <b-col
-          sm="3">
+          cols="6"
+          md="3">
           <b-button
             v-b-tooltip.hover.bottomleft="'Delete this recording'"
             :disabled="deleteDisabled"
             variant="danger"
             block
             @click="deleteRecording()">
-            <font-awesome-icon icon="exclamation-triangle"/>
+            <font-awesome-icon
+              icon="exclamation-triangle"
+              class="d-none d-md-inline"/>
             Delete
           </b-button>
         </b-col>
@@ -98,13 +127,19 @@
 
 <script>
 import api from '../../api/index';
+import Comment from './Comment.vue';
 
 export default {
   name: 'RecordingControls',
+  components: {Comment},
   props: {
     items: {
       type: Array,
       required: true
+    },
+    comment: {
+      type: String,
+      default: "",
     },
     downloadRawUrl: {
       type: String,
@@ -123,10 +158,8 @@ export default {
         {key: 'when', label: 'When'},
         {key: 'deleteButton', label: ''}
       ],
-      deleteDisabled: false
+      deleteDisabled: false,
     };
-  },
-  computed: {
   },
   watch: {
     items: function () {
@@ -134,15 +167,21 @@ export default {
     }
   },
   methods: {
-    addCoolTag: function () {
-      this.$emit('addTag', {
-        detail: "cool",
-        confidence: 0.9
-      });
-    },
     addMissedTrackTag: function () {
+      this.addTag("missed track");
+    },
+    addCoolTag: function () {
+      this.addTag("cool");
+    },
+    addTrappedTag: function () {
+      this.addTag("trapped in trap");
+    },
+    addTrapInteractionTag: function() {
+      this.addTag("interaction with trap");
+    },
+    addTag: function (label) {
       this.$emit('addTag', {
-        detail: "missed track",
+        detail: label,
         confidence: 0.9
       });
     },
@@ -155,6 +194,9 @@ export default {
       if(success) {
         this.$emit('nextOrPreviousRecording');
       }
+    },
+    updateComment(event) {
+      this.$emit("updateComment", event);
     }
   }
 };
