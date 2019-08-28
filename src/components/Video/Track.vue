@@ -190,6 +190,7 @@ export default {
     margin-bottom: 0;
     margin-top: 0.1em;
     flex: 1 1 auto;
+    cursor: pointer;
   }
 
   .track-time {
