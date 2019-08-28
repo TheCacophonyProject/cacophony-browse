@@ -1,39 +1,32 @@
 <template>
-  <b-row>
-    <b-col
-      cols="12"
-      lg="8">
-      <ThermalVideoPlayer
-        ref = "thermalPlayer"
-        :video-url="videoUrl"
-        :tracks="orderedTracks()"
-        :current-track="selectedTrack"
-        :colours="colours"
-        @trackSelected="trackSelected($event)"
-      />
-      <PrevNext
-        :recording="recording"
-        @nextOrPreviousRecording="prevNext"/>
-      <RecordingControls
-        :items="tagItems"
-        :comment="recording.comment"
-        :download-raw-url="videoRawUrl"
-        :download-file-url="videoUrl"
-        @deleteTag="deleteTag($event)"
-        @addTag="addTag($event)"
-        @updateComment="updateComment($event)"
-        @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
-    </b-col>
+  <b-container
+    class="video-elements-wrapper"
+  >
+    <b-row
+      class="no-gutters"
+    >
+      <b-col
+        cols="12"
+        lg="8"
+      >
+        <ThermalVideoPlayer
+          ref = "thermalPlayer"
+          :video-url="videoUrl"
+          :tracks="orderedTracks()"
+          :current-track="selectedTrack"
+          :colours="colours"/>
+      </b-col>
 
-    <b-col
-      cols="12"
-      lg="4">
-      <div
-        v-if="tracks && tracks.length > 0">
+      <b-col
+        cols="12"
+        lg="4">
         <div
-          v-for="(track, index) in orderedTracks()"
-          :key="index">
+          v-if="tracks && tracks.length > 0"
+          class="accordion"
+        >
           <TrackInfo
+            v-for="(track, index) in orderedTracks()"
+            :key="index"
             :track="track"
             :index="index"
             :num-tracks="tracks.length"
@@ -42,16 +35,42 @@
             :colour="colours[index % colours.length]"
             @trackSelected="trackSelected($event)"/>
         </div>
-      </div>
-      <div
-        v-if="recording && recording['processingState'] != 'FINISHED'"
-        class="processing">
-        Recording still processing...
-      </div>
-      <RecordingProperties
-        :recording="recording"/>
-    </b-col>
-  </b-row>
+        <div
+          v-if="recording && recording['processingState'] != 'FINISHED'"
+          class="processing">
+          Recording still processing...
+        </div>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col
+        cols="12"
+        lg="8"
+      >
+        <PrevNext
+          :recording="recording"
+          @nextOrPreviousRecording="prevNext"/>
+        <RecordingControls
+          :items="tagItems"
+          :comment="recording.comment"
+          :download-raw-url="videoRawUrl"
+          :download-file-url="videoUrl"
+          @deleteTag="deleteTag($event)"
+          @addTag="addTag($event)"
+          @updateComment="updateComment($event)"
+          @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
+      </b-col>
+      <b-col
+        cols="12"
+        lg="4"
+      >
+        <RecordingProperties
+          :recording="recording"/>
+      </b-col>
+
+    </b-row>
+  </b-container>
+
 </template>
 
 <script>
@@ -190,31 +209,12 @@ export default {
 </script>
 
 <style scoped>
-  .tag-buttons, .img-buttons {
-    padding: 0 5px;
+  .video-elements-wrapper {
+    padding: 0;
   }
-
-  .recording {
-    margin-top: 20px;
-  }
-
   .processing {
     color: darkred;
     font-weight: 600;
     font-size: 120%
   }
-
 </style>
-
-<style>
-  @media only screen and (max-width: 575px) {
-    .view .row {
-      margin: 0;
-    }
-
-    .view .row .col-12 {
-      padding: 0 5px;
-    }
-  }
-</style>
-

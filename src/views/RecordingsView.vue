@@ -10,18 +10,31 @@
           @toggled-search-panel="searchPanelIsCollapsed = !searchPanelIsCollapsed"
         />
       </div>
-      <div class="search-content-wrapper">
+      <div
+        :class="[
+          'search-content-wrapper',
+          {'display-rows': !showCards},
+        ]"
+      >
         <div class="search-results">
           <div class="results-summary">
             <div class="row align-items-center">
               <div class="col-6">
                 <h1>Recordings</h1>
               </div>
+
               <div class="col-6">
                 <CsvDownload
                   :params="serialisedQuery"
                   class="float-right"/>
+                <b-button
+                  class="float-right display-toggle"
+                  @click="toggleResultsDisplayStyle"
+                >
+                  Display as {{ showCards ? 'rows' : 'cards' }}
+                </b-button>
               </div>
+
             </div>
             <h2
               v-if="countMessage"
@@ -40,20 +53,51 @@
             v-if="!queryPending"
             class="results"
           >
-            <div
-              v-for="(itemsByDay, index) in tableItemsChunkedByDayAndHour"
-              :key="index"
-            >
-              <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+            <div v-if="showCards">
               <div
-                v-for="(itemsByHour, index) in itemsByDay"
-                :key="index"
+                v-for="(itemsByDay, index_a) in tableItemsChunkedByDayAndHour"
+                :key="index_a"
               >
-                <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+                <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+                <div
+                  v-for="(itemsByHour, index_b) in itemsByDay"
+                  :key="index_b"
+                >
+                  <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+                  <RecordingSummary
+                    v-for="(item, index) in itemsByHour"
+                    :item="item"
+                    :key="`${index}_${getResultsDisplayStyle}`"
+                    :display-style="getResultsDisplayStyle"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              v-else
+              class="all-rows"
+            >
+              <div class="recordings-day">
+                <div>
+                  <span>ID</span>
+                  <span>Type</span>
+                  <span>Device</span>
+                  <span>Group</span>
+                  <span>Location</span>
+                  <span>Date</span>
+                  <span>Time</span>
+                  <span>Duration</span>
+                  <span>Tags</span>
+                  <span>Battery</span>
+                </div>
+              </div>
+              <div class="results-rows">
                 <RecordingSummary
-                  v-for="(item, index) in itemsByHour"
+                  v-for="(item, index) in tableItems"
                   :item="item"
-                  :key="index"
+                  :is-even-row="index % 2 === 1"
+                  :key="`${index}_${getResultsDisplayStyle}`"
+                  :display-style="getResultsDisplayStyle"
                 />
               </div>
             </div>
@@ -70,6 +114,12 @@
               :key="i"
               class="recording-placeholder"
             />
+          </div>
+          <div
+            v-if="countMessage === 'No matches'"
+            class="no-results">
+            <h6 class="text-muted">No recordings found</h6>
+            <p class="small text-muted">Try modifying your search criteria.</p>
           </div>
         </div>
 
@@ -134,6 +184,7 @@ export default {
       countMessage: null,
       currentPage: null,
       perPage: 100,
+      showCards: this.getPreferredResultsDisplayStyle(),
       limitPaginationButtons: 5,
       perPageOptions: [
         {value: 10, text: "10 per page"},
@@ -163,6 +214,9 @@ export default {
         }
       }
       return chunks;
+    },
+    getResultsDisplayStyle() {
+      return this.showCards ? 'card' : 'row';
     },
     searchDescription() {
       // Get the current search query, not the live updated one.
@@ -220,11 +274,11 @@ export default {
           timespan = !isCustom ?
             `in the <strong>${timespan}</strong>` :
             `between <strong>${formatDate(query.where.recordingDateTime['$gt'], 0)}</strong>&nbsp;` +
-            `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
+              `and&nbsp;<strong>${formatDate(query.where.recordingDateTime['$lt'], 1)}</strong>${durationStr}`;
         }
         return (
           `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
-          `${timespan}${durationStr}`
+            `${timespan}${durationStr}`
         );
       } else {
         return '';
@@ -293,6 +347,13 @@ export default {
     },
     resetPagination() {
       this.currentPage = 1;
+    },
+    getPreferredResultsDisplayStyle() {
+      return localStorage.getItem('results-display-style') !== 'row';
+    },
+    toggleResultsDisplayStyle() {
+      this.showCards = !this.showCards;
+      localStorage.setItem('results-display-style', this.showCards ? 'card' : 'row');
     },
     parseCurrentRoute() {
       if (Object.keys(this.$route.query).length === 0) {
@@ -397,7 +458,7 @@ export default {
         } else if (query.where.hasOwnProperty('recordingDateTime')) {
           if (
             query.where.recordingDateTime.hasOwnProperty("$gt") &&
-            query.where.recordingDateTime.hasOwnProperty("$lt")
+              query.where.recordingDateTime.hasOwnProperty("$lt")
           ) {
             where.dateRange = 'customDateRange';
             // assume custom dateRange
@@ -459,7 +520,6 @@ export default {
         delete where.DeviceGroups;
         delete where.dateRange;
       }
-
       // Work out current pagination offset.
       const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
 
@@ -566,19 +626,24 @@ export default {
     collateTags: function (tags, tracks) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
-      for (const tag of tags) {
+      for (let i = 0; i < tags.length; i++) {
+        const tag = tags[i];
         const tagName = tag.animal === null ? tag.event : tag.animal;
-        this.addToListOfTags(tagItems, tagName, tag.automatic);
+        const taggerId = taggerId;
+
+        this.addToListOfTags(tagItems, tagName, tag.automatic, taggerId);
       }
 
       if (tracks) {
-        for (const track of tracks) {
-          for (const tag of track.TrackTags) {
-            this.addToListOfTags(tagItems, tag.what, tag.automatic);
+        for (let j = 0; j < tracks.length; j++) {
+          const track = tracks[j];
+          for (let i = 0; i < track.TrackTags.length; i++) {
+            const tag = track.TrackTags[i];
+            const taggerId = tag.UserId || tag.taggerId;
+            this.addToListOfTags(tagItems, tag.what, tag.automatic, taggerId);
           }
         }
       }
-
 
       // Use automatic and human status to create an ordered array of objects
       // suitable for parsing into coloured spans
@@ -587,7 +652,7 @@ export default {
         const tagItem = tagItems[animal];
         let subOrder = 0;
         if (animal == "false positive") {
-          animal = "F/P";
+          animal = "false positive";
           subOrder = 3;
         } else if (animal == "multiple animals") {
           animal = "multiple";
@@ -600,19 +665,21 @@ export default {
         if (tagItem.automatic && tagItem.human) {
           result.push({
             text: animal,
-            class: 'text-success',
+            class: 'automatic human',
+            taggerIds: tagItem.taggerIds,
             order: subOrder
           });
         } else if (tagItem.human) {
           result.push({
             text: animal,
-            class: '',
+            class: 'human',
+            taggerIds: tagItem.taggerIds,
             order: 10 + subOrder
           });
         } else if (tagItem.automatic) {
           result.push({
             text: animal,
-            class: 'text-danger',
+            class: 'automatic',
             order: 20 + subOrder
           });
         }
@@ -623,17 +690,18 @@ export default {
       });
       return result;
     },
-    addToListOfTags: function (allTags, tagName, isAutomatic) {
-      var tag = allTags[tagName];
-      if (!tag) {
-        allTags[tagName] = tag = {};
+    addToListOfTags: function (allTags, tagName, isAutomatic, taggerId) {
+      const tag = allTags[tagName] || {};
+      tag.taggerIds = tag.taggerIds || [];
+      if (taggerId && tag.taggerIds.indexOf(taggerId) === -1) {
+        tag.taggerIds.push(taggerId);
       }
-
       if (isAutomatic) {
-        allTags[tagName].automatic = true;
+        tag.automatic = true;
       } else {
-        allTags[tagName].human = true;
+        tag.human = true;
       }
+      allTags[tagName] = tag;
     },
   },
 };
@@ -645,6 +713,45 @@ export default {
   @import "~bootstrap/scss/mixins";
 
   $main-content-width: 640px;
+
+  .display-rows .results-summary {
+    padding: 0 20px;
+    max-width: 100vw;
+  }
+  .display-rows .recordings-day {
+    margin-bottom: 0;
+    display: table-header-group;
+    > div {
+      display: table-row;
+
+      > span {
+        position: sticky;
+        top: 0;
+        background: transparentize($white, 0.15);
+        padding: 0 10px;
+        vertical-align: middle;
+        display: table-cell;
+        border-right: 1px solid $border-color;
+        border-bottom: 1px solid $border-color;
+      }
+    }
+  }
+  .display-rows.search-content-wrapper {
+    margin: 0;
+    padding: 0;
+    .search-results {
+      margin: 0;
+      width: 100%;
+      max-width: unset;
+    }
+  }
+  .results-rows {
+    display: table-row-group;
+  }
+  .all-rows {
+    display: table;
+    width: 100%;
+  }
 
   .search-filter-wrapper {
     background: $gray-100;
@@ -704,12 +811,23 @@ export default {
     .search-results {
       max-width: $main-content-width;
       margin: 0 auto;
+      &.display-rows {
+        max-width: 100%;
+        margin: 0;
+      }
     }
   }
 
   .recording-placeholder {
     height: 110px;
     margin-bottom: 15px;
+  }
+
+  .no-results {
+    display: flex;
+    flex-flow: column nowrap;
+    margin-top: 20vh;
+    text-align: center;
   }
 
   .sticky-footer {
@@ -771,6 +889,9 @@ export default {
       position: sticky;
       bottom: 0;
     }
+  }
+  .display-toggle {
+    margin-right: 5px;
   }
 
 </style>
