@@ -113,7 +113,7 @@
     <span>{{ item.groupname }}</span>
     <span>{{ item.location }}</span>
     <span>{{ item.date }}</span>
-    <span>{{ item.time }}</span>
+    <span class="recording-time">{{ item.time }}</span>
     <span>{{ item.duration }}s</span>
     <span>
       <TagBadge
@@ -203,7 +203,7 @@ export default {
   // Row view variant
   .recording-summary-row {
     width: 100%;
-    &:nth-child(even) {
+    &:nth-child(odd) {
       background-color: #eee;
     }
     border-top: 1px solid $border-color;
@@ -214,11 +214,17 @@ export default {
     > * {
       display: table-cell;
       vertical-align: middle;
-      padding: 0 5px;
+      padding: 5px;
       border-right: 1px solid $border-color;
         &:last-child {
           padding-right: 5px;
         }
+    }
+    .svg-inline--fa.fa-2x {
+      font-size: 1.2em;
+    }
+    .recording-time {
+      white-space: nowrap;
     }
   }
 
