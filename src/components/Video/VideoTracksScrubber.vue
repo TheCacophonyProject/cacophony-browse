@@ -3,7 +3,7 @@
     v-if="!isLoaded || isLoaded && hasTracks"
     ref="scrubber"
     :style="{
-      height: `${(10 * numTracks) + 25}px`
+      height: `${Math.max(25, 13 * numTracks)}px`
     }"
     class="track-scrubber"
   >
@@ -20,7 +20,7 @@
         :title="`Track ${index + 1}`"
         :style="{
           background: colours[index % colours.length],
-          top: `${index * 10}px`,
+          top: `${index * 13}px`,
           width: getWidthForTrack(track),
           left: getOffsetForTrack(track)
         }"
@@ -167,7 +167,7 @@ export default {
   }
   .scrub-track {
     position: absolute;
-    height: 10px;
+    height: 12px;
     border-radius: 5px;
   }
   .playhead {
