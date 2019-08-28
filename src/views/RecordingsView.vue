@@ -13,16 +13,13 @@
       <div class="search-content-wrapper">
         <div class="search-results">
           <div class="results-summary">
-            <div class="row align-items-center">
-              <div class="col-6">
-                <h1>Recordings</h1>
-              </div>
-              <div class="col-6">
-                <CsvDownload
-                  :params="serialisedQuery"
-                  class="float-right"/>
-              </div>
-            </div>
+
+            <CsvDownload
+              :params="serialisedQuery"
+              class="float-right"/>
+            
+            <h1>Recordings</h1>
+
             <h2
               v-if="countMessage"
             >
