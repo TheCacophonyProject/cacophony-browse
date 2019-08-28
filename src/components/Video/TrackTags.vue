@@ -1,58 +1,108 @@
 <template>
-  <div>
-    <b-table
-      :items="items"
-      :fields="fields"
-      class="track-tag-table"
-      striped
-      hover
-      responsive
-      thead-class="d-none">
-      <template
-        slot="what"
-        slot-scope="row">
-        <div
-          class="what-image"
-          v-html="what(row.item.what)"/>
-      </template>
-      <template
-        slot="who"
-        slot-scope="row">
-        <div
-          v-if="row.item.User"
-          v-html="row.item.User.username"/>
-      </template>
-      <!-- Be careful about changing the tooltips to use a placement
-           other than "left" here. This can cause the tooltips to be
-           positioned badly, causing flickering and leads to other
-           problems:
+  <div class="simple-accordion-wrapper">
+    <h6
+      class="simple-accordion-header"
+      @click="show_details=!show_details"
+    >
+      Tag history
+      <span
+        v-if="!show_details"
+        title="Show all result classes"
+        class="pointer"
+      >
+        <font-awesome-icon
+          icon="angle-down"
+          class="fa-1x"/>
+      </span>
+      <span
+        v-if="show_details"
+        title="Hide other results"
+        class="pointer"
+      >
+        <font-awesome-icon
+          icon="angle-up"
+          class="fa-1x"/>
+      </span>
+    </h6>
+    <div v-if="show_details">
+      <b-table
+        :items="items"
+        :fields="fields"
+        class="track-tag-table"
+        striped
+        hover
+        small
+        responsive>
+        <template
+          slot="what"
+          slot-scope="row">
+          <div
+            class="what-image"
+          >
+            <img
+              v-if="what(row.item.what).link"
+              :src="what(row.item.what).link"
+              class="tag-img"
+            >
+            {{ what(row.item.what).what }}
+          </div>
+        </template>
 
-           - https://github.com/TheCacophonyProject/cacophony-browse/issues/180
-           - ttps://github.com/TheCacophonyProject/cacophony-browse/issues/185
-        -->
-      <template
-        slot="deleteButton"
-        slot-scope="row">
-        <font-awesome-icon
-          v-b-tooltip.hover.left="'Delete tag'"
-          v-if="!row.item.automatic"
-          icon="trash"
-          style="cursor: pointer;"
-          size="2x"
-          @click="$emit('deleteTag', row.item)"/>
-      </template>
-      <template
-        slot="confirmButton"
-        slot-scope="row">
-        <font-awesome-icon
-          v-b-tooltip.hover.left="'Confirm the automatic tag'"
-          v-if="row.item.automatic"
-          icon="check-circle"
-          style="cursor: pointer;"
-          size="2x"
-          @click="confirmTag(row.item)"/>
-      </template>
-    </b-table>
+        <template
+          slot="who"
+          slot-scope="row">
+          <span
+            v-if="row.item.User"
+          >
+            {{ row.item.User.username }}
+          </span>
+          <span
+            v-else
+          >
+            Cacophony AI
+          </span>
+        </template>
+        <template
+          slot="confidence"
+          slot-scope="row"
+        >
+          {{ confidence(row.item.confidence) }}
+        </template>
+        <!-- Be careful about changing the tooltips to use a placement
+             other than "left" here. This can cause the tooltips to be
+             positioned badly, causing flickering and leads to other
+             problems:
+
+             - https://github.com/TheCacophonyProject/cacophony-browse/issues/180
+             - ttps://github.com/TheCacophonyProject/cacophony-browse/issues/185
+          -->
+        <template
+          slot="buttons"
+          slot-scope="row">
+          <button
+            v-b-tooltip.hover.left="'Confirm the automatic tag'"
+            v-if="row.item.automatic"
+            class="btn"
+            @click="confirmTag(row.item)"
+          >
+            <font-awesome-icon
+              icon="check-circle"
+            />
+          </button>
+
+          <button
+            v-b-tooltip.hover.left="'Delete tag'"
+            v-if="!row.item.automatic"
+            class="btn"
+            @click="$emit('deleteTag', row.item)">
+            <font-awesome-icon
+              icon="trash"
+            />
+          </button>
+
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -71,12 +121,12 @@ export default {
   data () {
     return {
       fields: [
-        {key: 'what', label: 'Tags', variant: 'what'},
-        {key: 'confidence', label: ''},
-        {key: 'who', label: ''},
-        {key: 'deleteButton', label: '', variant: 'delete'},
-        {key: 'confirmButton', label: '', variant: 'confirm'}
-      ]
+        {key: 'what', label: 'Tag', tdClass: 'tag-history-table-what'},
+        {key: 'who', label: 'User'},
+        {key: 'confidence', label: 'Conf.'},
+        {key: 'buttons', label: '', tdClass: 'tag-history-table-buttons'},
+      ],
+      show_details: false,
     };
   },
   computed: {
@@ -99,9 +149,20 @@ export default {
       }
       try {
         const link = require('../../assets/video/' + image);
-        return `<img src="${link}"><div class="d-inline d-lg-block">${what}</div>`;
+        return {link, what};
       } catch (e) {
-        return `<img><div>${what}</div>`;
+        return {what};
+      }
+    },
+    confidence: function(confidence) {
+      if (confidence >= 0.8) {
+        return 'high';
+      } else if (confidence > 0.4 && confidence < 0.8) {
+        return 'mid';
+      } else if (confidence <= 0.4) {
+        return 'low';
+      } else {
+        return '';
       }
     },
     confirmTag: function (rowItem) {
@@ -115,28 +176,24 @@ export default {
 </script>
 
 <style scoped>
-.what-image >>> img
-{
+.track-tag-table {
+  font-size: 85%;
+}
+
+.tag-img {
   max-width: 30px;
   max-height: 30px;
-}
-
-.track-tag-table {
-  font-size: 80%;
-}
-
-.track-tag-table >>> thead tr td {
-  padding: 1px 0px;
+  margin-right: 0.2rem;
 }
 </style>
 
 <style>
-  td.table-delete,
-  td.table-confirm {
-    padding: 6px;
+  /* As it turns out, this has to be placed outside scoped styles 😱 */
+  .track-tag-table .table td {
+    vertical-align: middle;
   }
 
-  td.table-what {
-    padding: 0px;
+  td.tag-history-table-buttons {
+    padding: 0 !important;
   }
 </style>
