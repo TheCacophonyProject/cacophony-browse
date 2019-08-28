@@ -22,6 +22,19 @@ h1 {
 
 /* recordings */
 
+.simple-accordion-wrapper {
+  border-bottom: 1px solid #eee;
+}
+
+.simple-accordion-header {
+  cursor: pointer;
+  margin-top: 0.5em;
+}
+
+.simple-accordion-header .pointer {
+  float: right;
+}
+
 /* pagination */
 .page-item.active .page-link {
   z-index: 0;
