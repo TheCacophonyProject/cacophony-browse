@@ -77,12 +77,8 @@
       <a
         :href="`https://www.google.com/maps/@${item.location.replace(' ', '')},16z`"
         target="_blank"
-        @click.stop.prevent="({currentTarget: {href, target}}) => window.open(href, target)"
-      >
-        <img
-          alt="View location"
-          src=""
-        >
+        @click.stop.prevent="({currentTarget: {href, target}}) => window.open(href, target)">
+        View location
       </a>
     </div>
   </a>
