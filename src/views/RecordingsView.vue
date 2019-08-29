@@ -21,6 +21,7 @@
 
             <div class="float-right">
               <b-button
+                variant="light"
                 class="display-toggle btn-sm"
                 @click="toggleResultsDisplayStyle"
               >
@@ -73,7 +74,7 @@
               v-else
               class="all-rows"
             >
-              <div class="recordings-day">
+              <div class="results-header">
                 <div>
                   <span>ID</span>
                   <span>Type</span>
@@ -710,45 +711,6 @@ export default {
 
   $main-content-width: 640px;
 
-  .display-rows .results-summary {
-    padding: 0 20px;
-    max-width: 100vw;
-  }
-  .display-rows .recordings-day {
-    margin-bottom: 0;
-    display: table-header-group;
-    > div {
-      display: table-row;
-
-      > span {
-        position: sticky;
-        top: 0;
-        background: transparentize($white, 0.15);
-        padding: 0 10px;
-        vertical-align: middle;
-        display: table-cell;
-        border-right: 1px solid $border-color;
-        border-bottom: 1px solid $border-color;
-      }
-    }
-  }
-  .display-rows.search-content-wrapper {
-    margin: 0;
-    padding: 0;
-    .search-results {
-      margin: 0;
-      width: 100%;
-      max-width: unset;
-    }
-  }
-  .results-rows {
-    display: table-row-group;
-  }
-  .all-rows {
-    display: table;
-    width: 100%;
-  }
-
   .search-filter-wrapper {
     background: $gray-100;
     position: relative;
@@ -758,6 +720,7 @@ export default {
   .search-content-wrapper {
     margin: 0 auto;
     flex-basis: $main-content-width;
+    padding: 0 1em;
     h1 {
       margin: 2rem 0 1.2rem;
     }
@@ -807,9 +770,48 @@ export default {
     .search-results {
       max-width: $main-content-width;
       margin: 0 auto;
-      &.display-rows {
-        max-width: 100%;
+    }
+
+    &.display-rows {
+
+      .search-results {
         margin: 0;
+        width: 100%;
+        max-width: calc(100vw - 2em);
+      }
+
+      .results {
+        overflow: auto;
+      }
+
+      .results-rows {
+        display: table-row-group;
+      }
+      .all-rows {
+        display: table;
+        width: 100%;
+        border-top: 1px solid $border-color;
+        border-left: 1px solid $border-color;
+      }
+
+      .results-header {
+        margin-bottom: 0;
+        display: table-header-group;
+        > div {
+          display: table-row;
+
+          > span {
+            position: sticky;
+            top: 0;
+            background: transparentize($white, 0.15);
+            padding: 5px;
+            font-weight: 700;
+            vertical-align: middle;
+            display: table-cell;
+            border-right: 1px solid $border-color;
+            border-bottom: 2px solid $border-color;
+          }
+        }
       }
     }
   }
@@ -862,12 +864,6 @@ export default {
     }
   }
 
-  @include media-breakpoint-up(sm) {
-    .search-content-wrapper {
-      padding: 0 1.6rem;
-    }
-  }
-
   @include media-breakpoint-up(md) {
     .search-filter-wrapper {
       flex: 0 0 320px;
@@ -877,7 +873,6 @@ export default {
       position: relative;
       overflow: hidden;
       overflow-y: scroll;
-      padding: 0;
       margin: 0;
       max-height: calc(100vh - var(--navbar-height));
     }
