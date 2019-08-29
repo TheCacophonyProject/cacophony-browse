@@ -150,7 +150,6 @@
 
 import QueryRecordings from '../components/QueryRecordings/QueryRecordings.vue';
 import CsvDownload from '../components/QueryRecordings/CsvDownload.vue';
-import TableRecordings from '../components/TableRecordings.vue';
 import RecordingSummary from "../components/RecordingSummary.vue";
 import api from '../api/index';
 
@@ -167,7 +166,7 @@ const roundDate = (date, toHour = false) => {
 
 export default {
   name: 'RecordingsView',
-  components: {RecordingSummary, QueryRecordings, TableRecordings, CsvDownload},
+  components: {RecordingSummary, QueryRecordings, CsvDownload},
   props: {},
   data() {
     return {
