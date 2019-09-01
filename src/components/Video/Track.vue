@@ -224,7 +224,7 @@ export default {
     color: gray;
   }*/
 
-  @include media-breakpoint-down(lg) {
+  @include media-breakpoint-down(md) {
 
     .accordion > .card:first-of-type,
     .accordion > .card:not(:first-of-type):not(:last-of-type) {
