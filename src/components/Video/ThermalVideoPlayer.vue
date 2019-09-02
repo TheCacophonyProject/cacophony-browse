@@ -15,7 +15,7 @@
       @seeking="seeking"
       @play="draw"
       @statechanged="stateChange"
-      @ready="selectTrack"/>
+      @ready="playerReady"/>
     <VideoTracksScrubber
       ref="scrubber"
       :duration="duration"
@@ -106,7 +106,15 @@ export default {
     // Unregister the event listener before destroying this Vue instance
     window.removeEventListener('resize', this.onResize);
   },
-  methods: {
+  methods: {  
+    addRateChange() {
+      const htmlPlayer = this.$refs.player.$refs.video;
+      const rate = localStorage.getItem("playbackrate");
+      if(rate){
+        htmlPlayer.playbackRate = rate;
+      }
+      htmlPlayer.onratechange = this.ratechange;
+    },
     startScrub() {
       const player = this.$refs.player;
       const htmlPlayer = player.$refs.video;
@@ -135,6 +143,10 @@ export default {
       this.$data.playerOptions.sources[0].src = this.videoUrl;
       // if tracks is loaded then select the first track
       this.currentTrack = 0;
+    },
+    playerReady(){
+      this.addRateChange();
+      this.selectTrack();
     },
     selectTrack() {
       this.lastDisplayedVideoTime = -1;
@@ -209,6 +221,12 @@ export default {
     },
     setTimeAndRedraw(time) {
       this.$refs.player.player.currentTime(time);
+    },
+    ratechange(event) {
+      if(this.$refs.player != undefined){
+        const htmlPlayer = this.$refs.player.$refs.video;
+        localStorage.setItem('playbackrate',htmlPlayer.playbackRate);
+      }
     },
     seeking(event) {
       // If the user is moving the time slider on the video then update the canvas
