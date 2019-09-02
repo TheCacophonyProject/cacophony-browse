@@ -111,7 +111,7 @@ export default {
     window.removeEventListener("resize", this.onResize);
   },
   methods: {
-    addRateChange() {
+    bindRateChange() {
       const htmlPlayer = this.$refs.player.$refs.video;
       const rate = localStorage.getItem("playbackrate");
       if (rate) {
@@ -149,7 +149,7 @@ export default {
       this.currentTrack = 0;
     },
     playerReady() {
-      this.addRateChange();
+      this.bindRateChange();
       this.selectTrack();
     },
     selectTrack() {
