@@ -245,31 +245,41 @@ export default {
       if (this.dateRange === 0) {
         // All time option
         return {
-          "$lt": toDate.toISOString()
+          "$lt": this.formatQueryDate(toDate),
         };
       }       else {
         const fromDate = new Date(toDate.getTime() - this.dateRange*24*60*60*1000);
         return {
-          "$gt": fromDate.toISOString(),
-          "$lt": toDate.toISOString()
+          "$gt": this.formatQueryDate(fromDate),
+          "$lt": this.formatQueryDate(toDate),
         };
       }
 
+    }
+    ,padLeft (str, char, len) {
+      while (str.toString().length < len) {
+        str = `${char}${str}`;
+      }
+      return str;
+    },
+    formatQueryDate (date) {
+      return `${date.getFullYear()}-${this.padLeft(date.getMonth() + 1, '0', 2)}-${this.padLeft(date.getDate(), '0', 2)} ${this.padLeft(date.getHours(), '0', 2)}:${this.padLeft(date.getMinutes(), '0', 2)}:${this.padLeft(date.getSeconds(), '0', 2)}`;
     },
     gotoRecordingsSearchPage (array) {
-      const fromDate = this.dateQuery()['$gt'];
-      const toDate = this.dateQuery()['$lt'];
       const deviceName = array[0]._model.label;
-      const deviceId = this.devices.find((device) => {
+      const device = this.devices.find((device) => {
         return device.name === deviceName;
-      });
+      }); 
+
       this.$router.push({
         path: 'recordings',
         query: {
-          fromDate: fromDate,
-          toDate: toDate,
-          deviceId: JSON.stringify(deviceId),
-          recordingType: JSON.stringify(this.recordingType)
+          where: JSON.stringify({
+            dateRange:"customDateRange",
+            recordingDateTime: this.dateQuery(),
+            DeviceId: [device],
+            type: this.recordingType
+          })
         }
       });
     }

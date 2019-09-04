@@ -448,8 +448,8 @@ export default {
           const past = new Date(now.getTime() + (relativeRangeDays * oneDay));
           where.dateRange = {relativeDateRange: relativeRangeDays};
           where.recordingDateTime = {
-            "$lt": formatDate(now),
-            "$gt": formatDate(past),
+            "$lt": this.formatQueryDate(now),
+            "$gt": this.formatQueryDate(past),
           };
         } else if (query.where.hasOwnProperty('recordingDateTime')) {
           if (
