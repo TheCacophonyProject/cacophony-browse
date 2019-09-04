@@ -452,18 +452,29 @@ export default {
       if (query.where.hasOwnProperty("dateRange")) {
         // If it's a custom range, that can be inferred by the presence of recordingDateTime.
         // Otherwise, we'll synthesise recordingDateTime here from relative time.
-        if (query.where.dateRange.hasOwnProperty('all')) {
-          where.dateRange = 'all';
-        } else if (query.where.dateRange.hasOwnProperty('relativeDateRange')) {
+        if (query.where.dateRange.hasOwnProperty("all")) {
+          where.dateRange = "all";
+        } else if (query.where.dateRange.hasOwnProperty("relativeDateRange")) {
           const padLeft = (str, char, len) => {
             while (str.toString().length < len) {
               str = `${char}${str}`;
             }
             return str;
           };
-          const formatDate = (date) => (
-            `${date.getFullYear()}-${padLeft(date.getMonth() + 1, '0', 2)}-${padLeft(date.getDate(), '0', 2)} ${padLeft(date.getHours(), '0', 2)}:${padLeft(date.getMinutes(), '0', 2)}:${padLeft(date.getSeconds(), '0', 2)}`
-          );
+          const formatDate = date =>
+            `${date.getFullYear()}-${padLeft(
+              date.getMonth() + 1,
+              "0",
+              2
+            )}-${padLeft(date.getDate(), "0", 2)} ${padLeft(
+              date.getHours(),
+              "0",
+              2
+            )}:${padLeft(date.getMinutes(), "0", 2)}:${padLeft(
+              date.getSeconds(),
+              "0",
+              2
+            )}`;
           const now = new Date();
           const oneDay = 1000 * 60 * 60 * 24;
           const relativeRangeDays = parseInt(
