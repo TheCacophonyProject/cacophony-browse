@@ -3,12 +3,11 @@
 </template>
 
 <script>
-
 </script>
 
 <style>
 .hero {
-  background-image: url('../assets/hero/hero-theory.jpg');
+  background-image: url("../assets/hero/hero-theory.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;

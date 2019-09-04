@@ -2,7 +2,7 @@
 // for dev/staging/prod.
 const config = {
   environment: "TEST",
-  'api': "http://mocked-api-path"
+  api: "http://mocked-api-path"
 };
 
 config.tagVersion = 100;

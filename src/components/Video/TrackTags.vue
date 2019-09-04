@@ -107,71 +107,69 @@
 </template>
 
 <script>
-
 /* global require */
 
 export default {
-  name: 'TrackTags',
+  name: "TrackTags",
   props: {
     items: {
       type: Array,
       required: true
     }
   },
-  data () {
+  data() {
     return {
       fields: [
-        {key: 'what', label: 'Tag', tdClass: 'tag-history-table-what'},
-        {key: 'who', label: 'User'},
-        {key: 'confidence', label: 'Conf.'},
-        {key: 'buttons', label: '', tdClass: 'tag-history-table-buttons'},
+        { key: "what", label: "Tag", tdClass: "tag-history-table-what" },
+        { key: "who", label: "User" },
+        { key: "confidence", label: "Conf." },
+        { key: "buttons", label: "", tdClass: "tag-history-table-buttons" }
       ],
-      show_details: false,
+      show_details: false
     };
   },
-  computed: {
-  },
+  computed: {},
   methods: {
-    what: function (what) {
+    what: function(what) {
       // Struggling to get images to show correctly so using work-around
       // suggested at bottom of this page.
       // TODO implement alternative that doesn't use 'require' in this manner
       // https://bootstrap-vue.js.org/docs/reference/images/
       let image = null;
-      if (what == 'false positive') {
-        image = 'none.png';
-      } else if (what == 'bird/kiwi') {
-        image = 'kiwi.png';
-      } else if (what == 'unidentified') {
-        image = 'unknown.png';
+      if (what == "false positive") {
+        image = "none.png";
+      } else if (what == "bird/kiwi") {
+        image = "kiwi.png";
+      } else if (what == "unidentified") {
+        image = "unknown.png";
       } else {
-        image = what + '.png';
+        image = what + ".png";
       }
       try {
-        const link = require('../../assets/video/' + image);
-        return {link, what};
+        const link = require("../../assets/video/" + image);
+        return { link, what };
       } catch (e) {
-        return {what};
+        return { what };
       }
     },
     confidence: function(confidence) {
       if (confidence >= 0.8) {
-        return 'high';
+        return "high";
       } else if (confidence > 0.4 && confidence < 0.8) {
-        return 'mid';
+        return "mid";
       } else if (confidence <= 0.4) {
-        return 'low';
+        return "low";
       } else {
-        return '';
+        return "";
       }
     },
-    confirmTag: function (rowItem) {
+    confirmTag: function(rowItem) {
       const tag = {};
       tag.what = rowItem.what;
       tag.confidence = rowItem.confidence;
-      this.$emit('addTag', tag);
+      this.$emit("addTag", tag);
     }
-  },
+  }
 };
 </script>
 
@@ -188,12 +186,12 @@ export default {
 </style>
 
 <style>
-  /* As it turns out, this has to be placed outside scoped styles 😱 */
-  .track-tag-table .table td {
-    vertical-align: middle;
-  }
+/* As it turns out, this has to be placed outside scoped styles 😱 */
+.track-tag-table .table td {
+  vertical-align: middle;
+}
 
-  td.tag-history-table-buttons {
-    padding: 0 !important;
-  }
+td.tag-history-table-buttons {
+  padding: 0 !important;
+}
 </style>

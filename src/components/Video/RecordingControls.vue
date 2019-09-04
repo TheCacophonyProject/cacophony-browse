@@ -126,12 +126,12 @@
 </template>
 
 <script>
-import api from '../../api/index';
-import Comment from './Comment.vue';
+import api from "../../api/index";
+import Comment from "./Comment.vue";
 
 export default {
-  name: 'RecordingControls',
-  components: {Comment},
+  name: "RecordingControls",
+  components: { Comment },
   props: {
     items: {
       type: Array,
@@ -139,60 +139,60 @@ export default {
     },
     comment: {
       type: String,
-      default: "",
+      default: ""
     },
     downloadRawUrl: {
       type: String,
-      default: "",
+      default: ""
     },
     downloadFileUrl: {
       type: String,
-      default: "",
+      default: ""
     }
   },
-  data () {
+  data() {
     return {
       fields: [
-        {key: 'whatDetail', label: 'What'},
-        {key: 'who', label: 'By'},
-        {key: 'when', label: 'When'},
-        {key: 'deleteButton', label: '', tdClass: 'tags-table-buttons'}
+        { key: "whatDetail", label: "What" },
+        { key: "who", label: "By" },
+        { key: "when", label: "When" },
+        { key: "deleteButton", label: "", tdClass: "tags-table-buttons" }
       ],
-      deleteDisabled: false,
+      deleteDisabled: false
     };
   },
   watch: {
-    items: function () {
+    items: function() {
       this.deleteDisabled = false;
     }
   },
   methods: {
-    addMissedTrackTag: function () {
+    addMissedTrackTag: function() {
       this.addTag("missed track");
     },
-    addCoolTag: function () {
+    addCoolTag: function() {
       this.addTag("cool");
     },
-    addTrappedTag: function () {
+    addTrappedTag: function() {
       this.addTag("trapped in trap");
     },
     addTrapInteractionTag: function() {
       this.addTag("interaction with trap");
     },
-    addTag: function (label) {
-      this.$emit('addTag', {
+    addTag: function(label) {
+      this.$emit("addTag", {
         detail: label,
         confidence: 0.9
       });
     },
-    whatDetail: function (item) {
+    whatDetail: function(item) {
       return sentenceCase(item.what || item.detail || "-");
     },
     async deleteRecording() {
       this.deleteDisabled = true;
-      const {success} = await api.recording.del(this.$route.params.id);
-      if(success) {
-        this.$emit('nextOrPreviousRecording');
+      const { success } = await api.recording.del(this.$route.params.id);
+      if (success) {
+        this.$emit("nextOrPreviousRecording");
       }
     },
     updateComment(event) {
@@ -216,7 +216,7 @@ function sentenceCase(s) {
 </style>
 
 <style>
-  .table td.tags-table-buttons {
-    padding: 0;
-  }
+.table td.tags-table-buttons {
+  padding: 0;
+}
 </style>

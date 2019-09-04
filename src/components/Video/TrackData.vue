@@ -50,36 +50,36 @@
 </template>
 
 <script>
-import Vue2Filters from 'vue2-filters';
+import Vue2Filters from "vue2-filters";
 
 export default {
-  name: 'TrackData',
+  name: "TrackData",
   mixins: [Vue2Filters.mixin],
   props: {
     trackData: {
       type: Object,
       required: true
-    },
+    }
   },
   data() {
     return {
-      show_details: false,
+      show_details: false
     };
-  },
+  }
 };
 </script>
 
 <style scoped>
-  .details {
-    font-size: 85%;
-  }
-  h6 {
-    cursor: pointer;
-  }
-  p {
-    margin-bottom: 0.5em;
-  }
-  .table {
-    margin-top: 1em;
-  }
+.details {
+  font-size: 85%;
+}
+h6 {
+  cursor: pointer;
+}
+p {
+  margin-bottom: 0.5em;
+}
+.table {
+  margin-top: 1em;
+}
 </style>

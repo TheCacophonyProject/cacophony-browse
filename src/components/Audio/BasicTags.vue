@@ -18,23 +18,23 @@
 <script>
 /* eslint-disable no-console */
 export default {
-  name: 'BasicTag',
+  name: "BasicTag",
   methods: {
-    basicTag(tagValue) {      
+    basicTag(tagValue) {
       const tag = {};
       tag.what = tagValue;
       tag.confidence = 0.5;
       tag.startTime = 0.5;
       tag.duration = 0.5;
-      tag.automatic = false;    
-      this.$emit('addAudioTag', tag);
+      tag.automatic = false;
+      this.$emit("addAudioTag", tag);
     }
-  },
+  }
 };
 </script>
 
 <style scoped>
-  .basicTags{
-    margin: 5px;
-  }
+.basicTags {
+  margin: 5px;
+}
 </style>

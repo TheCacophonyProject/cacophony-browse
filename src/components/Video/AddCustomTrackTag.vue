@@ -36,21 +36,21 @@
   </b-modal>
 </template>
 <script>
-import DefaultLabels from '../../const.js';
+import DefaultLabels from "../../const.js";
 
 export default {
-  name: 'AddCustomTrackTag',
-  data () {
+  name: "AddCustomTrackTag",
+  data() {
     return {
       whatTag: "cat",
       whatOptions: DefaultLabels.trackLabels(),
       confidence: 0.8,
       confidenceOptions: [
-        {value: 0.4, text: "low"},
-        {value: 0.6, text: "mid"},
-        {value: 0.8, text: "high"}
+        { value: 0.4, text: "low" },
+        { value: 0.6, text: "mid" },
+        { value: 0.8, text: "high" }
       ],
-      comment: "",
+      comment: ""
     };
   },
   methods: {
@@ -58,7 +58,7 @@ export default {
       const tag = {};
       tag.confidence = this.confidence;
       tag.what = this.whatTag;
-      this.$emit('addTag', tag);
+      this.$emit("addTag", tag);
     }
   }
 };

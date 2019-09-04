@@ -15,9 +15,8 @@
 </template>
 
 <script>
-
-import {mapState} from 'vuex';
-import api from './../api/Recording.api.js';
+import { mapState } from "vuex";
+import api from "./../api/Recording.api.js";
 
 export default {
   name: "HomeGroupItem",
@@ -27,28 +26,28 @@ export default {
       required: true
     }
   },
-  data: function () {
+  data: function() {
     return {
       count: 0
     };
   },
   computed: {
     ...mapState({
-      groups: state => state.Groups.groups,
+      groups: state => state.Groups.groups
     }),
     query() {
       return {
-        where: JSON.stringify({DeviceId: this.group.Devices.map(d => d.id)}),
+        where: JSON.stringify({ DeviceId: this.group.Devices.map(d => d.id) })
       };
-    },
+    }
   },
-  async mounted () {
+  async mounted() {
     // Last 24 hours
     const toDate = new Date();
-    const fromDate = new Date(toDate.getTime() - 24*60*60*1000);
+    const fromDate = new Date(toDate.getTime() - 24 * 60 * 60 * 1000);
     const dateQuery = {
-      "$gt": fromDate.toISOString(),
-      "$lt": toDate.toISOString()
+      $gt: fromDate.toISOString(),
+      $lt: toDate.toISOString()
     };
 
     // Query params
@@ -65,18 +64,17 @@ export default {
     };
 
     // Get all data (first 1000 rows)
-    let {result: allData} = await api.query(params);
+    let { result: allData } = await api.query(params);
     // Check whether all data was fetched
     // if not, run again with increased limit to get all rows
     if (allData.count > limit) {
       params.limit = allData.count;
-      ({result: allData} = await api.query(params));
+      ({ result: allData } = await api.query(params));
     }
-    this.count =  allData.count;
-  },
+    this.count = allData.count;
+  }
 };
 </script>
 
 <style scoped>
-
 </style>

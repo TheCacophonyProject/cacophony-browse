@@ -41,17 +41,17 @@
 </template>
 
 <script>
-import {minLength, required} from 'vuelidate/lib/validators';
-import {mapState} from 'vuex';
+import { minLength, required } from "vuelidate/lib/validators";
+import { mapState } from "vuex";
 
 const groupNameMinLength = 3;
 
 export default {
-  name: 'GroupAdd',
+  name: "GroupAdd",
   data() {
     return {
       form: {
-        groupName: ''
+        groupName: ""
       }
     };
   },
@@ -92,28 +92,28 @@ export default {
 </script>
 
 <style>
-  .group-add {
-    margin-bottom: 1rem;
-  }
+.group-add {
+  margin-bottom: 1rem;
+}
 
+.add-group-form {
+  flex-wrap: wrap;
+}
+
+.input {
+  width: 100%;
+  margin-right: 0;
+}
+
+@media only screen and (min-width: 576px) {
   .add-group-form {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
   }
 
   .input {
-    width: 100%;
-    margin-right: 0;
+    width: auto;
+    margin-right: 1rem;
   }
-
-  @media only screen and (min-width: 576px) {
-    .add-group-form {
-      flex-wrap: nowrap;
-      justify-content: space-evenly;
-    }
-
-    .input {
-      width: auto;
-      margin-right: 1rem;
-    }
-  }
+}
 </style>

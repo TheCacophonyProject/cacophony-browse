@@ -66,22 +66,21 @@
 </template>
 
 <script>
-
 export default {
-  name: 'PrevNext',
+  name: "PrevNext",
   props: {
     recording: {
       type: Object,
-      default: function () {
+      default: function() {
         return {};
       }
     }
   },
   methods: {
     gotoNextRecording(...args) {
-      this.$emit('nextOrPreviousRecording', {...args});
+      this.$emit("nextOrPreviousRecording", { ...args });
     }
-  },
+  }
 };
 </script>
 
@@ -90,24 +89,22 @@ div.img-buttons {
   padding: 0.5em;
   text-align: center;
 }
-.img-buttons
-  span {
-    cursor: pointer;
-    width: 4em;
-    max-height: 4em;
-    box-sizing: border-box;
-    display: inline-block;
-    opacity: 0.6;
-  }
+.img-buttons span {
+  cursor: pointer;
+  width: 4em;
+  max-height: 4em;
+  box-sizing: border-box;
+  display: inline-block;
+  opacity: 0.6;
+}
 
-  @media only screen and (max-width: 575px) {
-    div.img-buttons {
-      font-size: 80%;
-    }
+@media only screen and (max-width: 575px) {
+  div.img-buttons {
+    font-size: 80%;
   }
+}
 
-
-  span:hover {
-    opacity: 1;
-  }
+span:hover {
+  opacity: 1;
+}
 </style>

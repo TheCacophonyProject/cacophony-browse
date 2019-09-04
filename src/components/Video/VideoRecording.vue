@@ -75,67 +75,73 @@
 
 <script>
 /* eslint-disable no-console */
-import {mapState} from 'vuex';
-import PrevNext from './PrevNext.vue';
-import RecordingControls from './RecordingControls.vue';
-import ThermalVideoPlayer from './ThermalVideoPlayer.vue';
-import TrackInfo from './Track.vue';
-import RecordingProperties from './RecordingProperties.vue';
+import { mapState } from "vuex";
+import PrevNext from "./PrevNext.vue";
+import RecordingControls from "./RecordingControls.vue";
+import ThermalVideoPlayer from "./ThermalVideoPlayer.vue";
+import TrackInfo from "./Track.vue";
+import RecordingProperties from "./RecordingProperties.vue";
 
 export default {
-  name: 'VideoRecording',
-  components: {PrevNext, RecordingControls, RecordingProperties, ThermalVideoPlayer, TrackInfo},
+  name: "VideoRecording",
+  components: {
+    PrevNext,
+    RecordingControls,
+    RecordingProperties,
+    ThermalVideoPlayer,
+    TrackInfo
+  },
   props: {
     recording: {
       type: Object,
-      required: true,
+      required: true
     },
     videoUrl: {
       type: String,
-      required: true,
+      required: true
     },
     videoRawUrl: {
       type: String,
-      required: true,
+      required: true
     },
     tracks: {
       type: Array,
-      required: true,
-    },
+      required: true
+    }
   },
-  data () {
+  data() {
     return {
       showAddObservation: false,
       selectedTrack: 0,
       startVideoTime: 0,
       colours: [
-        'yellow',
-        'orange',
-        'red',
-        'purple',
-        'lightblue',
-        'limegreen',
-        'black',
-        'white',
-      ],
+        "yellow",
+        "orange",
+        "red",
+        "purple",
+        "lightblue",
+        "limegreen",
+        "black",
+        "white"
+      ]
     };
   },
   computed: {
     ...mapState({
       tagItems() {
-        return this.$store.getters['Video/getTagItems'];
-      },
-    }),
+        return this.$store.getters["Video/getTagItems"];
+      }
+    })
   },
   watch: {
     recording: function() {
       this.trackSelected(0);
-    },
+    }
   },
   methods: {
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
-        this.$router.push({path: `/recording/${this.recording.id}`});
+        this.$router.push({ path: `/recording/${this.recording.id}` });
       }
     },
     async getNextRecording(direction, tagMode, tags, skipMessage) {
@@ -145,26 +151,31 @@ export default {
 
       let order;
       switch (direction) {
-      case "next":
-        where.recordingDateTime = {"$gt": this.recording.recordingDateTime};
-        order = "ASC";
-        break;
-      case "previous":
-        where.recordingDateTime = {"$lt": this.recording.recordingDateTime};
-        order = "DESC";
-        break;
-      case "either":
-        if (await this.getNextRecording('next', tagMode, tags, true)) {
-          return true;
-        }
-        return await this.getNextRecording('previous', tagMode, tags, skipMessage);
-      default:
-        throw `invalid direction: '${direction}'`;
+        case "next":
+          where.recordingDateTime = { $gt: this.recording.recordingDateTime };
+          order = "ASC";
+          break;
+        case "previous":
+          where.recordingDateTime = { $lt: this.recording.recordingDateTime };
+          order = "DESC";
+          break;
+        case "either":
+          if (await this.getNextRecording("next", tagMode, tags, true)) {
+            return true;
+          }
+          return await this.getNextRecording(
+            "previous",
+            tagMode,
+            tags,
+            skipMessage
+          );
+        default:
+          throw `invalid direction: '${direction}'`;
       }
-      order  = JSON.stringify([["recordingDateTime", order]]);
+      order = JSON.stringify([["recordingDateTime", order]]);
       where = JSON.stringify(where);
 
-      const params ={
+      const params = {
         where,
         order,
         limit: 1,
@@ -177,7 +188,11 @@ export default {
       if (tagMode) {
         params.tagMode = tagMode;
       }
-      return await this.$store.dispatch('Video/QUERY_RECORDING', { params, direction, skipMessage });
+      return await this.$store.dispatch("Video/QUERY_RECORDING", {
+        params,
+        direction,
+        skipMessage
+      });
     },
     prevNext(event) {
       this.gotoNextRecording(event[0], event[1], event[2]);
@@ -187,10 +202,10 @@ export default {
     },
     addTag(tag) {
       const id = Number(this.$route.params.id);
-      this.$store.dispatch('Video/ADD_TAG', { tag, id });
+      this.$store.dispatch("Video/ADD_TAG", { tag, id });
     },
     deleteTag(tagId) {
-      this.$store.dispatch('Video/DELETE_TAG', tagId);
+      this.$store.dispatch("Video/DELETE_TAG", tagId);
     },
     trackSelected(track) {
       if (track != this.selectedTrack) {
@@ -199,22 +214,24 @@ export default {
     },
     updateComment(comment) {
       const recordingId = Number(this.$route.params.id);
-      this.$store.dispatch('Video/UPDATE_COMMENT', { comment, recordingId });
+      this.$store.dispatch("Video/UPDATE_COMMENT", { comment, recordingId });
     },
     orderedTracks: function() {
-      return this.tracks.slice().sort((a, b) => a.data.start_s - b.data.start_s );
-    },
-  },
+      return this.tracks
+        .slice()
+        .sort((a, b) => a.data.start_s - b.data.start_s);
+    }
+  }
 };
 </script>
 
 <style scoped>
-  .video-elements-wrapper {
-    padding: 0;
-  }
-  .processing {
-    color: darkred;
-    font-weight: 600;
-    font-size: 120%
-  }
+.video-elements-wrapper {
+  padding: 0;
+}
+.processing {
+  color: darkred;
+  font-weight: 600;
+  font-size: 120%;
+}
 </style>

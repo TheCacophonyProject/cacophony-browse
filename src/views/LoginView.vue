@@ -58,17 +58,16 @@
 </template>
 
 <script>
-
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'LoginView',
+  name: "LoginView",
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data() {
     return {
-      usernameOrEmail: '',
-      password: '',
+      usernameOrEmail: "",
+      password: "",
       errorMessage: null
     };
   },
@@ -78,22 +77,21 @@ export default {
     async onSubmit(evt) {
       evt.preventDefault();
 
-      await this.$store.dispatch('User/LOGIN', {
+      await this.$store.dispatch("User/LOGIN", {
         username: this.usernameOrEmail,
         password: this.password
       });
 
-      if(this.$store.getters['User/isLoggedIn']) {
-        this.$router.go('home');
+      if (this.$store.getters["User/isLoggedIn"]) {
+        this.$router.go("home");
       }
     }
   }
 };
-
 </script>
 
 <style scoped>
-  .sign-form-wrapper {
-    max-width: 360px;
-  }
+.sign-form-wrapper {
+  max-width: 360px;
+}
 </style>

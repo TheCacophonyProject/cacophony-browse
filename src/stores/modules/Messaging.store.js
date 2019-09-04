@@ -5,20 +5,20 @@ const state = {
 const getters = {};
 
 const actions = {
-  WARN({commit}, message) {
-    commit('log', {message, level: 'warning'});
+  WARN({ commit }, message) {
+    commit("log", { message, level: "warning" });
   },
-  ERROR({commit}, message) {
-    commit('log', {message, level: 'danger'});
+  ERROR({ commit }, message) {
+    commit("log", { message, level: "danger" });
   },
-  INFO({commit}, message) {
-    commit('log', {message, level: 'info'});
+  INFO({ commit }, message) {
+    commit("log", { message, level: "info" });
   },
-  SUCCESS({commit}, message) {
-    commit('log', {message, level: 'success'});
+  SUCCESS({ commit }, message) {
+    commit("log", { message, level: "success" });
   },
-  ACKNOWLEDGE({commit}) {
-    commit('acknowledge');
+  ACKNOWLEDGE({ commit }) {
+    commit("acknowledge");
   }
 };
 

@@ -90,26 +90,26 @@
 </template>
 
 <script>
+import { minLength, required, sameAs } from "vuelidate/lib/validators";
 
-import {minLength, required, sameAs} from 'vuelidate/lib/validators';
-
-const validPattern = (value) => /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/.test(value);
+const validPattern = value =>
+  /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/.test(value);
 const usernameLength = 5;
 const passwordLength = 8;
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'RegisterView',
+  name: "RegisterView",
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data() {
     return {
       form: {
-        username: '',
-        email: '',
-        password: '',
-        passwordConfirm: '',
+        username: "",
+        email: "",
+        password: "",
+        passwordConfirm: ""
       },
       errorMessage: null
     };
@@ -118,7 +118,7 @@ export default {
   computed: {
     usernameFeedback() {
       if (this.$v.form.username.$invalid) {
-        if(!this.$v.form.username.validPattern) {
+        if (!this.$v.form.username.validPattern) {
           return `Must be letters (either case) or numbers`;
         }
         return `Minimum username length is ${usernameLength} characters`;
@@ -143,7 +143,7 @@ export default {
         validPattern
       },
       email: {
-        required,
+        required
       },
       password: {
         required,
@@ -151,7 +151,7 @@ export default {
       },
       passwordConfirm: {
         required,
-        sameAsPassword: sameAs('password')
+        sameAsPassword: sameAs("password")
       }
     }
   },
@@ -160,13 +160,13 @@ export default {
       evt.preventDefault();
 
       if (!this.$v.$invalid) {
-        await this.$store.dispatch('User/REGISTER', {
+        await this.$store.dispatch("User/REGISTER", {
           username: this.$v.form.username.$model,
           password: this.$v.form.password.$model,
-          email: this.$v.form.email.$model,
+          email: this.$v.form.email.$model
         });
-        if(this.$store.getters['User/isLoggedIn']) {
-          this.$router.push('/');
+        if (this.$store.getters["User/isLoggedIn"]) {
+          this.$router.push("/");
         }
       }
     }
@@ -175,9 +175,7 @@ export default {
 </script>
 
 <style scoped>
-  .sign-form-wrapper {
-    max-width: 460px;
-  }
+.sign-form-wrapper {
+  max-width: 460px;
+}
 </style>
-
-

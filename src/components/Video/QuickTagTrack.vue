@@ -50,20 +50,19 @@
 </template>
 
 <script>
-
-import DefaultLabels from '../../const.js';
+import DefaultLabels from "../../const.js";
 export default {
-  name: 'QuickTagTrack',
+  name: "QuickTagTrack",
   props: {
     tags: {
       type: Array,
       required: true
-    },
+    }
   },
   data() {
     return {
       animals: DefaultLabels.quickTagLabels(),
-      message: "",
+      message: ""
     };
   },
   methods: {
@@ -71,7 +70,7 @@ export default {
       const tag = {};
       tag.confidence = 0.85;
       tag.what = what;
-      this.$emit('addTag', tag);
+      this.$emit("addTag", tag);
     },
     getTitle(animal) {
       return "Mark as " + animal;
@@ -84,7 +83,7 @@ export default {
       for (const tag of this.tags) {
         if (tag.what == animal) {
           if (tag.automatic == false) {
-            buttonClass  += " tagged active";
+            buttonClass += " tagged active";
           } else {
             buttonClass += " ai-tagged active";
           }
@@ -97,7 +96,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .tag-buttons {
   margin-bottom: 1.2rem;
   display: flex;
@@ -137,5 +135,4 @@ export default {
     }
   }
 }
-
 </style>

@@ -13,9 +13,8 @@
 </template>
 
 <script>
-
 export default {
-  name: 'DateRange',
+  name: "DateRange",
   props: {
     value: {
       type: Number,
@@ -26,24 +25,24 @@ export default {
       default: false
     }
   },
-  data: function () {
+  data: function() {
     return {
       dates: [
-        {text: 'Last 24 Hours', value: 1},
-        {text: 'Last 7 Days', value: 7},
-        {text: 'Last 30 Days', value: 30},
-        {text: 'Last 60 Days', value: 60},
-        {text: 'Last 365 Days', value: 365},
-        {text: 'All Time', value: 0}
+        { text: "Last 24 Hours", value: 1 },
+        { text: "Last 7 Days", value: 7 },
+        { text: "Last 30 Days", value: 30 },
+        { text: "Last 60 Days", value: 60 },
+        { text: "Last 365 Days", value: 365 },
+        { text: "All Time", value: 0 }
       ]
     };
   },
   methods: {
     variant(buttonValue) {
       if (buttonValue === this.value) {
-        return 'primary';
+        return "primary";
       } else {
-        return 'secondary';
+        return "secondary";
       }
     }
   }

@@ -1,7 +1,7 @@
 var allLabels = {
   badTrack: {
     value: "bad track",
-    text: 'poor tracking'
+    text: "poor tracking"
   },
   other: {
     value: "other",
@@ -17,11 +17,11 @@ var allLabels = {
   },
   rodent: {
     value: "rodent",
-    text: 'rat or mouse'
+    text: "rat or mouse"
   },
   mustelid: {
     value: "mustelid",
-    text: 'stoat, weasel or ferret (mustelid)'
+    text: "stoat, weasel or ferret (mustelid)"
   },
   hedgehog: {
     value: "hedgehog",
@@ -53,7 +53,7 @@ var allLabels = {
   },
   insect: {
     value: "insect",
-    text: 'spider or insect (on camera lens or flying)'
+    text: "spider or insect (on camera lens or flying)"
   },
   unidentified: {
     value: "unidentified",
@@ -61,64 +61,64 @@ var allLabels = {
   },
   pest: {
     value: "pest",
-    text: 'unidentified animal but not bird'
+    text: "unidentified animal but not bird"
   },
   part: {
     value: "part",
-    text: 'part of animal (eg tail)'
+    text: "part of animal (eg tail)"
   },
   missedTrack: {
     value: "missed track",
-    text: 'Missed animal track'
+    text: "Missed animal track"
   },
   multipleAnimals: {
     value: "multiple animals",
-    text: 'Multiple animals in video'
+    text: "Multiple animals in video"
   },
   inTrap: {
     value: "trapped in trap",
-    text: 'Animal in trap'
+    text: "Animal in trap"
   },
   trapInteraction: {
     value: "interaction with trap",
-    text: 'Animal interacted with trap'
+    text: "Animal interacted with trap"
   },
   cool: {
     value: "cool",
-    text: 'Cool video'
+    text: "Cool video"
   },
   animal: {
     value: "animal",
-    text: 'Untracked animal (please specify animal)'
+    text: "Untracked animal (please specify animal)"
   },
   any: {
-    value: 'any',
-    text: 'all'
+    value: "any",
+    text: "all"
   },
   noHuman: {
-    value: 'no-human',
-    text: 'not tagged by human'
+    value: "no-human",
+    text: "not tagged by human"
   },
   tagged: {
-    value: 'tagged',
-    text: 'tagged as...'
+    value: "tagged",
+    text: "tagged as..."
   },
   humanTagged: {
-    value: 'human-tagged',
-    text: 'human tagged as...'
+    value: "human-tagged",
+    text: "human tagged as..."
   },
   automaticTagged: {
-    value: 'automatic-tagged',
-    text: 'AI tagged as...'
+    value: "automatic-tagged",
+    text: "AI tagged as..."
   },
   bothTagged: {
-    value: 'both-tagged',
-    text: 'AI and human tagged as...'
+    value: "both-tagged",
+    text: "AI and human tagged as..."
   },
   unTagged: {
-    value: 'untagged',
-    text: 'untagged only'
-  },
+    value: "untagged",
+    text: "untagged only"
+  }
 };
 
 const DefaultLabels = {
@@ -136,7 +136,7 @@ const DefaultLabels = {
     allLabels.insect,
     allLabels.unidentified,
     allLabels.pest,
-    allLabels.part,
+    allLabels.part
   ],
   tagTypes: [
     allLabels.any,
@@ -145,10 +145,16 @@ const DefaultLabels = {
     allLabels.humanTagged,
     allLabels.automaticTagged,
     allLabels.bothTagged,
-    allLabels.unTagged,
+    allLabels.unTagged
   ],
   quickTagLabels: function() {
-    return [allLabels.possum.value, allLabels.rodent.value, allLabels.hedgehog.value, allLabels.cat.value, allLabels.bird.value];
+    return [
+      allLabels.possum.value,
+      allLabels.rodent.value,
+      allLabels.hedgehog.value,
+      allLabels.cat.value,
+      allLabels.bird.value
+    ];
   },
   recordingLabels: function() {
     return [
@@ -164,7 +170,8 @@ const DefaultLabels = {
       .concat([allLabels.multipleAnimals]);
   },
   searchLabels: function() {
-    var searchLabels = this.animals.concat([allLabels.badTrack,
+    var searchLabels = this.animals.concat([
+      allLabels.badTrack,
       allLabels.other
     ]);
     searchLabels.splice(0, 0, allLabels.interesting);
@@ -175,19 +182,19 @@ const DefaultLabels = {
   },
   canHaveSpecifiedTags: function(tagType) {
     switch (tagType) {
-    case allLabels.tagged.value:
-    case allLabels.humanTagged.value:
-    case allLabels.automaticTagged.value:
-    case allLabels.bothTagged.value:
-    case allLabels.cool.value:
-    case allLabels.multipleAnimals.value:
-    case allLabels.inTrap.value:
-    case allLabels.missedTrack.value:
-      return true;
-    default:
-      return false;
+      case allLabels.tagged.value:
+      case allLabels.humanTagged.value:
+      case allLabels.automaticTagged.value:
+      case allLabels.bothTagged.value:
+      case allLabels.cool.value:
+      case allLabels.multipleAnimals.value:
+      case allLabels.inTrap.value:
+      case allLabels.missedTrack.value:
+        return true;
+      default:
+        return false;
     }
-  },
+  }
 };
 
 export default DefaultLabels;

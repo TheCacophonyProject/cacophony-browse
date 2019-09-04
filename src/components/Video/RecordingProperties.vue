@@ -76,59 +76,61 @@
 </template>
 
 <script>
-import BatteryLevel from '../BatteryLevel.vue';
+import BatteryLevel from "../BatteryLevel.vue";
 
 export default {
-  name: 'RecordingProperties',
+  name: "RecordingProperties",
   components: {
-    BatteryLevel,
+    BatteryLevel
   },
   props: {
     value: {
       type: String,
-      default: "",
+      default: ""
     },
     recording: {
       type: Object,
-      required: true,
+      required: true
     }
   },
-  data () {
+  data() {
     return {
       display: false,
       properties: [
-        {key: 'processingState', title: 'Processing State'},
-        {key: 'location', title: 'Location'},
-        {key: 'relativeToDusk', title: 'Relative to Dusk'},
-        {key: 'relativeToDawn', title: 'Relative to Dawn'},
-        {key: 'batteryLevel', title: 'Battery Level'},
-        {key: 'batteryCharging', title: 'Battery Charging'},
-        {key: 'airplaneModeOn', title: 'Airplane Mode'},
-        {key: 'version', title: 'Version'},
-        {key: 'additionalMetadata', title: 'Additional Metadata'}
+        { key: "processingState", title: "Processing State" },
+        { key: "location", title: "Location" },
+        { key: "relativeToDusk", title: "Relative to Dusk" },
+        { key: "relativeToDawn", title: "Relative to Dawn" },
+        { key: "batteryLevel", title: "Battery Level" },
+        { key: "batteryCharging", title: "Battery Charging" },
+        { key: "airplaneModeOn", title: "Airplane Mode" },
+        { key: "version", title: "Version" },
+        { key: "additionalMetadata", title: "Additional Metadata" }
       ],
       metaFields: [
         {
-          key: 'key',
-          label: 'Additional Metadata'
+          key: "key",
+          label: "Additional Metadata"
         },
         {
-          key: 'data',
-          label: ''
+          key: "data",
+          label: ""
         }
       ]
     };
   },
   computed: {
-    parseLocation: function () {
-      if (this.recording.location.type === 'Point') {
-        return `Lat: ${this.recording.location.coordinates[0].toFixed(2)}, Long: ${this.recording.location.coordinates[1].toFixed(2)}`;
+    parseLocation: function() {
+      if (this.recording.location.type === "Point") {
+        return `Lat: ${this.recording.location.coordinates[0].toFixed(
+          2
+        )}, Long: ${this.recording.location.coordinates[1].toFixed(2)}`;
       } else {
         return this.recording.location;
       }
     },
-    metaItems: function () {
-      const data = this.recording['additionalMetadata'];
+    metaItems: function() {
+      const data = this.recording["additionalMetadata"];
       const items = [];
       if (!data) {
         return items;
@@ -143,27 +145,26 @@ export default {
       }
       return items;
     }
-  },
+  }
 };
 </script>
 
 <style scoped>
-  #technical-details {
-    padding-top: 15px;
-  }
+#technical-details {
+  padding-top: 15px;
+}
 
-  .user-prop,
-  .prop{
-    padding-left: 15px;
-  }
+.user-prop,
+.prop {
+  padding-left: 15px;
+}
 
-  .user-prop,
-  .prop{
-    margin-bottom: .4rem;
-  }
+.user-prop,
+.prop {
+  margin-bottom: 0.4rem;
+}
 
-  .user-prop:last-child {
-    margin-bottom: 1.5rem;
-  }
-
+.user-prop:last-child {
+  margin-bottom: 1.5rem;
+}
 </style>

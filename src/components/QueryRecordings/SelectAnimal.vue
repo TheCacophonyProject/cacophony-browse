@@ -14,11 +14,10 @@
   </b-form-group>
 </template>
 <script>
-
-import DefaultLabels from '../../const.js';
+import DefaultLabels from "../../const.js";
 
 export default {
-  name: 'AnimalSelect',
+  name: "AnimalSelect",
   props: {
     value: {
       type: Array,
@@ -33,13 +32,13 @@ export default {
       default: false
     }
   },
-  data () {
+  data() {
     return {
       options: DefaultLabels.searchLabels()
     };
   },
   computed: {
-    placeholder: function () {
+    placeholder: function() {
       if (this.value.length > 0) {
         return "add more animals";
       } else if (this.canHaveSubTags) {
@@ -48,16 +47,16 @@ export default {
         return "";
       }
     },
-    tooltipTitle: function () {
+    tooltipTitle: function() {
       if (this.disabled) {
-        return 'Disabled when recording type includes audio';
+        return "Disabled when recording type includes audio";
       } else {
         return "";
       }
     }
-  },
+  }
 };
-
 </script>
 
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style src="vue-multiselect/dist/vue-multiselect.min.css">
+</style>

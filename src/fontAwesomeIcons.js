@@ -1,5 +1,5 @@
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faAngleDoubleLeft,
   faAngleDoubleRight,
@@ -33,8 +33,8 @@ import {
   faVideo,
   faWrench,
   faUser,
-  faUserCog,
-} from '@fortawesome/free-solid-svg-icons';
+  faUserCog
+} from "@fortawesome/free-solid-svg-icons";
 import {
   faCalendar,
   faCaretSquareDown,
@@ -46,8 +46,8 @@ import {
   faFileAudio,
   faFileVideo,
   faUserCircle,
-  faWindowClose,
-} from '@fortawesome/free-regular-svg-icons';
+  faWindowClose
+} from "@fortawesome/free-regular-svg-icons";
 
 // https://www.npmjs.com/package/@fortawesome/vue-fontawesome
 library.add(
@@ -94,7 +94,7 @@ library.add(
   faWindowClose,
   faWrench,
   faUser,
-  faUserCog,
+  faUserCog
 );
 
 export default FontAwesomeIcon;

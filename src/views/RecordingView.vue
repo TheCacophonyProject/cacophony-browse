@@ -1,13 +1,10 @@
 <template>
-  <b-container
-    v-if="recording"
-  >
+  <b-container v-if="recording">
     <b-row>
-      <b-col
-        cols="12"
-        lg="8"
-        class="recording-details"
-      >
+      <b-col 
+        cols="12" 
+        lg="8" 
+        class="recording-details">
         <h4 class="recording-title">
           <font-awesome-icon
             icon="microchip"
@@ -23,7 +20,9 @@
           :show="showAlert"
           :variant="alertVariant"
           dismissible
-          @dismissed="showAlert=false">{{ alertMessage }}</b-alert>
+          @dismissed="showAlert = false"
+        >{{ alertMessage }}</b-alert
+        >
       </b-col>
     </b-row>
 
@@ -31,7 +30,8 @@
       <AudioRecording
         :recording="recording"
         :audio-url="fileSource"
-        :audio-raw-url="rawSource"/>
+        :audio-raw-url="rawSource"
+      />
     </template>
 
     <template v-if="isVideo">
@@ -42,26 +42,25 @@
         :video-raw-url="rawSource"
       />
     </template>
-
   </b-container>
   <b-container v-else>Loading...</b-container>
 </template>
 
 <script>
-import config from '../config';
-import {mapState} from 'vuex';
-import VideoRecording from '../components/Video/VideoRecording.vue';
-import AudioRecording from '../components/Video/AudioRecording.vue';
+import config from "../config";
+import { mapState } from "vuex";
+import VideoRecording from "../components/Video/VideoRecording.vue";
+import AudioRecording from "../components/Video/AudioRecording.vue";
 
 export default {
-  name: 'RecordingView',
-  components: {VideoRecording, AudioRecording},
+  name: "RecordingView",
+  components: { VideoRecording, AudioRecording },
   props: {},
-  data () {
+  data() {
     return {
       showAlert: false,
       alertMessage: "",
-      alertVariant: "",
+      alertVariant: ""
     };
   },
   computed: {
@@ -70,7 +69,7 @@ export default {
       tracks: state => state.Video.tracks,
       isVideo: state => state.Video.recording.type == "thermalRaw",
       isAudio: state => state.Video.recording.type == "audio",
-      date: (state) => {
+      date: state => {
         if (state.Video.recording.recordingDateTime) {
           const date = new Date(state.Video.recording.recordingDateTime);
           return date.toDateString();
@@ -90,44 +89,48 @@ export default {
         }
         return "";
       },
-      fileSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
-      rawSource: state => `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
-    }),
+      fileSource: state =>
+        `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
+      rawSource: state =>
+        `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`
+    })
   },
   created: async function() {
-    await this.$store.dispatch('Video/GET_RECORDING', this.$route.params.id);
-  },
+    await this.$store.dispatch("Video/GET_RECORDING", this.$route.params.id);
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-  @import "~bootstrap/scss/functions";
-  @import "~bootstrap/scss/variables";
-  @import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
 
+.recording-details {
+  h4,
+  h5 {
+    display: inline-block;
+  }
+  h4 {
+    margin-right: 0.2em;
+  }
+}
+
+@include media-breakpoint-down(md) {
   .recording-details {
-    h4, h5 {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  .recording-details {
+    padding-top: 1rem;
+    padding-bottom: 0.9rem;
+    h4,
+    h5 {
       display: inline-block;
     }
-    h4 {
-      margin-right: 0.2em;
-    }
   }
-
-  @include media-breakpoint-down(md) {
-    .recording-details {
-      padding-top: 0.6rem;
-      padding-bottom: 0.6rem;
-    }
-  }
-
-  @include media-breakpoint-up(md) {
-    .recording-details {
-      padding-top: 1rem;
-      padding-bottom: 0.9rem;
-      h4, h5 {
-        display: inline-block;
-      }
-    }
-  }
+}
 </style>

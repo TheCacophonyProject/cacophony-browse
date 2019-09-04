@@ -62,55 +62,55 @@
 </template>
 
 <script>
-import {mapState} from 'vuex';
-import PrevNext from './PrevNext.vue';
-import RecordingProperties from './RecordingProperties.vue';
-import BasicTags from '../Audio/BasicTags.vue';
-import CustomTags from '../Audio/CustomTags.vue';
-import TagList from '../Audio/TagList.vue';
+import { mapState } from "vuex";
+import PrevNext from "./PrevNext.vue";
+import RecordingProperties from "./RecordingProperties.vue";
+import BasicTags from "../Audio/BasicTags.vue";
+import CustomTags from "../Audio/CustomTags.vue";
+import TagList from "../Audio/TagList.vue";
 //import config from '../../config.js';
 
 export default {
-  name: 'AudioRecording',
-  components: {CustomTags, BasicTags, PrevNext, RecordingProperties, TagList},
+  name: "AudioRecording",
+  components: { CustomTags, BasicTags, PrevNext, RecordingProperties, TagList },
   props: {
     recording: {
       type: Object,
-      required: true,
+      required: true
     },
     audioUrl: {
       type: String,
-      required: true,
+      required: true
     },
     audioRawUrl: {
       type: String,
-      required: true,
-    },
+      required: true
+    }
   },
   computed: {
     ...mapState({
       tagItems() {
-        const result = this.$store.getters['Video/getTagItems'];
+        const result = this.$store.getters["Video/getTagItems"];
         return result;
-      },
-    }),
+      }
+    })
   },
-  methods:{
-    addAudioTag: function(tag){
+  methods: {
+    addAudioTag: function(tag) {
       const id = Number(this.$route.params.id);
-      if (this.$refs.player.currentTime == this.$refs.player.duration){
+      if (this.$refs.player.currentTime == this.$refs.player.duration) {
         tag.startTime = 0;
       } else {
         tag.startTime = this.$refs.player.currentTime.toFixed(2);
       }
-      
+
       // eslint-disable-next-line no-console
       // console.log(config.tagVersion);
       // next line generates internal server error on test api - menno to follow up
       // tag.version = config.tagVersion;
 
-      this.$store.dispatch('Video/ADD_TAG', { tag, id });
-      
+      this.$store.dispatch("Video/ADD_TAG", { tag, id });
+
       // https://api-test.cacophony.org.nz/api/v1/tags
       // tag format
       // tagId integer OPTIONAL on get or post operation, COMPULSORY for delete, if tag id given for get or post then operation is an UPDATE
@@ -119,39 +119,38 @@ export default {
       // tag: string - known values - "unknown", "nothing of interest", "bird", "human", custom tag free text COMPULSORY maxlength 64
       // startTime - integer (0 - 60) seconds since start of audio clip COMPULSORY
       // duration - integer (0 - 60) seconds duration of tag, OPTIONAL
-      // confidence - real 0.0 - 1.0 OPTIONAL default is 0.5 
+      // confidence - real 0.0 - 1.0 OPTIONAL default is 0.5
       // taggerId (authenticated user id) COMPULSORY authenticated by backend
       // automatic -Boolean	"true" if tag is machine generated, "false" if human COMPULSORY
       // schemaVersion - integer 0000 MMnn MAJORminor - Future proofing for schema changes Starts with 0100 (v1.00) COMPULSORY
-      
     },
     deleteTag(tagId) {
-      this.$store.dispatch('Video/DELETE_TAG', tagId);
+      this.$store.dispatch("Video/DELETE_TAG", tagId);
     },
-    closeTab(){
+    closeTab() {
       window.close();
     },
-    replay(time){            
+    replay(time) {
       this.$refs.player.currentTime = time;
       this.$refs.player.play();
     },
-    volumeLoudest(){
+    volumeLoudest() {
       this.$refs.player.volume = 1.0;
     },
-    volumeLouder(){      
-      if ((this.$refs.player.volume + 0.1) <= 1.0) {
+    volumeLouder() {
+      if (this.$refs.player.volume + 0.1 <= 1.0) {
         this.$refs.player.volume += 0.1;
       }
     },
-    volumeDefault(){      
+    volumeDefault() {
       this.$refs.player.volume = 0.75;
     },
-    volumeQuieter(){
-      if ((this.$refs.player.volume - 0.1) >= 0) {
+    volumeQuieter() {
+      if (this.$refs.player.volume - 0.1 >= 0) {
         this.$refs.player.volume -= 0.1;
       }
     },
-    volumeQuietest(){
+    volumeQuietest() {
       this.$refs.player.volume = 0.25;
     }
   }
@@ -159,10 +158,11 @@ export default {
 </script>
 
 <style scoped>
-  .tag-buttons, .img-buttons {
-    padding: 0 5px;
-  }
-  .db{
-    border: 0px;
-  }
+.tag-buttons,
+.img-buttons {
+  padding: 0 5px;
+}
+.db {
+  border: 0px;
+}
 </style>

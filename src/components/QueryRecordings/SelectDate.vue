@@ -10,9 +10,8 @@
 </template>
 
 <script>
-
 export default {
-  name: 'SelectDate',
+  name: "SelectDate",
   props: {
     title: {
       type: String,

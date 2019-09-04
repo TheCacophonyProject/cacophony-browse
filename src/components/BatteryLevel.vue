@@ -15,17 +15,17 @@ export default {
     }
   },
   computed: {
-    icon: function () {
+    icon: function() {
       if (this.batteryLevel < 10) {
-        return 'battery-empty';
+        return "battery-empty";
       } else if (this.batteryLevel < 37.5) {
-        return 'battery-quarter';
+        return "battery-quarter";
       } else if (this.batteryLevel < 62.5) {
-        return 'battery-half';
+        return "battery-half";
       } else if (this.batteryLevel < 90) {
-        return 'battery-three-quarters';
+        return "battery-three-quarters";
       } else if (this.batteryLevel <= 100) {
-        return 'battery-full';
+        return "battery-full";
       } else {
         return null;
       }
@@ -35,9 +35,9 @@ export default {
 </script>
 
 <style scoped>
-  .fa-spin {
-    color: #f5f5f5;
-    margin: 1rem auto;
-    display: flex;
-  }
+.fa-spin {
+  color: #f5f5f5;
+  margin: 1rem auto;
+  display: flex;
+}
 </style>

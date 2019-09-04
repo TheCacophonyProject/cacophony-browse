@@ -59,15 +59,14 @@
 </template>
 
 <script>
-
-import {mapState} from 'vuex';
-import HomeGroups from '../components/HomeGroups.vue';
-import HomeUser from '../components/HomeUser.vue';
-import Hero from '../components/Hero.vue';
-import Spinner from '../components/Spinner.vue';
+import { mapState } from "vuex";
+import HomeGroups from "../components/HomeGroups.vue";
+import HomeUser from "../components/HomeUser.vue";
+import Hero from "../components/Hero.vue";
+import Spinner from "../components/Spinner.vue";
 
 export default {
-  name: 'HomeView',
+  name: "HomeView",
   components: {
     Hero,
     HomeGroups,
@@ -82,38 +81,37 @@ export default {
   computed: {
     ...mapState({
       username: state => state.User.userData.username,
-      groups: state => state.Groups.groups,
+      groups: state => state.Groups.groups
     }),
-    hasGroups () {
+    hasGroups() {
       return this.groups.length > 0;
     }
   },
-  created: function () {
+  created: function() {
     this.fetchGroups().then(() => {
       this.hasLoaded = true;
     });
   },
   methods: {
-    fetchGroups: function () {
-      return this.$store.dispatch('Groups/GET_GROUPS');
+    fetchGroups: function() {
+      return this.$store.dispatch("Groups/GET_GROUPS");
     }
   }
 };
 </script>
 
 <style scoped>
+.card-container {
+  padding-bottom: 2em;
+  position: relative;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Large screens */
+@media only screen and (min-width: 768px) {
   .card-container {
-    padding-bottom: 2em;
-    position: relative;
-    padding-left: 0;
-    padding-right: 0;
+    top: -15vh;
   }
-
-  /* Large screens */
-  @media only screen and (min-width: 768px) {
-    .card-container {
-      top: -15vh;
-    }
-  }
-
+}
 </style>

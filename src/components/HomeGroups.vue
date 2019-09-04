@@ -19,21 +19,19 @@
 </template>
 
 <script>
-
-import HomeGroupItem from './HomeGroupItem.vue';
-import { mapState } from 'vuex';
-import Vue2Filters from 'vue2-filters';
+import HomeGroupItem from "./HomeGroupItem.vue";
+import { mapState } from "vuex";
+import Vue2Filters from "vue2-filters";
 
 export default {
   name: "HomeGroups",
   components: { HomeGroupItem },
   mixins: [Vue2Filters.mixin],
   computed: mapState({
-    groups: state => state.Groups.groups,
+    groups: state => state.Groups.groups
   })
 };
 </script>
 
 <style scoped>
-
 </style>

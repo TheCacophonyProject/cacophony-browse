@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import api from '../../api';
-import store from '../index';
+import api from "../../api";
+import store from "../index";
 
 const state = {
   downloadFileJWT: null,
@@ -26,7 +26,7 @@ const getters = {
   getTagItems(state) {
     const tags = state.recording.Tags;
     const tagItems = [];
-    tags.map((tag) => {
+    tags.map(tag => {
       const tagItem = {};
       if (tag.what) {
         tagItem.what = tag.what;
@@ -39,9 +39,9 @@ const getters = {
       }
       if (tag.automatic) {
         tagItem.who = "Cacophony AI";
-        tagItem['_rowVariant'] = 'warning';
+        tagItem["_rowVariant"] = "warning";
       } else {
-        tagItem.who = tag.tagger ? tag.tagger.username : '-';
+        tagItem.who = tag.tagger ? tag.tagger.username : "-";
       }
       tagItem.when = new Date(tag.createdAt).toLocaleString();
       tagItem.tag = tag;
@@ -49,17 +49,17 @@ const getters = {
     });
     return tagItems;
   },
-  getAudioTagItems(state){
+  getAudioTagItems(state) {
     const tags = state.recording.Tags;
     const tagItems = [];
-    tags.map((tag) => {
+    tags.map(tag => {
       const tagItem = {};
       if (tag.event == "AUDIO") {
         // check for optional fields
-        if (tag.tagId){
+        if (tag.tagId) {
           tagItem.id = tag.id;
         }
-        if (tag.recordingId){
+        if (tag.recordingId) {
           tagItem.recordingId = tag.recordingId;
         }
         // compulsory fields
@@ -74,23 +74,25 @@ const getters = {
       }
     });
     return tagItems;
-  },
+  }
 };
 
 const actions = {
-
-  async QUERY_RECORDING(undefined, {params, direction, skipMessage}) {
-    const {result, success} = await api.recording.query(params);
+  async QUERY_RECORDING(undefined, { params, direction, skipMessage }) {
+    const { result, success } = await api.recording.query(params);
     if (!success || !result.rows || result.rows.length == 0) {
       if (!skipMessage) {
-        store.dispatch('Messaging/WARN', `No ${direction} recording for this device.`);
+        store.dispatch(
+          "Messaging/WARN",
+          `No ${direction} recording for this device.`
+        );
       }
       return false;
     }
-    return store.dispatch('Video/GET_RECORDING', result.rows[0].id);
+    return store.dispatch("Video/GET_RECORDING", result.rows[0].id);
   },
 
-  async GET_RECORDING({commit}, recordingId) {
+  async GET_RECORDING({ commit }, recordingId) {
     const recording = getRecording(commit, recordingId);
     const tracks = getTracks(commit, recordingId);
 
@@ -100,21 +102,21 @@ const actions = {
     return recording && tracks;
   },
 
-  async DELETE_TAG({commit}, tag) {
+  async DELETE_TAG({ commit }, tag) {
     const { success } = await api.tag.deleteTag(tag);
     if (success) {
-      commit('deleteTag', tag);
+      commit("deleteTag", tag);
     }
   },
 
-  async UPDATE_COMMENT({commit}, { comment, recordingId }) {
+  async UPDATE_COMMENT({ commit }, { comment, recordingId }) {
     const { success } = await api.recording.comment(comment, recordingId);
     if (success) {
-      commit('updateComment', comment);
+      commit("updateComment", comment);
     }
   },
 
-  async ADD_TAG({commit}, {tag, id}) {
+  async ADD_TAG({ commit }, { tag, id }) {
     const { success, result } = await api.tag.addTag(tag, id);
     if (!success) {
       return;
@@ -123,17 +125,23 @@ const actions = {
     // Add an initial tag to update the UI more quickly.
     tag.id = result.tagId;
     tag.createdAt = new Date();
-    commit('addTag', tag);
+    commit("addTag", tag);
 
     // Resync all recording tags from the API.
-    const { success: syncSuccess, result: syncResult }  = await api.recording.id(id);
+    const { success: syncSuccess, result: syncResult } = await api.recording.id(
+      id
+    );
     if (syncSuccess) {
-      commit('setTags', syncResult.recording.Tags);
+      commit("setTags", syncResult.recording.Tags);
     }
   },
 
-  async ADD_TRACK_TAG({commit}, {tag, recordingId, trackId}) {
-    const { success, result } = await api.recording.addTrackTag(tag, recordingId, trackId);
+  async ADD_TRACK_TAG({ commit }, { tag, recordingId, trackId }) {
+    const { success, result } = await api.recording.addTrackTag(
+      tag,
+      recordingId,
+      trackId
+    );
     if (!success) {
       return;
     }
@@ -142,39 +150,41 @@ const actions = {
     tag.id = result.trackTagId;
     tag.TrackId = trackId;
     tag.createdAt = new Date();
-    commit('addTrackTag', tag);
+    commit("addTrackTag", tag);
 
     // Resync all tags for the track from the API.
-    const { success: syncSuccess, result: syncResult } = await api.recording.tracks(recordingId);
+    const {
+      success: syncSuccess,
+      result: syncResult
+    } = await api.recording.tracks(recordingId);
     if (!syncSuccess) {
       return;
     }
     for (const track of syncResult.tracks) {
       if (track.id == trackId) {
-        commit('setTrackTags', track);
+        commit("setTrackTags", track);
       }
     }
   },
 
-  async DELETE_TRACK_TAG({commit}, {tag, recordingId}) {
+  async DELETE_TRACK_TAG({ commit }, { tag, recordingId }) {
     const { success } = await api.recording.deleteTrackTag(tag, recordingId);
     if (!success) {
       return;
     }
-    return commit('deleteTrackTag', tag);
-  },
+    return commit("deleteTrackTag", tag);
+  }
 };
-
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
-  receiveRecording(state, {recording, downloadFileJWT, downloadRawJWT}) {
+  receiveRecording(state, { recording, downloadFileJWT, downloadRawJWT }) {
     state.recording = recording;
     state.downloadFileJWT = downloadFileJWT;
     state.downloadRawJWT = downloadRawJWT;
   },
 
-  receiveTracks(state, {tracks}) {
+  receiveTracks(state, { tracks }) {
     state.tracks = tracks;
   },
 
@@ -212,19 +222,17 @@ const mutations = {
   }
 };
 
-
 const getRecording = async function(commit, recordingId) {
-  const {result: recording} = await api.recording.id(recordingId);
-  commit('receiveRecording', recording);
+  const { result: recording } = await api.recording.id(recordingId);
+  commit("receiveRecording", recording);
   return recording.success;
 };
 
 const getTracks = async function(commit, recordingId) {
-  const {result: tracks} = await api.recording.tracks(recordingId);
-  commit('receiveTracks', tracks);
+  const { result: tracks } = await api.recording.tracks(recordingId);
+  commit("receiveTracks", tracks);
   return tracks.success;
 };
-
 
 export default {
   namespaced: true,

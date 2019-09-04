@@ -56,15 +56,18 @@
 
 <script>
 /* global require */
-import TrackData from './TrackData.vue';
-import QuickTagTrack from './QuickTagTrack.vue';
-import TrackTags from './TrackTags.vue';
-import AddCustomTrackTag from './AddCustomTrackTag.vue';
+import TrackData from "./TrackData.vue";
+import QuickTagTrack from "./QuickTagTrack.vue";
+import TrackTags from "./TrackTags.vue";
+import AddCustomTrackTag from "./AddCustomTrackTag.vue";
 
 export default {
-  name: 'Track',
+  name: "Track",
   components: {
-    TrackData, QuickTagTrack, TrackTags, AddCustomTrackTag,
+    TrackData,
+    QuickTagTrack,
+    TrackTags,
+    AddCustomTrackTag
   },
   props: {
     track: {
@@ -77,19 +80,19 @@ export default {
     },
     index: {
       type: Number,
-      required: true,
+      required: true
     },
     numTracks: {
       type: Number,
-      required: true,
+      required: true
     },
     show: {
       type: Boolean,
-      default: false,
+      default: false
     },
     colour: {
       type: String,
-      default: 'yellow',
+      default: "yellow"
     }
   },
   data() {
@@ -100,10 +103,9 @@ export default {
       tag: null
     };
   },
-  computed: {
-  },
+  computed: {},
   methods: {
-    trackClass: function () {
+    trackClass: function() {
       const selected = "selected-" + this.show;
       if ("tag" in this.track.data) {
         return selected;
@@ -111,16 +113,16 @@ export default {
         return selected + " ignored";
       }
     },
-    trackImage: function () {
+    trackImage: function() {
       // Struggling to get images to show correctly so using work-around
       // suggested at bottom of this page.
       // TODO implement alternative that doesn't use 'require' in this manner
       // https://bootstrap-vue.js.org/docs/reference/images/
       let image = null;
       if ("tag" in this.track.data) {
-        image = this.track.data.tag + '.png';
+        image = this.track.data.tag + ".png";
         try {
-          const link = require('../../assets/video/' + image);
+          const link = require("../../assets/video/" + image);
           return `<img class="track-image" src="${link}" />`;
         } catch (e) {
           return `<img class="track-image"/>`;
@@ -137,153 +139,153 @@ export default {
     addTag(tag) {
       const recordingId = this.recordingId;
       const trackId = this.track.id;
-      this.$store.dispatch('Video/ADD_TRACK_TAG', { tag, recordingId, trackId });
+      this.$store.dispatch("Video/ADD_TRACK_TAG", {
+        tag,
+        recordingId,
+        trackId
+      });
     },
     deleteTag(tag) {
       const recordingId = this.recordingId;
-      this.$store.dispatch('Video/DELETE_TRACK_TAG', { tag, recordingId});
+      this.$store.dispatch("Video/DELETE_TRACK_TAG", { tag, recordingId });
     },
     trackSelected(increment) {
       const index = this.index + increment;
       if (0 <= index && index < this.numTracks) {
-        this.$emit('trackSelected', this.index + increment);
+        this.$emit("trackSelected", this.index + increment);
       }
     },
     headerClass() {
       return "selected-" + this.show;
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-  @import "~bootstrap/scss/functions";
-  @import "~bootstrap/scss/variables";
-  @import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
 
-  .card {
-    &.selected-true {
-      h5 {
-        font-weight: 600;
-      }
-    }
-    &.selected-false {
-      h5 {
-        color: $gray-700;
-      }
+.card {
+  &.selected-true {
+    h5 {
+      font-weight: 600;
     }
   }
-
-  .card-header,
-  .card-body {
-    padding-left: 1em;
-    padding-right: 1em;
+  &.selected-false {
+    h5 {
+      color: $gray-700;
+    }
   }
+}
 
-  .card-header {
-    display: flex;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-  }
+.card-header,
+.card-body {
+  padding-left: 1em;
+  padding-right: 1em;
+}
 
-  .track-title {
-    margin-bottom: 0;
-    margin-top: 0.1em;
-    flex: 1 1 auto;
-    cursor: pointer;
-  }
+.card-header {
+  display: flex;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
 
-  .track-time {
-    margin-left: auto;
-    font-size: 0.7em;
-    text-align: right;
-  }
+.track-title {
+  margin-bottom: 0;
+  margin-top: 0.1em;
+  flex: 1 1 auto;
+  cursor: pointer;
+}
 
-  .track-title,
-  .track-time {
-    cursor: pointer;
-  }
+.track-time {
+  margin-left: auto;
+  font-size: 0.7em;
+  text-align: right;
+}
 
-  .track-image {
-    display: inline-block;
-    vertical-align: bottom;
-    width: 20px;
-    height: 20px;
-  }
+.track-title,
+.track-time {
+  cursor: pointer;
+}
 
-  .prev-track,
-  .next-track {
-    color: grey;
-  }
+.track-image {
+  display: inline-block;
+  vertical-align: bottom;
+  width: 20px;
+  height: 20px;
+}
 
-  .delta {
-    color: gray;
-  }
+.prev-track,
+.next-track {
+  color: grey;
+}
 
-  /*.ignored {
+.delta {
+  color: gray;
+}
+
+/*.ignored {
     color: gray;
   }*/
 
-  @include media-breakpoint-down(md) {
-
-    .accordion > .card:first-of-type,
-    .accordion > .card:not(:first-of-type):not(:last-of-type) {
-      @include border-bottom-left-radius($border-radius);
-      @include border-bottom-right-radius($border-radius);
-      border-bottom: 1px solid $border-color;
-    }
-
-    .selected-false {
-      display: none;
-    }
-
-    .prev-track {
-      margin-left: -0.5em;
-    }
-
-    .next-track {
-      margin-right: -0.5em;
-    }
-
+@include media-breakpoint-down(md) {
+  .accordion > .card:first-of-type,
+  .accordion > .card:not(:first-of-type):not(:last-of-type) {
+    @include border-bottom-left-radius($border-radius);
+    @include border-bottom-right-radius($border-radius);
+    border-bottom: 1px solid $border-color;
   }
 
-  @include media-breakpoint-up(lg) {
-    .prev-track,
-    .next-track,
-    .out-of-tracks {
-      display: none;
-    }
-
-    .accordion > .card:last-of-type {
-      @include border-bottom-left-radius($border-radius);
-      @include border-bottom-right-radius($border-radius);
-      border-bottom: 1px solid $border-color;
-    }
+  .selected-false {
+    display: none;
   }
 
-  // Set a height for container of the track information.
-  // TODO: Leave for now, figure out a better way of doing it with JS
-
-  // not ideal
-  $videoPlayerHeightXl: 585px;
-  $videoPlayerHeightLg: 495px;
-
-  @include media-breakpoint-up(lg) {
-    .card {
-      max-height: $videoPlayerHeightLg;
-      overflow: hidden;
-    }
-
-    .card-body {
-      overflow: auto;
-    }
+  .prev-track {
+    margin-left: -0.5em;
   }
 
-  @include media-breakpoint-up(xl) {
-    .card {
-      max-height: $videoPlayerHeightXl;
-    }
+  .next-track {
+    margin-right: -0.5em;
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  .prev-track,
+  .next-track,
+  .out-of-tracks {
+    display: none;
   }
 
+  .accordion > .card:last-of-type {
+    @include border-bottom-left-radius($border-radius);
+    @include border-bottom-right-radius($border-radius);
+    border-bottom: 1px solid $border-color;
+  }
+}
+
+// Set a height for container of the track information.
+// TODO: Leave for now, figure out a better way of doing it with JS
+
+// not ideal
+$videoPlayerHeightXl: 585px;
+$videoPlayerHeightLg: 495px;
+
+@include media-breakpoint-up(lg) {
+  .card {
+    max-height: $videoPlayerHeightLg;
+    overflow: hidden;
+  }
+
+  .card-body {
+    overflow: auto;
+  }
+}
+
+@include media-breakpoint-up(xl) {
+  .card {
+    max-height: $videoPlayerHeightXl;
+  }
+}
 </style>
-

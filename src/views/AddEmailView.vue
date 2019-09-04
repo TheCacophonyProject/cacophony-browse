@@ -34,19 +34,18 @@
 </template>
 
 <script>
-
-import Hero from '../components/Hero.vue';
+import Hero from "../components/Hero.vue";
 
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: 'AddEmailView',
+  name: "AddEmailView",
   components: { Hero },
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data() {
     return {
-      email: '',
+      email: "",
       errorMessage: null
     };
   },
@@ -59,12 +58,13 @@ export default {
         this.errorMessage = "Email required";
         return;
       }
-      var result = await this.$store.dispatch('User/UPDATE', { email: this.email });
+      var result = await this.$store.dispatch("User/UPDATE", {
+        email: this.email
+      });
       if (result) {
-        this.$router.push('/');
+        this.$router.push("/");
       }
     }
   }
 };
-
 </script>
