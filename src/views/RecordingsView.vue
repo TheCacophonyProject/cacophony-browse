@@ -433,7 +433,7 @@ export default {
           where.dateRange = 'all';
         } else if (query.where.dateRange.hasOwnProperty('relativeDateRange')) {
           const padLeft = (str, char, len) => {
-            while (str.length < len) {
+            while (str.toString().length < len) {
               str = `${char}${str}`;
             }
             return str;
