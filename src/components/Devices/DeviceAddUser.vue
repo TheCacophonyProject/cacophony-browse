@@ -39,8 +39,8 @@
 </template>
 
 <script>
-import {required} from 'vuelidate/lib/validators';
-import {mapState} from 'vuex';
+import { required } from "vuelidate/lib/validators";
+import { mapState } from "vuex";
 
 export default {
   name: "DeviceAddUser",
@@ -76,14 +76,13 @@ export default {
       event.preventDefault();
 
       if (!this.$v.$invalid) {
-
         const params = {
           username: this.$v.form.username.$model,
           device: this.device,
           admin: this.$v.form.isAdmin.$model
         };
 
-        await this.$store.dispatch('Devices/ADD_USER', params);
+        await this.$store.dispatch("Devices/ADD_USER", params);
       }
     }
   }
@@ -91,45 +90,45 @@ export default {
 </script>
 
 <style scoped>
+.add-user-form {
+  flex-wrap: wrap;
+}
+
+.input {
+  width: 100%;
+  margin-right: 0;
+  margin-bottom: 1rem;
+}
+
+.options {
+  flex-direction: row;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+h3 {
+  font-size: large;
+  font-weight: bold;
+}
+
+@media only screen and (min-width: 576px) {
   .add-user-form {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    justify-content: space-around;
   }
 
   .input {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 1rem;
+    width: auto;
+    margin-right: 1rem;
+    margin-bottom: 0;
   }
 
   .options {
     flex-direction: row;
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    width: auto;
   }
-
-  h3 {
-    font-size: large;
-    font-weight: bold;
-  }
-
-  @media only screen and (min-width: 576px) {
-    .add-user-form {
-      flex-wrap: nowrap;
-      justify-content: space-around;
-    }
-
-    .input {
-      width: auto;
-      margin-right: 1rem;
-      margin-bottom: 0;
-    }
-
-    .options {
-      flex-direction: row;
-      display: flex;
-      justify-content: space-between;
-      width: auto;
-    }
-  }
+}
 </style>

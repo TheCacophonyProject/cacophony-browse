@@ -9,30 +9,24 @@
 </template>
 
 <script>
-
 export default {
-  name: 'ScaleChoice',
+  name: "ScaleChoice",
   props: {
     value: {
       type: Boolean,
       required: true
-    },
+    }
   },
-  data: function () {
+  data: function() {
     return {
-      types: [
-        {text: 'Log', value: false},
-        {text: 'Log', value: true},
-      ]
+      types: [{ text: "Log", value: false }, { text: "Log", value: true }]
     };
   },
-  methods: {
-  }
+  methods: {}
 };
 </script>
 
 <style scoped>
-
 b-btn {
   margin: 20px;
 }

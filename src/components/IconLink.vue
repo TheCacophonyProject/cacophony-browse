@@ -20,31 +20,31 @@ export default {
     },
     link: {
       type: Object,
-      default: null,
+      default: null
     },
     colour: {
       type: String,
-      default: 'green',
+      default: "green"
     },
     position: {
       type: String,
-      default: '',
+      default: ""
     }
   }
 };
 </script>
 
 <style scoped>
-  .right {
-    display: flex;
-    margin-left: auto;
-  }
+.right {
+  display: flex;
+  margin-left: auto;
+}
 
-  .green {
-    color: #28a745;
-  }
+.green {
+  color: #28a745;
+}
 
-  .red {
-    color: darkred;
-  }
+.red {
+  color: darkred;
+}
 </style>

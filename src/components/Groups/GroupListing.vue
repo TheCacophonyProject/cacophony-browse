@@ -34,42 +34,40 @@
 </template>
 
 <script>
-
-import {mapState} from 'vuex';
-import Spinner from '../Spinner.vue';
-import IconLink from '../IconLink.vue';
+import { mapState } from "vuex";
+import Spinner from "../Spinner.vue";
+import IconLink from "../IconLink.vue";
 
 export default {
   name: "GroupListing",
-  components: {Spinner, IconLink},
+  components: { Spinner, IconLink },
   computed: mapState({
     groups: state => state.Groups.groups,
     fetched: state => state.Groups.fetched,
-    orderedGroups: function () {
-      return this.groups.sort((a, b) => a.groupname.localeCompare( b.groupname) );
+    orderedGroups: function() {
+      return this.groups.sort((a, b) => a.groupname.localeCompare(b.groupname));
     }
   })
 };
 </script>
 
 <style scoped>
+h4 {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+}
+.group {
+  padding: 0.75rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+}
 
-  h4 {
-    margin-top: 0.75rem;
-    font-size: 1rem;
-  }
-  .group {
-    padding: 0.75rem;
-    border-top: 1px solid #dee2e6;
-    display: flex;
-    flex-direction: column;
-  }
+.header {
+  display: flex;
+}
 
-  .header {
-    display: flex;
-  }
-
-  p {
-    display: flex;
-  }
+p {
+  display: flex;
+}
 </style>

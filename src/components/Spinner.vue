@@ -20,9 +20,9 @@ export default {
 </script>
 
 <style scoped>
-  .fa-spin {
-    color: #f5f5f5;
-    margin: 1rem auto;
-    display: flex;
-  }
+.fa-spin {
+  color: #f5f5f5;
+  margin: 1rem auto;
+  display: flex;
+}
 </style>

@@ -1,21 +1,21 @@
-import api from '../../api/index';
+import api from "../../api/index";
 
 const state = {
   isLoggingIn: false,
   didInvalidate: false,
-  JWT: localStorage.getItem('JWT'),
+  JWT: localStorage.getItem("JWT"),
   userData: {
-    'username': localStorage.getItem('username'),
-    'email': localStorage.getItem('email'),
-    'globalPermission': getGlobalPermission(),
+    username: localStorage.getItem("username"),
+    email: localStorage.getItem("email"),
+    globalPermission: getGlobalPermission()
   },
   errorMessage: undefined,
-  recordingTypePref: localStorage.getItem('recordingTypePref') || 'both',
-  analysisDatePref: parseInt(localStorage.getItem('analysisDatePref')) || 7
+  recordingTypePref: localStorage.getItem("recordingTypePref") || "both",
+  analysisDatePref: parseInt(localStorage.getItem("analysisDatePref")) || 7
 };
 
 function getGlobalPermission() {
-  var globalPermission = localStorage.getItem('globalPermission');
+  var globalPermission = localStorage.getItem("globalPermission");
   if (["write", "read", "off"].includes(globalPermission)) {
     return globalPermission;
   }
@@ -27,7 +27,7 @@ function getGlobalPermission() {
 const getters = {
   isLoggedIn: state => !!state.JWT,
   getToken: state => state.JWT,
-  hasEmail: state => !!state.userData.email && state.userData.email != 'null',
+  hasEmail: state => !!state.userData.email && state.userData.email != "null"
 };
 
 // actions https://vuex.vuejs.org/guide/actions.html
@@ -37,39 +37,55 @@ const getters = {
 //	Actions can contain arbitrary asynchronous operations.
 
 const actions = {
-  async LOGIN({commit,}, payload) {
-    commit('invalidateLogin');
+  async LOGIN({ commit }, payload) {
+    commit("invalidateLogin");
 
-    const {result, success} = await api.user.login(payload.username, payload.password);
-    if(success) {
-      api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
-      commit('receiveLogin', result);
+    const { result, success } = await api.user.login(
+      payload.username,
+      payload.password
+    );
+    if (success) {
+      api.user.persistUser(
+        result.userData.username,
+        result.token,
+        result.userData.email,
+        result.userData.globalPermission
+      );
+      commit("receiveLogin", result);
     }
   },
   LOGOUT(context) {
-    context.commit('invalidateLogin');
+    context.commit("invalidateLogin");
     api.user.logout();
   },
-  async REGISTER({commit}, payload) {
+  async REGISTER({ commit }, payload) {
+    const { result, success } = await api.user.register(
+      payload.username,
+      payload.password,
+      payload.email
+    );
 
-    const {result, success} = await api.user.register(payload.username, payload.password, payload.email);
-
-    if(success) {
-      api.user.persistUser(result.userData.username, result.token, result.userData.email, result.userData.globalPermission);
-      commit('receiveLogin', result);
+    if (success) {
+      api.user.persistUser(
+        result.userData.username,
+        result.token,
+        result.userData.email,
+        result.userData.globalPermission
+      );
+      commit("receiveLogin", result);
     }
   },
-  async UPDATE ({ commit }, payload) {
-    const {result, success} = await api.user.updateFields(payload);
+  async UPDATE({ commit }, payload) {
+    const { result, success } = await api.user.updateFields(payload);
     if (success) {
       api.user.persistFields(payload);
-      commit('updateFields', payload);
+      commit("updateFields", payload);
       return true;
     } else {
-      commit('rejectUpdate', result);
+      commit("rejectUpdate", result);
       return false;
     }
-  },
+  }
 };
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
@@ -78,28 +94,28 @@ const mutations = {
     state.JWT = "";
   },
   rejectLogin(state, data) {
-    state.JWT = '';
+    state.JWT = "";
     state.errorMessage = data.messages || data.message;
   },
   receiveLogin(state, data) {
     state.JWT = data.token;
-    state.userData= data.userData;
+    state.userData = data.userData;
   },
-  updateFields (state, data) {
+  updateFields(state, data) {
     for (var key in data) {
       state.userData[key] = data[key];
     }
   },
-  rejectUpdate (state, response) {
+  rejectUpdate(state, response) {
     state.errorMessage = response.message;
   },
-  updateRecordingTypePref (state, data) {
+  updateRecordingTypePref(state, data) {
     state.recordingTypePref = data;
-    localStorage.setItem('recordingTypePref', data);
+    localStorage.setItem("recordingTypePref", data);
   },
-  updateAnalysisDatePref (state, data) {
+  updateAnalysisDatePref(state, data) {
     state.analysisDatePref = data;
-    localStorage.setItem('analysisDatePref', data);
+    localStorage.setItem("analysisDatePref", data);
   }
 };
 

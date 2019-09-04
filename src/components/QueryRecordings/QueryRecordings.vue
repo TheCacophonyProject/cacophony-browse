@@ -86,20 +86,25 @@
 </template>
 
 <script>
-import DefaultLabels from '../../const.js';
-import SelectDevice from './SelectDevice.vue';
-import SelectTagTypes from './SelectTagTypes.vue';
-import SelectAnimal from './SelectAnimal.vue';
-import SelectDuration from './SelectDuration.vue';
-import SelectDate from './SelectDate.vue';
-import SelectRecordingType from './SelectRecordingType.vue';
+import DefaultLabels from "../../const.js";
+import SelectDevice from "./SelectDevice.vue";
+import SelectTagTypes from "./SelectTagTypes.vue";
+import SelectAnimal from "./SelectAnimal.vue";
+import SelectDuration from "./SelectDuration.vue";
+import SelectDate from "./SelectDate.vue";
+import SelectRecordingType from "./SelectRecordingType.vue";
 import SelectDateRange from "./SelectDateRange.vue";
 
 export default {
-  name: 'QueryRecordings',
+  name: "QueryRecordings",
   components: {
     SelectDateRange,
-    SelectDevice, SelectTagTypes, SelectAnimal, SelectDuration, SelectDate, SelectRecordingType
+    SelectDevice,
+    SelectTagTypes,
+    SelectAnimal,
+    SelectDuration,
+    SelectDate,
+    SelectRecordingType
   },
   props: {
     disabled: {
@@ -115,43 +120,43 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
-      rawAnimals:[],
+      rawAnimals: [],
       hasSpecifiedTags: false,
       canHaveTags: false,
       isAudio: true,
       advanced: false,
-      isCustomDateRange: false,
+      isCustomDateRange: false
     };
   },
   computed: {
     recordingType: {
-      get () {
-        return this.query.where.type || 'both';
+      get() {
+        return this.query.where.type || "both";
       },
-      set (value) {
+      set(value) {
         this.query.where.type = value;
         // If it is an audio recording, then animals and tag types should be
         // disabled as these filters do not apply to audio recordings
-        this.isAudio = value !== 'video';
+        this.isAudio = value !== "video";
       }
     },
     duration: {
-      get () {
+      get() {
         const duration = this.query.where.duration;
-        return {low: duration["$gte"], high: duration["$lte"]};
+        return { low: duration["$gte"], high: duration["$lte"] };
       },
-      set (value) {
+      set(value) {
         this.query.where.duration["$gte"] = value.low;
         this.query.where.duration["$lte"] = value.high;
       }
     },
     tagTypes: {
-      get () {
+      get() {
         return this.query.tagMode;
       },
-      set (value) {
+      set(value) {
         this.query.tagMode = value;
         this.canHaveTags = this.canHaveSpecifiedTags(value);
         if (!this.canHaveTags) {
@@ -160,30 +165,36 @@ export default {
       }
     },
     dateRange: {
-      get () {
+      get() {
         return this.query.where.dateRange || {};
       },
-      set (value) {
+      set(value) {
         this.query.where.dateRange = value;
-        this.isCustomDateRange = (this.query.where.dateRange && this.query.where.dateRange.isCustom) || false;
+        this.isCustomDateRange =
+          (this.query.where.dateRange && this.query.where.dateRange.isCustom) ||
+          false;
       }
     },
     fromDate: {
-      get () {
+      get() {
         return this.query.where.recordingDateTime["$gt"] || "";
       },
-      set (value) {
+      set(value) {
         this.query.where.recordingDateTime["$gt"] = value;
       }
     },
     toDate: {
-      get () {
+      get() {
         return (
-          this.query.where.recordingDateTime["$lt"] &&
-          this.query.where.recordingDateTime["$lt"].replace(' 23:59:59', '')
-        ) || '';
+          (this.query.where.recordingDateTime["$lt"] &&
+            this.query.where.recordingDateTime["$lt"].replace(
+              " 23:59:59",
+              ""
+            )) ||
+          ""
+        );
       },
-      set (value) {
+      set(value) {
         if (value && value.trim() !== "") {
           this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
         } else {
@@ -192,106 +203,106 @@ export default {
       }
     },
     animals: {
-      get () {
+      get() {
         return this.rawAnimals;
       },
-      set (value) {
+      set(value) {
         this.rawAnimals = value;
-        this.query.tags = value.map(option => option.value ? option.value : option.text );
+        this.query.tags = value.map(
+          option => (option.value ? option.value : option.text)
+        );
         this.hasSpecifiedTags = this.query.tags.length > 0;
         if (this.hasSpecifiedTags) {
           if (!this.canHaveTags) {
-            this.tagTypes = 'tagged';
+            this.tagTypes = "tagged";
           }
         }
       }
     },
     devices: {
-      get () {
+      get() {
         return this.query.where.DeviceId;
       },
-      set (value) {
+      set(value) {
         this.query.where.DeviceId = value;
       }
     },
     groups: function() {
       return this.$store.state.Groups;
     },
-    isCustomDateRangeAndRangeIsValid: function () {
+    isCustomDateRangeAndRangeIsValid: function() {
       return (
         !this.isCustomDateRange ||
-        (this.isCustomDateRange && (
-          this.query.where.recordingDateTime["$gt"] !== '' &&
-          this.query.where.recordingDateTime["$lt"] !== '')
-        )
+        (this.isCustomDateRange &&
+          (this.query.where.recordingDateTime["$gt"] !== "" &&
+            this.query.where.recordingDateTime["$lt"] !== ""))
       );
-    },
+    }
   },
   watch: {
-    isAudio: function () {
+    isAudio: function() {
       if (this.isAudio) {
         // Reset any existing filters for animals and tag types when searching
         // for audio recordings
         this.animals = [];
-        this.tagTypes = 'any';
+        this.tagTypes = "any";
       }
-    },
+    }
   },
   methods: {
-    submit: function () {
-      this.$emit('submit');
+    submit: function() {
+      this.$emit("submit");
       this.toggleSearchPanel();
     },
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
-    toggleAdvancedSearch: function () {
+    toggleAdvancedSearch: function() {
       this.advanced = !this.advanced;
     },
-    toggleSearchPanel: function () {
-      this.$emit('toggled-search-panel');
-    },
-  },
+    toggleSearchPanel: function() {
+      this.$emit("toggled-search-panel");
+    }
+  }
 };
-
 </script>
 
 <style scoped lang="scss">
-  @import "~bootstrap/scss/functions";
-  @import "~bootstrap/scss/variables";
-  @import "~bootstrap/scss/mixins";
-  .query-recordings {
-    padding: 15px;
-    overflow: auto;
-    height: 100vh;
-    @include media-breakpoint-up(lg) {
-      max-height: calc(100vh - var(--navbar-height));
-    }
-    h2 {
-      font-size: 1.2rem;
-      color: $gray-700;
-      margin: 1rem 0 0.8rem;
-    }
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+.query-recordings {
+  padding: 15px;
+  overflow: auto;
+  height: 100vh;
+  @include media-breakpoint-up(lg) {
+    max-height: calc(100vh - var(--navbar-height));
   }
+  h2 {
+    font-size: 1.2rem;
+    color: $gray-700;
+    margin: 1rem 0 0.8rem;
+  }
+}
 
-  .search-panel-toggle-btn {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    transition: transform 0.2s;
-    @include media-breakpoint-down(lg) {
-      position: fixed;
-      top: 55px;
-      left: 0;
+.search-panel-toggle-btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  transition: transform 0.2s;
+  @include media-breakpoint-down(lg) {
+    position: fixed;
+    top: 55px;
+    left: 0;
+    transform: translate(var(--search-panel-width));
+    &.is-collapsed {
       transform: translate(var(--search-panel-width));
-      &.is-collapsed {
-        transform: translate(var(--search-panel-width));
-      }
-    }
-    @include media-breakpoint-up(lg) {
-      display: none;
     }
   }
+  @include media-breakpoint-up(lg) {
+    display: none;
+  }
+}
 
-  .toggle-advanced-search-btn {
-    margin-left: -0.75rem;
-    margin-bottom: 1rem;
-  }
+.toggle-advanced-search-btn {
+  margin-left: -0.75rem;
+  margin-bottom: 1rem;
+}
 </style>

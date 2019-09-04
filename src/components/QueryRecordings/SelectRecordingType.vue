@@ -9,29 +9,26 @@
 </template>
 
 <script>
-
 export default {
-  name: 'SelectRecordingType',
+  name: "SelectRecordingType",
   props: {
     value: {
       type: String,
       required: true
     }
   },
-  data () {
+  data() {
     return {
       thisvalue: ["interesting", "possum"],
       options: [
-        {value: 'both', text: 'Video and Audio'},
-        {value: 'audio', text: "Audio only"},
-        {value: 'video', text: 'Video only'}
+        { value: "both", text: "Video and Audio" },
+        { value: "audio", text: "Audio only" },
+        { value: "video", text: "Video only" }
       ]
     };
   }
 };
-
 </script>
 
 <style>
-
 </style>

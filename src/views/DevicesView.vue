@@ -6,29 +6,27 @@
 </template>
 
 <script>
-
-import {mapState} from 'vuex';
-import DeviceListing from '../components/Devices/DeviceListing.vue';
+import { mapState } from "vuex";
+import DeviceListing from "../components/Devices/DeviceListing.vue";
 
 export default {
-  name: 'DevicesView',
+  name: "DevicesView",
   components: { DeviceListing },
   props: {},
-  computed:
-    mapState({
-      devices: state => state.Devices.devices
-    }),
+  computed: mapState({
+    devices: state => state.Devices.devices
+  }),
   watch: {
-    '$route' () {
+    $route() {
       this.fetchDevices();
     }
   },
-  created: function () {
+  created: function() {
     this.fetchDevices();
   },
   methods: {
-    fetchDevices: function () {
-      this.$store.dispatch('Devices/GET_DEVICES');
+    fetchDevices: function() {
+      this.$store.dispatch("Devices/GET_DEVICES");
     }
   }
 };

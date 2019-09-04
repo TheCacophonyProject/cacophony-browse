@@ -35,18 +35,18 @@ export default {
   props: {
     tag: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   methods: {
     getTagTitle(str) {
       switch (str) {
-      case "automatic":
-        return "Tagged by Cacophony AI";
-      case "human":
-        return "Tagged by human";
-      case "automatic human":
-        return "Tagged by Cacophony AI and human";
+        case "automatic":
+          return "Tagged by Cacophony AI";
+        case "human":
+          return "Tagged by human";
+        case "automatic human":
+          return "Tagged by Cacophony AI and human";
       }
     }
   }
@@ -54,28 +54,28 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  @import "~bootstrap/scss/functions";
-  @import "~bootstrap/scss/variables";
-  .tag {
-    &.badge {
-       font-weight: initial;
-       font-size: 90%;
-       color: $white;
-       background: $secondary;
-       margin-right: 0.3rem;
-       line-height: 0.7;
-     }
-    &.automatic {
-       background: $danger;
-     }
-    &.human {
-       background: $success;
-     }
-    &.automatic.human {
-       background: $info;
-     }
-    .svg-inline--fa {
-      color: $white;
-    }
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+.tag {
+  &.badge {
+    font-weight: initial;
+    font-size: 90%;
+    color: $white;
+    background: $secondary;
+    margin-right: 0.3rem;
+    line-height: 0.7;
   }
+  &.automatic {
+    background: $danger;
+  }
+  &.human {
+    background: $success;
+  }
+  &.automatic.human {
+    background: $info;
+  }
+  .svg-inline--fa {
+    color: $white;
+  }
+}
 </style>

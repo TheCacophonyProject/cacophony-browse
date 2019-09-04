@@ -44,31 +44,28 @@
 </template>
 
 <script>
-
 export default {
-  name: 'TagList',
+  name: "TagList",
   props: {
     items: {
       type: Array,
       required: true
-    },
-  },  
+    }
+  },
   data() {
     return {
       fields: [
-        {key: 'animal', label: 'Tag Value'},
-        {key: 'startTime', label: 'Start Time'},
-        {key: 'who', label: 'By Who'},
-        {key: 'when', label: 'When'},
-        {key: 'replayButton', label: ''},
-        {key: 'deleteButton', label: ''}
+        { key: "animal", label: "Tag Value" },
+        { key: "startTime", label: "Start Time" },
+        { key: "who", label: "By Who" },
+        { key: "when", label: "When" },
+        { key: "replayButton", label: "" },
+        { key: "deleteButton", label: "" }
       ]
     };
   },
-  methods:{
-  }
+  methods: {}
 };
-
 </script>
 
 
@@ -76,6 +73,4 @@ export default {
 .tags-header {
   margin-top: 20px;
 }
-
-
 </style>

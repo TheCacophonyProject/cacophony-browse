@@ -27,60 +27,58 @@
 </template>
 
 <script>
-
-import {mapState} from 'vuex';
-import DeviceDetail from './DeviceDetail.vue';
-import Spinner from '../Spinner.vue';
-import IconLink from '../IconLink.vue';
+import { mapState } from "vuex";
+import DeviceDetail from "./DeviceDetail.vue";
+import Spinner from "../Spinner.vue";
+import IconLink from "../IconLink.vue";
 
 export default {
   name: "DevicesListing",
-  components: {DeviceDetail, Spinner, IconLink},
+  components: { DeviceDetail, Spinner, IconLink },
   data() {
     return {
-      devicesTableFields: [
-        {key: 'devicename', label: 'Devices'},
-      ]
+      devicesTableFields: [{ key: "devicename", label: "Devices" }]
     };
   },
   computed: mapState({
     fetched: state => state.Devices.fetched,
     devices: state => state.Devices.devices,
-    orderedDevices: function () {
-      return this.devices.sort((a, b) => a.devicename.localeCompare( b.devicename) );
+    orderedDevices: function() {
+      return this.devices.sort((a, b) =>
+        a.devicename.localeCompare(b.devicename)
+      );
     }
   }),
   methods: {
     fetchable() {
-      return this.fetched ? 'fetched' : 'fetching';
+      return this.fetched ? "fetched" : "fetching";
     }
   }
 };
 </script>
 
 <style scoped>
+.fetched {
+  opacity: 1;
+}
 
-  .fetched {
-    opacity: 1;
-  }
+.fetching {
+  visibility: hidden;
+}
 
-  .fetching {
-    visibility: hidden;
-  }
+h4 {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+}
 
-  h4 {
-    margin-top: 0.75rem;
-    font-size: 1rem;
-  }
+.device {
+  padding: 0.75rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+}
 
-  .device {
-    padding: 0.75rem;
-    border-top: 1px solid #dee2e6;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .header {
-    display: flex;
-  }
+.header {
+  display: flex;
+}
 </style>

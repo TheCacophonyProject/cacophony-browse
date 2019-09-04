@@ -385,4 +385,5 @@ export default {
   padding: 0;
 }
 </style>
-<style src="video.js/dist/video-js.css"></style>
+<style src="video.js/dist/video-js.css">
+</style>

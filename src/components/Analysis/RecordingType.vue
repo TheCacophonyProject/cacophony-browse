@@ -13,9 +13,8 @@
 </template>
 
 <script>
-
 export default {
-  name: 'RecordingType',
+  name: "RecordingType",
   props: {
     value: {
       type: String,
@@ -26,21 +25,21 @@ export default {
       default: false
     }
   },
-  data: function () {
+  data: function() {
     return {
       types: [
-        {text: 'Video', value: 'video'},
-        {text: 'Audio', value: 'audio'},
-        {text: 'Video & Audio', value: 'both'},
+        { text: "Video", value: "video" },
+        { text: "Audio", value: "audio" },
+        { text: "Video & Audio", value: "both" }
       ]
     };
   },
   methods: {
     variant(buttonValue) {
       if (buttonValue === this.value) {
-        return 'primary';
+        return "primary";
       } else {
-        return 'secondary';
+        return "secondary";
       }
     }
   }

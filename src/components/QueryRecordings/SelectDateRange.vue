@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: 'SelectDateRange',
+  name: "SelectDateRange",
   props: {
     title: {
       type: String,
@@ -22,7 +22,7 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       options: [
         { value: { relativeDateRange: -1 }, text: "Last 24 hours" },
@@ -32,7 +32,7 @@ export default {
         { value: { relativeDateRange: -90 }, text: "Last 90 days" },
         { value: { all: true }, text: "All" },
         // TODO(jon): Support for "all", which is basically just no date range
-        { value: { isCustom: true }, text: "Custom range" },
+        { value: { isCustom: true }, text: "Custom range" }
       ]
     };
   }

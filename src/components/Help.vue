@@ -18,7 +18,7 @@ export default {
       helpTip: {
         html: true,
         title: this.helpText.title,
-        content: this.helpText.content,
+        content: this.helpText.content
       }
     };
   }
@@ -26,7 +26,7 @@ export default {
 </script>
 
 <style scoped>
-  .help {
-    color: #28a745;
-  }
+.help {
+  color: #28a745;
+}
 </style>

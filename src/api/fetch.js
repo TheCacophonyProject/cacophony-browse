@@ -1,10 +1,10 @@
-import crossFetch from 'cross-fetch';
-import store from '../stores/index';
-import router from '../router';
+import crossFetch from "cross-fetch";
+import store from "../stores/index";
+import router from "../router";
 
 const defaults = {
-  mode: 'cors',
-  cache: 'no-cache',
+  mode: "cors",
+  cache: "no-cache",
   headers: {}
 };
 
@@ -15,7 +15,6 @@ const defaults = {
  * @returns {Promise<{result: any, success: boolean, status: number}>}
  */
 export async function fetch() {
-
   const args = [].slice.call(arguments, 0);
   const requiresAuth = args.requiresAuth || true;
 
@@ -24,7 +23,7 @@ export async function fetch() {
     ...args[1],
     headers: {
       ...args[1].headers,
-      Authorization: store.getters['User/getToken']
+      Authorization: store.getters["User/getToken"]
     }
   };
 
@@ -32,14 +31,17 @@ export async function fetch() {
   const status = response.status;
 
   const result = await response.json();
-  if(requiresAuth && status === 401) {
-    store.dispatch('User/LOGOUT');
-    store.dispatch('Messaging/ERROR', 'Error accessing your account.   Please log in again.');
-    router.push('login');
+  if (requiresAuth && status === 401) {
+    store.dispatch("User/LOGOUT");
+    store.dispatch(
+      "Messaging/ERROR",
+      "Error accessing your account.   Please log in again."
+    );
+    router.push("login");
   } else {
     handleMessages(result, status);
   }
-  return {result, status, success: response.ok};
+  return { result, status, success: response.ok };
 }
 
 function handleMessages(result, status) {
@@ -52,13 +54,16 @@ function handleMessages(result, status) {
     level = "ERROR";
   }
 
-  if(result.errors) {
+  if (result.errors) {
     for (const key in result.errors) {
-      store.dispatch('Messaging/ERROR', result.errors[key].msg);
+      store.dispatch("Messaging/ERROR", result.errors[key].msg);
     }
   }
-  result.messages && result.messages.forEach(message => store.dispatch(`Messaging/${level}`, message));
+  result.messages &&
+    result.messages.forEach(message =>
+      store.dispatch(`Messaging/${level}`, message)
+    );
   if (result.errorType == "client") {
-    store.dispatch('Messaging/ERROR', result.message);
+    store.dispatch("Messaging/ERROR", result.message);
   }
 }

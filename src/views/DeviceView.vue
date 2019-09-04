@@ -19,50 +19,51 @@
 </template>
 
 <script>
-
-import {mapState} from 'vuex';
-import DeviceDetail from '../components/Devices/DeviceDetail.vue';
-import Spinner from '../components/Spinner.vue';
-import IconLink from '../components/IconLink.vue';
+import { mapState } from "vuex";
+import DeviceDetail from "../components/Devices/DeviceDetail.vue";
+import Spinner from "../components/Spinner.vue";
+import IconLink from "../components/IconLink.vue";
 
 export default {
-  name: 'DeviceView',
-  components: {DeviceDetail, Spinner, IconLink},
+  name: "DeviceView",
+  components: { DeviceDetail, Spinner, IconLink },
   props: {},
-  computed:
-    mapState({
-      device: state => state.Devices.currentDevice,
-      fetched: state => state.Devices.fetched,
-      currentUser: state => state.User.userData
-    }),
+  computed: mapState({
+    device: state => state.Devices.currentDevice,
+    fetched: state => state.Devices.fetched,
+    currentUser: state => state.User.userData
+  }),
   watch: {
-    '$route'() {
+    $route() {
       this.fetchDevice();
     }
   },
-  created: async function () {
+  created: async function() {
     await this.fetchDevice();
   },
   methods: {
-    fetchDevice: async function () {
-      await this.$store.dispatch('Devices/GET_DEVICE', this.$route.params.devicename);
+    fetchDevice: async function() {
+      await this.$store.dispatch(
+        "Devices/GET_DEVICE",
+        this.$route.params.devicename
+      );
     }
   }
 };
 </script>
 
 <style scoped>
-  header {
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    align-items: center;
-    margin: 1.5rem 0;
-  }
+header {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  margin: 1.5rem 0;
+}
 
-  h1 {
-    font-size: x-large;
-    margin: 0;
-    font-weight: bold;
-  }
+h1 {
+  font-size: x-large;
+  margin: 0;
+  font-weight: bold;
+}
 </style>

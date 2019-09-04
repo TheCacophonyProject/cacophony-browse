@@ -43,30 +43,30 @@ export default {
   props: {
     tracks: {
       type: Array,
-      required: true,
+      required: true
     },
     colours: {
       type: Array,
-      required: true,
+      required: true
     },
     currentVideoTime: {
       type: Number,
       default: 0,
-      required: true,
+      required: true
     },
     duration: {
       type: Number,
       default: 0,
-      required: true,
+      required: true
     },
     canvasWidth: {
       type: Number,
-      required: true,
+      required: true
     }
   },
   data() {
     return {
-      inited: false,
+      inited: false
     };
   },
   computed: {
@@ -82,7 +82,7 @@ export default {
     },
     numTracks() {
       return this.hasTracks ? this.tracks.length : 0;
-    },
+    }
   },
   methods: {
     getWidthForTrack(track) {
@@ -105,75 +105,84 @@ export default {
         const scrubber = refs.scrubber;
         const passive = { passive: false };
 
-        const touchMove = (event) => {
+        const touchMove = event => {
           event.preventDefault();
-          const x = event.targetTouches[0].x - scrubber.getBoundingClientRect().x;
+          const x =
+            event.targetTouches[0].x - scrubber.getBoundingClientRect().x;
           const timeOffset = x / this.canvasWidth;
           context.$emit("set-playback-time", timeOffset * this.duration);
         };
 
-        const touchEnd = (event) => {
+        const touchEnd = event => {
           event.preventDefault();
           context.$emit("end-scrub");
-          window.removeEventListener('touchend', touchEnd);
-          window.removeEventListener('touchmove', touchMove);
+          window.removeEventListener("touchend", touchEnd);
+          window.removeEventListener("touchmove", touchMove);
         };
 
-        scrubber.addEventListener('touchstart', (event) => {
-          event.preventDefault();
-          context.$emit("start-scrub");
-          touchMove(event);
-          window.addEventListener('touchmove', touchMove, passive);
-          window.addEventListener('touchend', touchEnd, passive);
-        }, passive);
+        scrubber.addEventListener(
+          "touchstart",
+          event => {
+            event.preventDefault();
+            context.$emit("start-scrub");
+            touchMove(event);
+            window.addEventListener("touchmove", touchMove, passive);
+            window.addEventListener("touchend", touchEnd, passive);
+          },
+          passive
+        );
 
-        const mouseMove = (event) => {
+        const mouseMove = event => {
           event.preventDefault();
           const x = event.x - scrubber.getBoundingClientRect().x;
           const timeOffset = x / this.canvasWidth;
           context.$emit("set-playback-time", timeOffset * this.duration);
         };
 
-        const mouseEnd = (event) => {
+        const mouseEnd = event => {
           event.preventDefault();
           context.$emit("end-scrub");
-          window.removeEventListener('mouseup', mouseEnd);
-          window.removeEventListener('mousemove', mouseMove);
+          window.removeEventListener("mouseup", mouseEnd);
+          window.removeEventListener("mousemove", mouseMove);
         };
 
-        scrubber.addEventListener('mousedown', (event) => {
-          event.preventDefault();
-          context.$emit("start-scrub");
-          mouseMove(event);
-          window.addEventListener('mousemove', mouseMove);
-          window.addEventListener('mouseup', mouseEnd);
-        }, passive);
+        scrubber.addEventListener(
+          "mousedown",
+          event => {
+            event.preventDefault();
+            context.$emit("start-scrub");
+            mouseMove(event);
+            window.addEventListener("mousemove", mouseMove);
+            window.addEventListener("mouseup", mouseEnd);
+          },
+          passive
+        );
       });
-    },
+    }
   }
 };
 </script>
 
 <style scoped>
-  .track-scrubber {
-    position: relative;
-    background: #2B333F;
-    transition: height 0.3s;
-    overflow: hidden;
-  }
-  .loading {
-    color: #eee;
-    text-align: center;
-  }
-  .scrub-track {
-    position: absolute;
-    height: 12px;
-    border-radius: 5px;
-  }
-  .playhead {
-    height: 100%;
-    position: absolute;
-    background: rgba(0, 0, 0, 0.35);
-    left: 0;
-  }
+.track-scrubber {
+  position: relative;
+  background: #2b333f;
+  transition: height 0.3s;
+  overflow: hidden;
+}
+.loading {
+  color: #eee;
+  text-align: center;
+}
+.scrub-track {
+  position: absolute;
+  height: 12px;
+  border-radius: 5px;
+}
+.playhead {
+  height: 100%;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.35);
+  left: 0;
+}
 </style>

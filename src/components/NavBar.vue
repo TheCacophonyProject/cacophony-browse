@@ -54,7 +54,7 @@
 
 <script>
 export default {
-  name: 'Navbar',
+  name: "Navbar",
   data() {
     return {
       userName: this.$store.state.User.userData.username
@@ -62,52 +62,51 @@ export default {
   },
   computed: {
     isLoggedIn() {
-      return this.$store.getters['User/isLoggedIn'];
+      return this.$store.getters["User/isLoggedIn"];
     }
   },
   methods: {
     logout() {
-      this.$store.dispatch('User/LOGOUT');
-      this.$router.go('home');
+      this.$store.dispatch("User/LOGOUT");
+      this.$router.go("home");
     }
   }
 };
 </script>
 
 <style scoped>
-  .navbar {
-    border-bottom: solid rgb(222, 226, 230) 1px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    color: black;
-  }
+.navbar {
+  border-bottom: solid rgb(222, 226, 230) 1px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  color: black;
+}
 
+.navbar-brand {
+  width: 70%;
+}
+
+.navbar-brand img {
+  width: 100%;
+}
+
+.active {
+  background-color: #eeeeee;
+  color: #555;
+  border-radius: 2px;
+}
+
+@media only screen and (min-width: 576px) {
   .navbar-brand {
-    width: 70%;
+    width: auto;
   }
 
   .navbar-brand img {
-    width: 100%;
+    width: auto;
   }
 
-  .active {
-    background-color: #eeeeee;
-    color: #555;
-    border-radius: 2px;
+  .profile {
+    border-left: solid rgb(222, 226, 230) 1px;
   }
-
-
-  @media only screen and (min-width: 576px) {
-    .navbar-brand {
-      width: auto;
-    }
-
-    .navbar-brand img {
-      width: auto;
-    }
-
-    .profile {
-      border-left: solid rgb(222, 226, 230) 1px;
-    }
-  }
+}
 </style>

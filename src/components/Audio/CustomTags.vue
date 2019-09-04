@@ -13,31 +13,30 @@
 
 <script>
 export default {
-  name: 'CustomTag',
+  name: "CustomTag",
   data: function() {
     return {
-      customTagValue:''
+      customTagValue: ""
     };
   },
   methods: {
     addCustomTag() {
-      if(((this.customTagValue).trim()).length == 0) {
+      if (this.customTagValue.trim().length == 0) {
         this.customTagValue = "";
         return;
-      } 
+      }
       const tag = {};
       tag.what = this.customTagValue;
       tag.confidence = 0.5;
       tag.startTime = 0.5;
       tag.duration = 0.5;
-      tag.automatic = false;                
-      this.$emit('addAudioTag', tag);
+      tag.automatic = false;
+      this.$emit("addAudioTag", tag);
       this.customTagValue = "";
-    },    
+    }
   }
 };
 </script>
 
 <style scoped>
- 
 </style>

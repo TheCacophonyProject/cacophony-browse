@@ -40,15 +40,14 @@
 </template>
 
 <script>
-import {required} from 'vuelidate/lib/validators';
+import { required } from "vuelidate/lib/validators";
 
 export default {
-  name: 'GroupUserAdd',
+  name: "GroupUserAdd",
   props: {
     group: {
       type: Object,
-      default: () => {
-      }
+      default: () => {}
     }
   },
   data() {
@@ -64,7 +63,7 @@ export default {
       if (this.$v.form.username.$invalid) {
         return `Username is required`;
       }
-    },
+    }
   },
   validations: {
     form: {
@@ -75,65 +74,63 @@ export default {
     }
   },
   methods: {
-    addUser: function (event) {
+    addUser: function(event) {
       event.preventDefault();
 
       if (!this.$v.$invalid) {
-
         const params = {
           userName: this.$v.form.username.$model,
           isAdmin: this.$v.form.isAdmin.$model,
           groupName: this.group.groupname
         };
 
-        this.$store.dispatch('Groups/ADD_GROUP_USER', params);
+        this.$store.dispatch("Groups/ADD_GROUP_USER", params);
       }
-
     }
   }
 };
 </script>
 
 <style>
+.add-user-form {
+  flex-wrap: wrap;
+}
+
+.input {
+  width: 100%;
+  margin-right: 0;
+  margin-bottom: 1rem;
+}
+
+.options {
+  flex-direction: row;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+h3 {
+  font-size: large;
+  font-weight: bold;
+}
+
+@media only screen and (min-width: 576px) {
   .add-user-form {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
   }
 
   .input {
-    width: 100%;
-    margin-right: 0;
-    margin-bottom: 1rem;
+    width: auto;
+    margin-right: 1rem;
+    margin-bottom: 0;
   }
 
   .options {
     flex-direction: row;
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    width: auto;
   }
-
-  h3 {
-    font-size: large;
-    font-weight: bold;
-  }
-
-  @media only screen and (min-width: 576px) {
-    .add-user-form {
-      flex-wrap: nowrap;
-      justify-content: space-evenly;
-    }
-
-    .input {
-      width: auto;
-      margin-right: 1rem;
-      margin-bottom: 0;
-    }
-
-    .options {
-      flex-direction: row;
-      display: flex;
-      justify-content: space-between;
-      width: auto;
-    }
-  }
+}
 </style>

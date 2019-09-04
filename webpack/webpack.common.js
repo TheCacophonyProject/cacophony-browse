@@ -1,25 +1,22 @@
-const path = require('path');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-
+const path = require("path");
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const CleanWebpackPlugin = require("clean-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   module: {
     rules: [
       {
         test: /\.css$/,
-        use: [
-          'vue-style-loader',
-          'css-loader'
-        ],
-      },      {
+        use: ["vue-style-loader", "css-loader"]
+      },
+      {
         test: /\.vue$/,
-        loader: 'vue-loader'
+        loader: "vue-loader"
       },
       {
         test: /\.js$/,
-        loader: 'babel-loader',
+        loader: "babel-loader",
         exclude: /node_modules/,
         include: [
           path.resolve(__dirname, "src"),
@@ -29,42 +26,35 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
-        loader: 'file-loader',
+        loader: "file-loader",
         options: {
-          name: '[name].[ext]?[hash]'
+          name: "[name].[ext]?[hash]"
         }
       },
       {
-        enforce: 'pre',
+        enforce: "pre",
         test: /\.(js|vue)$/,
-        loader: 'eslint-loader',
+        loader: "eslint-loader",
         exclude: [/node_modules/]
       },
       // this will apply to both plain `.scss` files
       // AND `<style lang="scss">` blocks in `.vue` files
       {
         test: /\.scss$/,
-        use: [
-          'vue-style-loader',
-          'css-loader',
-          'sass-loader'
-        ]
+        use: ["vue-style-loader", "css-loader", "sass-loader"]
       }
     ]
   },
   plugins: [
     new VueLoaderPlugin(),
-    new CleanWebpackPlugin(
-      ["dist"],
-      { root: path.resolve(__dirname, '..') }
-    ),
-    new CopyWebpackPlugin(["src/assets/favicon"]),
+    new CleanWebpackPlugin(["dist"], { root: path.resolve(__dirname, "..") }),
+    new CopyWebpackPlugin(["src/assets/favicon"])
   ],
   resolve: {
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
+      vue$: "vue/dist/vue.esm.js"
     },
-    extensions: ['*', '.js', '.vue', '.json']
+    extensions: ["*", ".js", ".vue", ".json"]
   },
   devServer: {
     historyApiFallback: true,
@@ -74,5 +64,5 @@ module.exports = {
   performance: {
     hints: false
   },
-  devtool: '#eval-source-map'
+  devtool: "#eval-source-map"
 };

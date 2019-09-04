@@ -8,9 +8,8 @@
 </template>
 
 <script>
-
 export default {
-  name: 'DeviceGroups',
+  name: "DeviceGroups",
   props: {
     value: {
       type: [String, Number],
@@ -22,12 +21,15 @@ export default {
     }
   },
   computed: {
-    options: function () {
-      const options = [{
-        value: 'all', text: 'All Groups'
-      }];
-      this.allGroups.forEach((group) => {
-        options.push({value: group.id, text: group.name});
+    options: function() {
+      const options = [
+        {
+          value: "all",
+          text: "All Groups"
+        }
+      ];
+      this.allGroups.forEach(group => {
+        options.push({ value: group.id, text: group.name });
       });
       return options;
     }
