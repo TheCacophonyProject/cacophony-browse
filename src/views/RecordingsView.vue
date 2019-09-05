@@ -461,7 +461,7 @@ export default {
             }
             return str;
           };
-          const formatDate = date =>
+          const formatQueryDate = date =>
             `${date.getFullYear()}-${padLeft(
               date.getMonth() + 1,
               "0",
