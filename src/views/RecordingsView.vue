@@ -461,7 +461,7 @@ export default {
             }
             return str;
           };
-          const formatDate = date =>
+          const formatQueryDate = date =>
             `${date.getFullYear()}-${padLeft(
               date.getMonth() + 1,
               "0",
@@ -484,8 +484,8 @@ export default {
           const past = new Date(now.getTime() + relativeRangeDays * oneDay);
           where.dateRange = { relativeDateRange: relativeRangeDays };
           where.recordingDateTime = {
-            $lt: this.formatQueryDate(now),
-            $gt: this.formatQueryDate(past)
+            $lt: formatQueryDate(now),
+            $gt: formatQueryDate(past)
           };
         } else if (query.where.hasOwnProperty("recordingDateTime")) {
           if (
