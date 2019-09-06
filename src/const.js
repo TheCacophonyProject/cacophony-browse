@@ -165,7 +165,7 @@ const DefaultLabels = {
     ];
   },
   searchRecordingLabels: function() {
-    return this.recordingLabels
+    return this.recordingLabels()
       .concat(this.tagTypes)
       .concat([allLabels.multipleAnimals]);
   },
