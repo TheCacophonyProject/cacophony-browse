@@ -47,6 +47,14 @@ var allLabels = {
     value: "leporidae",
     text: "hare or rabbit (leporidae)"
   },
+  wallaby: {
+    value: "wallaby",
+    text: "wallaby"
+  },
+  pig: {
+    value: "pig",
+    text: "pig"
+  },
   human: {
     value: "human",
     text: "human"
@@ -54,6 +62,14 @@ var allLabels = {
   insect: {
     value: "insect",
     text: "spider or insect (on camera lens or flying)"
+  },
+  penguin: {
+    value: "penguin",
+    text: "penguin"
+  },
+  sealion: {
+    value: "sealion",
+    text: "sealion"
   },
   unidentified: {
     value: "unidentified",
@@ -132,8 +148,12 @@ const DefaultLabels = {
     allLabels.kiwi,
     allLabels.dog,
     allLabels.leporidae,
+    allLabels.wallaby,
+    allLabels.pig,
     allLabels.human,
     allLabels.insect,
+    allLabels.penguin,
+    allLabels.sealion,
     allLabels.unidentified,
     allLabels.pest,
     allLabels.part
