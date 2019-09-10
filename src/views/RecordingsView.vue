@@ -215,7 +215,9 @@ export default {
           numDevices !== 0
             ? `${numDevices} device${multipleDeviceSuffix}`
             : "All devices";
-        query.where.type = query.where.type || "both";
+
+        query.where.type =
+          query.where.type || this.$store.state.User.recordingTypePref;
         const recordings =
           query.where.type === "both" ? "audio and video" : query.where.type;
         const numAnimals = query.tags.length;
@@ -233,7 +235,7 @@ export default {
         let timespan;
         if (relativeDateRange === 1) {
           timespan = "last 24 hours";
-        } else if (isAll) {
+        } else if (isAll || isNaN(relativeDateRange)) {
           timespan = "";
         } else {
           timespan = `last ${relativeDateRange} days`;
@@ -280,13 +282,13 @@ export default {
           timespan = !isCustom
             ? `in the <strong>${timespan}</strong>`
             : `between <strong>${formatDate(
-                query.where.recordingDateTime["$gt"],
-                0
-              )}</strong>&nbsp;
+              query.where.recordingDateTime["$gt"],
+              0
+            )}</strong>&nbsp;
               and&nbsp;<strong>${formatDate(
-                query.where.recordingDateTime["$lt"],
-                1
-              )}</strong>${durationStr}`;
+    query.where.recordingDateTime["$lt"],
+    1
+  )}</strong>${durationStr}`;
         }
         return (
           `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
