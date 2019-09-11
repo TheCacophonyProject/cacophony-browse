@@ -40,15 +40,28 @@ export default {
   data() {
     return {
       options: [
-        { value: { low: "0", high: "" }, text: "Any duration" },
-        { value: { low: "0", high: "20" }, text: "Short (<20 seconds)" },
+        {
+          value: { low: "0", high: "" },
+          text: "Any duration"
+        },
+        {
+          value: { low: "0", high: "20" },
+          text: "Short (<20 seconds)"
+        },
         {
           value: { low: "20", high: "120" },
           text: "Medium (20 seconds - 2 minutes)"
         },
-        { value: { low: "120", high: "" }, text: "Long (> 2 minutes)" },
         {
-          value: { isCustom: true, low: "0", high: "100" },
+          value: { low: "120", high: "" },
+          text: "Long (> 2 minutes)"
+        },
+        {
+          value: {
+            isCustom: true,
+            low: "0",
+            high: "100"
+          },
           text: "Custom duration"
         }
       ]

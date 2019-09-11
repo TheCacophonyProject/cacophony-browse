@@ -17,7 +17,6 @@ module.exports = {
     }
   },
   rules: {
-    'indent': ['warn', 2, {"SwitchCase": 1 }],
     'linebreak-style': ['warn', 'unix'],
     'quotes': 'off',
     'semi': ['warn', 'always'],

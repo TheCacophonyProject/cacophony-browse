@@ -482,7 +482,9 @@ export default {
           );
           // Add time here, since relative date is negative
           const past = new Date(now.getTime() + relativeRangeDays * oneDay);
-          where.dateRange = { relativeDateRange: relativeRangeDays };
+          where.dateRange = {
+            relativeDateRange: relativeRangeDays
+          };
           where.recordingDateTime = {
             $lt: formatQueryDate(now),
             $gt: formatQueryDate(past)

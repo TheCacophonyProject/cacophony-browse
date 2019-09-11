@@ -72,7 +72,13 @@ import TagList from "../Audio/TagList.vue";
 
 export default {
   name: "AudioRecording",
-  components: { CustomTags, BasicTags, PrevNext, RecordingProperties, TagList },
+  components: {
+    CustomTags,
+    BasicTags,
+    PrevNext,
+    RecordingProperties,
+    TagList
+  },
   props: {
     recording: {
       type: Object,

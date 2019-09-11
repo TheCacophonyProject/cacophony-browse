@@ -110,12 +110,19 @@ export default {
         }
       }
       return devices.map(device => {
-        return { id: device.id, name: device.devicename };
+        return {
+          id: device.id,
+          name: device.devicename
+        };
       });
     },
     allGroups: function() {
       return this.$store.state.Groups.groups.map(group => {
-        return { id: group.id, name: group.groupname, devices: group.Devices };
+        return {
+          id: group.id,
+          name: group.groupname,
+          devices: group.Devices
+        };
       });
     },
     type: function() {
@@ -286,7 +293,10 @@ export default {
       const device = this.devices.find(device => {
         return device.name === deviceName;
       });
-      const whereQuery = { DeviceId: [device], type: this.recordingType };
+      const whereQuery = {
+        DeviceId: [device],
+        type: this.recordingType
+      };
       if (this.dateRange === 0) {
         whereQuery.dateRange = "all";
       } else {
