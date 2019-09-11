@@ -64,16 +64,17 @@ export default {
           },
           text: "Custom duration"
         }
-      ]
+      ],
+      isCustom: false
     };
   },
   computed: {
     selectedOption: function() {
       return this.getOptionForValue(this.value);
-    },
-    isCustom: function() {
-      return this.selectedOption.isCustom;
     }
+  },
+  mounted() {
+    this.isCustom = this.getOptionForValue(this.value).isCustom;
   },
   methods: {
     getOptionForValue: function({ low, high }) {
@@ -87,8 +88,8 @@ export default {
           return option.value;
         }
       }
-      // Fallback to the any option.
-      return this.options[0].value;
+      // Fallback to the custom option.
+      return this.options[4].value;
     },
     updateHigh: function(event) {
       const newValue = {
@@ -106,6 +107,7 @@ export default {
     },
     updateDurationType: function(val) {
       val = val.hasOwnProperty("value") ? val.value : val;
+      this.isCustom = val.isCustom;
       const { low, high } = val;
       const e = {
         high,

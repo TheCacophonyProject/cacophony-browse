@@ -127,16 +127,22 @@ export default {
       canHaveTags: false,
       isAudio: true,
       advanced: false,
+      loadedQuery: false,
       isCustomDateRange: false
     };
   },
   computed: {
     recordingType: {
       get() {
-        return this.query.where.type || "both";
+        return (
+          this.query.where.type ||
+          this.$store.state.User.recordingTypePref ||
+          "both"
+        );
       },
       set(value) {
         this.query.where.type = value;
+        this.$store.commit("User/updateRecordingTypePref", value);
         // If it is an audio recording, then animals and tag types should be
         // disabled as these filters do not apply to audio recordings
         this.isAudio = value !== "video";
@@ -250,6 +256,23 @@ export default {
         this.animals = [];
         this.tagTypes = "any";
       }
+    }
+  },
+  mounted() {
+    this.isAudio = this.recordingType === "audio";
+  },
+  updated() {
+    if (!this.loadedQuery) {
+      this.loadedQuery = true;
+      // If there was an advanced query, start with the advanced toggle area open.
+      this.advanced =
+        this.query.tags.length !== 0 ||
+        this.query.tagMode !== "any" ||
+        (this.query.where && this.query.where.duration.hasOwnProperty("$lte"));
+      this.canHaveTags = this.canHaveSpecifiedTags(this.query.tagMode);
+      this.animals = this.query.tags.map(tag =>
+        DefaultLabels.searchLabels().find(({ value }) => tag === value)
+      );
     }
   },
   methods: {
