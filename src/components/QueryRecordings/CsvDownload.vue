@@ -27,7 +27,9 @@ export default {
   methods: {
     async click() {
       const token = await userapi.token();
-      const params = Object.assign(this.params, { jwt: token });
+      const params = Object.assign(this.params, {
+        jwt: token
+      });
       const url =
         `${config.api}/api/v1/recordings/report?` +
         querystring.stringify(params);

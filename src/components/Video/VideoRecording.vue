@@ -141,7 +141,9 @@ export default {
   methods: {
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
-        this.$router.push({ path: `/recording/${this.recording.id}` });
+        this.$router.push({
+          path: `/recording/${this.recording.id}`
+        });
       }
     },
     async getNextRecording(direction, tagMode, tags, skipMessage) {
@@ -152,11 +154,15 @@ export default {
       let order;
       switch (direction) {
         case "next":
-          where.recordingDateTime = { $gt: this.recording.recordingDateTime };
+          where.recordingDateTime = {
+            $gt: this.recording.recordingDateTime
+          };
           order = "ASC";
           break;
         case "previous":
-          where.recordingDateTime = { $lt: this.recording.recordingDateTime };
+          where.recordingDateTime = {
+            $lt: this.recording.recordingDateTime
+          };
           order = "DESC";
           break;
         case "either":
@@ -214,7 +220,10 @@ export default {
     },
     updateComment(comment) {
       const recordingId = Number(this.$route.params.id);
-      this.$store.dispatch("Video/UPDATE_COMMENT", { comment, recordingId });
+      this.$store.dispatch("Video/UPDATE_COMMENT", {
+        comment,
+        recordingId
+      });
     },
     orderedTracks: function() {
       return this.tracks

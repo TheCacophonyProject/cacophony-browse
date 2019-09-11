@@ -147,7 +147,10 @@ export default {
     },
     deleteTag(tag) {
       const recordingId = this.recordingId;
-      this.$store.dispatch("Video/DELETE_TRACK_TAG", { tag, recordingId });
+      this.$store.dispatch("Video/DELETE_TRACK_TAG", {
+        tag,
+        recordingId
+      });
     },
     trackSelected(increment) {
       const index = this.index + increment;

@@ -37,7 +37,9 @@ export default {
     }),
     query() {
       return {
-        where: JSON.stringify({ DeviceId: this.group.Devices.map(d => d.id) })
+        where: JSON.stringify({
+          DeviceId: this.group.Devices.map(d => d.id)
+        })
       };
     }
   },

@@ -120,10 +120,18 @@ export default {
   data() {
     return {
       fields: [
-        { key: "what", label: "Tag", tdClass: "tag-history-table-what" },
+        {
+          key: "what",
+          label: "Tag",
+          tdClass: "tag-history-table-what"
+        },
         { key: "who", label: "User" },
         { key: "confidence", label: "Conf." },
-        { key: "buttons", label: "", tdClass: "tag-history-table-buttons" }
+        {
+          key: "buttons",
+          label: "",
+          tdClass: "tag-history-table-buttons"
+        }
       ],
       show_details: false
     };
