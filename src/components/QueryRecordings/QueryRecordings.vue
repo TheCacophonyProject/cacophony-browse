@@ -151,7 +151,10 @@ export default {
     duration: {
       get() {
         const duration = this.query.where.duration;
-        return { low: duration["$gte"], high: duration["$lte"] };
+        return {
+          low: duration["$gte"],
+          high: duration["$lte"]
+        };
       },
       set(value) {
         this.query.where.duration["$gte"] = value.low;

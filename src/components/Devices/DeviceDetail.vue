@@ -61,7 +61,11 @@ export default {
       deviceUsersTableFields: [
         { key: "username", label: "User Name" },
         { key: "admin", label: "Admin" },
-        { key: "controls", label: "", class: "device-actions-cell" }
+        {
+          key: "controls",
+          label: "",
+          class: "device-actions-cell"
+        }
       ],
       userSortBy: "username",
       usersHelpTip: {

@@ -97,15 +97,33 @@ export default {
     return {
       display: false,
       properties: [
-        { key: "processingState", title: "Processing State" },
+        {
+          key: "processingState",
+          title: "Processing State"
+        },
         { key: "location", title: "Location" },
-        { key: "relativeToDusk", title: "Relative to Dusk" },
-        { key: "relativeToDawn", title: "Relative to Dawn" },
+        {
+          key: "relativeToDusk",
+          title: "Relative to Dusk"
+        },
+        {
+          key: "relativeToDawn",
+          title: "Relative to Dawn"
+        },
         { key: "batteryLevel", title: "Battery Level" },
-        { key: "batteryCharging", title: "Battery Charging" },
-        { key: "airplaneModeOn", title: "Airplane Mode" },
+        {
+          key: "batteryCharging",
+          title: "Battery Charging"
+        },
+        {
+          key: "airplaneModeOn",
+          title: "Airplane Mode"
+        },
         { key: "version", title: "Version" },
-        { key: "additionalMetadata", title: "Additional Metadata" }
+        {
+          key: "additionalMetadata",
+          title: "Additional Metadata"
+        }
       ],
       metaFields: [
         {

@@ -156,7 +156,11 @@ export default {
         { key: "whatDetail", label: "What" },
         { key: "who", label: "By" },
         { key: "when", label: "When" },
-        { key: "deleteButton", label: "", tdClass: "tags-table-buttons" }
+        {
+          key: "deleteButton",
+          label: "",
+          tdClass: "tags-table-buttons"
+        }
       ],
       deleteDisabled: false
     };

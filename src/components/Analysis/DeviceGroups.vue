@@ -29,7 +29,10 @@ export default {
         }
       ];
       this.allGroups.forEach(group => {
-        options.push({ value: group.id, text: group.name });
+        options.push({
+          value: group.id,
+          text: group.name
+        });
       });
       return options;
     }
