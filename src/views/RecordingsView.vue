@@ -282,13 +282,13 @@ export default {
           timespan = !isCustom
             ? `in the <strong>${timespan}</strong>`
             : `between <strong>${formatDate(
-              query.where.recordingDateTime["$gt"],
-              0
-            )}</strong>&nbsp;
+                query.where.recordingDateTime["$gt"],
+                0
+              )}</strong>&nbsp;
               and&nbsp;<strong>${formatDate(
-    query.where.recordingDateTime["$lt"],
-    1
-  )}</strong>${durationStr}`;
+                query.where.recordingDateTime["$lt"],
+                1
+              )}</strong>${durationStr}`;
         }
         return (
           `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
