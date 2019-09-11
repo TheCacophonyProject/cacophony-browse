@@ -4,9 +4,9 @@ module.exports = {
     "import"
   ],
   extends: [
-    'plugin:vue/recommended',
+    "plugin:vue/recommended",
     "plugin:prettier/recommended",
-    'eslint:recommended',
+    "eslint:recommended",
     "plugin:import/errors",
   ],
   "parserOptions": {
@@ -17,7 +17,6 @@ module.exports = {
     }
   },
   rules: {
-    'indent': ['warn', 2, {"SwitchCase": 1 }],
     'linebreak-style': ['warn', 'unix'],
     'quotes': 'off',
     'semi': ['warn', 'always'],

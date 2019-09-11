@@ -85,13 +85,25 @@ export default {
   data() {
     return {
       groupUsersTableFields: [
-        { key: "username", label: "User Name", sortable: "true" },
+        {
+          key: "username",
+          label: "User Name",
+          sortable: "true"
+        },
         { key: "admin", label: "Admin" },
-        { key: "controls", label: "", class: "device-actions-cell" }
+        {
+          key: "controls",
+          label: "",
+          class: "device-actions-cell"
+        }
       ],
       userSortBy: "username",
       deviceTableFields: [
-        { key: "devicename", label: "Device Name", sortable: "true" }
+        {
+          key: "devicename",
+          label: "Device Name",
+          sortable: "true"
+        }
       ],
       deviceSortBy: "devicename",
       usersHelpTip: {

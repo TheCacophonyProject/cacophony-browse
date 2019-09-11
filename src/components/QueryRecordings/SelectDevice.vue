@@ -39,7 +39,10 @@ export default {
       fetched: state => state.Devices.fetched,
       devices: state =>
         state.Devices.devices.map(device => {
-          return { id: device.id, name: device.devicename };
+          return {
+            id: device.id,
+            name: device.devicename
+          };
         }),
       groups: state =>
         state.Groups.groups.map(group => {
