@@ -142,7 +142,6 @@ export default {
       },
       set(value) {
         this.query.where.type = value;
-        this.$store.commit("User/updateRecordingTypePref", value);
         // If it is an audio recording, then animals and tag types should be
         // disabled as these filters do not apply to audio recordings
         this.isAudio = value !== "video";
@@ -277,6 +276,7 @@ export default {
   },
   methods: {
     submit: function() {
+      this.$store.commit("User/updateRecordingTypePref", this.recordingType);
       this.$emit("submit");
       this.toggleSearchPanel();
     },
