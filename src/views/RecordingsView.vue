@@ -450,7 +450,7 @@ export default {
     },
     serialiseQuery(query, useForApiCall = false) {
       const where = {};
-      where.type = query.where.type;
+      where.type = query.where.type || this.$store.state.User.recordingTypePref;
       if (query.where.hasOwnProperty("dateRange")) {
         // If it's a custom range, that can be inferred by the presence of recordingDateTime.
         // Otherwise, we'll synthesise recordingDateTime here from relative time.
