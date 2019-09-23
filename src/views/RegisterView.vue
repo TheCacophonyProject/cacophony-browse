@@ -124,16 +124,19 @@ export default {
         }
         return `Minimum username length is ${usernameLength} characters`;
       }
+      return null;
     },
     passwordFeedback() {
       if (this.$v.form.password.$invalid) {
         return `Minimum password length is ${passwordLength} characters`;
       }
+      return null;
     },
     passwordConfirmFeedback() {
       if (this.$v.form.passwordConfirm.$invalid) {
         return `Must match password`;
       }
+      return null;
     }
   },
   validations: {

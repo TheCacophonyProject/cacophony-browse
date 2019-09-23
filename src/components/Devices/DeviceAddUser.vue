@@ -54,6 +54,7 @@ export default {
       if (this.$v.form.username.$invalid) {
         return `Username is required`;
       }
+      return null;
     },
     ...mapState({
       device: state => state.Devices.currentDevice,

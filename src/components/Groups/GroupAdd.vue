@@ -53,6 +53,7 @@ export default {
       if (this.$v.form.groupName.$invalid) {
         return `Group name must be at least ${groupNameMinLength} characters`;
       }
+      return null;
     },
     ...mapState({
       fetched: state => state.Groups.fetched

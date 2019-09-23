@@ -65,11 +65,10 @@
 import { mapState } from "vuex";
 import GroupUserAdd from "./GroupUserAdd.vue";
 import Help from "../Help.vue";
-import IconLink from "../IconLink.vue";
 
 export default {
   name: "GroupDetail",
-  components: { GroupUserAdd, Help, IconLink },
+  components: { GroupUserAdd, Help },
   props: {
     group: {
       type: Object,

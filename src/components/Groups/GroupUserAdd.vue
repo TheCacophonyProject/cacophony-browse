@@ -56,6 +56,7 @@ export default {
       if (this.$v.form.username.$invalid) {
         return `Username is required`;
       }
+      return null;
     }
   },
   validations: {

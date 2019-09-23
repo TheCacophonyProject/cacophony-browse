@@ -44,20 +44,15 @@
 
 <script>
 import { mapState } from "vuex";
-import PrevNext from "./PrevNext.vue";
-import RecordingProperties from "./RecordingProperties.vue";
 import BasicTags from "../Audio/BasicTags.vue";
 import CustomTags from "../Audio/CustomTags.vue";
 import TagList from "../Audio/TagList.vue";
-//import config from '../../config.js';
 
 export default {
   name: "AudioRecording",
   components: {
     CustomTags,
     BasicTags,
-    PrevNext,
-    RecordingProperties,
     TagList
   },
   props: {

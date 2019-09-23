@@ -29,13 +29,12 @@
 
 <script>
 import { mapState } from "vuex";
-import DeviceDetail from "./DeviceDetail.vue";
 import Spinner from "../Spinner.vue";
 import IconLink from "../IconLink.vue";
 
 export default {
   name: "DevicesListing",
-  components: { DeviceDetail, Spinner, IconLink },
+  components: { Spinner, IconLink },
   data() {
     return {
       devicesTableFields: [{ key: "devicename", label: "Devices" }]

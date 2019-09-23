@@ -78,7 +78,7 @@ const getters = {
 };
 
 const actions = {
-  async QUERY_RECORDING(undefined, { params, direction, skipMessage }) {
+  async QUERY_RECORDING(_, { params, direction, skipMessage }) {
     const { result, success } = await api.recording.query(params);
     if (!success || !result.rows || result.rows.length == 0) {
       if (!skipMessage) {
@@ -123,9 +123,10 @@ const actions = {
     }
 
     // Add an initial tag to update the UI more quickly.
-    tag.id = result.tagId;
-    tag.createdAt = new Date();
-    commit("addTag", tag);
+    const newTag = Object.assign({}, tag);
+    newTag.id = result.tagId;
+    newTag.createdAt = new Date();
+    commit("addTag", newTag);
 
     // Resync all recording tags from the API.
     const { success: syncSuccess, result: syncResult } = await api.recording.id(
@@ -147,10 +148,11 @@ const actions = {
     }
 
     // Add an initial tag to update the UI more quickly.
-    tag.id = result.trackTagId;
-    tag.TrackId = trackId;
-    tag.createdAt = new Date();
-    commit("addTrackTag", tag);
+    const newTag = Object.assign({}, tag);
+    newTag.id = result.trackTagId;
+    newTag.TrackId = trackId;
+    newTag.createdAt = new Date();
+    commit("addTrackTag", newTag);
 
     // Resync all tags for the track from the API.
     const {
