@@ -1,10 +1,7 @@
 <template>
   <b-container v-if="recording">
     <b-row>
-      <b-col 
-        cols="12" 
-        lg="8" 
-        class="recording-details">
+      <b-col cols="12" lg="8" class="recording-details">
         <h4 class="recording-title">
           <font-awesome-icon
             icon="microchip"
@@ -21,7 +18,7 @@
           :variant="alertVariant"
           dismissible
           @dismissed="showAlert = false"
-        >{{ alertMessage }}</b-alert
+          >{{ alertMessage }}</b-alert
         >
       </b-col>
     </b-row>

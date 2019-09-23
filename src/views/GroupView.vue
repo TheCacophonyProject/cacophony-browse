@@ -1,19 +1,16 @@
 <template>
   <b-container>
-    <header
-      v-if="fetched">
+    <header v-if="fetched">
       <h1>Group: {{ group.groupname }}</h1>
       <icon-link
         :icon="['fas', 'angle-left']"
-        :link="{ name: 'groups'}"
-        :position="'right'"/>
-    </header>
-    <spinner :fetching="!fetched"/>
-    <div v-if="group && fetched">
-      <group-detail
-        :group="group"
-        :user="currentUser"
+        :link="{ name: 'groups' }"
+        :position="'right'"
       />
+    </header>
+    <spinner :fetching="!fetched" />
+    <div v-if="group && fetched">
+      <group-detail :group="group" :user="currentUser" />
     </div>
   </b-container>
 </template>

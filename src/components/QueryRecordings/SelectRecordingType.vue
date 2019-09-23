@@ -4,7 +4,8 @@
     <b-form-select
       :value="value"
       :options="options"
-      @input="$emit('input', $event)"/>
+      @input="$emit('input', $event)"
+    />
   </b-form-group>
 </template>
 
@@ -30,5 +31,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

@@ -4,13 +4,12 @@
       <h6>Animals</h6>
       <div class="tag-btns-wrapper animals">
         <button
-          v-for="(animal) in animals"
+          v-for="animal in animals"
           :key="animal"
           :class="['btn btn-light btn-tag', getClass(animal)]"
-          @click="quickTag(animal)">
-          <img
-            :title="getTitle(animal)"
-            :src="getSrc(animal)">
+          @click="quickTag(animal)"
+        >
+          <img :title="getTitle(animal)" :src="getSrc(animal)" />
           <div class="tag-name">{{ animal }}</div>
         </button>
       </div>
@@ -21,31 +20,33 @@
       <div class="tag-btns-wrapper other">
         <button
           :class="['btn btn-light btn-tag', getClass('unidentified')]"
-          @click="quickTag('unidentified')">
+          @click="quickTag('unidentified')"
+        >
           <img
             title="Mark as unidentified (meaning the type of animal is unclear)"
-            src="../../assets/video/unknown.png">
+            src="../../assets/video/unknown.png"
+          />
           <div class="tag-name">unknown</div>
         </button>
         <div
           :class="['btn btn-light btn-tag', getClass('false-positive')]"
-          @click="quickTag('false positive')">
+          @click="quickTag('false positive')"
+        >
           <img
             title="Mark as nothing or false positive (meaning there is no animal)"
-            src="../../assets/video/none.png">
+            src="../../assets/video/none.png"
+          />
           <div class="tag-name">nothing</div>
         </div>
-        <div
-          v-b-modal="'custom-track-tag'"
-          class="btn btn-light btn-tag">
+        <div v-b-modal="'custom-track-tag'" class="btn btn-light btn-tag">
           <img
             title="Open form to add other tag"
-            src="../../assets/video/plus.png">
+            src="../../assets/video/plus.png"
+          />
           <div class="tag-name">other...</div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 

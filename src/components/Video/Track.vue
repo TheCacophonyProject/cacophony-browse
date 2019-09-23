@@ -1,55 +1,46 @@
 <template>
-  <div
-    :class="['card', trackClass()]" >
+  <div :class="['card', trackClass()]">
     <div class="card-header">
       <button
         v-if="index != 0"
         title="Previous track"
         class="prev-track button btn"
-        @click="trackSelected(-1)">
-        <font-awesome-icon
-
-          icon="angle-left"/>
-      </button>
-      <h5
-        class="track-title"
-        @click="trackSelected(0)"
+        @click="trackSelected(-1)"
       >
-        <span
-          :style="getIconStyle()"
-          class="track-image border"/>
-        Track {{ index + 1 }} <span class="out-of-tracks">/ {{ numTracks }}</span>
+        <font-awesome-icon icon="angle-left" />
+      </button>
+      <h5 class="track-title" @click="trackSelected(0)">
+        <span :style="getIconStyle()" class="track-image border" />
+        Track {{ index + 1 }}
+        <span class="out-of-tracks">/ {{ numTracks }}</span>
       </h5>
-      <div
-        class="track-time"
-        @click="trackSelected(0)">
-        <span class="title">Time:</span> {{ track.data.start_s }} - {{ track.data.end_s }}s <br>
-        <span class="delta"> (&#916; {{ (track.data.end_s - track.data.start_s) | currency('', 1) }}s) </span>
+      <div class="track-time" @click="trackSelected(0)">
+        <span class="title">Time:</span> {{ track.data.start_s }} -
+        {{ track.data.end_s }}s <br />
+        <span class="delta">
+          (&#916;
+          {{ (track.data.end_s - track.data.start_s) | currency("", 1) }}s)
+        </span>
       </div>
       <button
         v-if="index < numTracks - 1 && show"
         title="Next track"
         class="next-track button btn"
-        @click="trackSelected(1)">
-        <font-awesome-icon
-          icon="angle-right"/>
+        @click="trackSelected(1)"
+      >
+        <font-awesome-icon icon="angle-right" />
       </button>
       {{ message }}
     </div>
-    <div
-      v-if="show"
-      class="card-body">
-      <QuickTagTrack
-        :tags="track.TrackTags"
-        @addTag="addTag($event)"/>
-      <AddCustomTrackTag
-        @addTag="addTag($event)"/>
+    <div v-if="show" class="card-body">
+      <QuickTagTrack :tags="track.TrackTags" @addTag="addTag($event)" />
+      <AddCustomTrackTag @addTag="addTag($event)" />
       <TrackTags
         :items="track.TrackTags"
         @addTag="addTag($event)"
-        @deleteTag="deleteTag($event)"/>
-      <TrackData
-        :track-data="track.data"/>
+        @deleteTag="deleteTag($event)"
+      />
+      <TrackData :track-data="track.data" />
     </div>
   </div>
 </template>

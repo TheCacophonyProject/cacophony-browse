@@ -1,8 +1,6 @@
 <template>
   <b-container>
-    <ScaleChoice 
-      v-if="!fetching" 
-      v-model="logarithmic" />
+    <ScaleChoice v-if="!fetching" v-model="logarithmic" />
     <div style="height: 60vh; width: 100%">
       <Spinner :fetching="fetching" />
       <BarChart
@@ -17,34 +15,24 @@
     </div>
     <b-row>
       <b-col>
-        <DateRange 
-          v-model="dateRange" 
-          :vertical="vertical" />
+        <DateRange v-model="dateRange" :vertical="vertical" />
       </b-col>
       <b-col>
-        <RecordingType 
-          v-model="recordingType" 
-          :vertical="vertical" />
+        <RecordingType v-model="recordingType" :vertical="vertical" />
       </b-col>
       <b-col>
-        <DeviceGroups 
-          v-model="showGroups" 
-          :all-groups="allGroups" />
+        <DeviceGroups v-model="showGroups" :all-groups="allGroups" />
       </b-col>
     </b-row>
 
-    <div 
-      v-if="!fetching && unused.length > 0" 
-      class="mt-2">
+    <div v-if="!fetching && unused.length > 0" class="mt-2">
       Devices with no recordings for the selected time period:
       <ul>
-        <li 
-          v-for="(name, index) in unused" 
-          :key="index">
+        <li v-for="(name, index) in unused" :key="index">
           {{ name }}
         </li>
       </ul>
-  </div></b-container
+    </div></b-container
   >
 </template>
 

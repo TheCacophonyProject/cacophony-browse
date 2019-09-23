@@ -1,29 +1,18 @@
 <template>
-  <b-container
-    class="video-elements-wrapper"
-  >
-    <b-row
-      class="no-gutters"
-    >
-      <b-col
-        cols="12"
-        lg="8"
-      >
+  <b-container class="video-elements-wrapper">
+    <b-row class="no-gutters">
+      <b-col cols="12" lg="8">
         <ThermalVideoPlayer
-          ref = "thermalPlayer"
+          ref="thermalPlayer"
           :video-url="videoUrl"
           :tracks="orderedTracks()"
           :current-track="selectedTrack"
-          :colours="colours"/>
+          :colours="colours"
+        />
       </b-col>
 
-      <b-col
-        cols="12"
-        lg="4">
-        <div
-          v-if="tracks && tracks.length > 0"
-          class="accordion"
-        >
+      <b-col cols="12" lg="4">
+        <div v-if="tracks && tracks.length > 0" class="accordion">
           <TrackInfo
             v-for="(track, index) in orderedTracks()"
             :key="index"
@@ -31,25 +20,22 @@
             :index="index"
             :num-tracks="tracks.length"
             :recording-id="getRecordingId()"
-            :show="index==selectedTrack"
+            :show="index == selectedTrack"
             :colour="colours[index % colours.length]"
-            @trackSelected="trackSelected($event)"/>
+            @trackSelected="trackSelected($event)"
+          />
         </div>
         <div
           v-if="recording && recording['processingState'] != 'FINISHED'"
-          class="processing">
+          class="processing"
+        >
           Recording still processing...
         </div>
       </b-col>
     </b-row>
     <b-row>
-      <b-col
-        cols="12"
-        lg="8"
-      >
-        <PrevNext
-          :recording="recording"
-          @nextOrPreviousRecording="prevNext"/>
+      <b-col cols="12" lg="8">
+        <PrevNext :recording="recording" @nextOrPreviousRecording="prevNext" />
         <RecordingControls
           :items="tagItems"
           :comment="recording.comment"
@@ -58,19 +44,14 @@
           @deleteTag="deleteTag($event)"
           @addTag="addTag($event)"
           @updateComment="updateComment($event)"
-          @nextOrPreviousRecording="gotoNextRecording('either', 'any')"/>
+          @nextOrPreviousRecording="gotoNextRecording('either', 'any')"
+        />
       </b-col>
-      <b-col
-        cols="12"
-        lg="4"
-      >
-        <RecordingProperties
-          :recording="recording"/>
+      <b-col cols="12" lg="4">
+        <RecordingProperties :recording="recording" />
       </b-col>
-
     </b-row>
   </b-container>
-
 </template>
 
 <script>

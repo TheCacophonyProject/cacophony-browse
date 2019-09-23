@@ -1,14 +1,7 @@
 <template>
-  <b-card-group
-    deck
-    class="group-add">
+  <b-card-group deck class="group-add">
     <b-card bg-variant="light">
-
-      <b-form
-        inline
-        class="add-group-form"
-        @submit="addNewGroup">
-
+      <b-form inline class="add-group-form" @submit="addNewGroup">
         <b-form-group
           :state="!$v.form.groupName.$error"
           :invalid-feedback="groupNameInvalidFeedback"
@@ -30,12 +23,12 @@
           <b-button
             :disabled="$v.form.$invalid || !fetched"
             type="submit"
-            variant="primary">
+            variant="primary"
+          >
             Create new group
           </b-button>
         </b-form-group>
       </b-form>
-
     </b-card>
   </b-card-group>
 </template>

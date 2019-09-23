@@ -1,6 +1,6 @@
 <template>
   <div>
-    <hero/>
+    <hero />
     <b-container class="col-md-6 col-lg-5">
       <h1>Add Email</h1>
 
@@ -9,26 +9,17 @@
           :show="!!errorMessage"
           variant="danger"
           dismissible
-          @dismissed="errorMessage=undefined">
+          @dismissed="errorMessage = undefined"
+        >
           {{ errorMessage }}
         </b-alert>
 
-        <b-form-group
-          label="Email"
-          label-for="input-email">
-          <b-form-input
-            id="input-email"
-            v-model="email"
-            type="email"/>
+        <b-form-group label="Email" label-for="input-email">
+          <b-form-input id="input-email" v-model="email" type="email" />
         </b-form-group>
 
-        <b-button
-          type="submit"
-          variant="primary">Save Email
-        </b-button>
-
+        <b-button type="submit" variant="primary">Save Email </b-button>
       </b-form>
-
     </b-container>
   </div>
 </template>

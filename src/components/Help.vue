@@ -1,7 +1,5 @@
 <template>
-  <span
-    v-b-tooltip.hover="helpTip"
-    class="float-right help">?</span>
+  <span v-b-tooltip.hover="helpTip" class="float-right help">?</span>
 </template>
 
 <script>

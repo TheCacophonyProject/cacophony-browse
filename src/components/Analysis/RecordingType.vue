@@ -5,7 +5,8 @@
         v-for="(type, index) in types"
         :key="index"
         :variant="variant(type.value)"
-        @click="$emit('input', type.value)">
+        @click="$emit('input', type.value)"
+      >
         {{ type.text }}
       </b-btn>
     </b-button-group>

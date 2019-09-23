@@ -7,102 +7,64 @@
   >
     <div class="recording-type">
       <span v-if="item.type === 'audio'">
-        <font-awesome-icon
-          :icon="['far', 'file-audio']"
-          size="2x"
-        />
+        <font-awesome-icon :icon="['far', 'file-audio']" size="2x" />
       </span>
       <span v-else-if="item.type === 'thermalRaw'">
-        <font-awesome-icon
-          :icon="['far', 'file-video']"
-          size="2x"
-        />
+        <font-awesome-icon :icon="['far', 'file-video']" size="2x" />
       </span>
     </div>
     <div class="recording-main">
       <div class="recording-details">
         <span class="recording-group">
-          <font-awesome-icon
-            icon="users"
-            size="xs"
-          />
+          <font-awesome-icon icon="users" size="xs" />
           {{ item.groupname }}
         </span>
         <span class="recording-device">
-          <font-awesome-icon
-            icon="microchip"
-            size="xs"
-          />
+          <font-awesome-icon icon="microchip" size="xs" />
           {{ item.devicename }}
         </span>
       </div>
-      <div
-        v-if="item.tags.length !== 0"
-        class="recording-tags"
-      >
-        <TagBadge
-          v-for="(tag, index) in item.tags"
-          :key="index"
-          :tag="tag"
-        />
+      <div v-if="item.tags.length !== 0" class="recording-tags">
+        <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />
       </div>
       <div class="recording-time-duration">
         <div class="recording-time">
-          <font-awesome-icon
-            :icon="['far', 'calendar']"
-            size="xs"
-          />
+          <font-awesome-icon :icon="['far', 'calendar']" size="xs" />
           {{ item.date }} {{ item.time }}
         </div>
         <div class="recording-duration">
-          <font-awesome-icon
-            :icon="['far', 'clock']"
-            size="xs"
-          />
+          <font-awesome-icon :icon="['far', 'clock']" size="xs" />
           {{ item.duration }} seconds
         </div>
-        <div
-          v-if="hasBattery"
-          class="recording-battery"
-        >
+        <div v-if="hasBattery" class="recording-battery">
           <BatteryLevel :battery-level="item.other.batteryLevel" />
-        </div >
+        </div>
       </div>
     </div>
-    <div
-      v-if="item.location !== '(unknown)'"
-      class="recording-location"
-    >
+    <div v-if="item.location !== '(unknown)'" class="recording-location">
       <!-- NOTE: Temporary link to google maps while we figure out a good source for a mapping thumbnail service  -->
       <a
-        :href="`https://www.google.com/maps/@${item.location.replace(' ', '')},16z`"
+        :href="
+          `https://www.google.com/maps/@${item.location.replace(' ', '')},16z`
+        "
         target="_blank"
-        @click.stop.prevent="({currentTarget: {href, target}}) => window.open(href, target)">
+        @click.stop.prevent="
+          ({ currentTarget: { href, target } }) => window.open(href, target)
+        "
+      >
         View location
       </a>
     </div>
   </a>
-  <div
-    v-else-if="item && item.id"
-    class="recording-summary-row"
-  >
-    <a
-      :href="`/recording/${item.id}`"
-      target="_blank"
-    >
+  <div v-else-if="item && item.id" class="recording-summary-row">
+    <a :href="`/recording/${item.id}`" target="_blank">
       {{ item.id }}
     </a>
     <span v-if="item.type === 'audio'">
-      <font-awesome-icon
-        :icon="['far', 'file-audio']"
-        size="2x"
-      />
+      <font-awesome-icon :icon="['far', 'file-audio']" size="2x" />
     </span>
     <span v-else-if="item.type === 'thermalRaw'">
-      <font-awesome-icon
-        :icon="['far', 'file-video']"
-        size="2x"
-      />
+      <font-awesome-icon :icon="['far', 'file-video']" size="2x" />
     </span>
 
     <span>{{ item.devicename }}</span>
@@ -112,11 +74,7 @@
     <span class="recording-time">{{ item.time }}</span>
     <span>{{ item.duration }}s</span>
     <span>
-      <TagBadge
-        v-for="(tag, index) in item.tags"
-        :key="index"
-        :tag="tag"
-      />
+      <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />
     </span>
     <BatteryLevel
       v-if="item.other && item.other.batteryLevel"

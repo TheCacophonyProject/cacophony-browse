@@ -1,43 +1,38 @@
 <template>
   <div class="ml-4">
     <h2 class="tags-header">Recording Tags</h2>
-    <div 
-      v-if="items.length == 0" 
-      class="no-tags">
+    <div v-if="items.length == 0" class="no-tags">
       There are no tags for this recording
     </div>
     <b-table
-      v-if="items.length > 0" 
+      v-if="items.length > 0"
       :items="items"
       :fields="fields"
       striped
       responsive
-      @deleteTag="deleteTag($event)">
-      <template
-        slot="startTime"
-        slot-scope="row">
-        {{ row.item.tag.startTime }} 
+      @deleteTag="deleteTag($event)"
+    >
+      <template slot="startTime" slot-scope="row">
+        {{ row.item.tag.startTime }}
       </template>
-      <template
-        slot="replayButton"
-        slot-scope="row">
+      <template slot="replayButton" slot-scope="row">
         <font-awesome-icon
           v-b-tooltip.hover="'Replay'"
           :icon="['fa', 'play']"
           size="2x"
           style="cursor: pointer;"
-          @click="$emit('replay', row.item.tag.startTime)"/>       
+          @click="$emit('replay', row.item.tag.startTime)"
+        />
       </template>
 
-      <template
-        slot="deleteButton"
-        slot-scope="row">
+      <template slot="deleteButton" slot-scope="row">
         <font-awesome-icon
           v-b-tooltip.hover="'Delete tag'"
           icon="trash"
           size="2x"
           style="cursor: pointer;"
-          @click="$emit('deleteTag', row.item.tag.id)"/>       
+          @click="$emit('deleteTag', row.item.tag.id)"
+        />
       </template>
     </b-table>
   </div>
@@ -49,7 +44,7 @@ export default {
   props: {
     items: {
       type: Array,
-      required: true
+     required: true
     }
   },
   data() {
@@ -67,7 +62,6 @@ export default {
   methods: {}
 };
 </script>
-
 
 <style scoped>
 .tags-header {

@@ -1,22 +1,12 @@
 module.exports = {
-  "parser": "vue-eslint-parser",
-  plugins: [
-    "import"
-  ],
-  extends: [
-    "plugin:vue/recommended",
+  "root": true,
+  "extends": [
+    "plugin:vue/essential",
     "plugin:prettier/recommended",
-    "eslint:recommended",
-    "plugin:import/errors",
+    "eslint:recommended"
   ],
-  "parserOptions": {
-    "ecmaVersion": 8,
-    "ecmaFeatures": {
-      "globalReturn": true,
-      "experimentalObjectRestSpread": true
-    }
-  },
   rules: {
+    'no-prototype-builtins': 'off',
     'linebreak-style': ['warn', 'unix'],
     'quotes': 'off',
     'semi': ['warn', 'always'],
@@ -28,4 +18,4 @@ module.exports = {
     'brace-style': ['warn'],
     'prefer-const': ['warn']
   },
-};
+}

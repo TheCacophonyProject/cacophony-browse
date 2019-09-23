@@ -1,9 +1,8 @@
 <template>
-  <div class="hero"/>
+  <div class="hero" />
 </template>
 
-<script>
-</script>
+<script></script>
 
 <style>
 .hero {

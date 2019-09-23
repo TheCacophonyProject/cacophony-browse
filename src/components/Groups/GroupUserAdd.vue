@@ -2,11 +2,7 @@
   <b-card bg-variant="light">
     <h3>Add user</h3>
 
-    <b-form
-      inline
-      class="add-user-form"
-      @submit="addUser">
-
+    <b-form inline class="add-user-form" @submit="addUser">
       <b-input
         id="input-groupname"
         :state="!$v.form.username.$error"
@@ -23,19 +19,16 @@
           v-model="$v.form.isAdmin.$model"
           plain
           value="true"
-          unchecked-value="false">
+          unchecked-value="false"
+        >
           Admin?
         </b-form-checkbox>
 
-        <b-button
-          :disabled="$v.form.$invalid"
-          type="submit"
-          variant="primary">
+        <b-button :disabled="$v.form.$invalid" type="submit" variant="primary">
           Add user to group
         </b-button>
       </div>
     </b-form>
-
   </b-card>
 </template>
 

@@ -5,7 +5,8 @@
         v-for="(date, index) in dates"
         :key="index"
         :variant="variant(date.value)"
-        @click="$emit('input', date.value)">
+        @click="$emit('input', date.value)"
+      >
         {{ date.text }}
       </b-btn>
     </b-button-group>

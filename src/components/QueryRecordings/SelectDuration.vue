@@ -16,14 +16,16 @@
         type="number"
         min="0"
         class="form-control col-4"
-        @change="updateLow"/>
+        @change="updateLow"
+      />
       <label class="col-4 text-center col-form-label">to</label>
       <b-form-input
         :min="value.low"
         :value="value.high"
         type="number"
         class="form-control col-4"
-        @change="updateHigh"/>
+        @change="updateHigh"
+      />
     </b-form-row>
   </b-form-group>
 </template>

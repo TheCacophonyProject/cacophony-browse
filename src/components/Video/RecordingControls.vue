@@ -2,95 +2,88 @@
   <div>
     <Comment
       :initial-comment="comment"
-      @updateComment="updateComment($event)"/>
+      @updateComment="updateComment($event)"
+    />
     <div class="video-tags">
       <b-row class="pt-2 pb-2">
-        <b-col
-          cols="6"
-          md="3">
-          <b-button-group
-            class="btn-block pb-2">
-            <b-dropdown
-              text="Label"
-              right
-              variant="info"
-              class="btn-block">
+        <b-col cols="6" md="3">
+          <b-button-group class="btn-block pb-2">
+            <b-dropdown text="Label" right variant="info" class="btn-block">
               <b-dropdown-item
-                v-b-tooltip.hover.left="'An animal is in a trap in this recording'"
-                @click="addTrappedTag">
+                v-b-tooltip.hover.left="
+                  'An animal is in a trap in this recording'
+                "
+                @click="addTrappedTag"
+              >
                 Animal in trap
               </b-dropdown-item>
 
               <b-dropdown-item
-                v-b-tooltip.hover.left="'An animal interacted with a trap in this recording'"
-                @click="addTrapInteractionTag">
+                v-b-tooltip.hover.left="
+                  'An animal interacted with a trap in this recording'
+                "
+                @click="addTrapInteractionTag"
+              >
                 Animal interacted with trap
               </b-dropdown-item>
 
               <b-dropdown-item
-                v-b-tooltip.hover.left="'One or more animals do not have a corresponding track in this recording'"
-                @click="addMissedTrackTag">
+                v-b-tooltip.hover.left="
+                  'One or more animals do not have a corresponding track in this recording'
+                "
+                @click="addMissedTrackTag"
+              >
                 Missed track
               </b-dropdown-item>
 
               <b-dropdown-item
-                v-b-tooltip.hover.left="'Mark this as a cool or interesting recording'"
-                @click="addCoolTag">
+                v-b-tooltip.hover.left="
+                  'Mark this as a cool or interesting recording'
+                "
+                @click="addCoolTag"
+              >
                 Cool
               </b-dropdown-item>
             </b-dropdown>
           </b-button-group>
         </b-col>
 
-        <b-col
-          cols="6"
-          md="3">
-          <b-button
-            v-b-modal.update-comment
-            variant="info"
-            block>
+        <b-col cols="6" md="3">
+          <b-button v-b-modal.update-comment variant="info" block>
             Comment
           </b-button>
         </b-col>
 
-        <b-col
-          cols="6"
-          md="3">
+        <b-col cols="6" md="3">
           <b-button-group
             v-b-tooltip.hover.top="'Download the files for this recording'"
-            class="btn-block">
-            <b-dropdown
-              text="Download"
-              right
-              class="btn-block">
-              <b-dropdown-item
-                :href="downloadFileUrl"
-                target="_blank">
-                <font-awesome-icon :icon="['far', 'file-video']"/>
+            class="btn-block"
+          >
+            <b-dropdown text="Download" right class="btn-block">
+              <b-dropdown-item :href="downloadFileUrl" target="_blank">
+                <font-awesome-icon :icon="['far', 'file-video']" />
                 Video
               </b-dropdown-item>
-              <b-dropdown-item
-                :href="downloadRawUrl"
-                target="_blank">
-                <font-awesome-icon :icon="['far', 'file']"/>
+              <b-dropdown-item :href="downloadRawUrl" target="_blank">
+                <font-awesome-icon :icon="['far', 'file']" />
                 CPTV
               </b-dropdown-item>
             </b-dropdown>
           </b-button-group>
         </b-col>
 
-        <b-col
-          cols="6"
-          md="3">
+        <b-col cols="6" md="3">
           <b-button
             v-b-tooltip.hover.bottomleft="'Delete this recording'"
             :disabled="deleteDisabled"
             variant="danger"
             block
-            @click="deleteRecording()">
+            @click="deleteRecording()"
+          >
             <font-awesome-icon
               icon="exclamation-triangle"
-              class="d-none d-md-inline"/>
+              class="d-none d-md-inline"
+            />
             Delete
           </b-button>
         </b-col>
@@ -104,20 +97,18 @@
         class=""
         striped
         hover
-        responsive>
-        <template
-          slot="whatDetail"
-          slot-scope="row">
+        responsive
+      >
+        <template slot="whatDetail" slot-scope="row">
           {{ whatDetail(row.item) }}
         </template>
-        <template
-          slot="deleteButton"
-          slot-scope="row">
+        <template slot="deleteButton" slot-scope="row">
           <button class="button btn">
             <font-awesome-icon
               v-b-tooltip.hover.left="'Delete'"
               icon="trash"
-              @click="$emit('deleteTag', row.item.tag.id)"/>
+              @click="$emit('deleteTag', row.item.tag.id)"
+            />
           </button>
         </template>
       </b-table>

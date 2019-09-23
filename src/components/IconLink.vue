@@ -1,12 +1,11 @@
 <template>
-  <b-link
-    :to="link"
-    :class="position">
+  <b-link :to="link" :class="position">
     <font-awesome-icon
       :icon="icon"
       :class="colour"
       size="2x"
-      style="cursor: pointer;"/>
+      style="cursor: pointer;"
+    />
   </b-link>
 </template>
 

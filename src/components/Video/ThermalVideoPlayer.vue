@@ -1,7 +1,5 @@
 <template>
-  <div 
-    ref="container" 
-    class="video-container">
+  <div ref="container" class="video-container">
     <canvas
       ref="canvas"
       :width="canvasWidth"
@@ -385,5 +383,4 @@ export default {
   padding: 0;
 }
 </style>
-<style src="video.js/dist/video-js.css">
-</style>
+<style src="video.js/dist/video-js.css"></style>

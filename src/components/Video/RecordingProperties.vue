@@ -2,13 +2,21 @@
   <div>
     <b-form>
       <b-form-group>
-        <div v-if="recording.additionalMetadata && 'user-entered' in recording.additionalMetadata">
+        <div
+          v-if="
+            recording.additionalMetadata &&
+              'user-entered' in recording.additionalMetadata
+          "
+        >
           <h3>Properties</h3>
           <div>
             <p
-              v-for="(value, key) of recording.additionalMetadata['user-entered']"
+              v-for="(value, key) of recording.additionalMetadata[
+                'user-entered'
+              ]"
               :key="key"
-              class="user-prop">
+              class="user-prop"
+            >
               <strong>{{ key }}:</strong> {{ value }}
             </p>
           </div>
@@ -18,53 +26,50 @@
           <h5
             id="technical-details"
             class="simple-accordion-header"
-            @click="display=!display"
-          >Technical details &nbsp;
-            <span
-              v-if="!display"
-              title="Show details"
-              class="pointer">
-              <font-awesome-icon
-                icon="angle-down"
-                class="fa-1x"/>
+            @click="display = !display"
+          >
+            Technical details &nbsp;
+            <span v-if="!display" title="Show details" class="pointer">
+              <font-awesome-icon icon="angle-down" class="fa-1x" />
             </span>
-            <span
-              v-if="display"
-              title="Hide details"
-              class="pointer">
-              <font-awesome-icon
-                icon="angle-up"
-                class="fa-1x"/>
+            <span v-if="display" title="Hide details" class="pointer">
+              <font-awesome-icon icon="angle-up" class="fa-1x" />
             </span>
           </h5>
           <div v-if="display">
-            <div
-              v-for="prop of properties"
-              :key="prop.key">
+            <div v-for="prop of properties" :key="prop.key">
               <p
                 v-if="recording.batteryLevel && prop.key === 'batteryLevel'"
-                class="prop">
-                <strong>Battery Level: </strong><BatteryLevel :battery-level="recording.batteryLevel"/>
+                class="prop"
+              >
+                <strong>Battery Level: </strong
+                ><BatteryLevel :battery-level="recording.batteryLevel" />
               </p>
               <p
                 v-else-if="recording.location && prop.key === 'location'"
-                class="prop">
+                class="prop"
+              >
                 <strong>Location: </strong>{{ parseLocation }}
               </p>
-              <div v-else-if="recording.additionalMetadata && prop.key === 'additionalMetadata'">
+              <div
+                v-else-if="
+                  recording.additionalMetadata &&
+                    prop.key === 'additionalMetadata'
+                "
+              >
                 <div
                   v-for="(value, key) of recording.additionalMetadata"
-                  :key="key">
+                  :key="key"
+                >
                   <p
                     v-if="key != 'tracks' && key != 'user-entered'"
-                    class="prop">
+                    class="prop"
+                  >
                     <strong>{{ key }}:</strong> {{ value }}
                   </p>
                 </div>
               </div>
-              <p
-                v-else-if="recording[prop.key] != null"
-                class="prop">
+              <p v-else-if="recording[prop.key] != null" class="prop">
                 <strong>{{ prop.title }}:</strong> {{ recording[prop.key] }}
               </p>
             </div>

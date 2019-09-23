@@ -1,16 +1,16 @@
 <template>
-  <b-form-group
-    v-b-tooltip.hover="tooltipTitle">
+  <b-form-group v-b-tooltip.hover="tooltipTitle">
     <label>Animals</label>
-    <multiselect 
+    <multiselect
       :value="value"
-      :options="options" 
-      :multiple="true" 
+      :options="options"
+      :multiple="true"
       :placeholder="placeholder"
       :disabled="disabled"
-      label="text" 
+      label="text"
       track-by="value"
-      @input="$emit('input', $event)"/>
+      @input="$emit('input', $event)"
+    />
   </b-form-group>
 </template>
 <script>
@@ -58,5 +58,4 @@ export default {
 };
 </script>
 
-<style src="vue-multiselect/dist/vue-multiselect.min.css">
-</style>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

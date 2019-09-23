@@ -1,14 +1,10 @@
 <template>
   <b-list-group-item
-    :to="{ path: 'recordings', query: query}"
+    :to="{ path: 'recordings', query: query }"
     class="d-flex justify-content-between align-items-center"
   >
     {{ group.groupname }}
-    <b-badge
-      v-if="count > 0"
-      pill
-      variant="primary"
-      class="ml-auto">
+    <b-badge v-if="count > 0" pill variant="primary" class="ml-auto">
       {{ count }}
     </b-badge>
   </b-list-group-item>
@@ -78,5 +74,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
