@@ -1,6 +1,6 @@
 <template v-if="groups">
   <b-container>
-    <h1>Your Groups <help :help-text="helpTip"/></h1>
+    <h1>Your Groups <help :help-text="helpTip" /></h1>
     <group-listing :groups="groups" />
     <group-add />
   </b-container>

@@ -1,6 +1,6 @@
 <template>
   <div class="device-detail">
-    <h2>Users <help :help-text="usersHelpTip"/></h2>
+    <h2>Users <help :help-text="usersHelpTip" /></h2>
 
     <b-table
       :items="device.Users"
@@ -8,33 +8,26 @@
       :sort-by="userSortBy"
       striped
       hover
-      responsive>
-
-      <template
-        slot="admin"
-        slot-scope="data">
+      responsive
+    >
+      <template slot="admin" slot-scope="data">
         {{ data.item.DeviceUsers.admin }}
       </template>
 
-      <template
-        slot="controls"
-        slot-scope="data">
-
+      <template slot="controls" slot-scope="data">
         <b-button
           v-b-tooltip.hover
           v-if="isDeviceAdmin"
           title="Remove user from device"
           class="trash-button"
-          @click="removeUser(data.item.username, uiUser)">
-          <font-awesome-icon
-            icon="trash"
-            size="1x"
-            style="cursor: pointer;"/>
+          @click="removeUser(data.item.username, uiUser)"
+        >
+          <font-awesome-icon icon="trash" size="1x" style="cursor: pointer;" />
         </b-button>
       </template>
     </b-table>
 
-    <device-add-user v-if="isDeviceAdmin"/>
+    <device-add-user v-if="isDeviceAdmin" />
   </div>
 </template>
 

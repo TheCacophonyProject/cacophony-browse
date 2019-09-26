@@ -2,18 +2,17 @@
   <b-container class="sign-wrapper">
     <b-form-row class="align-items-center justify-content-center">
       <div class="sign-form-wrapper bg-white rounded">
-
         <div class="logo" />
 
         <h1 class="text-center">Register</h1>
 
         <b-form @submit="onSubmit">
-
           <b-alert
             :show="!!errorMessage"
             variant="danger"
             dismissible
-            @dismissed="errorMessage=undefined">
+            @dismissed="errorMessage = undefined"
+          >
             {{ errorMessage }}
           </b-alert>
 
@@ -57,7 +56,8 @@
               id="input-password"
               v-model="$v.form.password.$model"
               :state="!$v.form.password.$error"
-              type="password"/>
+              type="password"
+            />
           </b-form-group>
 
           <b-form-group
@@ -69,23 +69,24 @@
             <b-form-input
               v-model="$v.form.passwordConfirm.$model"
               :state="!$v.form.passwordConfirm.$error"
-              type="password"/>
+              type="password"
+            />
           </b-form-group>
 
           <b-button
             :disabled="$v.form.$invalid"
             type="submit"
             class="btn-block"
-            variant="primary">Register
+            variant="primary"
+            >Register
           </b-button>
 
-          <p class="small mt-4 text-center">Already registered? <b-link href="/login">Login here</b-link>.</p>
-
+          <p class="small mt-4 text-center">
+            Already registered? <b-link href="/login">Login here</b-link>.
+          </p>
         </b-form>
-
       </div>
     </b-form-row>
-
   </b-container>
 </template>
 
@@ -123,16 +124,19 @@ export default {
         }
         return `Minimum username length is ${usernameLength} characters`;
       }
+      return null;
     },
     passwordFeedback() {
       if (this.$v.form.password.$invalid) {
         return `Minimum password length is ${passwordLength} characters`;
       }
+      return null;
     },
     passwordConfirmFeedback() {
       if (this.$v.form.passwordConfirm.$invalid) {
         return `Must match password`;
       }
+      return null;
     }
   },
   validations: {

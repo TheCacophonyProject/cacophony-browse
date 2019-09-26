@@ -38,13 +38,9 @@
             <h5 v-else>
               Loading...
             </h5>
-            <p 
-              class="search-description" 
-              v-html="searchDescription" />
+            <p class="search-description" v-html="searchDescription" />
           </div>
-          <div 
-            v-if="!queryPending" 
-            class="results">
+          <div v-if="!queryPending" class="results">
             <div v-if="showCards">
               <div
                 v-for="(itemsByDay, index_a) in tableItemsChunkedByDayAndHour"
@@ -65,9 +61,7 @@
                 </div>
               </div>
             </div>
-            <div 
-              v-else 
-              class="all-rows">
+            <div v-else class="all-rows">
               <div class="results-header">
                 <div>
                   <span>ID</span>
@@ -93,9 +87,7 @@
               </div>
             </div>
           </div>
-          <div 
-            v-else 
-            class="results loading">
+          <div v-else class="results loading">
             <div
               v-for="i in 10"
               :style="{
@@ -105,17 +97,13 @@
               class="recording-placeholder"
             />
           </div>
-          <div 
-            v-if="countMessage === 'No matches'" 
-            class="no-results">
+          <div v-if="countMessage === 'No matches'" class="no-results">
             <h6 class="text-muted">No recordings found</h6>
             <p class="small text-muted">Try modifying your search criteria.</p>
           </div>
         </div>
 
-        <div 
-          v-if="count > perPage" 
-          class="sticky-footer">
+        <div v-if="count > perPage" class="sticky-footer">
           <div class="pagination-per-page">
             <b-form-select
               id="recordsPerPage"

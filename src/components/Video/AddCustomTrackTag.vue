@@ -1,36 +1,20 @@
 <template>
-  <b-modal
-    id="custom-track-tag"
-    title="Add track tag"
-    @ok="quickTag">
+  <b-modal id="custom-track-tag" title="Add track tag" @ok="quickTag">
     <b-form>
-      <b-form-group
-        label="Tag:"
-        horizontal>
-        <b-form-select
-          v-model="whatTag"
-          :options="whatOptions">
+      <b-form-group label="Tag:" horizontal>
+        <b-form-select v-model="whatTag" :options="whatOptions">
           <template slot="first">
-            <option
-              :value="null"
-              disabled>Choose a tag..
-            </option>
+            <option :value="null" disabled>Choose a tag.. </option>
           </template>
         </b-form-select>
       </b-form-group>
 
-      <b-form-group
-        label="Confidence:"
-        horizontal>
-        <b-form-radio-group
-          v-model="confidence"
-          :options="confidenceOptions" />
+      <b-form-group label="Confidence:" horizontal>
+        <b-form-radio-group v-model="confidence" :options="confidenceOptions" />
       </b-form-group>
 
-      <b-form-group
-        label="Comment:"
-        horizontal>
-        <b-form-input v-model="comment"/>
+      <b-form-group label="Comment:" horizontal>
+        <b-form-input v-model="comment" />
       </b-form-group>
     </b-form>
   </b-modal>

@@ -1,49 +1,48 @@
 <template>
   <div class="nav-bar">
     <b-navbar toggleable="lg">
-
       <b-navbar-brand>
-        <router-link
-          class="navbar-brand"
-          to="/"
-          alt="home" />
+        <router-link class="navbar-brand" to="/" alt="home" />
       </b-navbar-brand>
 
-      <b-navbar-toggle target="navbarToggler"/>
+      <b-navbar-toggle target="navbarToggler" />
 
-      <b-collapse
-        id="navbarToggler"
-        is-nav>
-
+      <b-collapse id="navbarToggler" is-nav>
         <b-navbar-nav v-if="isLoggedIn">
           <b-nav-item to="/analysis">Analysis</b-nav-item>
           <b-nav-item to="/recordings">Recordings</b-nav-item>
         </b-navbar-nav>
 
-        <b-navbar-nav
-          v-if="isLoggedIn"
-          class="ml-auto">
-
+        <b-navbar-nav v-if="isLoggedIn" class="ml-auto">
           <b-nav-item-dropdown>
             <template slot="button-content">
               <font-awesome-icon icon="wrench" />&nbsp;Admin
             </template>
-            <b-dropdown-item href="/groups"><font-awesome-icon icon="users" />&nbsp;Groups</b-dropdown-item>
-            <b-dropdown-item href="/devices"><font-awesome-icon icon="microchip" />&nbsp;Devices</b-dropdown-item>
+            <b-dropdown-item href="/groups"
+              ><font-awesome-icon icon="users" />&nbsp;Groups</b-dropdown-item
+            >
+            <b-dropdown-item href="/devices"
+              ><font-awesome-icon
+                icon="microchip"
+              />&nbsp;Devices</b-dropdown-item
+            >
           </b-nav-item-dropdown>
 
           <b-nav-item-dropdown class="profile">
             <template slot="button-content">
-              <font-awesome-icon :icon="['far', 'user-circle']" />&nbsp;{{ userName }}
+              <font-awesome-icon :icon="['far', 'user-circle']" />&nbsp;{{
+                userName
+              }}
             </template>
-            <b-dropdown-item @click="logout"><font-awesome-icon icon="power-off" />&nbsp;Logout</b-dropdown-item>
+            <b-dropdown-item @click="logout"
+              ><font-awesome-icon
+                icon="power-off"
+              />&nbsp;Logout</b-dropdown-item
+            >
           </b-nav-item-dropdown>
-
         </b-navbar-nav>
 
-        <b-navbar-nav
-          v-if="!isLoggedIn"
-          class="ml-auto">
+        <b-navbar-nav v-if="!isLoggedIn" class="ml-auto">
           <b-nav-item to="/login">Login</b-nav-item>
           <b-nav-item to="/register">Register</b-nav-item>
         </b-navbar-nav>

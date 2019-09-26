@@ -1,22 +1,19 @@
 <template>
   <div class="container">
-    <div
-      v-for="(item, index) in getMessages()"
-      :key="index"
-      class="row">
+    <div v-for="(item, index) in getMessages()" :key="index" class="row">
       <b-alert
         v-if="displayLevels.includes(item.level)"
         :variant="item.level"
         show
         dismissible
-
-        @dismissed="acknowledgeMessages">
+        @dismissed="acknowledgeMessages"
+      >
         <div
-          class="col-sm-11 offset-sm-1 col-md-7 offset-md-2 col-lg-4 offset-lg-4 box">
-          <icon-link
-            :icon="['fas', 'exclamation-triangle']"
-            :colour="'red'"/>
-          Oops! Something went wrong. <br> Message is: "{{ item.message }}"
+          class="col-sm-11 offset-sm-1 col-md-7 offset-md-2 col-lg-4 offset-lg-4 box"
+        >
+          <icon-link :icon="['fas', 'exclamation-triangle']" :colour="'red'" />
+          Oops! Something went wrong. <br />
+          Message is: "{{ item.message }}"
         </div>
       </b-alert>
     </div>

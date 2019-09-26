@@ -3,7 +3,8 @@
     :pressed="value"
     variant="outline-secondary"
     size="sm"
-    @click="$emit('input', !value)">
+    @click="$emit('input', !value)"
+  >
     Log Scale
   </b-btn>
 </template>

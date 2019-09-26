@@ -1,20 +1,16 @@
 <template>
   <div class="query-recordings">
     <b-button
-      :class="['search-panel-toggle-btn', {'is-collapsed': isCollapsed}]"
+      :class="['search-panel-toggle-btn', { 'is-collapsed': isCollapsed }]"
       variant="primary"
       @click="() => toggleSearchPanel()"
     >
       <span v-if="isCollapsed">
-        <font-awesome-icon
-          :icon="['fas', 'search']"
-        />
+        <font-awesome-icon :icon="['fas', 'search']" />
         <span class="sr-only">Expand search panel</span>
       </span>
       <span v-else>
-        <font-awesome-icon
-          :icon="['fas', 'times']"
-        />
+        <font-awesome-icon :icon="['fas', 'times']" />
         <span class="sr-only">Collapse search panel</span>
       </span>
     </b-button>
@@ -24,19 +20,11 @@
       <SelectRecordingType v-model="recordingType" />
       <SelectDateRange v-model="dateRange" />
       <b-form-row v-if="isCustomDateRange">
-        <b-col
-          sm="6"
-        >
-          <SelectDate
-            v-model="fromDate"
-            title="From Date"/>
+        <b-col sm="6">
+          <SelectDate v-model="fromDate" title="From Date" />
         </b-col>
-        <b-col
-          sm="6"
-        >
-          <SelectDate
-            v-model="toDate"
-            title="To Date"/>
+        <b-col sm="6">
+          <SelectDate v-model="toDate" title="To Date" />
         </b-col>
       </b-form-row>
       <b-form-row>
@@ -47,31 +35,19 @@
             @click="() => toggleAdvancedSearch()"
           >
             Advanced search
-            <font-awesome-icon
-              v-if="!advanced"
-              :icon="['fas', 'caret-down']"
-            />
-            <font-awesome-icon
-              v-else
-              :icon="['fas', 'caret-up']"
-            />
+            <font-awesome-icon v-if="!advanced" :icon="['fas', 'caret-down']" />
+            <font-awesome-icon v-else :icon="['fas', 'caret-up']" />
           </b-button>
         </b-col>
       </b-form-row>
-      <SelectDuration
-        v-if="advanced"
-        v-model="duration"
-      />
-      <SelectTagTypes
-        v-if="advanced"
-        v-model="tagTypes"
-        :disabled="isAudio"
-      />
+      <SelectDuration v-if="advanced" v-model="duration" />
+      <SelectTagTypes v-if="advanced" v-model="tagTypes" :disabled="isAudio" />
       <SelectAnimal
         v-if="advanced"
         v-model="animals"
         :disabled="isAudio"
-        :can-have-sub-tags="canHaveTags"/>
+        :can-have-sub-tags="canHaveTags"
+      />
       <b-button
         :disabled="!isCustomDateRangeAndRangeIsValid || disabled"
         block
@@ -216,8 +192,8 @@ export default {
       },
       set(value) {
         this.rawAnimals = value;
-        this.query.tags = value.map(
-          option => (option.value ? option.value : option.text)
+        this.query.tags = value.map(option =>
+          option.value ? option.value : option.text
         );
         this.hasSpecifiedTags = this.query.tags.length > 0;
         if (this.hasSpecifiedTags) {

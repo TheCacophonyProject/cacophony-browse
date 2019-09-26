@@ -6,19 +6,11 @@
       <dt>Username</dt>
       <dd id="username">{{ username }}</dd>
       <dt v-show="firstname">First name</dt>
-      <dd
-        v-show="firstname"
-        id="firstname">{{ firstname }}
-      </dd>
-      <dt v-show="lastname">Last name
-      </dt>
-      <dd
-        v-show="lastname"
-        id="lastname">{{ lastname }}
-      </dd>
+      <dd v-show="firstname" id="firstname">{{ firstname }}</dd>
+      <dt v-show="lastname">Last name</dt>
+      <dd v-show="lastname" id="lastname">{{ lastname }}</dd>
       <dt>Email</dt>
       <dd id="email">{{ email }}</dd>
-
     </dl>
   </div>
 </template>
@@ -38,5 +30,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

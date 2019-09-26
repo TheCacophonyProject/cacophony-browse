@@ -1,16 +1,13 @@
 <template>
   <div
-    v-if="!isLoaded || isLoaded && hasTracks"
+    v-if="!isLoaded || (isLoaded && hasTracks)"
     ref="scrubber"
     :style="{
       height: `${Math.max(25, 13 * numTracks)}px`
     }"
     class="track-scrubber"
   >
-    <div
-      v-if="!isLoaded"
-      class="loading"
-    >
+    <div v-if="!isLoaded" class="loading">
       Loading track info...
     </div>
     <div v-else>
@@ -29,7 +26,7 @@
       <div
         :style="{
           right: `${canvasWidth - getOffsetForTime(currentVideoTime)}px`,
-          pointerEvents: 'none',
+          pointerEvents: 'none'
         }"
         class="playhead"
       />

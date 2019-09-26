@@ -5,11 +5,10 @@
       title="Update Comment"
       @ok="updateComment"
       @show="reset"
-      @shown="setFocus">
+      @shown="setFocus"
+    >
       <b-form-group label="Comment">
-        <b-input
-          ref="comment-input"
-          v-model="comment"/>
+        <b-input ref="comment-input" v-model="comment" />
       </b-form-group>
     </b-modal>
   </div>
@@ -43,5 +42,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

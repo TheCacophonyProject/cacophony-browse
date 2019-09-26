@@ -1,27 +1,16 @@
 <template>
   <div class="simple-accordion-wrapper">
-    <h6
-      class="simple-accordion-header"
-      @click="show_details=!show_details"
-    >
+    <h6 class="simple-accordion-header" @click="show_details = !show_details">
       Tag history
       <span
         v-if="!show_details"
         title="Show all result classes"
         class="pointer"
       >
-        <font-awesome-icon
-          icon="angle-down"
-          class="fa-1x"/>
+        <font-awesome-icon icon="angle-down" class="fa-1x" />
       </span>
-      <span
-        v-if="show_details"
-        title="Hide other results"
-        class="pointer"
-      >
-        <font-awesome-icon
-          icon="angle-up"
-          class="fa-1x"/>
+      <span v-if="show_details" title="Hide other results" class="pointer">
+        <font-awesome-icon icon="angle-up" class="fa-1x" />
       </span>
     </h6>
     <div v-if="show_details">
@@ -32,40 +21,28 @@
         striped
         hover
         small
-        responsive>
-        <template
-          slot="what"
-          slot-scope="row">
-          <div
-            class="what-image"
-          >
+        responsive
+      >
+        <template slot="what" slot-scope="row">
+          <div class="what-image">
             <img
               v-if="what(row.item.what).link"
               :src="what(row.item.what).link"
               class="tag-img"
-            >
+            />
             {{ what(row.item.what).what }}
           </div>
         </template>
 
-        <template
-          slot="who"
-          slot-scope="row">
-          <span
-            v-if="row.item.User"
-          >
+        <template slot="who" slot-scope="row">
+          <span v-if="row.item.User">
             {{ row.item.User.username }}
           </span>
-          <span
-            v-else
-          >
+          <span v-else>
             Cacophony AI
           </span>
         </template>
-        <template
-          slot="confidence"
-          slot-scope="row"
-        >
+        <template slot="confidence" slot-scope="row">
           {{ confidence(row.item.confidence) }}
         </template>
         <!-- Be careful about changing the tooltips to use a placement
@@ -76,30 +53,24 @@
              - https://github.com/TheCacophonyProject/cacophony-browse/issues/180
              - ttps://github.com/TheCacophonyProject/cacophony-browse/issues/185
           -->
-        <template
-          slot="buttons"
-          slot-scope="row">
+        <template slot="buttons" slot-scope="row">
           <button
             v-b-tooltip.hover.left="'Confirm the automatic tag'"
             v-if="row.item.automatic"
             class="btn"
             @click="confirmTag(row.item)"
           >
-            <font-awesome-icon
-              icon="check-circle"
-            />
+            <font-awesome-icon icon="check-circle" />
           </button>
 
           <button
             v-b-tooltip.hover.left="'Delete tag'"
             v-if="!row.item.automatic"
             class="btn"
-            @click="$emit('deleteTag', row.item)">
-            <font-awesome-icon
-              icon="trash"
-            />
+            @click="$emit('deleteTag', row.item)"
+          >
+            <font-awesome-icon icon="trash" />
           </button>
-
         </template>
       </b-table>
     </div>

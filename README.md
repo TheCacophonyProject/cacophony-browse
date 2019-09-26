@@ -28,6 +28,21 @@ vue-loader](http://vuejs.github.io/vue-loader).
 Please follow the Vue style guide for all development:
 https://vuejs.org/v2/style-guide/#ad
 
+The project is configured to use eslint and prettier. Please ensure
+your development setup included a recent version of prettier. Pull
+requests will be checked to ensure there are no code formatting or
+eslint issues.
+
+To run eslint:
+```
+npm run lint
+```
+
+To run eslint and automatically fix issues:
+```
+npm run lint:fix
+```
+
 # Releases
 
 * Ensure all changes have been merged and are pulled into the local copy.

@@ -1,59 +1,40 @@
 <template>
   <b-container>
     <b-row>
-      <b-col
-        cols="12"
-        lg="8"
-        class="mb-2">
+      <b-col cols="12" lg="8" class="mb-2">
         <audio
           ref="player"
           :src="audioUrl"
           volume="0.75"
           controls
           autoplay
-          class="audio"/>
+          class="audio"
+        />
       </b-col>
     </b-row>
     <b-row>
-      <b-col 
-        cols="2" 
-        class="db">
-        <b-button-group 
-          class="pl-4"
-          vertical>
-          <b-button 
-            class="mt-1" 
-            @click="volumeLoudest">Loudest</b-button>
-          <b-button 
-            class="mt-1" 
-            @click="volumeLouder">Louder</b-button>
+      <b-col cols="2" class="db">
+        <b-button-group class="pl-4" vertical>
+          <b-button class="mt-1" @click="volumeLoudest">Loudest</b-button>
+          <b-button class="mt-1" @click="volumeLouder">Louder</b-button>
           <b-button class="mt-1">Default</b-button>
-          <b-button 
-            class="mt-1" 
-            @click="volumeQuieter">Quieter</b-button>
-          <b-button 
-            class="mt-1" 
-            @click="volumeQuietest">Quietest</b-button>
+          <b-button class="mt-1" @click="volumeQuieter">Quieter</b-button>
+          <b-button class="mt-1" @click="volumeQuietest">Quietest</b-button>
         </b-button-group>
       </b-col>
-      <b-row 
-        class="db m-0 no-gutters">
-        <b-col 
-          offset="1"
-          class="mt-0 ml-0 db"
-          cols="19">   
-          <BasicTags @addAudioTag="addAudioTag($event)"/>              
-          <CustomTags @addAudioTag="addAudioTag($event)"/>
-          <b-button 
-            class="float-right mt-3 mr-1"
-            size="lg"             
-            @click="closeTab()">Done</b-button>                              
+      <b-row class="db m-0 no-gutters">
+        <b-col offset="1" class="mt-0 ml-0 db" cols="19">
+          <BasicTags @addAudioTag="addAudioTag($event)" />
+          <CustomTags @addAudioTag="addAudioTag($event)" />
+          <b-button class="float-right mt-3 mr-1" size="lg" @click="closeTab()"
+            >Done</b-button
+          >
         </b-col>
       </b-row>
     </b-row>
     <b-row>
-      <TagList 
-        :items="tagItems" 
+      <TagList
+        :items="tagItems"
         @deleteTag="deleteTag($event)"
         @replay="replay($event)"
       />
@@ -63,20 +44,15 @@
 
 <script>
 import { mapState } from "vuex";
-import PrevNext from "./PrevNext.vue";
-import RecordingProperties from "./RecordingProperties.vue";
 import BasicTags from "../Audio/BasicTags.vue";
 import CustomTags from "../Audio/CustomTags.vue";
 import TagList from "../Audio/TagList.vue";
-//import config from '../../config.js';
 
 export default {
   name: "AudioRecording",
   components: {
     CustomTags,
     BasicTags,
-    PrevNext,
-    RecordingProperties,
     TagList
   },
   props: {

@@ -1,14 +1,9 @@
 <template>
   <span
     v-b-tooltip="getTagTitle(tag.class)"
-    :class="[
-      'tag',
-      'badge',
-      tag.class
-    ]"
+    :class="['tag', 'badge', tag.class]"
   >
-    <span
-      class="tag-icon">
+    <span class="tag-icon">
       <font-awesome-icon
         v-if="tag.class === 'automatic'"
         icon="cog"

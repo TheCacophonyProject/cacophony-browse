@@ -78,9 +78,7 @@ function addTrackTag(tag, recordingId, trackId) {
 }
 
 function deleteTrackTag(tag, recordingId) {
-  const url = `${config.api}${apiPath}/${recordingId}/tracks/${
-    tag.TrackId
-  }/tags/${tag.id}`;
+  const url = `${config.api}${apiPath}/${recordingId}/tracks/${tag.TrackId}/tags/${tag.id}`;
   return fetch(url, {
     method: "DELETE"
   });

@@ -1,33 +1,31 @@
 <template>
   <div>
-
-    <spinner :fetching="!fetched"/>
+    <spinner :fetching="!fetched" />
 
     <div v-if="fetched && !groups.length">
       <p>
-        <icon-link
-          :icon="['fas', 'exclamation-triangle']"/>
-        You don't belong to any groups.</p>
-      <p>If you are setting up a device, create a group below.  All the devices you
-      manage will be linked together through this group, so choose a name relating to your organisation, project or property.
+        <icon-link :icon="['fas', 'exclamation-triangle']" />
+        You don't belong to any groups.
+      </p>
+      <p>
+        If you are setting up a device, create a group below. All the devices
+        you manage will be linked together through this group, so choose a name
+        relating to your organisation, project or property.
       </p>
     </div>
-    <div
-      v-for="(group, index) in orderedGroups"
-      :key="index"
-      class="group">
-
+    <div v-for="(group, index) in orderedGroups" :key="index" class="group">
       <router-link
-        :to="{ name: 'group', params: { groupname: group.groupname }}"
+        :to="{ name: 'group', params: { groupname: group.groupname } }"
         tag="div"
-        class="header">
-
+        class="header"
+      >
         <h4>{{ group.groupname }}</h4>
 
         <icon-link
           :icon="['fas', 'angle-right']"
-          :link="{ name: 'group', params: { groupname: group.groupname }}"
-          :position="'right'"/>
+          :link="{ name: 'group', params: { groupname: group.groupname } }"
+          :position="'right'"
+        />
       </router-link>
     </div>
   </div>

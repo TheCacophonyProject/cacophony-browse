@@ -1,43 +1,45 @@
 <template>
   <b-container class="sign-wrapper">
     <b-form-row class="align-items-center justify-content-center">
-
       <div class="sign-form-wrapper bg-white rounded text-center">
-
         <div class="logo" />
 
         <h1>Login</h1>
 
         <b-form @submit="onSubmit">
-
           <b-alert
             :show="!!errorMessage"
             variant="danger"
             dismissible
-            @dismissed="errorMessage=undefined">
+            @dismissed="errorMessage = undefined"
+          >
             {{ errorMessage }}
           </b-alert>
 
           <b-form-group
             label="Username or Email"
             label-class="sr-only"
-            label-for="input-username-or-email">
+            label-for="input-username-or-email"
+          >
             <b-form-input
               id="input-username-or-email"
               v-model="usernameOrEmail"
               placeholder="Username or Email Address"
-              type="text"/>
+              type="text"
+            />
           </b-form-group>
 
           <b-form-group
             label="Password"
             label-class="sr-only"
-            label-for="input-password">
+            label-for="input-password"
+          >
             <b-form-input
               id="input-password"
               v-model="password"
               placeholder="Password"
-              type="password"/>
+              type="password"
+            />
           </b-form-group>
 
           <b-button
@@ -45,14 +47,15 @@
             type="submit"
             variant="primary"
             class="btn-block"
-          >Sign in
+            >Sign in
           </b-button>
 
-          <p class="small mt-4">Don't have an account yet? <b-link href="/register">Register here</b-link>.</p>
-
+          <p class="small mt-4">
+            Don't have an account yet?
+            <b-link href="/register">Register here</b-link>.
+          </p>
         </b-form>
       </div>
-
     </b-form-row>
   </b-container>
 </template>

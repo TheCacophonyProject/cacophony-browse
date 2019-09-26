@@ -1,7 +1,6 @@
 <template>
   <div>
-
-    <spinner :fetching="!fetched"/>
+    <spinner :fetching="!fetched" />
 
     <p v-if="!devices.length && fetched">You currently have no devices.</p>
 
@@ -9,18 +8,20 @@
       v-for="(device, index) in orderedDevices"
       :key="index"
       :class="fetchable()"
-      class="device">
+      class="device"
+    >
       <router-link
-        :to="{ name: 'device', params: { devicename: device.devicename }}"
+        :to="{ name: 'device', params: { devicename: device.devicename } }"
         tag="div"
-        class="header">
-
+        class="header"
+      >
         <h4>{{ device.devicename }}</h4>
 
         <icon-link
           :icon="['fas', 'angle-right']"
-          :link="{ name: 'device', params: { devicename: device.devicename }}"
-          :position="'right'"/>
+          :link="{ name: 'device', params: { devicename: device.devicename } }"
+          :position="'right'"
+        />
       </router-link>
     </div>
   </div>
@@ -28,13 +29,12 @@
 
 <script>
 import { mapState } from "vuex";
-import DeviceDetail from "./DeviceDetail.vue";
 import Spinner from "../Spinner.vue";
 import IconLink from "../IconLink.vue";
 
 export default {
   name: "DevicesListing",
-  components: { DeviceDetail, Spinner, IconLink },
+  components: { Spinner, IconLink },
   data() {
     return {
       devicesTableFields: [{ key: "devicename", label: "Devices" }]

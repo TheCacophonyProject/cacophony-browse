@@ -1,13 +1,11 @@
 <template>
-  <div 
-    class="db d-inline">
-    <b-form-input 
+  <div class="db d-inline">
+    <b-form-input
       v-model="customTagValue"
-      class="w-50 mt-4 d-inline align-bottom" 
-      placeholder="Enter custom tag"/>
-    <b-button 
-      class="mt-0 align-bottom" 
-      @click="addCustomTag()">Add</b-button>
+      class="w-50 mt-4 d-inline align-bottom"
+      placeholder="Enter custom tag"
+    />
+    <b-button class="mt-0 align-bottom" @click="addCustomTag()">Add</b-button>
   </div>
 </template>
 
@@ -38,5 +36,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -1,19 +1,16 @@
 <template>
   <b-container>
-    <header
-      v-if="fetched">
+    <header v-if="fetched">
       <h1>Device: {{ device.devicename }}</h1>
       <icon-link
         :icon="['fas', 'angle-left']"
-        :link="{ name: 'devices'}"
-        :position="'right'"/>
+        :link="{ name: 'devices' }"
+        :position="'right'"
+      />
     </header>
     <spinner :fetching="!fetched" />
     <div v-if="device && fetched">
-      <device-detail
-        :device="device"
-        :user="currentUser"
-      />
+      <device-detail :device="device" :user="currentUser" />
     </div>
   </b-container>
 </template>

@@ -2,7 +2,7 @@
   <div class="container">
     <div class="group-detail row">
       <div class="users-detail col-lg-7">
-        <h2>Users <help :help-text="usersHelpTip"/></h2>
+        <h2>Users <help :help-text="usersHelpTip" /></h2>
         <b-table
           :items="group.GroupUsers"
           :fields="groupUsersTableFields"
@@ -10,56 +10,54 @@
           striped
           hover
           outlined
-          responsive>
-
-          <template
-            slot="admin"
-            slot-scope="data">
+          responsive
+        >
+          <template slot="admin" slot-scope="data">
             {{ data.item.isAdmin }}
           </template>
 
-          <template
-            slot="controls"
-            slot-scope="data">
-
+          <template slot="controls" slot-scope="data">
             <b-button
               v-b-tooltip.hover
               v-if="isGroupAdmin"
               title="Remove user from group"
               class="trash-button"
-              @click="removeUser(data.item.username, uiUser)">
+              @click="removeUser(data.item.username, uiUser)"
+            >
               <font-awesome-icon
                 icon="trash"
                 size="1x"
-                style="cursor: pointer;"/>
+                style="cursor: pointer;"
+              />
             </b-button>
           </template>
         </b-table>
 
-        <group-user-add
-          v-if="isGroupAdmin"
-          :group="group"/>
+        <group-user-add v-if="isGroupAdmin" :group="group" />
       </div>
 
       <div class="devices-detail col-lg-5">
-        <h2>Devices <help :help-text="devicesHelpTip"/></h2>
+        <h2>Devices <help :help-text="devicesHelpTip" /></h2>
         <b-table
           :items="group.Devices"
           :fields="deviceTableFields"
           :sort-by="deviceSortBy"
           hover
           outlined
-          responsive>
-
-          <template
-            slot="devicename"
-            slot-scope="row">
-            <b-link :to="{ name: 'device', params: { devicename: row.item.devicename }}">{{ row.item.devicename }}</b-link>
+          responsive
+        >
+          <template slot="devicename" slot-scope="row">
+            <b-link
+              :to="{
+                name: 'device',
+                params: { devicename: row.item.devicename }
+              }"
+              >{{ row.item.devicename }}</b-link
+            >
           </template>
         </b-table>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -67,11 +65,10 @@
 import { mapState } from "vuex";
 import GroupUserAdd from "./GroupUserAdd.vue";
 import Help from "../Help.vue";
-import IconLink from "../IconLink.vue";
 
 export default {
   name: "GroupDetail",
-  components: { GroupUserAdd, Help, IconLink },
+  components: { GroupUserAdd, Help },
   props: {
     group: {
       type: Object,

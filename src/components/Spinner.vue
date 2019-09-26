@@ -1,10 +1,5 @@
 <template>
-  <font-awesome-icon
-    v-show="fetching"
-    class="fa-spin"
-    icon="cog"
-    size="4x"
-  />
+  <font-awesome-icon v-show="fetching" class="fa-spin" icon="cog" size="4x" />
 </template>
 
 <script>
