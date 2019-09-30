@@ -141,7 +141,7 @@ export default {
         limit: 1,
         offset: 0
       };
-      
+
       return await this.$store.dispatch("Video/QUERY_RECORDING", {
         params,
         direction,
