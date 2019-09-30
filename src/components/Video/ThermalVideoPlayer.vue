@@ -139,6 +139,14 @@ export default {
       }
     },
     setVideoUrl() {
+      const htmlPlayer = this.$refs.player.$refs.video;
+      if (htmlPlayer) {
+        const rate = localStorage.getItem("playbackrate");
+        if (rate) {
+          htmlPlayer.playbackRate = rate;
+          htmlPlayer.onratechange = null;
+        }
+      }
       // first must make sure the width to be loaded is also correct.
       this.playerOptions.width = this.canvasWidth + "px";
       this.playerOptions.height = this.canvasHeight + "px";

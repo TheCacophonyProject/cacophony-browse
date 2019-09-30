@@ -23,12 +23,27 @@
         </b-button-group>
       </b-col>
       <b-row class="db m-0 no-gutters">
-        <b-col offset="1" class="mt-0 ml-0 db" cols="19">
+        <b-col offset="1" class="mt-0 ml-0 db" cols="12">
           <BasicTags @addAudioTag="addAudioTag($event)" />
           <CustomTags @addAudioTag="addAudioTag($event)" />
           <b-button class="float-right mt-3 mr-1" size="lg" @click="closeTab()"
             >Done</b-button
           >
+        </b-col>
+        <b-col offset="9" md="3" class=" mt-3">
+          <b-button
+            v-b-tooltip.hover.bottomleft="'Delete this recording'"
+            :disabled="deleteDisabled"
+            variant="danger"
+            block
+            @click="deleteRecording()"
+          >
+            <font-awesome-icon
+              icon="exclamation-triangle"
+              class="d-none d-md-inline"
+            />
+            Delete
+          </b-button>
         </b-col>
       </b-row>
     </b-row>
@@ -43,6 +58,7 @@
 </template>
 
 <script>
+import api from "../../api/index";
 import { mapState } from "vuex";
 import BasicTags from "../Audio/BasicTags.vue";
 import CustomTags from "../Audio/CustomTags.vue";
@@ -50,6 +66,9 @@ import TagList from "../Audio/TagList.vue";
 
 export default {
   name: "AudioRecording",
+  data() {
+    return { deleteDisabled: false };
+  },
   components: {
     CustomTags,
     BasicTags,
@@ -78,6 +97,64 @@ export default {
     })
   },
   methods: {
+    async gotoNextRecording(direction) {
+      if (await this.getNextRecording(direction)) {
+        this.deleteDisabled = false;
+        this.$router.push({
+          path: `/recording/${this.recording.id}`
+        });
+      }
+    },
+    async getNextRecording(direction, skipMessage) {
+      let where = {
+        DeviceId: this.recording.Device.id
+      };
+
+      let order;
+      switch (direction) {
+        case "next":
+          where.recordingDateTime = {
+            $gt: this.recording.recordingDateTime
+          };
+          order = "ASC";
+          break;
+        case "previous":
+          where.recordingDateTime = {
+            $lt: this.recording.recordingDateTime
+          };
+          order = "DESC";
+          break;
+        case "either":
+          if (await this.getNextRecording("next", true)) {
+            return true;
+          }
+          return await this.getNextRecording("previous", skipMessage);
+        default:
+          throw `invalid direction: '${direction}'`;
+      }
+      order = JSON.stringify([["recordingDateTime", order]]);
+      where = JSON.stringify(where);
+
+      const params = {
+        where,
+        order,
+        limit: 1,
+        offset: 0
+      };
+      
+      return await this.$store.dispatch("Video/QUERY_RECORDING", {
+        params,
+        direction,
+        skipMessage
+      });
+    },
+    async deleteRecording() {
+      this.deleteDisabled = true;
+      const { success } = await api.recording.del(this.$route.params.id);
+      if (success) {
+        this.gotoNextRecording("either");
+      }
+    },
     addAudioTag: function(tag) {
       const id = Number(this.$route.params.id);
       if (this.$refs.player.currentTime == this.$refs.player.duration) {
