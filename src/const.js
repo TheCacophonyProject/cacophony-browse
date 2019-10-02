@@ -3,7 +3,7 @@ var allLabels = {
     value: "false-positive",
     text: "false positive"
   },
-  badTrack: {
+  poorTracking: {
     value: "poor tracking",
     text: "poor tracking"
   },
@@ -199,14 +199,14 @@ const DefaultLabels = {
   },
   searchLabels: function() {
     var searchLabels = this.animals.concat([
-      allLabels.badTrack,
+      allLabels.poorTracking,
       allLabels.other
     ]);
     searchLabels.splice(0, 0, allLabels.interesting);
     return searchLabels;
   },
   trackLabels: function() {
-    return this.animals.concat([allLabels.badTrack, allLabels.other]);
+    return this.animals.concat([allLabels.poorTracking, allLabels.other]);
   },
   canHaveSpecifiedTags: function(tagType) {
     switch (tagType) {
