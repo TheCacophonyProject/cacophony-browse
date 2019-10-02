@@ -1,6 +1,10 @@
 var allLabels = {
+  falsePositive: {
+    value: "false-positive",
+    text: "false positive"
+  },
   badTrack: {
-    value: "bad track",
+    value: "poor tracking",
     text: "poor tracking"
   },
   other: {
@@ -167,6 +171,10 @@ const DefaultLabels = {
     allLabels.bothTagged,
     allLabels.unTagged
   ],
+  allLabels: allLabels,
+  otherTagLabels: function() {
+    return [allLabels.unidentified, allLabels.falsePositive];
+  },
   quickTagLabels: function() {
     return [
       allLabels.possum.value,
