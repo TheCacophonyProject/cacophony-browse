@@ -30,7 +30,7 @@
               :src="what(row.item.what).link"
               class="tag-img"
             />
-            {{ what(row.item.what).what }}
+            {{ row.item.what }}
           </div>
         </template>
 
@@ -79,6 +79,7 @@
 
 <script>
 /* global require */
+import DefaultLabels from "../../const.js";
 
 export default {
   name: "TrackTags",
@@ -115,12 +116,8 @@ export default {
       // TODO implement alternative that doesn't use 'require' in this manner
       // https://bootstrap-vue.js.org/docs/reference/images/
       let image = null;
-      if (what == "false positive") {
-        image = "none.png";
-      } else if (what == "bird/kiwi") {
+      if (what == DefaultLabels.allLabels.kiwi.value) {
         image = "kiwi.png";
-      } else if (what == "unidentified") {
-        image = "unknown.png";
       } else {
         image = what + ".png";
       }

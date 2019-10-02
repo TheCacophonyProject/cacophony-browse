@@ -1,6 +1,10 @@
 var allLabels = {
-  badTrack: {
-    value: "bad track",
+  falsePositive: {
+    value: "false-positive",
+    text: "false positive"
+  },
+  poorTracking: {
+    value: "poor tracking",
     text: "poor tracking"
   },
   other: {
@@ -71,13 +75,13 @@ var allLabels = {
     value: "sealion",
     text: "sealion"
   },
-  unidentified: {
-    value: "unidentified",
-    text: "unidentified"
+  unknown: {
+    value: "unknown",
+    text: "unknown"
   },
   pest: {
     value: "pest",
-    text: "unidentified animal but not bird"
+    text: "unknown animal but not bird"
   },
   part: {
     value: "part",
@@ -154,7 +158,7 @@ const DefaultLabels = {
     allLabels.insect,
     allLabels.penguin,
     allLabels.sealion,
-    allLabels.unidentified,
+    allLabels.unknown,
     allLabels.pest,
     allLabels.part
   ],
@@ -167,6 +171,10 @@ const DefaultLabels = {
     allLabels.bothTagged,
     allLabels.unTagged
   ],
+  allLabels: allLabels,
+  otherTagLabels: function() {
+    return [allLabels.unknown, allLabels.falsePositive];
+  },
   quickTagLabels: function() {
     return [
       allLabels.possum.value,
@@ -191,14 +199,14 @@ const DefaultLabels = {
   },
   searchLabels: function() {
     var searchLabels = this.animals.concat([
-      allLabels.badTrack,
+      allLabels.poorTracking,
       allLabels.other
     ]);
     searchLabels.splice(0, 0, allLabels.interesting);
     return searchLabels;
   },
   trackLabels: function() {
-    return this.animals.concat([allLabels.badTrack, allLabels.other]);
+    return this.animals.concat([allLabels.poorTracking, allLabels.other]);
   },
   canHaveSpecifiedTags: function(tagType) {
     switch (tagType) {
