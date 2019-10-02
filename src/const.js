@@ -75,13 +75,13 @@ var allLabels = {
     value: "sealion",
     text: "sealion"
   },
-  unidentified: {
-    value: "unidentified",
-    text: "unidentified"
+  unknown: {
+    value: "unknown",
+    text: "unknown"
   },
   pest: {
     value: "pest",
-    text: "unidentified animal but not bird"
+    text: "unknown animal but not bird"
   },
   part: {
     value: "part",
@@ -158,7 +158,7 @@ const DefaultLabels = {
     allLabels.insect,
     allLabels.penguin,
     allLabels.sealion,
-    allLabels.unidentified,
+    allLabels.unknown,
     allLabels.pest,
     allLabels.part
   ],
@@ -173,7 +173,7 @@ const DefaultLabels = {
   ],
   allLabels: allLabels,
   otherTagLabels: function() {
-    return [allLabels.unidentified, allLabels.falsePositive];
+    return [allLabels.unknown, allLabels.falsePositive];
   },
   quickTagLabels: function() {
     return [

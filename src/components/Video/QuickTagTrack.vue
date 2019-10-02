@@ -75,8 +75,8 @@ export default {
     getOtherTitle(other) {
       if (other == DefaultLabels.allLabels.falsePositive.value) {
         return "Mark as nothing or false positive (meaning there is no animal)";
-      } else if (other == DefaultLabels.allLabels.unidentified.value) {
-        return "Mark as unidentified (meaning the type of animal is unclear)";
+      } else if (other == DefaultLabels.allLabels.unknown.value) {
+        return "Mark as unknown (meaning the type of animal is unclear)";
       }
     },
     getTitle(animal) {
