@@ -26,7 +26,7 @@
         <b-col offset="1" class="mt-0 ml-0 db" cols="12">
           <BasicTags @addAudioTag="addAudioTag($event)" />
           <CustomTags @addAudioTag="addAudioTag($event)" />
-          <b-button class="float-right mt-3 mr-1" size="lg" @click="closeTab()"
+          <b-button class="float-right mt-3 mr-1" size="lg" @click="done()"
             >Done</b-button
           >
         </b-col>
@@ -186,8 +186,8 @@ export default {
     deleteTag(tagId) {
       this.$store.dispatch("Video/DELETE_TAG", tagId);
     },
-    closeTab() {
-      window.close();
+    done() {
+      this.gotoNextRecording("either");
     },
     replay(time) {
       this.$refs.player.currentTime = time;
