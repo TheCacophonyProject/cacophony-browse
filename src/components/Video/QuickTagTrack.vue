@@ -58,15 +58,38 @@ export default {
       required: true
     }
   },
+  watch: {
+    tags: function(newVal, oldVal) {
+      this.filterTags();
+    }
+  },
+  created: function() {
+    this.filterTags();
+  },
   data() {
     return {
+      userTags: [],
       animals: DefaultLabels.quickTagLabels(),
       otherTags: DefaultLabels.otherTagLabels(),
       message: ""
     };
   },
   methods: {
+    filterTags() {
+      this.userTags = this.tags.filter(
+        tag =>
+          tag.User &&
+          tag.User.username == this.$store.state.User.userData.username
+      );
+    },
     quickTag(what) {
+      var found = this.userTags.find(function(tag) {
+        return tag.what == what;
+      });
+      if (found) {
+        this.$emit("deleteTag", found);
+        return;
+      }
       const tag = {};
       tag.confidence = 0.85;
       tag.what = what;
@@ -87,7 +110,7 @@ export default {
     },
     getClass(animal) {
       let buttonClass = "tag-div";
-      for (const tag of this.tags) {
+      for (const tag of this.userTags) {
         if (tag.what == animal) {
           if (tag.automatic == false) {
             buttonClass += " tagged active";
