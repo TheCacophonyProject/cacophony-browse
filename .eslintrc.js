@@ -1,10 +1,14 @@
 module.exports = {
+  plugins: ["@typescript-eslint"],
   root: true,
   extends: [
     "plugin:vue/essential",
     "plugin:prettier/recommended",
     "eslint:recommended"
   ],
+  parserOptions: {
+    parser: require.resolve("@typescript-eslint/parser")
+  },
   rules: {
     "no-prototype-builtins": "off",
     "linebreak-style": ["warn", "unix"],
