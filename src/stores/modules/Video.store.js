@@ -99,7 +99,10 @@ const actions = {
     await recording;
     await tracks;
 
-    return recording && tracks;
+    return {
+      recording,
+      tracks: tracks.tracks
+    };
   },
 
   async DELETE_TAG({ commit }, tag) {
@@ -167,14 +170,16 @@ const actions = {
         commit("setTrackTags", track);
       }
     }
+    return result;
   },
 
   async DELETE_TRACK_TAG({ commit }, { tag, recordingId }) {
-    const { success } = await api.recording.deleteTrackTag(tag, recordingId);
-    if (!success) {
-      return;
+    const result = await api.recording.deleteTrackTag(tag, recordingId);
+    if (!result.success) {
+      return result;
     }
-    return commit("deleteTrackTag", tag);
+    commit("deleteTrackTag", tag);
+    return result;
   }
 };
 
@@ -187,6 +192,9 @@ const mutations = {
   },
 
   receiveTracks(state, { tracks }) {
+    for (let i = 0; i < tracks.length; i++) {
+      tracks[i].trackIndex = i;
+    }
     state.tracks = tracks;
   },
 
