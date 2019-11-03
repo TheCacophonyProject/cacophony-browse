@@ -21,6 +21,7 @@
       :duration="duration"
       :tracks="tracks"
       :current-video-time="currentVideoTime"
+      :current-track="currentTrack"
       :canvas-width="canvasWidth"
       @start-scrub="startScrub"
       @end-scrub="endScrub"

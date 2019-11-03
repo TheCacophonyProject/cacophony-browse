@@ -1,9 +1,9 @@
 <template>
   <div
-    v-if="!isLoaded || (isLoaded && hasTracks)"
     ref="scrubber"
     :style="{
-      height: `${Math.max(25, 13 * numTracks)}px`
+      height: `${heightForTracks}px`,
+      width: `${canvasWidth}px`
     }"
     class="track-scrubber"
   >
@@ -19,13 +19,14 @@
           background: colours[index % colours.length],
           top: `${index * 13}px`,
           width: getWidthForTrack(track),
-          left: getOffsetForTrack(track)
+          left: getOffsetForTrack(track),
+          opacity: index === currentTrack ? 1.0 : 0.5
         }"
         class="scrub-track"
       />
       <div
         :style="{
-          right: `${canvasWidth - getOffsetForTime(currentVideoTime)}px`,
+          right: `${canvasWidth - offsetForCurrentTime}px`,
           pointerEvents: 'none'
         }"
         class="playhead"
@@ -34,8 +35,20 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+// eslint-disable-next-line no-unused-vars
+import { Track } from "../../api/Recording.api";
 import { TagColours } from "../../const";
+
+const getPositionXForEvent = (event: Event): number => {
+  if (event instanceof TouchEvent) {
+    const touch: Touch = event.targetTouches[0];
+    return (touch && touch.clientX) || 0;
+  } else {
+    return (event as MouseEvent).x;
+  }
+};
+
 export default {
   name: "VideoTracksScrubber",
   props: {
@@ -53,6 +66,11 @@ export default {
       default: 0,
       required: true
     },
+    currentTrack: {
+      type: Number,
+      default: 0,
+      required: true
+    },
     canvasWidth: {
       type: Number,
       required: true
@@ -65,94 +83,95 @@ export default {
   },
   computed: {
     isLoaded() {
-      const loaded = this.tracks && this.duration;
-      if (loaded && this.tracks.length !== 0 && !this.inited) {
-        this.init();
-      }
-      return loaded;
+      return this.tracks && this.tracks.length && this.duration;
     },
     hasTracks() {
       return this.isLoaded && this.tracks.length !== 0;
     },
     numTracks() {
       return this.hasTracks ? this.tracks.length : 0;
+    },
+    scrubber() {
+      return this.$refs.scrubber;
+    },
+    offsetForCurrentTime() {
+      return this.getOffsetForTime(this.currentVideoTime);
+    },
+    heightForTracks() {
+      return this.numTracks === 0 ? 0 : Math.max(25, 13 * this.numTracks);
     }
   },
   methods: {
-    getWidthForTrack(track) {
+    getWidthForTrack(track: Track): string {
       const trackDuration = track.data.end_s - track.data.start_s;
       const ratio = trackDuration / this.duration;
       return `${ratio * this.canvasWidth}px`;
     },
-    getOffsetForTrack(track) {
+    getOffsetForTrack(track: Track): string {
       return `${this.getOffsetForTime(track.data.start_s)}px`;
     },
-    getOffsetForTime(time) {
+    getOffsetForTime(time: number): number {
       const pixelsPerSecond = this.canvasWidth / this.duration;
       return pixelsPerSecond * time;
     },
-    init() {
-      const refs = this.$refs;
-      const context = this;
-      this.$nextTick(() => {
-        context.inited = true;
-        const scrubber = refs.scrubber;
-        const passive = { passive: false };
-
-        const touchMove = event => {
-          event.preventDefault();
-          const x =
-            event.targetTouches[0].x - scrubber.getBoundingClientRect().x;
-          const timeOffset = x / this.canvasWidth;
-          context.$emit("set-playback-time", timeOffset * this.duration);
-        };
-
-        const touchEnd = event => {
-          event.preventDefault();
-          context.$emit("end-scrub");
-          window.removeEventListener("touchend", touchEnd);
-          window.removeEventListener("touchmove", touchMove);
-        };
-
-        scrubber.addEventListener(
-          "touchstart",
-          event => {
-            event.preventDefault();
-            context.$emit("start-scrub");
-            touchMove(event);
-            window.addEventListener("touchmove", touchMove, passive);
-            window.addEventListener("touchend", touchEnd, passive);
-          },
-          passive
-        );
-
-        const mouseMove = event => {
-          event.preventDefault();
-          const x = event.x - scrubber.getBoundingClientRect().x;
-          const timeOffset = x / this.canvasWidth;
-          context.$emit("set-playback-time", timeOffset * this.duration);
-        };
-
-        const mouseEnd = event => {
-          event.preventDefault();
-          context.$emit("end-scrub");
-          window.removeEventListener("mouseup", mouseEnd);
-          window.removeEventListener("mousemove", mouseMove);
-        };
-
-        scrubber.addEventListener(
-          "mousedown",
-          event => {
-            event.preventDefault();
-            context.$emit("start-scrub");
-            mouseMove(event);
-            window.addEventListener("mousemove", mouseMove);
-            window.addEventListener("mouseup", mouseEnd);
-          },
-          passive
-        );
-      });
+    pointerMove(event: Event) {
+      event.preventDefault();
+      const x =
+        getPositionXForEvent(event) - this.scrubber.getBoundingClientRect().x;
+      const timeOffset = x / this.canvasWidth;
+      this.$emit("set-playback-time", timeOffset * this.duration);
+    },
+    pointerEnd(event: Event) {
+      event.preventDefault();
+      this.$emit("end-scrub");
+      if (event instanceof MouseEvent) {
+        window.removeEventListener("mouseup", this.pointerEnd);
+        window.removeEventListener("mousemove", this.pointerMove);
+      } else if (event instanceof TouchEvent) {
+        window.removeEventListener("touchend", this.pointerEnd);
+        window.removeEventListener("touchmove", this.pointerMove);
+      }
+    },
+    pointerStart(event: Event) {
+      event.preventDefault();
+      this.$emit("start-scrub");
+      this.pointerMove(event);
+      if (event instanceof MouseEvent) {
+        window.addEventListener("mousemove", this.pointerMove);
+        window.addEventListener("mouseup", this.pointerEnd);
+      } else if (event instanceof TouchEvent) {
+        window.addEventListener("touchmove", this.pointerMove, {
+          passive: false
+        });
+        window.addEventListener("touchend", this.pointerEnd, {
+          passive: false
+        });
+      }
+    },
+    initScrubber() {
+      if (this.scrubber) {
+        this.scrubber.addEventListener("touchstart", this.pointerStart, {
+          passive: false
+        });
+        this.scrubber.addEventListener("mousedown", this.pointerStart, {
+          passive: false
+        });
+      }
+    },
+    tearDownScrubber() {
+      if (this.scrubber) {
+        this.scrubber.removeEventListener("touchstart", this.pointerStart);
+        this.scrubber.removeEventListener("mousedown", this.pointerStart);
+        window.removeEventListener("touchend", this.pointerEnd);
+        window.removeEventListener("touchmove", this.pointerMove);
+      }
     }
+  },
+  mounted() {
+    this.initScrubber();
+  },
+  beforeDestroy() {
+    this.tearDownScrubber();
   }
 };
 </script>
@@ -163,12 +182,15 @@ export default {
   background: #2b333f;
   transition: height 0.3s;
   overflow: hidden;
+  /* Above the motion paths canvas if it exists */
+  z-index: 810;
 }
 .loading {
   color: #eee;
   text-align: center;
 }
 .scrub-track {
+  transition: opacity 0.3s linear;
   position: absolute;
   height: 12px;
   border-radius: 5px;
