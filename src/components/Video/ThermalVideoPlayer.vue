@@ -10,21 +10,37 @@
     />
     <canvas
       ref="canvas"
+      :key="'boxes'"
       :width="canvasWidth"
       :height="canvasHeight"
       class="canvas"
+      :class="{ 'ended-playback': ended }"
     />
     <video-player
       ref="player"
       :key="videoUrl"
       :options="playerOptions"
       class="video vjs-custom-skin"
+      :class="{ 'ended-playback': ended }"
       @seeking="seeking"
       @play="draw"
-      @statechanged="stateChange"
+      @ended="showEndedOverlay"
+      @canplay="canPlay"
       @ready="playerReady"
     />
+    <transition name="fade">
+      <div class="load-overlay" v-if="loading">
+        <Spinner />
+      </div>
+    </transition>
+    <transition name="fade">
+      <div class="end-overlay" v-if="ended">
+        <b-button @click="replay">Play again?</b-button>
+        <b-button @click="requestNextVideo">Next video?</b-button>
+      </div>
+    </transition>
     <VideoTracksScrubber
+      :class="{ 'ended-playback': ended }"
       ref="scrubber"
       :duration="duration"
       :tracks="tracks"
@@ -41,12 +57,16 @@
 <script lang="ts">
 import { videoPlayer } from "vue-video-player";
 import VideoTracksScrubber from "./VideoTracksScrubber.vue";
+import Spinner from "../Spinner.vue";
 import MotionPathsOverlay from "./MotionPathsOverlay.vue";
+// eslint-disable-next-line no-unused-vars
+import { Player } from "videojs";
 import { TagColours } from "../../const";
 
 export default {
   name: "ThermalVideoPlayer",
   components: {
+    Spinner,
     videoPlayer,
     VideoTracksScrubber,
     MotionPathsOverlay
@@ -77,9 +97,10 @@ export default {
       duration: 0,
       colours: TagColours,
       playerOptions: {
+        bigPlayButton: false,
         autoplay: true,
         muted: true,
-        width: "720px",
+        width: "800px",
         playbackRates: [0.5, 1, 2, 4, 8],
         inactivityTimeout: 0,
         sources: [
@@ -96,20 +117,19 @@ export default {
       isScrubbing: false,
       initedTrackHitRegions: false,
       ended: false,
+      loading: true,
       playerIsReady: false
     };
   },
   watch: {
-    videoUrl: function() {
+    videoUrl() {
+      this.playerIsReady = false;
       this.setVideoUrl();
     },
-    currentTrack: function() {
+    currentTrack() {
       this.selectTrack();
     },
-    tracks: function(tracks) {
-      for (let i = 0; i < tracks.length; i++) {
-        tracks[i].trackIndex = i;
-      }
+    tracks() {
       this.selectTrack();
     }
   },
@@ -128,6 +148,18 @@ export default {
     window.removeEventListener("resize", this.onResize);
   },
   methods: {
+    canPlay() {
+      this.loading = false;
+      this.duration = document.getElementsByTagName("video")[0].duration;
+      setTimeout(() => {
+        this.$emit("ready-to-play");
+      }, 200);
+    },
+    showEndedOverlay() {
+      setTimeout(() => {
+        this.ended = true;
+      }, 150);
+    },
     bindRateChange() {
       const htmlPlayer = this.$refs.player.$refs.video;
       const rate = localStorage.getItem("playbackrate");
@@ -158,6 +190,7 @@ export default {
       }
     },
     setVideoUrl() {
+      this.loading = true;
       const htmlPlayer = this.$refs.player.$refs.video;
       if (htmlPlayer) {
         const rate = localStorage.getItem("playbackrate");
@@ -171,11 +204,28 @@ export default {
       this.playerOptions.height = this.canvasHeight + "px";
       this.$data.playerOptions.sources[0].src = this.videoUrl;
       // if tracks is loaded then select the first track
-      this.currentTrack = 0;
+      if (this.currentTrack !== 0) {
+        this.$emit("trackSelected", 0);
+      }
+    },
+    replay() {
+      this.videoJsPlayer.pause();
+      this.videoJsPlayer.currentTime(0);
+      this.videoJsPlayer.trigger("loadstart");
+      this.videoJsPlayer.play();
+      if (this.currentTrack !== 0) {
+        this.$emit("trackSelected", 0);
+      }
+      this.ended = false;
+    },
+    requestNextVideo() {
+      this.ended = false;
+      this.$emit("request-next-recording");
     },
     playerReady() {
       this.bindRateChange();
       this.selectTrack();
+      this.playerIsReady = true;
     },
     selectTrack() {
       this.lastDisplayedVideoTime = -1;
@@ -367,7 +417,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .video {
   min-width: 100%;
   max-width: 100%;
@@ -396,11 +446,43 @@ export default {
 
 .canvas {
   position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
   width: 100%;
   height: 100%;
   z-index: 900;
+}
+
+.load-overlay {
+  background-color: black;
+  > * {
+    position: relative;
+    top: calc(50% - 1em);
+  }
+}
+
+.end-overlay,
+.load-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+.end-overlay {
+  background-color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  > button {
+    max-height: 60px;
+  }
+}
+.ended-playback {
+  //opacity: 0.5;
 }
 
 .video-container {
@@ -408,6 +490,14 @@ export default {
   position: relative;
   width: 100%;
   padding: 0;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
 <style src="video.js/dist/video-js.css"></style>
