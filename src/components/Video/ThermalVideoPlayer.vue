@@ -84,6 +84,14 @@ export default {
       type: Number,
       default: 0
     },
+    canSelectTracks: {
+      type: Boolean,
+      default: true
+    },
+    loopSelectedTrack: {
+      type: Boolean,
+      default: false
+    },
     showMotionPaths: {
       type: Boolean,
       default: false
@@ -264,7 +272,7 @@ export default {
         this.$refs.scrubber.$el.style.width = canvas.style.width;
       }
 
-      if (!this.initedTrackHitRegions) {
+      if (this.canSelectTracks && !this.initedTrackHitRegions) {
         this.initedTrackHitRegions = true;
         // Hit-testing of track rects, so they are clickable.
         const hitTestPos = (x, y) => {
@@ -381,6 +389,19 @@ export default {
         // NOTE: Since our video is 9fps, we're don't need to update this at 60fps.
         const frameTime = 1 / 9;
         this.currentVideoTime = v.player.currentTime();
+
+        if (this.loopSelectedTrack) {
+          // If we want to loop the current track, check to see if we've gone past the end of it here.
+          const trackEndTime =
+            (this.tracks &&
+              this.tracks[this.currentTrack] &&
+              this.tracks[this.currentTrack].data.end_s) ||
+            Number.POSITIVE_INFINITY;
+          if (this.currentVideoTime > trackEndTime) {
+            this.selectTrack();
+          }
+        }
+
         const currentFrame = Math.floor(this.currentVideoTime / frameTime);
         if (currentFrame !== this.lastDisplayedVideoTime || this.isScrubbing) {
           // Only update the canvas if the video time has changed as this means a new
