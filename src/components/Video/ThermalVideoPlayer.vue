@@ -1,5 +1,13 @@
 <template>
   <div ref="container" class="video-container">
+    <MotionPathsOverlay
+      v-if="showMotionPaths && hasTracks && playerIsReady"
+      :canvas-width="canvasWidth"
+      :canvas-height="canvasHeight"
+      :ended-playback="ended"
+      :tracks="tracks"
+      :scale="scale"
+    />
     <canvas
       ref="canvas"
       :width="canvasWidth"
@@ -30,16 +38,18 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { videoPlayer } from "vue-video-player";
 import VideoTracksScrubber from "./VideoTracksScrubber.vue";
+import MotionPathsOverlay from "./MotionPathsOverlay.vue";
 import { TagColours } from "../../const";
 
 export default {
   name: "ThermalVideoPlayer",
   components: {
     videoPlayer,
-    VideoTracksScrubber
+    VideoTracksScrubber,
+    MotionPathsOverlay
   },
   props: {
     videoUrl: {
@@ -53,6 +63,10 @@ export default {
     currentTrack: {
       type: Number,
       default: 0
+    },
+    showMotionPaths: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -80,7 +94,9 @@ export default {
       scale: 5,
       wasPaused: false,
       isScrubbing: false,
-      initedTrackHitRegions: false
+      initedTrackHitRegions: false,
+      ended: false,
+      playerIsReady: false
     };
   },
   watch: {
@@ -97,7 +113,12 @@ export default {
       this.selectTrack();
     }
   },
-  mounted: function() {
+  computed: {
+    hasTracks(): boolean {
+      return this.tracks && this.tracks.length !== 0;
+    }
+  },
+  mounted() {
     this.initOverlayCanvas();
     this.setVideoUrl();
     window.addEventListener("resize", this.onResize);
