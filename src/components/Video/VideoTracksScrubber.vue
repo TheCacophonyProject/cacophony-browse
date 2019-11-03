@@ -35,14 +35,11 @@
 </template>
 
 <script>
+import { TagColours } from "../../const";
 export default {
   name: "VideoTracksScrubber",
   props: {
     tracks: {
-      type: Array,
-      required: true
-    },
-    colours: {
       type: Array,
       required: true
     },
@@ -63,7 +60,7 @@ export default {
   },
   data() {
     return {
-      inited: false
+      colours: TagColours
     };
   },
   computed: {

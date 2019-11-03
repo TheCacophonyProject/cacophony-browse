@@ -7,7 +7,6 @@
           :video-url="videoUrl"
           :tracks="orderedTracks()"
           :current-track="selectedTrack"
-          :colours="colours"
         />
       </b-col>
 
@@ -62,6 +61,7 @@ import RecordingControls from "./RecordingControls.vue";
 import ThermalVideoPlayer from "./ThermalVideoPlayer.vue";
 import TrackInfo from "./Track.vue";
 import RecordingProperties from "./RecordingProperties.vue";
+import { TagColours } from "../../const";
 
 export default {
   name: "VideoRecording",
@@ -95,16 +95,7 @@ export default {
       showAddObservation: false,
       selectedTrack: 0,
       startVideoTime: 0,
-      colours: [
-        "yellow",
-        "orange",
-        "red",
-        "purple",
-        "lightblue",
-        "limegreen",
-        "black",
-        "white"
-      ]
+      colours: TagColours
     };
   },
   computed: {

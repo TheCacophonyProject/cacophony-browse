@@ -21,7 +21,6 @@
       :duration="duration"
       :tracks="tracks"
       :current-video-time="currentVideoTime"
-      :colours="colours"
       :canvas-width="canvasWidth"
       @start-scrub="startScrub"
       @end-scrub="endScrub"
@@ -33,6 +32,7 @@
 <script>
 import { videoPlayer } from "vue-video-player";
 import VideoTracksScrubber from "./VideoTracksScrubber.vue";
+import { TagColours } from "../../const";
 
 export default {
   name: "ThermalVideoPlayer",
@@ -52,10 +52,6 @@ export default {
     currentTrack: {
       type: Number,
       default: 0
-    },
-    colours: {
-      type: Array,
-      required: true
     }
   },
   data() {
@@ -64,6 +60,7 @@ export default {
       lastDisplayedVideoTime: 0,
       currentVideoTime: 0,
       duration: 0,
+      colours: TagColours,
       playerOptions: {
         autoplay: true,
         muted: true,
