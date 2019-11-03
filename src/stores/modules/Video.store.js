@@ -93,12 +93,12 @@ const actions = {
   },
 
   async GET_RECORDING({ commit }, recordingId) {
-    const recording = getRecording(commit, recordingId);
-    const tracks = getTracks(commit, recordingId);
-
-    await recording;
-    await tracks;
-
+    const tracksPromise = api.recording.tracks(recordingId);
+    const recordingPromise = api.recording.id(recordingId);
+    const { result: recording } = await recordingPromise;
+    const { result: tracks } = await tracksPromise;
+    commit("receiveRecording", recording);
+    commit("receiveTracks", tracks);
     return {
       recording,
       tracks: tracks.tracks
@@ -230,18 +230,6 @@ const mutations = {
     const track = state.findTrack(deletedTag.TrackId);
     track.TrackTags = track.TrackTags.filter(tag => tag.id != deletedTag.id);
   }
-};
-
-const getRecording = async function(commit, recordingId) {
-  const { result: recording } = await api.recording.id(recordingId);
-  commit("receiveRecording", recording);
-  return recording.success;
-};
-
-const getTracks = async function(commit, recordingId) {
-  const { result: tracks } = await api.recording.tracks(recordingId);
-  commit("receiveTracks", tracks);
-  return tracks.success;
 };
 
 export default {
