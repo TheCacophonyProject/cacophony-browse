@@ -142,6 +142,12 @@ export default {
     }
   },
   computed: {
+    htmlPlayer(): HTMLVideoElement {
+      return this.$refs.player.$refs.video;
+    },
+    videoJsPlayer(): Player {
+      return this.$refs.player.player;
+    },
     hasTracks(): boolean {
       return this.tracks && this.tracks.length !== 0;
     }
@@ -169,42 +175,32 @@ export default {
       }, 150);
     },
     bindRateChange() {
-      const htmlPlayer = this.$refs.player.$refs.video;
       const rate = localStorage.getItem("playbackrate");
       if (rate) {
-        htmlPlayer.playbackRate = rate;
+        this.htmlPlayer.playbackRate = rate;
       }
-      htmlPlayer.onratechange = this.ratechange;
+      this.htmlPlayer.onratechange = this.ratechange;
     },
     startScrub() {
-      const player = this.$refs.player;
-      const htmlPlayer = player.$refs.video;
-      this.wasPaused = htmlPlayer.paused;
+      this.wasPaused = this.htmlPlayer.paused;
       if (!this.wasPaused) {
-        player.player.pause();
+        this.videoJsPlayer.pause();
       }
       this.isScrubbing = true;
     },
     endScrub() {
       if (!this.wasPaused) {
-        this.$refs.player.player.play();
+        this.videoJsPlayer.play();
       }
       this.isScrubbing = false;
     },
-    stateChange(event) {
-      if (event.hasOwnProperty("canplay") && event.canplay) {
-        // Try to get the video length:
-        this.duration = document.getElementsByTagName("video")[0].duration;
-      }
-    },
     setVideoUrl() {
       this.loading = true;
-      const htmlPlayer = this.$refs.player.$refs.video;
-      if (htmlPlayer) {
+      if (this.htmlPlayer) {
         const rate = localStorage.getItem("playbackrate");
         if (rate) {
-          htmlPlayer.playbackRate = rate;
-          htmlPlayer.onratechange = null;
+          this.htmlPlayer.playbackRate = rate;
+          this.htmlPlayer.onratechange = null;
         }
       }
       // first must make sure the width to be loaded is also correct.
@@ -255,8 +251,8 @@ export default {
       this.canvasWidth = this.$refs.container.clientWidth;
       this.scale = this.canvasWidth / 160;
       this.canvasHeight = this.scale * 120 + 30;
-      this.$refs.player.player.width(this.canvasWidth);
-      this.$refs.player.player.height(this.canvasHeight);
+      this.videoJsPlayer.width(this.canvasWidth);
+      this.videoJsPlayer.height(this.canvasHeight);
 
       // Make canvas be sharp on retina displays:
       const canvas = this.$refs.canvas;
@@ -268,7 +264,7 @@ export default {
       canvas.style.height = `${this.canvasHeight}px`;
       context.scale(devicePixelRatio, devicePixelRatio);
 
-      if (this.$refs.scrubber) {
+      if (this.$refs.scrubber && this.$refs.scrubber.$el) {
         this.$refs.scrubber.$el.style.width = canvas.style.width;
       }
 
@@ -291,18 +287,18 @@ export default {
           return null;
         };
 
-        canvas.addEventListener(
-          "click",
-          function(event) {
-            const canvasOffset = canvas.getBoundingClientRect();
-            const x = event.x - canvasOffset.x;
-            const y = event.y - canvasOffset.y;
-            const hitRect = hitTestPos(x, y);
-            if (hitRect) {
-              this.$emit("trackSelected", hitRect.trackIndex);
-            }
-          }.bind(this)
-        );
+        canvas.addEventListener("click", event => {
+          const canvasOffset = canvas.getBoundingClientRect();
+          const x = event.x - canvasOffset.x;
+          const y = event.y - canvasOffset.y;
+          const hitRect = hitTestPos(x, y);
+          const hitIndex = this.tracks.findIndex(
+            track => track.trackIndex === hitRect.trackIndex
+          );
+          if (hitRect && this.currentTrack !== hitIndex) {
+            this.$emit("trackSelected", hitIndex);
+          }
+        });
 
         canvas.addEventListener("mousemove", event => {
           const canvasOffset = canvas.getBoundingClientRect();
@@ -315,12 +311,11 @@ export default {
       }
     },
     setTimeAndRedraw(time) {
-      this.$refs.player.player.currentTime(time);
+      this.videoJsPlayer.currentTime(time);
     },
     ratechange() {
-      if (this.$refs.player != undefined) {
-        const htmlPlayer = this.$refs.player.$refs.video;
-        localStorage.setItem("playbackrate", htmlPlayer.playbackRate);
+      if (this.htmlPlayer) {
+        localStorage.setItem("playbackrate", this.htmlPlayer.playbackRate);
       }
     },
     seeking(event) {
@@ -331,8 +326,12 @@ export default {
       }
     },
     drawRectWithText(context, { trackIndex, rectWidth, rectHeight, x, y }) {
-      context.strokeStyle = this.colours[trackIndex % this.colours.length];
-      const lineWidth = trackIndex === this.currentTrack ? 3 : 1;
+      const hitIndex = this.tracks.findIndex(
+        track => track.trackIndex === trackIndex
+      );
+      context.strokeStyle = this.colours[hitIndex % this.colours.length];
+      const selected = this.currentTrack === hitIndex;
+      const lineWidth = selected ? 3 : 1;
       const halfLineWidth = lineWidth / 2;
       context.lineWidth = lineWidth;
       context.strokeRect(
@@ -341,11 +340,11 @@ export default {
         rectWidth + halfLineWidth,
         rectHeight + halfLineWidth
       );
-      const selected = trackIndex === this.currentTrack;
+
       if (selected) {
         context.font = "12px Verdana";
         context.fillStyle = "white";
-        const text = `Track ${trackIndex + 1}`;
+        const text = `Track ${hitIndex + 1}`;
         const textHeight = 12;
         const textWidth = context.measureText(text).width;
 
@@ -384,11 +383,15 @@ export default {
         });
     },
     draw() {
-      if (this.$refs.player) {
-        const v = this.$refs.player;
+      if (this.videoJsPlayer && this.htmlPlayer) {
         // NOTE: Since our video is 9fps, we're don't need to update this at 60fps.
         const frameTime = 1 / 9;
-        this.currentVideoTime = v.player.currentTime();
+        try {
+          // NOTE: This is just to suppress a spurious type error inside videojs when it hasn't initialised properly yet.
+          this.currentVideoTime = this.videoJsPlayer.currentTime();
+        } catch (e) {
+          this.currentVideoTime = 0;
+        }
 
         if (this.loopSelectedTrack) {
           // If we want to loop the current track, check to see if we've gone past the end of it here.
@@ -410,28 +413,25 @@ export default {
             this.currentVideoTime
           );
           const canvas = this.$refs.canvas;
-          const context = canvas.getContext("2d");
-          const devicePixelRatio = window.devicePixelRatio;
-          canvas.width = this.canvasWidth * devicePixelRatio;
-          canvas.height = this.canvasHeight * devicePixelRatio;
-
-          canvas.style.width = `${this.canvasWidth}px`;
-          canvas.style.height = `${this.canvasHeight}px`;
-          if (this.$refs.scrubber) {
-            this.$refs.scrubber.$el.style.width = canvas.style.width;
-          }
-          context.scale(devicePixelRatio, devicePixelRatio);
-
-          // Clear the canvas before each new frame
-          context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-          if (allFrameData.length) {
-            for (const rect of allFrameData) {
-              this.drawRectWithText(context, rect);
+          if (canvas) {
+            const context = canvas.getContext("2d");
+            const devicePixelRatio = window.devicePixelRatio;
+            canvas.width = this.canvasWidth * devicePixelRatio;
+            canvas.height = this.canvasHeight * devicePixelRatio;
+            canvas.style.width = `${this.canvasWidth}px`;
+            canvas.style.height = `${this.canvasHeight}px`;
+            context.scale(devicePixelRatio, devicePixelRatio);
+            // Clear the canvas before each new frame
+            context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+            if (allFrameData.length) {
+              for (const rect of allFrameData) {
+                this.drawRectWithText(context, rect);
+              }
             }
           }
           this.lastDisplayedVideoTime = currentFrame;
         }
-        requestAnimationFrame(this.draw);
+        requestAnimationFrame(this.draw.bind(this));
       }
     }
   }
