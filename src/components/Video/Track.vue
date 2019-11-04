@@ -38,7 +38,11 @@
         @addTag="addTag($event)"
         @deleteTag="deleteTag($event)"
       />
-      <AddCustomTrackTag @addTag="addTag($event)" />
+      <AddCustomTrackTag
+        :tags="track.TrackTags"
+        @addTag="addTag($event)"
+        @deleteTag="deleteTag($event)"
+      />
       <TrackTags
         :items="track.TrackTags"
         @addTag="addTag($event)"

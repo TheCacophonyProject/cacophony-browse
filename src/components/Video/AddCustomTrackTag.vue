@@ -24,6 +24,12 @@ import DefaultLabels from "../../const.js";
 
 export default {
   name: "AddCustomTrackTag",
+  props: {
+    tags: {
+      type: Array,
+      required: true
+    }
+  },
   data() {
     return {
       whatTag: "cat",
@@ -39,9 +45,25 @@ export default {
   },
   methods: {
     quickTag() {
+      const userTags = this.tags.filter(
+        tag =>
+          tag.User &&
+          tag.User.username == this.$store.state.User.userData.username
+      );
+
       const tag = {};
       tag.confidence = this.confidence;
       tag.what = this.whatTag;
+
+      var found = userTags.find(function(uTag) {
+        return uTag.what == tag.what;
+      });
+      if (found) {
+        return;
+      } else if (userTags.length > 0) {
+        this.$emit("deleteTag", userTags[0]);
+      }
+
       this.$emit("addTag", tag);
     }
   }
