@@ -24,6 +24,8 @@ export default {
       const params = Object.assign(this.params, {
         jwt: token
       });
+      params.offset = 0;
+      params.limit = 100000;
       const url =
         `${config.api}/api/v1/recordings/report?` +
         querystring.stringify(params);
