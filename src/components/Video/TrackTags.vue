@@ -148,6 +148,13 @@ export default {
       );
     },
     confirmTag: function(rowItem) {
+      const found = this.items.find(
+        tag => tag.User && tag.what != rowItem.what
+      );
+      if (found) {
+        this.$emit("deleteTag", found);
+      }
+
       const tag = {};
       tag.what = rowItem.what;
       tag.confidence = rowItem.confidence;

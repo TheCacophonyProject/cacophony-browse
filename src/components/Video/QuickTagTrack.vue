@@ -89,6 +89,8 @@ export default {
       if (found) {
         this.$emit("deleteTag", found);
         return;
+      } else if (this.userTags.length > 0) {
+        this.$emit("deleteTag", this.userTags[0]);
       }
       const tag = {};
       tag.confidence = 0.85;
