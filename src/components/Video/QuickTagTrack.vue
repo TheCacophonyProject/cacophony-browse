@@ -90,7 +90,12 @@ export default {
         this.$emit("deleteTag", found);
         return;
       } else if (this.userTags.length > 0) {
-        this.$emit("deleteTag", this.userTags[0]);
+        const delTag = this.userTags.find(function(uTag) {
+          return !DefaultLabels.isAdditionalTag(uTag);
+        });
+        if (delTag) {
+          this.$emit("deleteTag", delTag);
+        }
       }
       const tag = {};
       tag.confidence = 0.85;

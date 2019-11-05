@@ -149,7 +149,10 @@ export default {
     },
     confirmTag: function(rowItem) {
       const found = this.items.find(
-        tag => tag.User && tag.what != rowItem.what
+        tag =>
+          tag.User &&
+          tag.what != rowItem.what &&
+          !DefaultLabels.isAdditionalTag(tag)
       );
       if (found) {
         this.$emit("deleteTag", found);

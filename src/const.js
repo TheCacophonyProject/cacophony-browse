@@ -172,6 +172,7 @@ const DefaultLabels = {
     allLabels.unTagged
   ],
   allLabels: allLabels,
+  additionalTrackTags: [allLabels.part, allLabels.poorTracking],
   otherTagLabels: function() {
     return [allLabels.unknown, allLabels.falsePositive];
   },
@@ -196,6 +197,11 @@ const DefaultLabels = {
     return this.recordingLabels()
       .concat(this.tagTypes)
       .concat([allLabels.multipleAnimals]);
+  },
+  isAdditionalTag(tag) {
+    return this.additionalTrackTags.find(function(additionalTag) {
+      return additionalTag.value == tag.what;
+    });
   },
   searchLabels: function() {
     var searchLabels = this.animals.concat([

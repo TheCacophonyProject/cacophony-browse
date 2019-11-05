@@ -58,10 +58,18 @@ export default {
       var found = userTags.find(function(uTag) {
         return uTag.what == tag.what;
       });
+
       if (found) {
         return;
-      } else if (userTags.length > 0) {
-        this.$emit("deleteTag", userTags[0]);
+      }
+      const isAdditionalTag = DefaultLabels.isAdditionalTag(tag);
+      if (!isAdditionalTag && userTags.length > 0) {
+        const delTag = userTags.find(function(uTag) {
+          return !DefaultLabels.isAdditionalTag(uTag);
+        });
+        if (delTag) {
+          this.$emit("deleteTag", delTag);
+        }
       }
 
       this.$emit("addTag", tag);
