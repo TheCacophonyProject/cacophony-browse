@@ -51,6 +51,8 @@ export default {
 <style scoped lang="scss">
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
+@import "../styles/tag-colours";
+
 .tag {
   &.badge {
     font-weight: initial;
@@ -61,13 +63,13 @@ export default {
     line-height: 0.7;
   }
   &.automatic {
-    background: $danger;
+    background: $ai;
   }
   &.human {
-    background: $success;
+    background: $human;
   }
   &.automatic.human {
-    background: $info;
+    background: $aihuman;
   }
   .svg-inline--fa {
     color: $white;

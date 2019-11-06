@@ -58,15 +58,40 @@ export default {
       required: true
     }
   },
+  watch: {
+    tags: function(newVal, oldVal) {
+      this.filterTags();
+    }
+  },
+  created: function() {
+    this.filterTags();
+  },
   data() {
     return {
+      userTags: [],
       animals: DefaultLabels.quickTagLabels(),
       otherTags: DefaultLabels.otherTagLabels(),
       message: ""
     };
   },
   methods: {
+    filterTags() {
+      this.userTags = this.tags.filter(
+        tag =>
+          tag.User &&
+          tag.User.username == this.$store.state.User.userData.username
+      );
+    },
     quickTag(what) {
+      var found = this.userTags.find(function(tag) {
+        return tag.what == what;
+      });
+
+      if (found) {
+        this.$emit("deleteTag", found);
+        return;
+      }
+
       const tag = {};
       tag.confidence = 0.85;
       tag.what = what;
@@ -87,14 +112,19 @@ export default {
     },
     getClass(animal) {
       let buttonClass = "tag-div";
-      for (const tag of this.tags) {
-        if (tag.what == animal) {
-          if (tag.automatic == false) {
-            buttonClass += " tagged active";
-          } else {
-            buttonClass += " ai-tagged active";
-          }
-        }
+      var userTag = this.userTags.find(function(tag) {
+        return tag.what == animal;
+      });
+
+      if (userTag) {
+        buttonClass += " tagged active";
+      }
+      var aiTag = this.tags.find(function(tag) {
+        return tag.what == animal && tag.automatic;
+      });
+
+      if (aiTag) {
+        buttonClass += " ai-tagged active";
       }
       return buttonClass;
     }
@@ -103,6 +133,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "../../styles/tag-colours";
+
 .tag-buttons {
   margin-bottom: 1.2rem;
   display: flex;
@@ -139,10 +171,13 @@ export default {
       font-size: 0.7em;
     }
     &.tagged {
-      border: 2px solid green !important;
+      border: 2px solid $human !important;
     }
     &.ai-tagged {
-      border: 2px solid gold !important;
+      border: 2px solid $ai !important;
+    }
+    &.ai-tagged.tagged {
+      border: 2px solid $aihuman !important;
     }
   }
 }

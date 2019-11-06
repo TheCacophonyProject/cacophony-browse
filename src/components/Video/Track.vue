@@ -33,7 +33,11 @@
       {{ message }}
     </div>
     <div v-if="show" class="card-body">
-      <QuickTagTrack :tags="track.TrackTags" @addTag="addTag($event)" />
+      <QuickTagTrack
+        :tags="track.TrackTags"
+        @addTag="addTag($event)"
+        @deleteTag="deleteTag($event)"
+      />
       <AddCustomTrackTag @addTag="addTag($event)" />
       <TrackTags
         :items="track.TrackTags"
