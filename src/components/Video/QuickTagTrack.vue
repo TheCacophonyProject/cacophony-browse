@@ -59,7 +59,7 @@ export default {
     }
   },
   watch: {
-    tags: function(newVal, oldVal) {
+    tags: function() {
       this.filterTags();
     }
   },

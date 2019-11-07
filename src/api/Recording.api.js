@@ -63,8 +63,7 @@ function replaceTrackTag(tag, recordingId, trackId) {
   const body = querystring.stringify({
     what: tag.what,
     confidence: tag.confidence,
-    automatic: "false",
-    data: JSON.stringify("")
+    automatic: "false"
   });
 
   const url = `${config.api}${apiPath}/${recordingId}/tracks/${trackId}/replaceTag`;
@@ -82,8 +81,7 @@ function addTrackTag(tag, recordingId, trackId) {
   const body = querystring.stringify({
     what: tag.what,
     confidence: tag.confidence,
-    automatic: "false",
-    data: JSON.stringify("")
+    automatic: "false"
   });
 
   const url = `${config.api}${apiPath}/${recordingId}/tracks/${trackId}/tags`;
