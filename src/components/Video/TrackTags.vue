@@ -56,7 +56,7 @@
         <template slot="buttons" slot-scope="row">
           <button
             v-b-tooltip.hover.left="'Confirm the automatic tag'"
-            v-if="row.item.automatic"
+            v-if="row.item.automatic && !userTagExists(row.item.what)"
             class="btn"
             @click="confirmTag(row.item)"
           >
@@ -138,6 +138,14 @@ export default {
       } else {
         return "";
       }
+    },
+    userTagExists: function(what) {
+      return this.items.find(
+        tag =>
+          tag.User &&
+          tag.what == what &&
+          tag.User.username == this.$store.state.User.userData.username
+      );
     },
     confirmTag: function(rowItem) {
       const tag = {};
