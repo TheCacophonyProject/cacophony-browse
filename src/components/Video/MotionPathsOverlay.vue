@@ -33,6 +33,14 @@ export default {
     scale: {
       type: Number,
       required: true
+    },
+    currentTrack: {
+      type: Number,
+      required: true
+    },
+    showOnlyForCurrentTrack: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -62,7 +70,11 @@ export default {
 
         // Draw track trails:
         let num = 0;
-        for (const { data } of this.tracks) {
+        let tracks = this.tracks;
+        if (this.showOnlyForCurrentTrack) {
+          tracks = [this.tracks[this.currentTrack]];
+        }
+        for (const { data } of tracks) {
           context.strokeStyle = this.colours[num % this.colours.length];
           context.lineWidth = 3 / devicePixelRatio;
           context.lineJoin = "round";

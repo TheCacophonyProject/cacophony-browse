@@ -1,5 +1,10 @@
 <template>
   <div class="tagging-view">
+    <AddCustomTrackTag
+      @addTag="addCustomTag"
+      :allow-comment="false"
+      :allow-confidence="false"
+    />
     <div class="player-and-controls">
       <div class="video-container">
         <div class="player">
@@ -23,6 +28,7 @@
             :can-select-tracks="false"
             :loop-selected-track="true"
             :show-motion-paths="showMotionPaths"
+            :show-overlays-for-current-track-only="true"
             @request-next-recording="nextRecording"
             @ready-to-play="playerIsReady"
           />
@@ -46,13 +52,27 @@
             />
             <span>{{ text }}</span>
           </b-button>
+
+          <b-button
+            :disabled="!readyToTag || currentTrackIsAlreadyTagged"
+            v-b-modal="'custom-track-tag'"
+            class="btn btn-light btn-tag equal-flex"
+          >
+            <img
+              alt="Other tag"
+              title="Open form to add other tag"
+              src="../assets/video/plus.png"
+            />
+            <span>other...</span>
+          </b-button>
+
+          <b-button :disabled="!readyToTag" @click="markTrackAsSkipped">
+            <span>Skip track</span>
+          </b-button>
         </div>
       </div>
     </div>
     <div class="actions">
-      <b-button :disabled="!readyToTag" @click="markTrackAsSkipped"
-        >Skip track</b-button
-      >
       <b-button :disabled="!readyToTag || history.length === 0" @click="undo">
         Undo last action
       </b-button>
@@ -78,6 +98,7 @@
 <script lang="ts">
 import config from "../config";
 import ThermalVideoPlayer from "../components/Video/ThermalVideoPlayer.vue";
+import AddCustomTrackTag from "../components/Video/AddCustomTrackTag.vue";
 import api from "../api";
 import DefaultLabels, { TagColours } from "../const";
 import Vue from "vue";
@@ -128,12 +149,13 @@ interface TaggingViewData {
 
 export default Vue.extend({
   name: "TaggingView",
-  components: { ThermalVideoPlayer },
+  components: { ThermalVideoPlayer, AddCustomTrackTag },
   data(): TaggingViewData {
     return {
       colours: TagColours,
       tags: [
         ...DefaultLabels.quickTagLabels().map(x => ({ text: x, value: x })),
+        { text: "mustelid", value: "mustelid" },
         ...DefaultLabels.otherTagLabels()
       ],
       recordingsByDevice: {},
@@ -223,6 +245,9 @@ export default Vue.extend({
       await this.pickRecording();
       this.loading = false;
     },
+    addCustomTag({ what }) {
+      this.addTag(what);
+    },
     async addTag(tagLabel: string) {
       const recordingId = this.currentRecording.id;
       const trackId = this.orderedTracks[this.currentTrackIndex].id;
@@ -292,7 +317,7 @@ export default Vue.extend({
         } else {
           this.nextTrackOrRecording();
         }
-      }, 500);
+      }, 300);
     },
     pickDevice() {
       const devices = Object.keys(this.recordingsByDevice).map(Number);
@@ -536,6 +561,7 @@ export default Vue.extend({
 }
 .video-container,
 .actions {
+  min-width: 640px;
   max-width: 640px;
 }
 .player {

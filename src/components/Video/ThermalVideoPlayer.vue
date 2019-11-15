@@ -2,6 +2,8 @@
   <div ref="container" class="video-container">
     <MotionPathsOverlay
       v-if="showMotionPaths && hasTracks && playerIsReady"
+      :current-track="currentTrack"
+      :show-only-for-current-track="showOverlaysForCurrentTrackOnly"
       :canvas-width="canvasWidth"
       :canvas-height="canvasHeight"
       :ended-playback="ended"
@@ -95,6 +97,10 @@ export default {
     showMotionPaths: {
       type: Boolean,
       default: false
+    },
+    showOverlaysForCurrentTrackOnly: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -170,9 +176,11 @@ export default {
       }, 200);
     },
     showEndedOverlay() {
-      setTimeout(() => {
-        this.ended = true;
-      }, 150);
+      if (!this.loopSelectedTrack) {
+        setTimeout(() => {
+          this.ended = true;
+        }, 150);
+      }
     },
     bindRateChange() {
       const rate = localStorage.getItem("playbackrate");
@@ -273,7 +281,8 @@ export default {
         // Hit-testing of track rects, so they are clickable.
         const hitTestPos = (x, y) => {
           const allFrameData = this.getVideoFrameDataForAllTracksAtTime(
-            this.currentVideoTime
+            this.currentVideoTime,
+            this.showOverlaysForCurrentTrackOnly
           );
           for (const rect of allFrameData) {
             if (
@@ -356,7 +365,7 @@ export default {
         context.fillText(text, textX, textY);
       }
     },
-    getVideoFrameDataForAllTracksAtTime(currentTime) {
+    getVideoFrameDataForAllTracksAtTime(currentTime, currentTrackOnly) {
       const search = (positions, currentTime) => {
         let i = positions.length - 1;
         while (positions[i][0] > currentTime) {
@@ -366,7 +375,10 @@ export default {
       };
       // First check if the last position we got is still the current position?
       // See if tracks are in range.
-      return this.tracks
+      const tracks = currentTrackOnly
+        ? [this.tracks[this.currentTrack]]
+        : this.tracks;
+      return tracks
         .filter(
           ({ data: { start_s, end_s } }) =>
             start_s <= currentTime && end_s >= currentTime
@@ -410,7 +422,8 @@ export default {
           // Only update the canvas if the video time has changed as this means a new
           // video frame is being displayed.
           const allFrameData = this.getVideoFrameDataForAllTracksAtTime(
-            this.currentVideoTime
+            this.currentVideoTime,
+            this.showOverlaysForCurrentTrackOnly
           );
           const canvas = this.$refs.canvas;
           if (canvas) {
