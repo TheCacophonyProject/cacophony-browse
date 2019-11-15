@@ -5,6 +5,7 @@ const state = {
   didInvalidate: false,
   JWT: localStorage.getItem("JWT"),
   userData: {
+    id: localStorage.getItem("id"),
     username: localStorage.getItem("username"),
     email: localStorage.getItem("email"),
     globalPermission: getGlobalPermission()
@@ -46,6 +47,7 @@ const actions = {
     );
     if (success) {
       api.user.persistUser(
+        result.userData.id,
         result.userData.username,
         result.token,
         result.userData.email,
@@ -67,6 +69,7 @@ const actions = {
 
     if (success) {
       api.user.persistUser(
+        result.userData.id,
         result.userData.username,
         result.token,
         result.userData.email,

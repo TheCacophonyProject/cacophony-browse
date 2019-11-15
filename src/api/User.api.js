@@ -24,7 +24,9 @@ function login(usernameOrEmail, password) {
   });
 }
 
-function persistUser(username, token, email, globalPermission) {
+function persistUser(id, username, token, email, globalPermission) {
+  localStorage.setItem("id", id);
+
   localStorage.setItem("username", username);
   localStorage.setItem("JWT", token);
   localStorage.setItem("email", email);
@@ -37,6 +39,7 @@ function persistFields(data) {
   }
 }
 function logout() {
+  localStorage.setItem("id", "");
   localStorage.setItem("username", "");
   localStorage.setItem("JWT", "");
   localStorage.setItem("email", "");
