@@ -141,7 +141,7 @@ const actions = {
   },
 
   async ADD_TRACK_TAG({ commit }, { tag, recordingId, trackId }) {
-    const { success, result } = await api.recording.addTrackTag(
+    const { success, result } = await api.recording.replaceTrackTag(
       tag,
       recordingId,
       trackId

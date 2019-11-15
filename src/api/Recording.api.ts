@@ -9,7 +9,8 @@ export default {
   del,
   tracks,
   addTrackTag,
-  deleteTrackTag
+  deleteTrackTag,
+  replaceTrackTag
 };
 
 export type DeviceId = number;
@@ -199,12 +200,30 @@ function tracks(recordingId: RecordingId): Promise<FetchResult<{ tracks: Track[]
   });
 }
 
+
+function replaceTrackTag(tag: TrackTag, recordingId: RecordingId, trackId: TrackId) {
+  const body = querystring.stringify({
+    what: tag.what,
+    confidence: tag.confidence,
+    automatic: "false"
+  });
+
+  const url = `${config.api}${apiPath}/${recordingId}/tracks/${trackId}/replaceTag`;
+
+  return fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: body
+  });
+}
+
 function addTrackTag(tag: Tag, recordingId: RecordingId, trackId: TrackId): Promise<FetchResult<{trackTagId: number, success: boolean}>> {
   const body = querystring.stringify({
     what: tag.what,
     confidence: tag.confidence,
     automatic: false,
-    data: JSON.stringify('')
   });
   const url = `${config.api}${apiPath}/${recordingId}/tracks/${trackId}/tags`;
   return fetch(url, {
