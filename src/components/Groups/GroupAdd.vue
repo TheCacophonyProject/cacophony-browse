@@ -30,7 +30,6 @@
 
 <script>
 import { minLength, required } from "vuelidate/lib/validators";
-import { mapState } from "vuex";
 
 const groupNameMinLength = 3;
 

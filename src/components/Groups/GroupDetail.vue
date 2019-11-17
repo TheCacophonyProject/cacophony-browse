@@ -1,16 +1,17 @@
 <template>
   <div class="container">
-    <div class="group-detail row">
-      <div class="users-detail col-lg-7">
+    <b-row class="group-detail">
+      <b-col class="users-detail col-12 col-lg-7">
         <h2>Users <help :help-text="usersHelpTip" /></h2>
         <div class="description-and-button-wrapper">
           <p>
             Users can view recordings for the devices associated with this
             group.
           </p>
+          <group-user-add v-if="isGroupAdmin" :group="group" />
           <b-button
             v-if="isGroupAdmin"
-            v-b-modal.group-add-user
+            v-b-modal.group-user-add
             variant="primary"
             v-b-tooltip.hover
             title="Add user to group"
@@ -19,7 +20,6 @@
             <font-awesome-icon icon="user-plus" size="xs" />
             <span>Add user</span>
           </b-button>
-          <group-user-add v-if="isGroupAdmin" :group="group" />
         </div>
         <b-table
           :items="group.GroupUsers"
@@ -51,9 +51,9 @@
             </b-button>
           </template>
         </b-table>
-      </div>
+      </b-col>
 
-      <div class="devices-detail col-lg-5">
+      <b-col class="devices-detail col-12 col-lg-5">
         <h2>Devices <help :help-text="devicesHelpTip" /></h2>
         <p>Devices associated with this group.</p>
         <b-table
@@ -74,19 +74,19 @@
             >
           </template>
         </b-table>
-      </div>
-    </div>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import GroupUserAdd from "./GroupUserAdd.vue";
 import Help from "../Help.vue";
+import GroupUserAdd from "./GroupUserAdd.vue";
 
 export default {
   name: "GroupDetail",
-  components: { GroupUserAdd, Help },
+  components: { Help, GroupUserAdd },
   props: {
     group: {
       type: Object,

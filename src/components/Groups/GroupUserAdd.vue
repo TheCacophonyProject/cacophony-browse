@@ -1,6 +1,6 @@
 <template>
   <b-modal
-    id="group-add-user"
+    id="group-user-add"
     title="Add user to group"
     @ok="addUser"
     @shown="setFocusAndReset"
