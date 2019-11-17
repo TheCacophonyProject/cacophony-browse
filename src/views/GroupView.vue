@@ -1,13 +1,31 @@
 <template>
-  <b-container>
-    <header v-if="fetched">
-      <h1>Group: {{ group.groupname }}</h1>
-      <icon-link
-        :icon="['fas', 'angle-left']"
-        :link="{ name: 'groups' }"
-        :position="'right'"
-      />
-    </header>
+  <b-container fluid style="padding: 0">
+    <b-jumbotron class="jumbotron-admin" fluid>
+      <div>
+        <b-link
+          :to="{
+            name: 'groups'
+          }"
+        >
+          <font-awesome-icon icon="angle-left" size="xs" />
+          <span>Back to groups</span>
+        </b-link>
+      </div>
+      <h1>
+        <font-awesome-icon icon="users" size="xs" />
+        <span v-if="!fetched" class="group-name-placeholder"
+          >loading group name</span
+        >
+        <span v-else>
+          {{ group && group.groupname }}
+        </span>
+      </h1>
+      <p class="lead">
+        Manage the users associated with this group and view the devices
+        associated with it.
+      </p>
+    </b-jumbotron>
+
     <spinner :fetching="!fetched" />
     <div v-if="group && fetched">
       <group-detail :group="group" :user="currentUser" />
@@ -19,11 +37,10 @@
 import { mapState } from "vuex";
 import GroupDetail from "../components/Groups/GroupDetail.vue";
 import Spinner from "../components/Spinner.vue";
-import IconLink from "../components/IconLink.vue";
 
 export default {
   name: "GroupView",
-  components: { GroupDetail, Spinner, IconLink },
+  components: { GroupDetail, Spinner },
   props: {},
   data() {
     return {
@@ -57,17 +74,8 @@ export default {
 </script>
 
 <style scoped>
-header {
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-  align-items: center;
-  margin: 1.5rem 0 -1.5em 0;
-}
-
-h1 {
-  font-weight: bold;
-  font-size: x-large;
-  margin: 0;
+.group-name-placeholder {
+  color: #ccc;
+  font-style: italic;
 }
 </style>

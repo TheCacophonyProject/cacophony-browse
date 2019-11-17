@@ -15,6 +15,7 @@ const defaults = {
  * @returns {Promise<{result: any, success: boolean, status: number}>}
  */
 export async function fetch() {
+  // TODO - Does this arguments parsing need to be so opaque?
   const args = [].slice.call(arguments, 0);
   const requiresAuth = args.requiresAuth || true;
 
@@ -26,6 +27,11 @@ export async function fetch() {
       Authorization: store.getters["User/getToken"]
     }
   };
+  // TODO - added the ability to suppress the global messaging and handle it at a component level. Ideally the option might be passed down from the component but for we're setting the preference in the API layer
+  let suppressGlobalMessaging = false;
+  if (args[2] === true) {
+    suppressGlobalMessaging = true;
+  }
 
   const response = await crossFetch.apply(this, args);
   const status = response.status;
@@ -39,7 +45,9 @@ export async function fetch() {
     );
     router.push("login");
   } else {
-    handleMessages(result, status);
+    if (!suppressGlobalMessaging) {
+      handleMessages(result, status);
+    }
   }
   return { result, status, success: response.ok };
 }

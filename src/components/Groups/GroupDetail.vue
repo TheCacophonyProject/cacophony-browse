@@ -3,6 +3,24 @@
     <div class="group-detail row">
       <div class="users-detail col-lg-7">
         <h2>Users <help :help-text="usersHelpTip" /></h2>
+        <div class="description-and-button-wrapper">
+          <p>
+            Users can view recordings for the devices associated with this
+            group.
+          </p>
+          <b-button
+            v-if="isGroupAdmin"
+            v-b-modal.group-add-user
+            variant="primary"
+            v-b-tooltip.hover
+            title="Add user to group"
+            class="add-button"
+          >
+            <font-awesome-icon icon="user-plus" size="xs" />
+            <span>Add user</span>
+          </b-button>
+          <group-user-add v-if="isGroupAdmin" :group="group" />
+        </div>
         <b-table
           :items="group.GroupUsers"
           :fields="groupUsersTableFields"
@@ -13,7 +31,7 @@
           responsive
         >
           <template slot="admin" slot-scope="data">
-            {{ data.item.isAdmin }}
+            {{ data.item.isAdmin ? "Yes" : "No" }}
           </template>
 
           <template slot="controls" slot-scope="data">
@@ -22,6 +40,7 @@
               v-if="isGroupAdmin"
               title="Remove user from group"
               class="trash-button"
+              variant="light"
               @click="removeUser(data.item.username, uiUser)"
             >
               <font-awesome-icon
@@ -32,12 +51,11 @@
             </b-button>
           </template>
         </b-table>
-
-        <group-user-add v-if="isGroupAdmin" :group="group" />
       </div>
 
       <div class="devices-detail col-lg-5">
         <h2>Devices <help :help-text="devicesHelpTip" /></h2>
+        <p>Devices associated with this group.</p>
         <b-table
           :items="group.Devices"
           :fields="deviceTableFields"
@@ -87,7 +105,7 @@ export default {
           label: "User Name",
           sortable: "true"
         },
-        { key: "admin", label: "Admin" },
+        { key: "admin", label: "Administrator" },
         {
           key: "controls",
           label: "",
@@ -104,23 +122,18 @@ export default {
       ],
       deviceSortBy: "devicename",
       usersHelpTip: {
-        title: "Users",
-        content:
-          "<p>These are the users who can view recordings for the group's devices.</p>" +
-          "<p>If you are a group admin, you can also add new users.</p>"
+        title: "Only administrators can add new users"
       },
       devicesHelpTip: {
-        title: "Devices",
-        content:
-          "<p>These are devices that this group manages.</p>" +
-          "<p>Devices specify which group they belong to when they first register.   Therefore the devices " +
-          "list cannot be edited.</p>"
+        title:
+          "Devices specify which group they belong to when they first register. They can't be edited here."
       }
     };
   },
   computed: mapState({
     uiUser: state => state.User.userData.username,
     isGroupAdmin: function() {
+      // FIXME - This seems to return the wrong result in Firefox
       if (this.user && this.group.GroupUsers) {
         const username = this.user.username;
         return (
@@ -155,36 +168,50 @@ export default {
 };
 </script>
 
-<style scoped>
-.group-detail {
-  margin-top: 15px;
-}
+<style lang="scss" scoped>
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
 
-.users-detail,
-.devices-detail {
-  padding-left: 0px;
-  padding-right: 0px;
-}
-
-@media (min-width: 992px) {
-  .users-detail {
-    padding-right: 30px;
-  }
-
-  .devices-detail {
-    padding-left: 30px;
-  }
+.view.container-fluid {
+  padding: 0;
 }
 
 h2 {
   font-size: x-large;
-  margin-top: 2rem;
+}
+
+.description-and-button-wrapper {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  margin-bottom: 1em;
+  p {
+    margin-bottom: 0;
+  }
+  .add-button {
+    white-space: nowrap;
+    margin-left: auto;
+  }
+}
+
+.help {
+  color: $gray-400;
+  font-size: large;
+}
+
+@include media-breakpoint-down(sm) {
+  .add-button {
+    position: fixed;
+    bottom: 1em;
+    right: 1em;
+    z-index: 1;
+  }
 }
 
 button.trash-button {
-  padding: 0;
-  background: inherit;
-  color: black;
+  padding: 0 0.5em;
+  background: transparent;
   border: none;
 }
 </style>

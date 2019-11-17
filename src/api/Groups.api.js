@@ -10,14 +10,18 @@ export default {
 
 function addNewGroup(groupName) {
   const body = `groupname=${encodeURIComponent(groupName)}`;
-
-  return fetch(`${config.api}/api/v1/groups`, {
-    method: "POST",
-    body: body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
-  });
+  const suppressGlobalMessage = true;
+  return fetch(
+    `${config.api}/api/v1/groups`,
+    {
+      method: "POST",
+      body: body,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+      }
+    },
+    suppressGlobalMessage
+  );
 }
 
 function addGroupUser(groupName, userName, isAdmin) {
@@ -27,13 +31,19 @@ function addGroupUser(groupName, userName, isAdmin) {
     isAdmin
   )}`;
 
-  return fetch(`${config.api}/api/v1/groups/users`, {
-    method: "POST",
-    body: body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
-  });
+  const suppressGlobalMessage = true;
+
+  return fetch(
+    `${config.api}/api/v1/groups/users`,
+    {
+      method: "POST",
+      body: body,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+      }
+    },
+    suppressGlobalMessage
+  );
 }
 
 function removeGroupUser(groupName, userName) {

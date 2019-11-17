@@ -45,13 +45,18 @@ h1 {
   -moz-appearance: none;
 }
 
-&.tagged {
-  border: 2px solid green !important;
+
+/* Admin */
+
+.jumbotron-admin {
+  background: #f8f9fa;
+  padding-top: 1em;
+  padding-bottom: 1.5em;
 }
-&.ai-tagged {
-  border: 2px solid gold !important;
+
+
+.jumbotron-admin h1 {
+  font-size: x-large;
 }
-&.ai-tagged.tagged {
-  border: 2px solid $info !important;
-}
+
 @import "login-register.css";
