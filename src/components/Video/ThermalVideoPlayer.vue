@@ -61,7 +61,6 @@ import { videoPlayer } from "vue-video-player";
 import VideoTracksScrubber from "./VideoTracksScrubber.vue";
 import Spinner from "../Spinner.vue";
 import MotionPathsOverlay from "./MotionPathsOverlay.vue";
-// eslint-disable-next-line no-unused-vars
 import { Player } from "videojs";
 import { TagColours } from "../../const";
 

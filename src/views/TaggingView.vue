@@ -104,23 +104,13 @@ import DefaultLabels, { TagColours } from "../const";
 import Vue from "vue";
 
 import {
-  // eslint-disable-next-line no-unused-vars
   DeviceId,
-  // eslint-disable-next-line no-unused-vars
   Recording,
-  // eslint-disable-next-line no-unused-vars
   RecordingInfo,
-  // eslint-disable-next-line no-unused-vars
   RecordingType,
-  // eslint-disable-next-line no-unused-vars
   TagMode,
-  // eslint-disable-next-line no-unused-vars
   Track,
-  // eslint-disable-next-line no-unused-vars
-  TrackId,
-  // eslint-disable-next-line no-unused-vars
   TrackTag,
-  // eslint-disable-next-line no-unused-vars
   User
 } from "../api/Recording.api";
 

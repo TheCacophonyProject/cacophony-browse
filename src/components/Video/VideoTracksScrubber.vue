@@ -36,7 +36,6 @@
 </template>
 
 <script lang="ts">
-// eslint-disable-next-line no-unused-vars
 import { Track } from "../../api/Recording.api";
 import { TagColours } from "../../const";
 
