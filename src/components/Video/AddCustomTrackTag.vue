@@ -9,11 +9,11 @@
         </b-form-select>
       </b-form-group>
 
-      <b-form-group label="Confidence:" horizontal>
+      <b-form-group label="Confidence:" horizontal v-if="allowConfidence">
         <b-form-radio-group v-model="confidence" :options="confidenceOptions" />
       </b-form-group>
 
-      <b-form-group label="Comment:" horizontal>
+      <b-form-group label="Comment:" horizontal v-if="allowComment">
         <b-form-input v-model="comment" />
       </b-form-group>
     </b-form>
@@ -24,6 +24,16 @@ import DefaultLabels from "../../const.js";
 
 export default {
   name: "AddCustomTrackTag",
+  props: {
+    allowConfidence: {
+      type: Boolean,
+      default: true
+    },
+    allowComment: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       whatTag: "cat",
