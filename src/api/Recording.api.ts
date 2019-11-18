@@ -108,16 +108,17 @@ export interface Track {
   archivedAt: UtcTimestamp | null;
   AlgorithmId: number;
   TrackTags: TrackTag[];
-  //trackIndex: number;
 }
 
 export interface User {
   username: string;
   id?: number;
+  email: string;
+  globalPermission: "read" | "write" | "off";
 }
 
 export interface TrackTag {
-  id: TrackTagId; // NOTE(jon): Different than a TagId?
+  id: TrackTagId;
   TrackId: TrackId;
   UserId?: UserId;
   what: string;

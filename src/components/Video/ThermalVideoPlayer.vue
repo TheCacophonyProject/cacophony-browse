@@ -203,6 +203,7 @@ export default {
     },
     setVideoUrl() {
       this.loading = true;
+      this.ended = false;
       if (this.htmlPlayer) {
         const rate = localStorage.getItem("playbackrate");
         if (rate) {

@@ -1,5 +1,11 @@
 <template>
-  <div class="tagging-view">
+  <div
+    class="tagging-view"
+    v-if="
+      currentUser.globalPermission == 'read' ||
+        currentUser.globalPermission == 'write'
+    "
+  >
     <AddCustomTrackTag
       @addTag="addCustomTag"
       :allow-comment="false"
@@ -135,6 +141,7 @@ interface TaggingViewData {
     tag: TrackTag;
   }[];
   nextTrackOrRecordingTimeout: number;
+  currentTimeout: number | null;
 }
 
 export default Vue.extend({
@@ -160,7 +167,8 @@ export default Vue.extend({
       taggingPending: false,
       readyToPlay: false,
       nextTrackOrRecordingTimeout: 0,
-      showMotionPaths: false
+      showMotionPaths: false,
+      currentTimeout: null
     };
   },
   methods: {
@@ -258,8 +266,7 @@ export default Vue.extend({
           const synthesisedTag = {
             ...tag,
             User: {
-              username: this.currentUser.username,
-              id: this.currentUser.id
+              ...this.currentUser
             },
             id: result.trackTagId,
             TrackId: trackId,
@@ -301,10 +308,14 @@ export default Vue.extend({
     },
     primeNextTrack(tillNext: number) {
       this.nextTrackOrRecordingTimeout = tillNext;
-      setTimeout(() => {
-        if (this.nextTrackOrRecordingTimeout !== 0) {
+      if (this.currentTimeout) {
+        clearTimeout(this.currentTimeout);
+      }
+      this.currentTimeout = setTimeout(() => {
+        if (tillNext !== 0) {
           this.primeNextTrack(tillNext - 1);
         } else {
+          clearTimeout(this.currentTimeout);
           this.nextTrackOrRecording();
         }
       }, 300);
