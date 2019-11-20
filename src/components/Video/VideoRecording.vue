@@ -73,6 +73,10 @@ export default {
     TrackInfo
   },
   props: {
+    trackid: {
+      type: Number,
+      require: false
+    },
     recording: {
       type: Object,
       required: true
@@ -114,12 +118,30 @@ export default {
       }
     })
   },
+  mounted: function() {
+    this.selectedTrack = this.getSelectedTrack();
+  },
   watch: {
     recording: function() {
       this.trackSelected(0);
+    },
+    tracks: function() {
+      this.selectedTrack = this.getSelectedTrack();
     }
   },
+
   methods: {
+    getSelectedTrack() {
+      if (this.$route.params.trackid) {
+        const index = this.orderedTracks().findIndex(
+          track => track.id == this.$route.params.trackid
+        );
+        if (index > -1) {
+          return index;
+        }
+      }
+      return 0;
+    },
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
         this.$router.push({

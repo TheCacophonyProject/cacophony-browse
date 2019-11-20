@@ -1,5 +1,11 @@
 <template>
-  <div class="query-recordings">
+  <div
+    :class="[
+      'query-recordings',
+      'search-filter-wrapper',
+      { 'is-collapsed': isCollapsed }
+    ]"
+  >
     <b-button
       :class="['search-panel-toggle-btn', { 'is-collapsed': isCollapsed }]"
       variant="primary"
@@ -580,6 +586,9 @@ export default {
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins";
+
+$main-content-width: 640px;
+
 .query-recordings {
   padding: 15px;
   overflow: auto;
@@ -600,6 +609,34 @@ export default {
   border-right: 1px solid $gray-200;
 }
 
+@include media-breakpoint-down(md) {
+  .search-filter-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translate(0);
+    max-width: var(--search-panel-width);
+    z-index: 2;
+    transition: transform 0.2s;
+    &.is-collapsed {
+      transform: translate(var(--search-panel-offset));
+    }
+  }
+}
+
+@include media-breakpoint-up(md) {
+  .search-filter-wrapper {
+    flex: 0 0 320px;
+  }
+  .search-content-wrapper {
+    flex: 1 1 $main-content-width;
+    position: relative;
+    overflow: hidden;
+    overflow-y: scroll;
+    margin: 0;
+    max-height: calc(100vh - var(--navbar-height));
+  }
+}
 .search-panel-toggle-btn {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;

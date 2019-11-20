@@ -138,6 +138,10 @@ var allLabels = {
   unTagged: {
     value: "untagged",
     text: "untagged only"
+  },
+  unidentified: {
+    value: "unidentified",
+    text: "unidentified"
   }
 };
 

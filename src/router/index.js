@@ -75,7 +75,7 @@ function createRouter() {
         }
       },
       {
-        path: "/recording/:id",
+        path: "/recording/:id/:trackid?",
         component: RecordingVue
       },
       {

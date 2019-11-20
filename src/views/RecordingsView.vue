@@ -553,6 +553,12 @@ $main-content-width: 640px;
   }
 }
 
+.search-filter-wrapper {
+  background: $gray-100;
+  position: relative;
+  border-right: 1px solid $gray-200;
+}
+
 @include media-breakpoint-down(md) {
   .search-filter-wrapper {
     position: fixed;
