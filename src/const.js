@@ -229,4 +229,16 @@ const DefaultLabels = {
   }
 };
 
+export const TagColours = [
+  "yellow",
+  "orange",
+  "red",
+  "purple",
+  "lightblue",
+  "limegreen",
+  "black",
+  "white"
+];
+
+export { allLabels };
 export default DefaultLabels;

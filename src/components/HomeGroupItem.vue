@@ -12,7 +12,7 @@
 
 <script>
 import { mapState } from "vuex";
-import api from "./../api/Recording.api.js";
+import api from "../api/Recording.api";
 
 export default {
   name: "HomeGroupItem",

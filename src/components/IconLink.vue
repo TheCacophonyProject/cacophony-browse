@@ -14,7 +14,7 @@ export default {
   name: "IconLink",
   props: {
     icon: {
-      type: Object,
+      type: Array,
       required: true
     },
     link: {

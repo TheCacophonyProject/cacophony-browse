@@ -12,6 +12,11 @@
           <b-nav-item to="/visits">Visits</b-nav-item>
           <b-nav-item to="/analysis">Analysis</b-nav-item>
           <b-nav-item to="/recordings">Recordings</b-nav-item>
+          <b-nav-item
+            to="/tagging"
+            v-if="globalPermission === 'read' || globalPermission === 'write'"
+            >Power Tagger</b-nav-item
+          >
         </b-navbar-nav>
 
         <b-navbar-nav v-if="isLoggedIn" class="ml-auto">
@@ -57,7 +62,8 @@ export default {
   name: "Navbar",
   data() {
     return {
-      userName: this.$store.state.User.userData.username
+      userName: this.$store.state.User.userData.username,
+      globalPermission: this.$store.state.User.userData.globalPermission
     };
   },
   computed: {

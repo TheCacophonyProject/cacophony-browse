@@ -24,13 +24,12 @@ function login(usernameOrEmail, password) {
   });
 }
 
-function persistUser(id, username, token, email, globalPermission) {
-  localStorage.setItem("id", id);
-
+function persistUser(username, token, email, globalPermission, userId) {
   localStorage.setItem("username", username);
   localStorage.setItem("JWT", token);
   localStorage.setItem("email", email);
   localStorage.setItem("globalPermission", globalPermission);
+  localStorage.setItem("userId", userId);
 }
 
 function persistFields(data) {
@@ -41,6 +40,7 @@ function persistFields(data) {
 function logout() {
   localStorage.setItem("id", "");
   localStorage.setItem("username", "");
+  localStorage.setItem("userId", "");
   localStorage.setItem("JWT", "");
   localStorage.setItem("email", "");
   localStorage.setItem("globalPermission", "");

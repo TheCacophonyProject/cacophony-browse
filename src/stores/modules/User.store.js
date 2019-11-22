@@ -1,11 +1,11 @@
-import api from "../../api/index";
+import api from "../../api";
 
 const state = {
   isLoggingIn: false,
   didInvalidate: false,
   JWT: localStorage.getItem("JWT"),
   userData: {
-    id: localStorage.getItem("id"),
+    id: Number(localStorage.getItem("userId")),
     username: localStorage.getItem("username"),
     email: localStorage.getItem("email"),
     globalPermission: getGlobalPermission()
@@ -51,7 +51,8 @@ const actions = {
         result.userData.username,
         result.token,
         result.userData.email,
-        result.userData.globalPermission
+        result.userData.globalPermission,
+        result.userData.id
       );
       commit("receiveLogin", result);
     }
@@ -73,7 +74,8 @@ const actions = {
         result.userData.username,
         result.token,
         result.userData.email,
-        result.userData.globalPermission
+        result.userData.globalPermission,
+        result.userData.id
       );
       commit("receiveLogin", result);
     }

@@ -39,7 +39,7 @@
 <script>
 import BarChart from "../components/Chart/BarChart.vue";
 import Spinner from "../components/Spinner.vue";
-import api from "./../api/Recording.api.js";
+import api from "../api/Recording.api";
 import DateRange from "../components/Analysis/DateRange.vue";
 import RecordingType from "../components/Analysis/RecordingType.vue";
 import DeviceGroups from "../components/Analysis/DeviceGroups.vue";

@@ -39,14 +39,18 @@
                     {{ row.item.what }}
                   </template>
                   <template slot="start" slot-scope="row">
-                    {{ row.item.events[0].start.format("LLL") }}
+                    <div v-if="row.item.events.length > 0">
+                      {{ row.item.events[0].start.format("LLL") }}
+                    </div>
                   </template>
                   <template slot="end" slot-scope="row">
-                    {{
-                      row.item.events[row.item.events.length - 1].end.format(
-                        "LLL"
-                      )
-                    }}
+                    <div v-if="row.item.events.length > 0">
+                      {{
+                        row.item.events[row.item.events.length - 1].end.format(
+                          "LLL"
+                        )
+                      }}
+                    </div>
                   </template>
                   <template slot="events" slot-scope="row">
                     {{ row.item.events.length }}
@@ -100,10 +104,10 @@
                         {{ row.item[0] }}
                       </template>
                       <template slot="start" slot-scope="row">
-                        {{ row.item[1].firstVisit.format("LLL") }}
+                        {{ row.item[1].start.format("LLL") }}
                       </template>
                       <template slot="end" slot-scope="row">
-                        {{ row.item[1].lastVisit.format("LLL") }}
+                        {{ row.item[1].end.format("LLL") }}
                       </template>
                       <template slot="visits" slot-scope="row">
                         {{ row.item[1].visits.length }}
@@ -133,16 +137,17 @@
     </b-row>
   </b-container>
 </template>
-<script>
+<script lang="ts">
+import * as moment from "moment";
+
+import { RecordingInfo } from "../api/Recording.api";
+import { DeviceVisits, VisitEvent, DeviceVisitMap } from "../visits";
 import DefaultLabels from "../const.js";
-import { mapState } from "vuex";
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
-import moment from "moment";
 import api from "../api/index";
 export default {
   name: "VisitsView",
   components: { QueryRecordings },
-
   props: {},
   data() {
     return {
@@ -193,15 +198,6 @@ export default {
         this.$store.commit("User/updateAnalysisDatePref", value);
       }
     },
-    ...mapState({
-      devices: state =>
-        state.Devices.devices.map(device => {
-          return {
-            id: device.id,
-            name: device.devicename
-          };
-        })
-    }),
     vertical: function() {
       // Change button orientation to vertical on small screen sizes
       return this.width < 576;
@@ -212,7 +208,7 @@ export default {
     await this.$store.dispatch("Groups/GET_GROUPS");
   },
   methods: {
-    navigateToRecording(event) {
+    navigateToRecording(event: VisitEvent) {
       this.$router.push({
         path: `recording/${event.recID}/${event.trackID}`
       });
@@ -224,26 +220,10 @@ export default {
     submitNewQuery(whereQuery) {
       this.getData(whereQuery);
     },
-    formatDate: function(momentDate) {
+    formatDate: function(momentDate: moment.Moment) {
       return momentDate.format("LLL");
     },
-    getTrackTag: function(trackTags) {
-      if (!trackTags || trackTags.length == 0) {
-        return null;
-      }
-      const manualTags = trackTags.filter(tag => tag.automatic == false);
-      if (manualTags.length > 0) {
-        const userTag = manualTags.find(
-          tag => tag.UserId == this.$store.state.User.userData.id
-        );
-        if (userTag) {
-          return userTag;
-        } else {
-          return manualTags[0];
-        }
-      }
-      return trackTags[0];
-    },
+
     getData: async function(whereQuery) {
       this.fetching = true;
       // Extract query information
@@ -266,176 +246,38 @@ export default {
         this.countMessage = "No matches";
       }
 
-      this.visits = [];
       var eventsByDevice = this.calculatVisits(result.rows);
-      this.visits = this.visits.filter(function(event) {
+      this.visits = this.visits.filter(function(visit) {
         return (
-          event.tag != DefaultLabels.allLabels.bird.value &&
-          event.tag != DefaultLabels.allLabels.falsePositive.value
+          visit.events.length > 0 &&
+          visit.what != DefaultLabels.allLabels.bird.value &&
+          visit.what != DefaultLabels.allLabels.falsePositive.value
         );
       });
       this.visits = this.visits.sort(function(a, b) {
         return a.start < b.start;
       });
       this.data = eventsByDevice;
+      console.log(this.data);
     },
-    calculatVisits(recordings) {
-      const deviceMap = {};
+    calculatVisits(recordings: RecordingInfo[]): DeviceVisitMap {
+      this.visits = [];
+      const userID = this.$store.state.User.userData.id;
+      const deviceMap: DeviceVisitMap = {};
       for (const rec of recordings) {
         let devVisits = deviceMap[rec.DeviceId];
         if (!devVisits) {
-          devVisits = {
-            deviceName: rec.Device.devicename,
-            id: rec.DeviceId,
-            animals: {},
-            lastVisit: null
-          };
+          devVisits = new DeviceVisits(
+            rec.Device.devicename,
+            rec.DeviceId,
+            userID
+          );
           deviceMap[rec.DeviceId] = devVisits;
         }
-        this.calculateTrackVisits(rec, devVisits);
+        const newVisits = devVisits.calculateTrackVisits(rec);
+        this.visits.push(...newVisits);
       }
       return deviceMap;
-    },
-    calculateTrackVisits(rec, devVisits) {
-      for (const trackKey in rec.Tracks) {
-        const track = rec.Tracks[trackKey];
-        this.calculateTrackTagVisit(rec, track, devVisits);
-      }
-    },
-    calculateTrackTagVisit(rec, track, devVisits) {
-      const tag = this.getTrackTag(track.TrackTags);
-      if (!tag) {
-        return;
-      }
-      let visitSummary;
-      const trackPeriod = this.trackStartEnd(rec, track);
-      if (tag.what == DefaultLabels.allLabels.unidentified.value) {
-        if (this.isPartOfLastVisit(devVisits.lastVisit, trackPeriod.end)) {
-          visitSummary = devVisits.animals[devVisits.lastVisit.what];
-
-          this.addEvent(
-            visitSummary,
-            rec,
-            track,
-            tag,
-            devVisits.lastVisit.what != tag.what
-          );
-          visitSummary.firstVisit = trackPeriod.end;
-          return;
-        }
-      }
-      visitSummary = devVisits.animals[tag.what];
-      if (
-        visitSummary &&
-        this.isPartOfLastVisit(visitSummary.visits[0], trackPeriod.end)
-      ) {
-        this.addEvent(visitSummary, rec, track, tag);
-      } else {
-        this.addVisit(devVisits, visitSummary, rec, track, tag);
-      }
-    },
-    recheckUnidentified(devVisits, visit) {
-      const unVisit = devVisits.lastVisit;
-      if (
-        unVisit &&
-        unVisit.what == DefaultLabels.allLabels.unidentified.value
-      ) {
-        console.log(
-          "Last visit is unidentified",
-          unVisit.what,
-          unVisit.start.format("LLL")
-        );
-        let unEvent = unVisit.events[0];
-        let insertIndex = 1;
-        while (unEvent && this.isPartOfLastVisit(visit, unEvent.end)) {
-          console.log("Adding visit", unEvent.start.format("LLL"));
-
-          visit.events.splice(insertIndex, 0, unEvent);
-          insertIndex += 1;
-          unEvent.wasUnidentified = true;
-          unVisit.events.splice(0, 1);
-          unEvent = unVisit.events[0];
-        }
-
-        if (unVisit.events.length == 0) {
-          const unVisitSummary =
-            devVisits.animals[DefaultLabels.allLabels.unidentified.value];
-          unVisitSummary.visits.splice(0, 1);
-          this.visits.pop();
-        }
-      }
-    },
-    trackStartEnd(rec, track) {
-      const recTime = moment(rec.recordingDateTime);
-      const trackStart = recTime.add(track.start_s * 1000, "milliseconds");
-      const trackEnd = recTime.add(track.end_s * 1000, "milliseconds");
-      return { start: trackStart, end: trackEnd, recStart: recTime };
-    },
-    addEvent(visitSummary, rec, track, tag, wasUnidentified = false) {
-      //add event to current visit
-      const lastVisit = visitSummary.visits[0];
-      const event = this.newEvent(rec, track, tag, wasUnidentified);
-      lastVisit.events.splice(0, 0, event);
-      lastVisit.start = event.start;
-      visitSummary.firstVisit = event.end;
-    },
-    newEvent(rec, track, tag, wasUnidentified = false) {
-      const trackTimes = this.trackStartEnd(rec, track);
-      return {
-        wasUnidentified: wasUnidentified,
-        recID: rec.id,
-        recStart: trackTimes.recStart,
-        trackID: track.id,
-        confidence: tag.confidence,
-        start: trackTimes.start,
-        end: trackTimes.end
-      };
-    },
-    addVisit(devVisits, visitSummary, rec, track, tag) {
-      const visit = this.newVisit(rec, track, tag, devVisits.deviceName);
-
-      if (!visitSummary) {
-        visitSummary = this.newVisitSummary(visit);
-        devVisits.animals[visit.what] = visitSummary;
-      }
-      visitSummary.currentEvent += 1;
-      visit.eventId = visitSummary.currentEvent;
-      visitSummary.visits.splice(0, 0, visit);
-      visitSummary.firstVisit = visit.end;
-      if (visit.what != DefaultLabels.allLabels.unidentified.value) {
-        this.recheckUnidentified(devVisits, visit);
-      }
-      devVisits.lastVisit = visit;
-      this.visits.push(visit);
-      return visit;
-    },
-    isPartOfLastVisit(lastVisit, newEnd) {
-      if (!lastVisit) {
-        return false;
-      }
-      const secondsDiff = Math.abs(lastVisit.start.diff(newEnd, "seconds"));
-      return secondsDiff <= this.eventMaxTimeSeconds;
-    },
-    newVisitSummary(visit) {
-      return {
-        what: visit.what,
-        visits: [],
-        currentEvent: 0,
-        lastVisit: visit.start,
-        firstVisit: visit.end
-      };
-    },
-    newVisit(rec, track, tag, deviceName) {
-      const event = this.newEvent(rec, track, tag);
-
-      return {
-        eventId: 1,
-        events: [event],
-        what: tag.what,
-        end: event.end,
-        start: event.start,
-        device: deviceName
-      };
     }
   }
 };
