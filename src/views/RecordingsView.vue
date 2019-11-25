@@ -236,7 +236,7 @@ export default {
       );
     },
     pagination() {
-      this.updateRouteQuery();
+      this.$refs.queryRec.updateRouteQuery();
     },
     submitNewQuery(whereQuery) {
       this.serialisedQuery = whereQuery;

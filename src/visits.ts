@@ -44,14 +44,28 @@ class DeviceVisits {
 
   calculateTrackVisits(rec: RecordingInfo): Visit[] {
     const visits = [];
-    for (const trackKey in rec.Tracks) {
+
+    const tracks = rec.Tracks;
+    this.sortTracks(tracks);
+    for (const trackKey in tracks) {
       const track = rec.Tracks[trackKey];
+
       const visit = this.calculateTrackTagVisit(rec, track);
       if (visit) {
         visits.push(visit);
       }
     }
     return visits;
+  }
+
+  sortTracks(tracks: Track[]) {
+    tracks.sort(function(a, b) {
+      if (a.data && a.data.start_s && a.data.end_s) {
+        return a.data.start_s - b.data.start_s;
+      } else {
+        return 0;
+      }
+    });
   }
 
   calculateTrackTagVisit(rec: RecordingInfo, track: Track): Visit {
@@ -65,13 +79,6 @@ class DeviceVisits {
         this.lastVisit &&
         this.lastVisit.isPartOfVisit(trackPeriod.trackEnd)
       ) {
-        console.log(
-          trackPeriod.trackEnd.format("LLL") +
-            " unidentified part of prev visit of" +
-            this.lastVisit.what +
-            " start at" +
-            this.lastVisit.start.format("LLL")
-        );
         this.lastVisit.addEvent(
           rec,
           track,
@@ -135,6 +142,9 @@ class DeviceVisits {
       if (unVisit.events.length == 0) {
         const unVisitSummary = this.animals[allLabels.unidentified.value];
         unVisitSummary.removeVisitAtIndex(0);
+        if (unVisitSummary.visits.length == 0) {
+          delete this.animals[allLabels.unidentified.value];
+        }
       }
     }
   }
@@ -149,6 +159,9 @@ class VisitSummary {
   }
 
   lastVisit(): Visit {
+    if (this.visits.length == 0) {
+      return null;
+    }
     return this.visits[0];
   }
 
@@ -179,12 +192,6 @@ class VisitSummary {
       this.end = visit.start;
     }
     return visit;
-    // if (visit.what != DefaultLabels.allLabels.unidentified.value) {
-    //   this.recheckUnidentified(devVisits, visit);
-    // }
-    // devVisits.lastVisit = visit;
-    // visits.push(visit);
-    // return visit;
   }
 }
 
@@ -250,7 +257,7 @@ class VisitEvent {
     this.recID = rec.id;
     this.recStart = trackTimes.recStart;
     this.trackID = track.id;
-    this.confidence = tag.confidence;
+    this.confidence = Math.round(tag.confidence * 100);
     this.start = trackTimes.trackStart;
     this.end = trackTimes.trackEnd;
   }
@@ -262,15 +269,12 @@ class TrackStartEnd {
   trackEnd: moment.Moment;
   constructor(rec: RecordingInfo, track: Track) {
     this.recStart = moment(rec.recordingDateTime);
+    this.trackStart = moment(rec.recordingDateTime);
+    this.trackEnd = moment(rec.recordingDateTime);
+
     if (track.data) {
-      this.trackStart = this.recStart.add(
-        track.data.start_s * 1000,
-        "milliseconds"
-      );
-      this.trackEnd = this.recStart.add(
-        track.data.end_s * 1000,
-        "milliseconds"
-      );
+      this.trackStart = this.trackStart.add(track.data.start_s * 1000, "ms");
+      this.trackEnd = this.trackEnd.add(track.data.end_s * 1000, "ms");
     } else {
       this.trackStart = this.recStart;
       this.trackEnd = this.recStart;

@@ -47,7 +47,6 @@ const actions = {
     );
     if (success) {
       api.user.persistUser(
-        result.userData.id,
         result.userData.username,
         result.token,
         result.userData.email,
@@ -70,7 +69,6 @@ const actions = {
 
     if (success) {
       api.user.persistUser(
-        result.userData.id,
         result.userData.username,
         result.token,
         result.userData.email,

@@ -329,7 +329,6 @@ export default {
       }
     },
     updateRouteQuery() {
-      console.log("update route query");
       // Update the url query params string so that this search can be easily shared.
       this.lastQuery = JSON.parse(JSON.stringify(this.query));
       this.$router.push({
@@ -374,7 +373,7 @@ export default {
       };
     },
     formatQueryDate(date) {
-      return moment(date).format("YYYY-MM-DD hh:mm:ss");
+      return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
     addIfSet(map, value, submap, key) {
       if (value && value.trim() !== "") {
