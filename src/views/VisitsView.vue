@@ -51,7 +51,9 @@
                       </div>
                     </template>
                     <template slot="device" slot-scope="row">
-                      {{ row.item.device }}
+                      <div class="device-cell">
+                        {{ row.item.device }}
+                      </div>
                     </template>
                     <template slot="date" slot-scope="row">
                       {{ row.item.events[0].start.format(tableDateFormat) }}
@@ -98,6 +100,8 @@
                   </b-table>
                 </div>
               </div>
+
+              <h1>Visit Summary Per Device</h1>
               <div v-for="devMap in data" :key="devMap.id">
                 <div v-if="Object.entries(devMap.animals).length > 0">
                   <b-row>
@@ -178,20 +182,19 @@ export default {
         { key: "what", label: "Animal" },
         { key: "start", label: "First Visit" },
         { key: "end", label: "Last Visit" },
-        { key: "visits", label: "#" }
+        { key: "visits", label: "Visits" }
       ],
       visitFields: [
         {
           key: "what",
           label: "",
-          thStyle: { display: "none" },
-          class: "col-4"
+          thStyle: { display: "none" }
         },
-        { key: "device", label: "Device", class: "col-3" },
-        { key: "date", label: "Date", class: "col-2" },
-        { key: "start", label: "Visit Start", class: "col-1" },
-        { key: "end", label: "End", class: "col-1" },
-        { key: "events", label: "#", class: "col-1" }
+        { key: "device", label: "Device" },
+        { key: "date", label: "Date" },
+        { key: "start", label: "Visit Start" },
+        { key: "end", label: "End" },
+        { key: "events", label: "#" }
       ],
       visitEventFields: [
         { key: "recording", label: "Recording" },
@@ -373,10 +376,16 @@ export default {
   width: 138px;
 }
 
+.device-cell {
+  width: 151px;
+  height: 28px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
 .visits-table table > tbody > tr:not(.b-table-details) {
-  tr {
-    cursor: pointer;
-  }
+  cursor: pointer;
+  height: 48px;
 }
 
 .visits-table .b-table-details {
