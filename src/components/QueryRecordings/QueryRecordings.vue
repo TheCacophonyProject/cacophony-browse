@@ -106,7 +106,7 @@ export default {
       type: Number,
       required: false
     },
-    pageSize: {
+    perPage: {
       type: Number,
       required: false
     }
@@ -274,6 +274,12 @@ export default {
     }
   },
   methods: {
+    updatePagination() {
+      this.query.limit = this.perPage;
+      const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
+      this.query.offset = newOffset;
+      this.updateRouteQuery();
+    },
     deserialiseRouteIntoQuery(routeQuery, target) {
       target = target || this.query;
       for (const key in routeQuery) {
@@ -323,10 +329,6 @@ export default {
         }
       }
       this.deserialiseRouteIntoQuery(this.$route.query);
-      if (this.$route.query.offset) {
-        this.currentPage =
-          Math.ceil(this.$route.query.offset / this.perPage) + 1;
-      }
     },
     updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
@@ -339,9 +341,6 @@ export default {
     submit: function() {
       this.$store.commit("User/updateRecordingTypePref", this.recordingType);
       this.updateRouteQuery();
-      // console.log("submit with button");
-
-      // this.$emit("submit", this.serialiseQuery(this.query, true));
       this.toggleSearchPanel();
     },
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,

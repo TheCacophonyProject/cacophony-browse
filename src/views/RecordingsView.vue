@@ -113,7 +113,7 @@
               v-model="perPage"
               :options="perPageOptions"
               class="results-per-page"
-              @input="pagination"
+              @change="perPageChanged"
             />
             <b-pagination
               :total-rows="count"
@@ -121,7 +121,7 @@
               :per-page="perPage"
               :limit="limitPaginationButtons"
               class="pagination-buttons"
-              @input="pagination"
+              @change="pagination"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export default {
       tableItems: [],
       count: null,
       countMessage: null,
-      currentPage: null,
+      currentPage: 1,
       perPage: 100,
       showCards: this.getPreferredResultsDisplayStyle(),
       limitPaginationButtons: 5,
@@ -173,6 +173,14 @@ export default {
         { value: 1000, text: "1000 per page" }
       ]
     };
+  },
+  created() {
+    if (this.$route.query.limit) {
+      this.perPage = Number(this.$route.query.limit);
+    }
+    if (this.$route.query.offset) {
+      this.currentPage = Math.ceil(this.$route.query.offset / this.perPage) + 1;
+    }
   },
   computed: {
     tableItemsChunkedByDayAndHour() {
@@ -198,6 +206,12 @@ export default {
     }
   },
   methods: {
+    pagination() {
+      this.$refs.queryRec.updatePagination();
+    },
+    perPageChanged() {
+      this.$refs.queryRec.updatePagination();
+    },
     relativeDay(itemDate) {
       itemDate = itemDate[0][0].dateObj;
       const todayDate = new Date();
@@ -222,9 +236,6 @@ export default {
       }
       return `${hours <= 12 ? hours : hours - 12}${hours < 12 ? "am" : "pm"}`;
     },
-    resetPagination() {
-      this.currentPage = 1;
-    },
     getPreferredResultsDisplayStyle() {
       return localStorage.getItem("results-display-style") !== "row";
     },
@@ -234,9 +245,6 @@ export default {
         "results-display-style",
         this.showCards ? "card" : "row"
       );
-    },
-    pagination() {
-      this.$refs.queryRec.updateRouteQuery();
     },
     submitNewQuery(whereQuery) {
       this.serialisedQuery = whereQuery;
