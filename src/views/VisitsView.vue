@@ -153,8 +153,6 @@
   </b-container>
 </template>
 <script lang="ts">
-import * as moment from "moment";
-
 import { RecordingInfo } from "../api/Recording.api";
 import { DeviceVisits, VisitEvent, DeviceVisitMap, Visit } from "../visits";
 import DefaultLabels from "../const.js";
@@ -164,7 +162,6 @@ import api from "../api/index";
 export default {
   name: "VisitsView",
   components: { QueryRecordings, EventSummary },
-  props: {},
   data() {
     return {
       tableDateTimeFormat: "L LTS",
@@ -232,31 +229,7 @@ export default {
         hourVisits.push(item);
       }
       return visitsByDay;
-    },
-    recordingType: {
-      get() {
-        return this.$store.state.User.recordingTypePref;
-      },
-      set(value) {
-        this.$store.commit("User/updateRecordingTypePref", value);
-      }
-    },
-    dateRange: {
-      get() {
-        return this.$store.state.User.analysisDatePref;
-      },
-      set(value) {
-        this.$store.commit("User/updateAnalysisDatePref", value);
-      }
-    },
-    vertical: function() {
-      // Change button orientation to vertical on small screen sizes
-      return this.width < 576;
     }
-  },
-  created: async function() {
-    await this.$store.dispatch("Devices/GET_DEVICES");
-    await this.$store.dispatch("Groups/GET_GROUPS");
   },
   methods: {
     eventsByRec(visitEvents: VisitEvent[]) {
@@ -292,21 +265,12 @@ export default {
         return;
       }
     },
-    navigateToRecording(event: VisitEvent) {
-      this.$router.push({
-        path: `recording/${event.recID}/${event.trackID}`
-      });
-    },
     expandAdditionalInfo(row) {
       this.$set(row, "_showDetails", !row._showDetails);
     },
     submitNewQuery(whereQuery) {
       this.getData(whereQuery);
     },
-    formatDate: function(momentDate: moment.Moment) {
-      return momentDate.format("ll");
-    },
-
     getData: async function(whereQuery) {
       this.fetching = true;
       // Extract query information

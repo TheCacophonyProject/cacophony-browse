@@ -38,7 +38,6 @@ function persistFields(data) {
   }
 }
 function logout() {
-  localStorage.setItem("id", "");
   localStorage.setItem("username", "");
   localStorage.setItem("userId", "");
   localStorage.setItem("JWT", "");

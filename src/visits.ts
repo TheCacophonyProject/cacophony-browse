@@ -2,7 +2,9 @@ import * as moment from "moment";
 
 import { RecordingInfo, Track, TrackTag } from "./api/Recording.api";
 import { allLabels } from "./const";
+
 let visitID = 1;
+const eventMaxTimeSeconds = 60 * 10;
 
 interface DeviceVisitMap {
   [key: number]: DeviceVisits;
@@ -11,8 +13,6 @@ interface DeviceVisitMap {
 interface AnimalMap {
   [key: string]: VisitSummary;
 }
-
-const eventMaxTimeSeconds = 60 * 10;
 
 function getTrackTag(trackTags: TrackTag[], userID: number): TrackTag {
   if (!trackTags || trackTags.length == 0) {

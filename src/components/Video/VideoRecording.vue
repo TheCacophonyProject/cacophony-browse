@@ -111,9 +111,7 @@ export default {
       }
     }),
     orderedTracks() {
-      return ([...this.tracks] || []).sort(
-        (a, b) => a.data.start_s - b.data.start_s
-      );
+      return this.orderTracks();
     }
   },
   mounted: function() {
@@ -129,9 +127,14 @@ export default {
   },
 
   methods: {
+    orderTracks() {
+      return ([...this.tracks] || []).sort(
+        (a, b) => a.data.start_s - b.data.start_s
+      );
+    },
     getSelectedTrack() {
       if (this.$route.params.trackid) {
-        const index = this.orderedTracks().findIndex(
+        const index = this.orderTracks().findIndex(
           track => track.id == this.$route.params.trackid
         );
         if (index > -1) {

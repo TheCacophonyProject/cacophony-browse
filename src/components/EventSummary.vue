@@ -1,8 +1,8 @@
 <template>
   <a
-    :href="`/recording//${item.recID}/${item.trackID}`"
+    :href="`/recording/${item.recID}/${item.trackID}`"
     class="event-summary row"
-    @click="navigateToRecording(item)"
+    @click="event => navigateToRecording(event, item)"
   >
     <b-col class="track-title">
       <span>Track </span>
@@ -40,10 +40,12 @@ export default {
     }
   },
   methods: {
-    navigateToRecording(visEvent: VisitEvent) {
-      this.$router.push({
-        path: `recording/${visEvent.recID}/${visEvent.trackID}`
-      });
+    navigateToRecording(event, visEvent: VisitEvent) {
+      if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
+        this.$router.push({
+          path: `recording/${visEvent.recID}/${visEvent.trackID}`
+        });
+      }
     }
   }
 };
