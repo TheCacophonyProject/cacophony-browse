@@ -106,7 +106,7 @@
           </div>
         </div>
 
-        <div v-if="count > perPage" class="sticky-footer">
+        <div class="sticky-footer">
           <div class="pagination-per-page">
             <b-form-select
               id="recordsPerPage"
@@ -122,6 +122,7 @@
               :limit="limitPaginationButtons"
               class="pagination-buttons"
               @change="pagination"
+              v-if="count > perPage"
             />
           </div>
         </div>
@@ -174,7 +175,22 @@ export default {
       ]
     };
   },
-  created() {
+  watch: {
+    $route() {
+      if (this.$route.query.limit) {
+        this.perPage = Number(this.$route.query.limit);
+      } else {
+        this.perPage = 100;
+      }
+      if (this.$route.query.offset) {
+        this.currentPage =
+          Math.ceil(this.$route.query.offset / this.perPage) + 1;
+      } else {
+        this.currentPage = 1;
+      }
+    }
+  },
+  mounted() {
     if (this.$route.query.limit) {
       this.perPage = Number(this.$route.query.limit);
     }
@@ -206,11 +222,11 @@ export default {
     }
   },
   methods: {
-    pagination() {
-      this.$refs.queryRec.updatePagination();
+    pagination(page) {
+      this.$refs.queryRec.updatePagination(this.perPage, page);
     },
-    perPageChanged() {
-      this.$refs.queryRec.updatePagination();
+    perPageChanged(perPage) {
+      this.$refs.queryRec.updatePagination(perPage, this.currentPage);
     },
     relativeDay(itemDate) {
       itemDate = itemDate[0][0].dateObj;

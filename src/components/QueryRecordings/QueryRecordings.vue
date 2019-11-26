@@ -274,9 +274,9 @@ export default {
     }
   },
   methods: {
-    updatePagination() {
-      this.query.limit = this.perPage;
-      const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
+    updatePagination(perPage, page) {
+      this.query.limit = perPage;
+      const newOffset = Math.max(0, (page - 1) * perPage);
       this.query.offset = newOffset;
       this.updateRouteQuery();
     },
@@ -484,15 +484,13 @@ export default {
         where: where,
         tagMode: query.tagMode
       };
-      if (this.perPage) {
-        params.limit = this.perPage;
-
-        if (this.currentPage) {
-          // Work out current pagination offset.
-          const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
-          params.offset = newOffset;
+      if (query.limit) {
+        params.limit = query.limit;
+        if (query.offset) {
+          params.offset = query.offset;
         }
       }
+
       if (query.tags && query.tags.length > 0) {
         params.tags = query.tags;
       }
