@@ -94,6 +94,7 @@
                           :item="item"
                           :trackNumber="index + 1"
                           :key="index"
+                          :what="row.item.what"
                         />
                       </div>
                     </template>

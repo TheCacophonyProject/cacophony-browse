@@ -12,15 +12,18 @@
       {{ item.start.format("LT") }}
     </b-col>
     <b-col>
-      {{ item.confidence }}
-      <span> %</span>
+      <div v-if="item.confidence != 0">
+        {{ item.confidence }}
+        <span> %</span>
+      </div>
     </b-col>
     <b-col>
-      <div v-if="item.wasUnidentified">
-        <span>
-          Unidentified
-        </span>
-      </div>
+      <span v-if="item.wasUnidentified">
+        Unidentified
+      </span>
+      <span v-else>
+        {{ capitilizeFirst(what) }}
+      </span>
     </b-col>
   </a>
 </template>
@@ -37,9 +40,16 @@ export default {
     item: {
       type: Object,
       required: true
+    },
+    what: {
+      type: String,
+      required: true
     }
   },
   methods: {
+    capitilizeFirst(value: string) {
+      return value.charAt(0).toUpperCase() + value.substring(1);
+    },
     navigateToRecording(event, visEvent: VisitEvent) {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         this.$router.push({

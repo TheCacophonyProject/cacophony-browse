@@ -257,7 +257,11 @@ class VisitEvent {
     this.recID = rec.id;
     this.recStart = trackTimes.recStart;
     this.trackID = track.id;
-    this.confidence = Math.round(tag.confidence * 100);
+    if (tag.what != allLabels.unidentified.value) {
+      this.confidence = Math.round(tag.confidence * 100);
+    } else {
+      this.confidence = 0;
+    }
     this.start = trackTimes.trackStart;
     this.end = trackTimes.trackEnd;
   }
