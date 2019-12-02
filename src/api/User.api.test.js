@@ -77,7 +77,8 @@ describe("register(username,password,email) calls fetch", () => {
     const testUsername = "testu";
     const testPassword = "testp";
     const testEmail = "teste";
-    await userApi.register(testUsername, testPassword, testEmail);
+    const testEndUserAgreement = 3;
+    await userApi.register(testUsername, testPassword, testEmail, testEndUserAgreement);
 
     const calls = fetch.mock.calls;
     expect(calls).toHaveLength(1);
@@ -86,6 +87,7 @@ describe("register(username,password,email) calls fetch", () => {
       body: querystring.stringify({
         username: testUsername,
         password: testPassword,
+        endUserAgreement: testEndUserAgreement,
         email: testEmail
       }),
       headers: {

@@ -8,8 +8,11 @@ const state = {
     id: Number(localStorage.getItem("userId")),
     username: localStorage.getItem("username"),
     email: localStorage.getItem("email"),
-    globalPermission: getGlobalPermission()
+    globalPermission: getGlobalPermission(),
+    acceptedEUA: localStorage.getItem("acceptedEUA")
   },
+  latestEUA: localStorage.getItem("latestEUA"),
+  euaUpdatedAt: localStorage.getItem("euaUpdatedAt"),
   errorMessage: undefined,
   recordingTypePref: localStorage.getItem("recordingTypePref") || "both",
   analysisDatePref: parseInt(localStorage.getItem("analysisDatePref")) || 7
@@ -28,7 +31,9 @@ function getGlobalPermission() {
 const getters = {
   isLoggedIn: state => !!state.JWT,
   getToken: state => state.JWT,
-  hasEmail: state => !!state.userData.email && state.userData.email != "null"
+  hasEmail: state => !!state.userData.email && state.userData.email != "null",
+  acceptedEUA: state => state.userData.acceptedEUA >= state.latestEUA,
+  euaUpdatedAt: state => state.euaUpdatedAt
 };
 
 // actions https://vuex.vuejs.org/guide/actions.html
@@ -60,21 +65,23 @@ const actions = {
     context.commit("invalidateLogin");
     api.user.logout();
   },
-  async REGISTER({ commit }, payload) {
+  async REGISTER({ commit, state }, payload) {
     const { result, success } = await api.user.register(
       payload.username,
       payload.password,
-      payload.email
+      payload.email,
+      state.latestEUA
     );
-
     if (success) {
       api.user.persistUser(
         result.userData.username,
         result.token,
         result.userData.email,
         result.userData.globalPermission,
-        result.userData.id
+        result.userData.id,
+        result.userData.endUserAgreement
       );
+      result.userData.acceptedEUA = result.userData.endUserAgreement;
       commit("receiveLogin", result);
     }
   },
@@ -83,6 +90,31 @@ const actions = {
     if (success) {
       api.user.persistFields(payload);
       commit("updateFields", payload);
+      return true;
+    } else {
+      commit("rejectUpdate", result);
+      return false;
+    }
+  },
+  async ACCEPT_END_USER_AGREEMENT({ commit, state }) {
+    const { result, success } = await api.user.updateFields({
+      endUserAgreement: state.latestEUA
+    });
+    if (success) {
+      const updateFields = { acceptedEUA: state.latestEUA };
+      api.user.persistFields(updateFields);
+      commit("updateFields", updateFields);
+      return true;
+    } else {
+      commit("rejectUpdate", result);
+      return false;
+    }
+  },
+  async GET_END_USER_AGREEMENT_VERSION({ commit }) {
+    const { result, success } = await api.user.getEUAVersion();
+    if (success) {
+      api.user.persistFields({ latestEUA: result.euaVersion });
+      commit("updateLatestEUA", result.euaVersion);
       return true;
     } else {
       commit("rejectUpdate", result);
@@ -108,6 +140,13 @@ const mutations = {
     for (var key in data) {
       state.userData[key] = data[key];
     }
+  },
+  updateLatestEUA(state, latestEUA) {
+    const now = new Date();
+    state.euaUpdatedAt = now.toISOString();
+    localStorage.setItem("euaUpdatedAt", now.toISOString());
+    state.latestEUA = latestEUA;
+    localStorage.setItem("latestEUA", latestEUA);
   },
   rejectUpdate(state, response) {
     state.errorMessage = response.message;

@@ -8,6 +8,7 @@ export default {
   register,
   updateFields,
   persistFields,
+  getEUAVersion,
   token
 };
 
@@ -24,12 +25,20 @@ function login(usernameOrEmail, password) {
   });
 }
 
-function persistUser(username, token, email, globalPermission, userId) {
+function persistUser(
+  username,
+  token,
+  email,
+  globalPermission,
+  userId,
+  acceptedEUA
+) {
   localStorage.setItem("username", username);
   localStorage.setItem("JWT", token);
   localStorage.setItem("email", email);
   localStorage.setItem("globalPermission", globalPermission);
   localStorage.setItem("userId", userId);
+  localStorage.setItem("acceptedEUA", acceptedEUA);
 }
 
 function persistFields(data) {
@@ -43,11 +52,13 @@ function logout() {
   localStorage.setItem("JWT", "");
   localStorage.setItem("email", "");
   localStorage.setItem("globalPermission", "");
+  localStorage.setItem("acceptedEUA", "");
 }
-function register(username, password, email) {
+function register(username, password, email, endUserAgreement) {
   const body =
     `username=${encodeURIComponent(username)}` +
     `&password=${encodeURIComponent(password)}` +
+    `&endUserAgreement=${encodeURIComponent(endUserAgreement)}` +
     `&email=${encodeURIComponent(email)}`;
   return fetch(`${config.api}/api/v1/Users`, {
     method: "POST",
@@ -64,6 +75,11 @@ function updateFields(fields) {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded"
     }
+  });
+}
+function getEUAVersion() {
+  return fetch(`${config.api}/api/v1/endUserAgreementVersion`, {
+    method: "GET"
   });
 }
 

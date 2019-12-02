@@ -4,7 +4,7 @@
       <div class="sign-form-wrapper bg-white rounded text-center">
         <div class="logo" />
 
-        <h1>Login</h1>
+        <h1>End User Agreement</h1>
 
         <b-form @submit="onSubmit">
           <b-alert
@@ -16,44 +16,39 @@
             {{ errorMessage }}
           </b-alert>
 
-          <b-form-group
-            label="Username or Email"
-            label-class="sr-only"
-            label-for="input-username-or-email"
-          >
-            <b-form-input
-              id="input-username-or-email"
-              v-model="usernameOrEmail"
-              placeholder="Username or Email Address"
-              type="text"
-            />
-          </b-form-group>
+          <p>
+            The end user agreement has been updated. Please accept the new end
+            user agreement.
+          </p>
 
           <b-form-group
-            label="Password"
+            label="EndUserAgreement"
             label-class="sr-only"
-            label-for="input-password"
+            label-for="input-end-user-agreement"
           >
-            <b-form-input
-              id="input-password"
-              v-model="password"
-              placeholder="Password"
-              type="password"
-            />
+            <b-form-checkbox
+              id="input-end-user-agreement"
+              v-model="inputEndUserAgreement"
+              value="accepted"
+              unchecked-value="not-accepted"
+            >
+              I agree to the terms of the
+              <a
+                target="_blank"
+                href="https://www.2040.co.nz/pages/2040-end-user-agreement"
+              >
+                end user agreement
+              </a>
+            </b-form-checkbox>
           </b-form-group>
 
           <b-button
-            :disabled="usernameOrEmail === '' || password === ''"
+            :disabled="inputEndUserAgreement != 'accepted'"
             type="submit"
             variant="primary"
             class="btn-block"
-            >Sign in
+            >Continue
           </b-button>
-
-          <p class="small mt-4">
-            Don't have an account yet?
-            <b-link href="/register">Register here</b-link>.
-          </p>
         </b-form>
       </div>
     </b-form-row>
@@ -63,14 +58,13 @@
 <script>
 export default {
   // https://vuejs.org/v2/style-guide/#Multi-word-component-names-essential
-  name: "LoginView",
+  name: "AcceptEndUserAgreementView",
   // https://vuejs.org/v2/style-guide/#Prop-definitions-essential
   props: {},
   // https://vuejs.org/v2/style-guide/#Component-data-essential
   data() {
     return {
-      usernameOrEmail: "",
-      password: "",
+      inputEndUserAgreement: "not-accepted",
       errorMessage: null
     };
   },
@@ -79,18 +73,9 @@ export default {
   methods: {
     async onSubmit(evt) {
       evt.preventDefault();
-
-      await this.$store.dispatch("User/LOGIN", {
-        username: this.usernameOrEmail,
-        password: this.password
-      });
-
+      await this.$store.dispatch("User/ACCEPT_END_USER_AGREEMENT");
       if (this.$store.getters["User/isLoggedIn"]) {
-        if (this.$route.query.nextUrl) {
-          this.$router.push(this.$route.query.nextUrl);
-        } else {
-          this.$router.go("home");
-        }
+        this.$router.go("home");
       }
     }
   }
