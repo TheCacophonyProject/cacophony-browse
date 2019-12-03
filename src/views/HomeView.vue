@@ -87,7 +87,7 @@ export default {
       groups: state => state.Groups.groups
     }),
     hasGroups() {
-      return this.groups.length > 0;
+      return this.hasLoaded && this.groups && this.groups.length > 0;
     }
   },
   created: function() {
