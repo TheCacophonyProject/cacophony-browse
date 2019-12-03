@@ -154,6 +154,7 @@
   </b-container>
 </template>
 <script lang="ts">
+/* global require */
 import { RecordingInfo } from "../api/Recording.api";
 import { DeviceVisits, VisitEvent, DeviceVisitMap, Visit } from "../visits";
 import DefaultLabels from "../const.js";

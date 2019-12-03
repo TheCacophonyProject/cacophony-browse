@@ -6,10 +6,6 @@ import { allLabels } from "./const";
 let visitID = 1;
 const eventMaxTimeSeconds = 60 * 10;
 
-interface DeviceVisitMap {
-  [key: number]: DeviceVisits;
-}
-
 interface AnimalMap {
   [key: string]: VisitSummary;
 }
@@ -285,11 +281,9 @@ class TrackStartEnd {
     }
   }
 }
-export {
-  DeviceVisitMap,
-  DeviceVisits,
-  VisitSummary,
-  Visit,
-  VisitEvent,
-  TrackStartEnd
-};
+
+export interface DeviceVisitMap {
+  [key: number]: DeviceVisits;
+}
+
+export { DeviceVisits, VisitSummary, Visit, VisitEvent, TrackStartEnd };
