@@ -12,14 +12,14 @@ export default {
 };
 
 function login(usernameOrEmail, password) {
-  const body = `nameOrEmail=${encodeURIComponent(
-    usernameOrEmail
-  )}&password=${encodeURIComponent(password)}`;
   return fetch(`${config.api}/authenticate_user`, {
     method: "POST",
-    body: body,
+    body: JSON.stringify({
+      nameOrEmail: usernameOrEmail,
+      password: password
+    }),
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+      "Content-Type": "application/json; charset=utf-8"
     }
   });
 }
@@ -45,24 +45,24 @@ function logout() {
   localStorage.setItem("globalPermission", "");
 }
 function register(username, password, email) {
-  const body =
-    `username=${encodeURIComponent(username)}` +
-    `&password=${encodeURIComponent(password)}` +
-    `&email=${encodeURIComponent(email)}`;
   return fetch(`${config.api}/api/v1/Users`, {
     method: "POST",
-    body: body,
+    body: JSON.stringify({
+      username: username,
+      password: password,
+      email: email
+    }),
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+      "Content-Type": "application/json; charset=utf-8"
     }
   });
 }
 function updateFields(fields) {
   return fetch(`${config.api}/api/v1/Users`, {
     method: "PATCH",
-    body: `data=${encodeURIComponent(JSON.stringify(fields))}`,
+    body: JSON.stringify(fields),
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
+      "Content-Type": "application/json"
     }
   });
 }
