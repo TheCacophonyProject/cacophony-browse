@@ -1,5 +1,4 @@
-import config from "../config";
-import { fetch } from "./fetch";
+import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
 
 export default {
@@ -161,84 +160,48 @@ const apiPath = "/api/v1/recordings";
 function query(params: any): Promise<FetchResult<QueryResult<RecordingInfo>>> {
   // Params must include where (stringified JSON), limit, offset
   // Params can also include tagMode, tags, order
-  const url = `${config.api}${apiPath}?${querystring.stringify(params)}`;
-  return fetch(url, {
-    method: "GET"
-  });
+  return CacophonyApi.get(`${apiPath}?${querystring.stringify(params)}`);
 }
 
 function id(id: RecordingId): Promise<FetchResult<Recording>> {
-  const url = `${config.api}${apiPath}/${id}`;
-  return fetch(url, {
-    method: "GET"
-  });
+  return CacophonyApi.get(`${apiPath}/${id}`);
 }
 
 function comment(comment: string, id: RecordingId): Promise<FetchResult<any>> {
-  const commentString = JSON.stringify({ comment: comment });
-  const body = `updates=${encodeURIComponent(commentString)}`;
-  const url = `${config.api}${apiPath}/${id}`;
-  return fetch(url, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: body
+  return CacophonyApi.patch(`${apiPath}/${id}`, {
+    updates: {
+      comment: comment
+    }
   });
 }
 
 function del(id: RecordingId): Promise<FetchResult<any>> {
-  const url = `${config.api}${apiPath}/${id}`;
-  return fetch(url, {
-    method: "DELETE"
-  });
+  return CacophonyApi.delete(`${apiPath}/${id}`);
 }
 
 function tracks(recordingId: RecordingId): Promise<FetchResult<{ tracks: Track[] }>> {
-  const url = `${config.api}${apiPath}/${recordingId}/tracks`;
-  return fetch(url, {
-    method: "GET"
-  });
+  return CacophonyApi.get(`${apiPath}/${recordingId}/tracks`);
 }
 
 
 function replaceTrackTag(tag: TrackTag, recordingId: RecordingId, trackId: TrackId) {
-  const body = querystring.stringify({
+  const body = {
     what: tag.what,
     confidence: tag.confidence,
     automatic: "false"
-  });
-
-  const url = `${config.api}${apiPath}/${recordingId}/tracks/${trackId}/replaceTag`;
-
-  return fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: body
-  });
+  };
+  return CacophonyApi.post(`${apiPath}/${recordingId}/tracks/${trackId}/replaceTag`, body);
 }
 
 function addTrackTag(tag: Tag, recordingId: RecordingId, trackId: TrackId): Promise<FetchResult<{trackTagId: number, success: boolean}>> {
-  const body = querystring.stringify({
+  const body = {
     what: tag.what,
     confidence: tag.confidence,
     automatic: false,
-  });
-  const url = `${config.api}${apiPath}/${recordingId}/tracks/${trackId}/tags`;
-  return fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: body
-  });
+  };
+  return CacophonyApi.post(`${apiPath}/${recordingId}/tracks/${trackId}/tags`, body);
 }
 
 function deleteTrackTag(tag: TrackTag, recordingId: RecordingId): Promise<FetchResult<any>> {
-  const url = `${config.api}${apiPath}/${recordingId}/tracks/${tag.TrackId}/tags/${tag.id}`;
-  return fetch(url, {
-    method: "DELETE"
-  });
+  return CacophonyApi.delete(`${apiPath}/${recordingId}/tracks/${tag.TrackId}/tags/${tag.id}`);
 }

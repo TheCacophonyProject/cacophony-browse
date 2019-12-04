@@ -1,5 +1,4 @@
-import config from "../config";
-import { fetch } from "./fetch";
+import CacophonyApi from "./CacophonyApi";
 
 export default {
   login,
@@ -12,15 +11,9 @@ export default {
 };
 
 function login(usernameOrEmail, password) {
-  return fetch(`${config.api}/authenticate_user`, {
-    method: "POST",
-    body: JSON.stringify({
-      nameOrEmail: usernameOrEmail,
-      password: password
-    }),
-    headers: {
-      "Content-Type": "application/json; charset=utf-8"
-    }
+  return CacophonyApi.post("/authenticate_user", {
+    nameOrEmail: usernameOrEmail,
+    password: password
   });
 }
 
@@ -45,33 +38,20 @@ function logout() {
   localStorage.setItem("globalPermission", "");
 }
 function register(username, password, email) {
-  return fetch(`${config.api}/api/v1/Users`, {
-    method: "POST",
-    body: JSON.stringify({
-      username: username,
-      password: password,
-      email: email
-    }),
-    headers: {
-      "Content-Type": "application/json; charset=utf-8"
-    }
+  return CacophonyApi.post("/api/v1/Users", {
+    username: username,
+    password: password,
+    email: email
   });
 }
 function updateFields(fields) {
-  return fetch(`${config.api}/api/v1/Users`, {
-    method: "PATCH",
-    body: JSON.stringify(fields),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
+  return CacophonyApi.patch("/api/v1/Users", { fields });
 }
 
 async function token() {
   // Params must include where (stringified JSON), limit, offset
   // Params can also include tagMode, tags, order
-  const url = `${config.api}/token`;
-  const { result, success } = await fetch(url, { method: "POST" });
+  const { result, success } = await CacophonyApi.post("/token");
   if (!success) {
     throw "Failed to get token";
   }

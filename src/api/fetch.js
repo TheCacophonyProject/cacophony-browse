@@ -14,24 +14,21 @@ const defaults = {
  * These fields can easily be resolved using object destructuring to directly assign the required information.
  * @returns {Promise<{result: any, success: boolean, status: number}>}
  */
-export async function fetch() {
-  const args = [].slice.call(arguments, 0);
-  const requiresAuth = args.requiresAuth || true;
-
-  args[1] = {
+export async function fetch(url, init) {
+  init = {
     ...defaults,
-    ...args[1],
+    ...init,
     headers: {
-      ...args[1].headers,
+      ...init.headers,
       Authorization: store.getters["User/getToken"]
     }
   };
 
-  const response = await crossFetch.apply(this, args);
+  const response = await crossFetch(url, init);
   const status = response.status;
 
   const result = await response.json();
-  if (requiresAuth && status === 401) {
+  if (status === 401) {
     store.dispatch("User/LOGOUT");
     store.dispatch(
       "Messaging/ERROR",

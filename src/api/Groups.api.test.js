@@ -18,9 +18,9 @@ describe("addGroup(groupName) calls authenticatedFetch", () => {
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
-      body: querystring.stringify({ groupname: testGroupName }),
+      body: JSON.stringify({ groupname: testGroupName }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });
@@ -49,13 +49,13 @@ describe("addGroupUser(groupName, userName, isAdmin) calls authenticatedFetch", 
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
-      body: querystring.stringify({
+      body: JSON.stringify({
         group: testGroup,
         username: testUserName,
         admin: testBoolAdmin
       }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });
@@ -83,9 +83,9 @@ describe("removeGroupUser(groupName,username) calls authenticatedFetch", () => {
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "DELETE",
-      body: querystring.stringify({ group: testGroup, username: testUserName }),
+      body: JSON.stringify({ group: testGroup, username: testUserName }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });
@@ -100,7 +100,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
   test("with the correct path (no param)", async () => {
     await groupApi.getGroups();
     expect(fetch.mock.calls[0][0]).toBe(
-      "http://mocked-api-path/api/v1/groups?where={}"
+      `http://mocked-api-path/api/v1/groups?where=${encodeURIComponent("{}")}`
     );
   });
 
@@ -124,10 +124,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
 
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
-      method: "GET",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-      }
+      method: "GET"
     });
   });
 

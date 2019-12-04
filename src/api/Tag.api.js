@@ -1,6 +1,4 @@
-import config from "../config";
-import { fetch } from "./fetch";
-import querystring from "querystring";
+import CacophonyApi from "./CacophonyApi";
 
 export default {
   addTag,
@@ -10,26 +8,12 @@ export default {
 const apiPath = "/api/v1/tags";
 
 function addTag(tag, id) {
-  const body = querystring.stringify({
+  return CacophonyApi.post(apiPath, {
     recordingId: id,
-    tag: JSON.stringify(tag)
-  });
-
-  return fetch(config.api + apiPath, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: body
+    tag: tag
   });
 }
 
 function deleteTag(id) {
-  return fetch(config.api + apiPath, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: querystring.stringify({ tagId: id })
-  });
+  return CacophonyApi.delete(apiPath, { tagId: id });
 }
