@@ -9,9 +9,12 @@ const defaults = {
 };
 
 /**
+ * Makes a request to the given url with default handling for cors and authentication.
  * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
  * The result field is the JSON blob from the response body.
  * These fields can easily be resolved using object destructuring to directly assign the required information.
+ * @param {RequestInfo} url The full url to send the request to
+ * @param {RequestInit} init: The RequestInit info for things such as headers and body
  * @returns {Promise<{result: any, success: boolean, status: number}>}
  */
 export async function fetch(url, init) {
