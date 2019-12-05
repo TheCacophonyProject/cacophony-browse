@@ -78,7 +78,7 @@ function updateFields(fields) {
   });
 }
 function getEUAVersion() {
-  return fetch(`${config.api}/api/v1/endUserAgreementVersion`, {
+  return fetch(`${config.api}/api/v1/endUserAgreement/latest`, {
     method: "GET"
   });
 }
