@@ -16,8 +16,8 @@ export default {
    * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
    * The result field is the JSON blob from the response body.
    * These fields can easily be resolved using object destructuring to directly assign the required information.
-   * @param {string} endpoint The cacophony API endpoint to target, for example `/api/v1/users`.
-   * @returns {Promise<{result: any, success: boolean, status: number}>}
+   * @param {string} endpoint - The cacophony API endpoint to target, for example `/api/v1/users`.
+   * @returns {Promise<{result: *, success: boolean, status: number}>}
    */
   get: async endpoint => fetch(`${config.api}${endpoint}`, { method: "GET" }),
 
@@ -25,9 +25,9 @@ export default {
    * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
    * The result field is the JSON blob from the response body.
    * These fields can easily be resolved using object destructuring to directly assign the required information.
-   * @param {string} endpoint The cacophony API endpoint to target, for example `/api/v1/users`.
-   * @param {any} body: An object to go in the request body that will be sent as JSON.
-   * @returns {Promise<{result: any, success: boolean, status: number}>}
+   * @param {string} endpoint - The cacophony API endpoint to target, for example `/api/v1/users`.
+   * @param {*} [body] - An object to go in the request body that will be sent as JSON.
+   * @returns {Promise<{result: *, success: boolean, status: number}>}
    */
   post: async (endpoint, body) => fetchJsonWithMethod(endpoint, "POST", body),
 
@@ -35,9 +35,9 @@ export default {
    * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
    * The result field is the JSON blob from the response body.
    * These fields can easily be resolved using object destructuring to directly assign the required information.
-   * @param {string} endpoint The cacophony API endpoint to target, for example `/api/v1/users`.
-   * @param {any} body: An object to go in the request body that will be sent as JSON.
-   * @returns {Promise<{result: any, success: boolean, status: number}>}
+   * @param {string} endpoint - The cacophony API endpoint to target, for example `/api/v1/users`.
+   * @param {*} [body] - An object to go in the request body that will be sent as JSON.
+   * @returns {Promise<{result: *, success: boolean, status: number}>}
    */
   patch: async (endpoint, body) => fetchJsonWithMethod(endpoint, "PATCH", body),
 
@@ -45,9 +45,9 @@ export default {
    * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
    * The result field is the JSON blob from the response body.
    * These fields can easily be resolved using object destructuring to directly assign the required information.
-   * @param {string} endpoint The cacophony API endpoint to target, for example `/api/v1/users`.
-   * @param {any} body: An object to go in the request body that will be sent as JSON.
-   * @returns {Promise<{result: any, success: boolean, status: number}>}
+   * @param {string} endpoint - The cacophony API endpoint to target, for example `/api/v1/users`.
+   * @param {*} [body] - An object to go in the request body that will be sent as JSON.
+   * @returns {Promise<{result: *, success: boolean, status: number}>}
    */
   delete: async (endpoint, body) =>
     fetchJsonWithMethod(endpoint, "DELETE", body)
