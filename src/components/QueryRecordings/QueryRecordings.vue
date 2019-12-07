@@ -23,7 +23,9 @@
     <b-form-group>
       <h2>Search recordings</h2>
       <SelectDevice v-model="devices" />
-      <SelectRecordingType v-model="recordingType" />
+      <div v-if="!onlyRecordingType">
+        <SelectRecordingType v-model="recordingType" />
+      </div>
       <SelectDateRange v-model="dateRange" />
       <b-form-row v-if="isCustomDateRange">
         <b-col sm="6">
@@ -109,6 +111,10 @@ export default {
     perPage: {
       type: Number,
       required: false
+    },
+    onlyRecordingType: {
+      type: String,
+      required: false
     }
   },
   data() {
@@ -127,6 +133,9 @@ export default {
   computed: {
     recordingType: {
       get() {
+        if (this.onlyRecordingType) {
+          return this.onlyRecordingType;
+        }
         return (
           this.query.where.type ||
           this.$store.state.User.recordingTypePref ||
@@ -339,7 +348,9 @@ export default {
       });
     },
     submit: function() {
-      this.$store.commit("User/updateRecordingTypePref", this.recordingType);
+      if (!this.onlyRecordingType) {
+        this.$store.commit("User/updateRecordingTypePref", this.recordingType);
+      }
       this.updateRouteQuery();
       this.toggleSearchPanel();
     },
@@ -385,7 +396,12 @@ export default {
         return {};
       }
       const where = {};
-      where.type = query.where.type || this.$store.state.User.recordingTypePref;
+      if (this.onlyRecordingType) {
+        where.type = this.onlyRecordingType;
+      } else {
+        where.type =
+          query.where.type || this.$store.state.User.recordingTypePref;
+      }
       if (query.where.hasOwnProperty("dateRange")) {
         // If it's a custom range, that can be inferred by the presence of recordingDateTime.
         // Otherwise, we'll synthesise recordingDateTime here from relative time.
@@ -513,8 +529,11 @@ export default {
             ? `${numDevices} device${multipleDeviceSuffix}`
             : "All devices";
 
-        query.where.type =
-          query.where.type || this.$store.state.User.recordingTypePref;
+        if (this.onlyRecordingType) {
+          query.where.type = this.onlyRecordingType;
+        } else if (!query.where.type) {
+          query.where.type = this.$store.state.User.recordingTypePref;
+        }
         const recordings =
           query.where.type === "both" ? "audio and video" : query.where.type;
         const numAnimals = query.tags.length;

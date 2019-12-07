@@ -3,6 +3,7 @@
     <QueryRecordings
       ref="queryRec"
       :disabled="queryPending"
+      :onlyRecordingType="'video'"
       :path="'visits'"
       :is-collapsed="searchPanelIsCollapsed"
       @submit="submitNewQuery"
