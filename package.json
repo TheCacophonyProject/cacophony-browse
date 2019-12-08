@@ -11,8 +11,8 @@
     "release": "webpack --config webpack/webpack.release.js --progress --hide-modules",
     "test": "jest",
     "test:watch": "npm run test -- --watch",
-    "lint": "eslint ./src --ext .js,.ts,.vue",
-    "lint:fix": "eslint ./src --fix --ext .js,.ts,.vue",
+    "lint": "eslint ./src --ext .js,.vue,.ts",
+    "lint:fix": "eslint ./src --fix --ext .js,.vue,.ts",
     "version": "./update-nfpm-version"
   },
   "dependencies": {

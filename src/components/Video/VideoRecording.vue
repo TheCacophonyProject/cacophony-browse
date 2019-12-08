@@ -75,6 +75,10 @@ export default {
     TrackInfo
   },
   props: {
+    trackid: {
+      type: Number,
+      require: false
+    },
     recording: {
       type: Object,
       required: true
@@ -107,17 +111,38 @@ export default {
       }
     }),
     orderedTracks() {
-      return ([...this.tracks] || []).sort(
-        (a, b) => a.data.start_s - b.data.start_s
-      );
+      return this.orderTracks();
     }
+  },
+  mounted: function() {
+    this.selectedTrack = this.getSelectedTrack();
   },
   watch: {
     recording: function() {
       this.trackSelected(0);
+    },
+    tracks: function() {
+      this.selectedTrack = this.getSelectedTrack();
     }
   },
+
   methods: {
+    orderTracks() {
+      return ([...this.tracks] || []).sort(
+        (a, b) => a.data.start_s - b.data.start_s
+      );
+    },
+    getSelectedTrack() {
+      if (this.$route.params.trackid) {
+        const index = this.orderTracks().findIndex(
+          track => track.id == this.$route.params.trackid
+        );
+        if (index > -1) {
+          return index;
+        }
+      }
+      return 0;
+    },
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
         this.$router.push({
