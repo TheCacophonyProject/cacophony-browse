@@ -24,9 +24,9 @@ type JwtToken<T> = string;
 type UtcTimestamp = string;
 
 interface FetchResult<T> {
-  result: T,
-  success: boolean,
-  status: number
+  result: T;
+  success: boolean;
+  status: number;
 }
 
 interface Device {
@@ -36,10 +36,10 @@ interface Device {
 
 interface Location {
   type: "Point" | string;
-  coordinates:[number, number];
+  coordinates: [number, number];
 }
 
-export type RecordingType = 'thermalRaw' | 'audio';
+export type RecordingType = "thermalRaw" | "audio";
 
 export interface RecordingInfo {
   id: RecordingId;
@@ -47,18 +47,18 @@ export interface RecordingInfo {
   recordingDateTime: UtcTimestamp;
   rawMimeType: string;
   fileMimeType: string;
-  "processingState": "FINISHED"; // Or?
-  duration: number, //seconds
-  location: Location,
-  batteryLevel: null,
+  processingState: "FINISHED"; // Or?
+  duration: number; //seconds
+  location: Location;
+  batteryLevel: null;
   DeviceId: DeviceId;
-  GroupId: GroupId,
+  GroupId: GroupId;
   Group: {
-    groupname: string
-  },
-  Tags: Tag[],
-  Tracks: Track[],
-  Device: Device,
+    groupname: string;
+  };
+  Tags: Tag[];
+  Tracks: Track[];
+  Device: Device;
 
   fileKey?: string;
   comment?: string | null;
@@ -69,27 +69,27 @@ export interface RecordingInfo {
   batteryCharging?: null;
   airplaneModeOn?: null;
   additionalMetadata?: {
-    algorithm: number,
-    previewSecs: number
-  },
+    algorithm: number;
+    previewSecs: number;
+  };
 }
-type Mp4File = 'string';
-type CptvFile = 'string';
+type Mp4File = "string";
+type CptvFile = "string";
 export interface Recording {
-  "messages": [],
-  recording: RecordingInfo,
-  rawSize: number, // CPTV size
-  fileSize: number, // MP4 size
-  downloadFileJWT: JwtToken<Mp4File>,
-  downloadRawJWT: JwtToken<CptvFile>,
-  success: boolean
+  messages: [];
+  recording: RecordingInfo;
+  rawSize: number; // CPTV size
+  fileSize: number; // MP4 size
+  downloadFileJWT: JwtToken<Mp4File>;
+  downloadRawJWT: JwtToken<CptvFile>;
+  success: boolean;
 }
 
 type Seconds = number;
 type Rectangle = [number, number, number, number];
 
 export interface Track {
-  id: TrackId,
+  id: TrackId;
   data: {
     positions: [Seconds, Rectangle][];
     start_s: Seconds;
@@ -125,7 +125,7 @@ export interface TrackTag {
   confidence?: number;
   automatic?: boolean;
   data?: "";
-  createdAt: UtcTimestamp,
+  createdAt: UtcTimestamp;
   updatedAt?: UtcTimestamp;
   User?: User;
 }
@@ -144,7 +144,14 @@ export interface QueryResult<T> {
   success: boolean;
 }
 
-export type TagMode = 'any' | 'no-human' | 'tagged' | 'human-tagged' | 'automatic-tagged' | 'both-tagged' | 'untagged';
+export type TagMode =
+  | "any"
+  | "no-human"
+  | "tagged"
+  | "human-tagged"
+  | "automatic-tagged"
+  | "both-tagged"
+  | "untagged";
 
 export interface Query {
   where: {
@@ -194,15 +201,20 @@ function del(id: RecordingId): Promise<FetchResult<any>> {
   });
 }
 
-function tracks(recordingId: RecordingId): Promise<FetchResult<{ tracks: Track[] }>> {
+function tracks(
+  recordingId: RecordingId
+): Promise<FetchResult<{ tracks: Track[] }>> {
   const url = `${config.api}${apiPath}/${recordingId}/tracks`;
   return fetch(url, {
     method: "GET"
   });
 }
 
-
-function replaceTrackTag(tag: TrackTag, recordingId: RecordingId, trackId: TrackId) {
+function replaceTrackTag(
+  tag: TrackTag,
+  recordingId: RecordingId,
+  trackId: TrackId
+) {
   const body = querystring.stringify({
     what: tag.what,
     confidence: tag.confidence,
@@ -220,11 +232,15 @@ function replaceTrackTag(tag: TrackTag, recordingId: RecordingId, trackId: Track
   });
 }
 
-function addTrackTag(tag: Tag, recordingId: RecordingId, trackId: TrackId): Promise<FetchResult<{trackTagId: number, success: boolean}>> {
+function addTrackTag(
+  tag: Tag,
+  recordingId: RecordingId,
+  trackId: TrackId
+): Promise<FetchResult<{ trackTagId: number; success: boolean }>> {
   const body = querystring.stringify({
     what: tag.what,
     confidence: tag.confidence,
-    automatic: false,
+    automatic: false
   });
   const url = `${config.api}${apiPath}/${recordingId}/tracks/${trackId}/tags`;
   return fetch(url, {
@@ -236,7 +252,10 @@ function addTrackTag(tag: Tag, recordingId: RecordingId, trackId: TrackId): Prom
   });
 }
 
-function deleteTrackTag(tag: TrackTag, recordingId: RecordingId): Promise<FetchResult<any>> {
+function deleteTrackTag(
+  tag: TrackTag,
+  recordingId: RecordingId
+): Promise<FetchResult<any>> {
   const url = `${config.api}${apiPath}/${recordingId}/tracks/${tag.TrackId}/tags/${tag.id}`;
   return fetch(url, {
     method: "DELETE"
