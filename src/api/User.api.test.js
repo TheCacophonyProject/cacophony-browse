@@ -2,7 +2,6 @@ jest.mock("./fetch");
 
 import userApi from "./User.api";
 import { fetch } from "./fetch";
-import querystring from "querystring";
 
 describe("login(groupname) calls fetch", () => {
   test("with the correct path", async () => {
@@ -27,12 +26,12 @@ describe("login(groupname) calls fetch", () => {
     expect(calls).toHaveLength(1);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
-      body: querystring.stringify({
+      body: JSON.stringify({
         nameOrEmail: testUsername,
         password: testPassword
       }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });
@@ -83,13 +82,13 @@ describe("register(username,password,email) calls fetch", () => {
     expect(calls).toHaveLength(1);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
-      body: querystring.stringify({
+      body: JSON.stringify({
         username: testUsername,
         password: testPassword,
         email: testEmail
       }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });

@@ -84,11 +84,13 @@ describe("comment() calls fetch", () => {
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "PATCH",
-      body: `updates=${encodeURIComponent(
-        JSON.stringify({ comment: testComment })
-      )}`,
+      body: JSON.stringify({
+        updates: {
+          comment: testComment
+        }
+      }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });

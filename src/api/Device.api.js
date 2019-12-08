@@ -1,5 +1,4 @@
-import config from "../config";
-import { fetch } from "./fetch";
+import CacophonyApi from "./CacophonyApi";
 
 export default {
   getDevices,
@@ -8,31 +7,20 @@ export default {
 };
 
 function getDevices() {
-  return fetch(`${config.api}/api/v1/devices`, { method: "GET" });
+  return CacophonyApi.get("/api/v1/devices");
 }
 
 function addUserToDevice(username, deviceId, admin) {
-  const body = `username=${encodeURIComponent(
-    username
-  )}&deviceId=${encodeURIComponent(deviceId)}&admin=${admin}`;
-
-  return fetch(`${config.api}/api/v1/devices/users`, {
-    method: "POST",
-    body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
+  return CacophonyApi.post("/api/v1/devices/users", {
+    username: username,
+    deviceId: deviceId,
+    admin: admin
   });
 }
 
 function removeUserFromDevice(username, deviceId) {
-  const body = `username=${username}&deviceId=${deviceId}`;
-
-  return fetch(`${config.api}/api/v1/devices/users`, {
-    method: "DELETE",
-    body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
+  return CacophonyApi.delete("/api/v1/devices/users", {
+    username: username,
+    deviceId: deviceId
   });
 }
