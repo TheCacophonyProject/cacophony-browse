@@ -49,6 +49,7 @@
       :current-video-time="currentVideoTime"
       :current-track="currentTrack"
       :canvas-width="canvasWidth"
+      :side-padding="vjsButtonWidth"
       @start-scrub="startScrub"
       @end-scrub="endScrub"
       @set-playback-time="setTimeAndRedraw"
@@ -123,6 +124,7 @@ export default {
           }
         ]
       },
+      vjsButtonWidth: 50, //button width + duration margin
       canvasWidth: 800,
       canvasHeight: 600,
       scale: 5,
