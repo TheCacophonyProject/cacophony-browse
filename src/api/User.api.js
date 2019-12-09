@@ -45,7 +45,7 @@ function register(username, password, email) {
   });
 }
 function updateFields(fields) {
-  return CacophonyApi.patch("/api/v1/Users", { fields });
+  return CacophonyApi.patch("/api/v1/Users", fields);
 }
 
 async function token() {
