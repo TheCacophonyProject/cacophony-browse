@@ -56,7 +56,8 @@ const actions = {
         result.token,
         result.userData.email,
         result.userData.globalPermission,
-        result.userData.id
+        result.userData.id,
+        result.userData.endUserAgreement
       );
       commit("receiveLogin", result);
     }
@@ -135,6 +136,7 @@ const mutations = {
   receiveLogin(state, data) {
     state.JWT = data.token;
     state.userData = data.userData;
+    state.userData.acceptedEUA = data.userData.endUserAgreement;
   },
   updateFields(state, data) {
     for (var key in data) {
