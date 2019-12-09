@@ -1,5 +1,4 @@
-import config from "../config";
-import { fetch } from "./fetch";
+import CacophonyApi from "./CacophonyApi";
 
 export default {
   login,
@@ -13,15 +12,9 @@ export default {
 };
 
 function login(usernameOrEmail, password) {
-  const body = `nameOrEmail=${encodeURIComponent(
-    usernameOrEmail
-  )}&password=${encodeURIComponent(password)}`;
-  return fetch(`${config.api}/authenticate_user`, {
-    method: "POST",
-    body: body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
+  return CacophonyApi.post("/authenticate_user", {
+    nameOrEmail: usernameOrEmail,
+    password: password
   });
 }
 
@@ -55,39 +48,24 @@ function logout() {
   localStorage.setItem("acceptedEUA", "");
 }
 function register(username, password, email, endUserAgreement) {
-  const body =
-    `username=${encodeURIComponent(username)}` +
-    `&password=${encodeURIComponent(password)}` +
-    `&endUserAgreement=${encodeURIComponent(endUserAgreement)}` +
-    `&email=${encodeURIComponent(email)}`;
-  return fetch(`${config.api}/api/v1/Users`, {
-    method: "POST",
-    body: body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
+  return CacophonyApi.post("/api/v1/Users", {
+    username: username,
+    password: password,
+    endUserAgreement: endUserAgreement,
+    email: email
   });
 }
 function updateFields(fields) {
-  return fetch(`${config.api}/api/v1/Users`, {
-    method: "PATCH",
-    body: `data=${encodeURIComponent(JSON.stringify(fields))}`,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    }
-  });
+  return CacophonyApi.patch("/api/v1/Users", fields);
 }
 function getEUAVersion() {
-  return fetch(`${config.api}/api/v1/endUserAgreement/latest`, {
-    method: "GET"
-  });
+  return CacophonyApi.get("/api/v1/endUserAgreement/latest");
 }
 
 async function token() {
   // Params must include where (stringified JSON), limit, offset
   // Params can also include tagMode, tags, order
-  const url = `${config.api}/token`;
-  const { result, success } = await fetch(url, { method: "POST" });
+  const { result, success } = await CacophonyApi.post("/token");
   if (!success) {
     throw "Failed to get token";
   }

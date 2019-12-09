@@ -8,8 +8,11 @@
         ]"
       >
         <QueryRecordings
+          ref="queryRec"
           :disabled="queryPending"
-          :query="query"
+          :currentPage="currentPage"
+          :perPage="perPage"
+          :path="'recordings'"
           :is-collapsed="searchPanelIsCollapsed"
           @submit="submitNewQuery"
           @toggled-search-panel="
@@ -103,14 +106,14 @@
           </div>
         </div>
 
-        <div v-if="count > perPage" class="sticky-footer">
+        <div class="sticky-footer">
           <div class="pagination-per-page">
             <b-form-select
               id="recordsPerPage"
               v-model="perPage"
               :options="perPageOptions"
               class="results-per-page"
-              @input="pagination"
+              @change="perPageChanged"
             />
             <b-pagination
               :total-rows="count"
@@ -118,7 +121,8 @@
               :per-page="perPage"
               :limit="limitPaginationButtons"
               class="pagination-buttons"
-              @input="pagination"
+              @change="pagination"
+              v-if="count > perPage"
             />
           </div>
         </div>
@@ -149,15 +153,15 @@ export default {
   props: {},
   data() {
     return {
-      query: this.resetQuery(),
+      searchDescription: null,
+      serialisedQuery: {},
       queryPending: false,
-      lastQuery: null,
       searchPanelIsCollapsed: true,
       recordings: [],
       tableItems: [],
       count: null,
       countMessage: null,
-      currentPage: null,
+      currentPage: 1,
       perPage: 100,
       showCards: this.getPreferredResultsDisplayStyle(),
       limitPaginationButtons: 5,
@@ -170,6 +174,29 @@ export default {
         { value: 1000, text: "1000 per page" }
       ]
     };
+  },
+  watch: {
+    $route() {
+      if (this.$route.query.limit) {
+        this.perPage = Number(this.$route.query.limit);
+      } else {
+        this.perPage = 100;
+      }
+      if (this.$route.query.offset) {
+        this.currentPage =
+          Math.ceil(this.$route.query.offset / this.perPage) + 1;
+      } else {
+        this.currentPage = 1;
+      }
+    }
+  },
+  mounted() {
+    if (this.$route.query.limit) {
+      this.perPage = Number(this.$route.query.limit);
+    }
+    if (this.$route.query.offset) {
+      this.currentPage = Math.ceil(this.$route.query.offset / this.perPage) + 1;
+    }
   },
   computed: {
     tableItemsChunkedByDayAndHour() {
@@ -192,136 +219,14 @@ export default {
     },
     getResultsDisplayStyle() {
       return this.showCards ? "card" : "row";
-    },
-    searchDescription() {
-      // Get the current search query, not the live updated one.
-      if (this.lastQuery !== null) {
-        const query = this.lastQuery;
-        const numDevices = query.where.DeviceId.length;
-        const multipleDeviceSuffix = numDevices > 1 ? "s" : "";
-        const devices =
-          numDevices !== 0
-            ? `${numDevices} device${multipleDeviceSuffix}`
-            : "All devices";
-
-        query.where.type =
-          query.where.type || this.$store.state.User.recordingTypePref;
-        const recordings =
-          query.where.type === "both" ? "audio and video" : query.where.type;
-        const numAnimals = query.tags.length;
-        const multipleAnimalSuffix = numAnimals > 1 ? "s" : "";
-        const tagsText =
-          numAnimals === 0
-            ? "all animals"
-            : `${numAnimals} animal${multipleAnimalSuffix}`;
-        const isCustom =
-          query.where.dateRange && query.where.dateRange.isCustom;
-        const isAll = query.where.dateRange && query.where.dateRange.all;
-        const relativeDateRange = Math.abs(
-          Number(query.where.dateRange.relativeDateRange)
-        );
-        let timespan;
-        if (relativeDateRange === 1) {
-          timespan = "last 24 hours";
-        } else if (isAll || isNaN(relativeDateRange)) {
-          timespan = "";
-        } else {
-          timespan = `last ${relativeDateRange} days`;
-        }
-
-        const duration = query.where.duration;
-        const durationFrom =
-          duration.hasOwnProperty("$gte") && Number(duration["$gte"]);
-        const durationTo =
-          duration.hasOwnProperty("$lte") && Number(duration["$lte"]);
-        let durationStr = "";
-        if (
-          durationFrom !== false &&
-          durationTo !== false &&
-          durationTo !== 0
-        ) {
-          durationStr = ` with durations <strong>${durationFrom}</strong>&nbsp;&ndash;&nbsp;<strong>${durationTo}s</strong>`;
-        } else if (durationFrom !== false && durationFrom !== 0) {
-          durationStr = ` with durations <strong>> ${durationFrom}s</strong>`;
-        }
-
-        const formatDate = (str, addDays) => {
-          const date = new Date();
-          let parts = str.split("-").map(str => str.trim());
-          let time = [];
-          const lastPart = parts
-            .pop()
-            .split(" ")
-            .map(str => str.trim());
-          parts.push(lastPart.shift());
-          parts = parts.map(Number);
-          date.setFullYear(parts[0]);
-          date.setMonth(parts[1] - 1);
-          date.setDate(parts[2] + addDays);
-          if (lastPart.length) {
-            time = lastPart[0].split(":").map(Number);
-            date.setHours(time[0]);
-            date.setMinutes(time[1]);
-            date.setSeconds(time[2]);
-          }
-          return date.toLocaleDateString("en-NZ").split(",")[0];
-        };
-        if (!isAll) {
-          timespan = !isCustom
-            ? `in the <strong>${timespan}</strong>`
-            : `between <strong>${formatDate(
-                query.where.recordingDateTime["$gt"],
-                0
-              )}</strong>&nbsp;
-              and&nbsp;<strong>${formatDate(
-                query.where.recordingDateTime["$lt"],
-                1
-              )}</strong>${durationStr}`;
-        }
-        return (
-          `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
-          `${timespan}${durationStr}`
-        );
-      } else {
-        return "";
-      }
-    },
-    serialisedQuery() {
-      const query = this.lastQuery || this.query;
-      return this.serialiseQuery(query, true);
     }
-  },
-  watch: {
-    $route() {
-      // Create/update the query object from the route string
-      this.parseCurrentRoute();
-    }
-  },
-  mounted() {
-    this.parseCurrentRoute();
-    this.updateRouteQuery();
   },
   methods: {
-    resetQuery() {
-      return {
-        where: {
-          DeviceId: [],
-          duration: {
-            $gte: "0",
-            $lte: ""
-          },
-          recordingDateTime: {
-            $gt: "",
-            $lt: ""
-          },
-          dateRange: {
-            relativeDateRange: -30
-          }
-        },
-        tagMode: "any",
-        tags: [],
-        type: ""
-      };
+    pagination(page) {
+      this.$refs.queryRec.updatePagination(this.perPage, page);
+    },
+    perPageChanged(perPage) {
+      this.$refs.queryRec.updatePagination(perPage, this.currentPage);
     },
     relativeDay(itemDate) {
       itemDate = itemDate[0][0].dateObj;
@@ -347,9 +252,6 @@ export default {
       }
       return `${hours <= 12 ? hours : hours - 12}${hours < 12 ? "am" : "pm"}`;
     },
-    resetPagination() {
-      this.currentPage = 1;
-    },
     getPreferredResultsDisplayStyle() {
       return localStorage.getItem("results-display-style") !== "row";
     },
@@ -360,234 +262,20 @@ export default {
         this.showCards ? "card" : "row"
       );
     },
-    parseCurrentRoute() {
-      if (Object.keys(this.$route.query).length === 0) {
-        // Populate the url params if we got here without them, ie. /recordings
-        this.resetPagination();
-        this.query = this.resetQuery();
-        this.updateRouteQuery();
-      }
-      this.deserialiseRouteIntoQuery(this.$route.query);
-      if (this.$route.query.offset) {
-        this.currentPage =
-          Math.ceil(this.$route.query.offset / this.perPage) + 1;
-      }
-      this.getRecordings();
+    submitNewQuery(whereQuery) {
+      this.serialisedQuery = whereQuery;
+      this.getRecordings(whereQuery);
     },
-    pagination() {
-      this.updateRouteQuery();
-    },
-    submitNewQuery() {
-      // New query, so reset pagination.
-      this.resetPagination();
-      this.updateRouteQuery();
-    },
-    updateRouteQuery() {
-      // Update the url query params string so that this search can be easily shared.
-      this.lastQuery = JSON.parse(JSON.stringify(this.query));
-      this.$router.push({
-        path: "recordings",
-        query: this.serialiseQuery(this.query)
-      });
-    },
-    deserialiseRouteIntoQuery(routeQuery, target) {
-      target = target || this.query;
-      for (const key in routeQuery) {
-        if (routeQuery.hasOwnProperty(key)) {
-          target[key] = routeQuery[key];
-        }
-      }
-      if (routeQuery.where) {
-        target.where = JSON.parse(routeQuery.where);
-        if (!target.where.recordingDateTime) {
-          this.$set(target.where, "recordingDateTime", {});
-        }
-        if (!target.where.dateRange) {
-          this.$set(target.where, "dateRange", {});
-        } else {
-          if (target.where.dateRange === "customDateRange") {
-            this.$set(target.where, "dateRange", { isCustom: true });
-          } else if (target.where.dateRange === "all") {
-            this.$set(target.where, "dateRange", { all: true });
-          }
-        }
-        if (!target.where.hasOwnProperty("DeviceId")) {
-          this.$set(target.where, "DeviceId", []);
-        }
-        if (!target.where.duration) {
-          this.$set(target.where, "duration", {});
-        }
-        if (target.where.DeviceId && target.where.DeviceGroups) {
-          target.where.DeviceId = [
-            ...target.where.DeviceId,
-            ...target.where.DeviceGroups
-          ];
-        } else if (target.where.DeviceGroups) {
-          target.where.DeviceId = [...target.where.DeviceGroups];
-        }
-      }
-      if (routeQuery.tags) {
-        target.tags = JSON.parse(routeQuery.tags);
-      }
-    },
-    addIfSet(map, value, submap, key) {
-      if (value && value.trim() !== "") {
-        map[submap] = map[submap] || {};
-        map[submap][key] = value;
-      }
-    },
-    serialiseQuery(query, useForApiCall = false) {
-      const where = {};
-      where.type = query.where.type || this.$store.state.User.recordingTypePref;
-      if (query.where.hasOwnProperty("dateRange")) {
-        // If it's a custom range, that can be inferred by the presence of recordingDateTime.
-        // Otherwise, we'll synthesise recordingDateTime here from relative time.
-        if (query.where.dateRange.hasOwnProperty("all")) {
-          where.dateRange = "all";
-        } else if (query.where.dateRange.hasOwnProperty("relativeDateRange")) {
-          const padLeft = (str, char, len) => {
-            while (str.toString().length < len) {
-              str = `${char}${str}`;
-            }
-            return str;
-          };
-          const formatQueryDate = date =>
-            `${date.getFullYear()}-${padLeft(
-              date.getMonth() + 1,
-              "0",
-              2
-            )}-${padLeft(date.getDate(), "0", 2)} ${padLeft(
-              date.getHours(),
-              "0",
-              2
-            )}:${padLeft(date.getMinutes(), "0", 2)}:${padLeft(
-              date.getSeconds(),
-              "0",
-              2
-            )}`;
-          const now = new Date();
-          const oneDay = 1000 * 60 * 60 * 24;
-          const relativeRangeDays = parseInt(
-            query.where.dateRange.relativeDateRange
-          );
-          // Add time here, since relative date is negative
-          const past = new Date(now.getTime() + relativeRangeDays * oneDay);
-          where.dateRange = {
-            relativeDateRange: relativeRangeDays
-          };
-          where.recordingDateTime = {
-            $lt: formatQueryDate(now),
-            $gt: formatQueryDate(past)
-          };
-        } else if (query.where.hasOwnProperty("recordingDateTime")) {
-          if (
-            query.where.recordingDateTime.hasOwnProperty("$gt") &&
-            query.where.recordingDateTime.hasOwnProperty("$lt")
-          ) {
-            where.dateRange = "customDateRange";
-            // assume custom dateRange
-            this.addIfSet(
-              where,
-              query.where.recordingDateTime["$gt"],
-              "recordingDateTime",
-              "$gt"
-            );
-            this.addIfSet(
-              where,
-              query.where.recordingDateTime["$lt"],
-              "recordingDateTime",
-              "$lt"
-            );
-          }
-        }
-      }
-      this.addIfSet(where, query.where.duration["$gte"], "duration", "$gte");
-      this.addIfSet(where, query.where.duration["$lte"], "duration", "$lte");
-      // add devices and devices from groups
-      if (query.where.DeviceId.length !== 0) {
-        const deviceIds = [];
-        for (const device of query.where.DeviceId) {
-          if (typeof device === "object") {
-            if (typeof device.id === "number") {
-              // Add single devices
-              deviceIds.push(device.id);
-            } else {
-              // NOTE: if the device is a group, the id is a string.
-              // Add groups of devices
-              where.DeviceGroups = where.DeviceGroups || [];
-              where.DeviceGroups.push(device.id);
-              if (device.devices) {
-                for (const item of device.devices) {
-                  deviceIds.push(item.id);
-                }
-              }
-            }
-          } else if (typeof device === "number") {
-            // We're reconstituting this from the query params, so we only have
-            // device ids at this stage, we don't have the labels.
-            deviceIds.push(device);
-          }
-        }
-        // Dedupe ids.
-        where.DeviceId = deviceIds.reduce((acc, id) => {
-          !acc.includes(id) && acc.push(id);
-          return acc;
-        }, []);
-        if (where.DeviceGroups && where.DeviceGroups.length !== 0) {
-          // Dedupe ids.
-          where.DeviceGroups = where.DeviceGroups.reduce((acc, id) => {
-            !acc.includes(id) && acc.push(id);
-            return acc;
-          }, []);
-        }
-      }
-
-      if (useForApiCall) {
-        // Map between the mismatch in video type types between frontend and backend
-        if (where.type === "video") {
-          where.type = "thermalRaw";
-        } else if (where.type === "both") {
-          delete where.type;
-        }
-        // Remove the group param, since the API doesn't handle that, we're just using
-        // it to accurately share search parameters via urls.
-        delete where.DeviceGroups;
-        delete where.dateRange;
-      }
-      // Work out current pagination offset.
-      const newOffset = Math.max(0, (this.currentPage - 1) * this.perPage);
-
-      const params = {
-        where: where,
-        limit: this.perPage,
-        offset: newOffset,
-        tagMode: query.tagMode
-      };
-
-      if (query.tags && query.tags.length > 0) {
-        params.tags = query.tags;
-      }
-
-      for (const key in params) {
-        const val = params[key];
-        if (typeof val === "object") {
-          params[key] = JSON.stringify(val);
-        }
-      }
-
-      return params;
-    },
-    async getRecordings() {
+    async getRecordings(whereQuery) {
       // Remove previous values
       this.countMessage = "";
       this.recordings = [];
       this.tableItems = [];
       // Call API and process results
       this.queryPending = true;
-      const { result, success } = await api.recording.query(
-        this.serialiseQuery(this.query, true)
-      );
+      const { result, success } = await api.recording.query(whereQuery);
       this.queryPending = false;
+      this.searchDescription = this.$refs.queryRec.searchDescription();
 
       // Remove previous values *again* since it's possible for the query to have been called twice
       // since it's async, and then you'd append values twice.
@@ -758,12 +446,6 @@ export default {
 
 $main-content-width: 640px;
 
-.search-filter-wrapper {
-  background: $gray-100;
-  position: relative;
-  border-right: 1px solid $gray-200;
-}
-
 .search-content-wrapper {
   margin: 0 auto;
   flex-basis: $main-content-width;
@@ -893,6 +575,12 @@ $main-content-width: 640px;
     margin-bottom: 0;
     justify-content: center;
   }
+}
+
+.search-filter-wrapper {
+  background: $gray-100;
+  position: relative;
+  border-right: 1px solid $gray-200;
 }
 
 @include media-breakpoint-down(md) {

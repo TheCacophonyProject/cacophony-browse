@@ -138,6 +138,10 @@ var allLabels = {
   unTagged: {
     value: "untagged",
     text: "untagged only"
+  },
+  unidentified: {
+    value: "unidentified",
+    text: "unidentified"
   }
 };
 
@@ -236,4 +240,5 @@ export const TagColours = [
   "white"
 ];
 
+export { allLabels };
 export default DefaultLabels;
