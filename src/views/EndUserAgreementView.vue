@@ -75,7 +75,11 @@ export default {
       evt.preventDefault();
       await this.$store.dispatch("User/ACCEPT_END_USER_AGREEMENT");
       if (this.$store.getters["User/isLoggedIn"]) {
-        this.$router.go("home");
+        if (this.$route.query.nextUrl) {
+          this.$router.push(this.$route.query.nextUrl);
+        } else {
+          this.$router.go("home");
+        }
       }
     }
   }
