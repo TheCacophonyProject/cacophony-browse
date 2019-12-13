@@ -41,13 +41,13 @@ describe("addUserToDevice() calls fetch", () => {
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
-      body: querystring.stringify({
+      body: JSON.stringify({
         username: testUser,
         deviceId: testDeviceId,
         admin: testIsAdmin
       }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });
@@ -73,12 +73,12 @@ describe("removeUserFromDevice() calls fetch", () => {
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "DELETE",
-      body: querystring.stringify({
+      body: JSON.stringify({
         username: testUser,
         deviceId: testDeviceId
       }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });

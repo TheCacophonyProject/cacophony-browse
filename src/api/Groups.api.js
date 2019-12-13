@@ -1,5 +1,4 @@
-import config from "../config";
-import { fetch } from "./fetch";
+import CacophonyApi from "./CacophonyApi";
 
 export default {
   addNewGroup,
@@ -9,65 +8,35 @@ export default {
 };
 
 function addNewGroup(groupName) {
-  const body = `groupname=${encodeURIComponent(groupName)}`;
-  const suppressGlobalMessage = true;
-  return fetch(
-    `${config.api}/api/v1/groups`,
-    {
-      method: "POST",
-      body: body,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-      }
-    },
-    suppressGlobalMessage
+  const suppressGlobalMessaging = true;
+  return CacophonyApi.post(
+    "/api/v1/groups",
+    { groupname: groupName },
+    suppressGlobalMessaging
   );
 }
 
 function addGroupUser(groupName, userName, isAdmin) {
-  const body = `group=${encodeURIComponent(
-    groupName
-  )}&username=${encodeURIComponent(userName)}&admin=${encodeURIComponent(
-    isAdmin
-  )}`;
-
-  const suppressGlobalMessage = true;
-
-  return fetch(
-    `${config.api}/api/v1/groups/users`,
+  const suppressGlobalMessaging = true;
+  return CacophonyApi.post(
+    "/api/v1/groups/users",
     {
-      method: "POST",
-      body: body,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-      }
+      group: groupName,
+      username: userName,
+      admin: isAdmin
     },
-    suppressGlobalMessage
+    suppressGlobalMessaging
   );
 }
 
 function removeGroupUser(groupName, userName) {
-  const body = `group=${encodeURIComponent(
-    groupName
-  )}&username=${encodeURIComponent(userName)}`;
-
-  return fetch(`${config.api}/api/v1/groups/users`, {
-    method: "DELETE",
-    body: body,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
+  return CacophonyApi.delete("/api/v1/groups/users", {
+    group: groupName,
+    username: userName
   });
 }
 
 async function getGroups(groupname) {
-  const where = JSON.stringify({ groupname });
-  const body = `where=${where}`;
-
-  return await fetch(`${config.api}/api/v1/groups?${body}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
-    }
-  });
+  const where = JSON.stringify({ groupname: groupname });
+  return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent(where)}`);
 }

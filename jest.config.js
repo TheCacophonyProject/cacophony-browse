@@ -134,8 +134,8 @@ module.exports = {
 
   // The glob patterns Jest uses to detect test files
   testMatch: [
-    "**/src/**/__tests__/**/*.js?(x)",
-    "**/src/**/?(*.)+(spec|test).js?(x)"
+    "**/src/**/__tests__/**/*.+(ts|tsx|js|jsx)",
+    "**/src/**/?(*.)+(spec|test).+(ts|tsx|js|jsx)"
   ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
@@ -162,7 +162,8 @@ module.exports = {
   // transform: null,
   transform: {
     "^.+\\.js$": "babel-jest",
-    ".*\\.(vue)$": "<rootDir>/node_modules/vue-jest"
+    ".*\\.(vue)$": "<rootDir>/node_modules/vue-jest",
+    "^.+\\.(ts|tsx)?$": "ts-jest"
   }
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation

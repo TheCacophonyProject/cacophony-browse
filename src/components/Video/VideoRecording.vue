@@ -5,28 +5,29 @@
         <ThermalVideoPlayer
           ref="thermalPlayer"
           :video-url="videoUrl"
-          :tracks="orderedTracks()"
+          :tracks="orderedTracks"
+          @trackSelected="trackSelected"
           :current-track="selectedTrack"
-          :colours="colours"
+          @request-next-recording="nextRecording"
         />
       </b-col>
 
       <b-col cols="12" lg="4">
         <div v-if="tracks && tracks.length > 0" class="accordion">
           <TrackInfo
-            v-for="(track, index) in orderedTracks()"
+            v-for="(track, index) in orderedTracks"
             :key="index"
             :track="track"
             :index="index"
             :num-tracks="tracks.length"
             :recording-id="getRecordingId()"
-            :show="index == selectedTrack"
+            :show="index === selectedTrack"
             :colour="colours[index % colours.length]"
-            @trackSelected="trackSelected($event)"
+            @trackSelected="trackSelected"
           />
         </div>
         <div
-          v-if="recording && recording['processingState'] != 'FINISHED'"
+          v-if="recording && recording['processingState'] !== 'FINISHED'"
           class="processing"
         >
           Recording still processing...
@@ -62,6 +63,7 @@ import RecordingControls from "./RecordingControls.vue";
 import ThermalVideoPlayer from "./ThermalVideoPlayer.vue";
 import TrackInfo from "./Track.vue";
 import RecordingProperties from "./RecordingProperties.vue";
+import { TagColours } from "../../const";
 
 export default {
   name: "VideoRecording",
@@ -73,6 +75,10 @@ export default {
     TrackInfo
   },
   props: {
+    trackid: {
+      type: Number,
+      require: false
+    },
     recording: {
       type: Object,
       required: true
@@ -95,16 +101,7 @@ export default {
       showAddObservation: false,
       selectedTrack: 0,
       startVideoTime: 0,
-      colours: [
-        "yellow",
-        "orange",
-        "red",
-        "purple",
-        "lightblue",
-        "limegreen",
-        "black",
-        "white"
-      ]
+      colours: TagColours
     };
   },
   computed: {
@@ -112,14 +109,40 @@ export default {
       tagItems() {
         return this.$store.getters["Video/getTagItems"];
       }
-    })
+    }),
+    orderedTracks() {
+      return this.orderTracks();
+    }
+  },
+  mounted: function() {
+    this.selectedTrack = this.getSelectedTrack();
   },
   watch: {
     recording: function() {
       this.trackSelected(0);
+    },
+    tracks: function() {
+      this.selectedTrack = this.getSelectedTrack();
     }
   },
+
   methods: {
+    orderTracks() {
+      return ([...this.tracks] || []).sort(
+        (a, b) => a.data.start_s - b.data.start_s
+      );
+    },
+    getSelectedTrack() {
+      if (this.$route.params.trackid) {
+        const index = this.orderTracks().findIndex(
+          track => track.id == this.$route.params.trackid
+        );
+        if (index > -1) {
+          return index;
+        }
+      }
+      return 0;
+    },
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
         this.$router.push({
@@ -184,6 +207,9 @@ export default {
     prevNext(event) {
       this.gotoNextRecording(event[0], event[1], event[2]);
     },
+    nextRecording() {
+      this.gotoNextRecording("next", false, false, true);
+    },
     getRecordingId() {
       return Number(this.$route.params.id);
     },
@@ -195,9 +221,7 @@ export default {
       this.$store.dispatch("Video/DELETE_TAG", tagId);
     },
     trackSelected(track) {
-      if (track != this.selectedTrack) {
-        this.selectedTrack = track;
-      }
+      this.selectedTrack = track;
     },
     updateComment(comment) {
       const recordingId = Number(this.$route.params.id);
@@ -205,11 +229,6 @@ export default {
         comment,
         recordingId
       });
-    },
-    orderedTracks: function() {
-      return this.tracks
-        .slice()
-        .sort((a, b) => a.data.start_s - b.data.start_s);
     }
   }
 };

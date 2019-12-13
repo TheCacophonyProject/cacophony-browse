@@ -9,35 +9,30 @@ const defaults = {
 };
 
 /**
+ * Makes a request to the given url with default handling for cors and authentication.
  * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
  * The result field is the JSON blob from the response body.
  * These fields can easily be resolved using object destructuring to directly assign the required information.
+ * @param {RequestInfo} url The full url to send the request to
+ * @param {RequestInit} init: The RequestInit info for things such as headers and body
+ * @param {boolean} suppressGlobalMessaging: ability to suppress the global messaging and handle it at a component level. Ideally the option might be passed down from the component but for now we're setting the preference in the API layer. Not ideal, could be improved.
  * @returns {Promise<{result: any, success: boolean, status: number}>}
  */
-export async function fetch() {
-  // TODO - Does this arguments parsing need to be so opaque?
-  const args = [].slice.call(arguments, 0);
-  const requiresAuth = args.requiresAuth || true;
-
-  args[1] = {
+export async function fetch(url, init, suppressGlobalMessaging = false) {
+  init = {
     ...defaults,
-    ...args[1],
+    ...init,
     headers: {
-      ...args[1].headers,
+      ...init.headers,
       Authorization: store.getters["User/getToken"]
     }
   };
-  // TODO - added the ability to suppress the global messaging and handle it at a component level. Ideally the option might be passed down from the component but for we're setting the preference in the API layer
-  let suppressGlobalMessaging = false;
-  if (args[2] === true) {
-    suppressGlobalMessaging = true;
-  }
 
-  const response = await crossFetch.apply(this, args);
+  const response = await crossFetch(url, init);
   const status = response.status;
 
   const result = await response.json();
-  if (requiresAuth && status === 401) {
+  if (status === 401) {
     store.dispatch("User/LOGOUT");
     store.dispatch(
       "Messaging/ERROR",
@@ -46,7 +41,7 @@ export async function fetch() {
     router.push("login");
   } else {
     if (!suppressGlobalMessaging) {
-      handleMessages(result, status);
+      handleMessages(result, status); //TODO: don't have this on the fetch function; handle errors more explicitly (this should remove the suppressGlobalMessaging hack). Do we global error messages?
     }
   }
   return { result, status, success: response.ok };

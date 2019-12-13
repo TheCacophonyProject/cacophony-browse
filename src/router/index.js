@@ -14,6 +14,8 @@ import RegisterView from "../views/RegisterView.vue";
 import RecordingVue from "../views/RecordingView.vue";
 import AddEmailView from "../views/AddEmailView.vue";
 import AnalysisView from "../views/AnalysisView.vue";
+import VisitsView from "../views/VisitsView.vue";
+import TaggingView from "../views/TaggingView.vue";
 
 Vue.use(Router);
 
@@ -74,7 +76,7 @@ function createRouter() {
         }
       },
       {
-        path: "/recording/:id",
+        path: "/recording/:id/:trackid?",
         component: RecordingVue
       },
       {
@@ -89,6 +91,16 @@ function createRouter() {
         path: "/analysis",
         name: "analysis",
         component: AnalysisView
+      },
+      {
+        path: "/visits",
+        name: "visits",
+        component: VisitsView
+      },
+      {
+        path: "/tagging",
+        name: "tagging",
+        component: TaggingView
       }
     ]
   });

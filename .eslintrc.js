@@ -1,10 +1,15 @@
 module.exports = {
+  plugins: ["@typescript-eslint"],
   root: true,
   extends: [
     "plugin:vue/essential",
     "plugin:prettier/recommended",
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended"
   ],
+  parserOptions: {
+    parser: require.resolve("@typescript-eslint/parser")
+  },
   rules: {
     "no-prototype-builtins": "off",
     "linebreak-style": ["warn", "unix"],
@@ -14,7 +19,7 @@ module.exports = {
     "no-console": ["warn"],
     "no-debugger": ["warn"],
     "no-undef": ["warn"],
-    "no-unused-vars": ["warn"],
+    "@typescript-eslint/no-unused-vars": ["warn"],
     "brace-style": ["warn"],
     "prefer-const": ["warn"]
   }
