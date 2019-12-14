@@ -1,7 +1,6 @@
 jest.mock("./fetch");
 import { fetch } from "./fetch";
 import tagApi from "./Tag.api";
-import querystring from "querystring";
 
 describe("addTag() calls fetch", () => {
   test("with the correct path", async () => {
@@ -17,12 +16,12 @@ describe("addTag() calls fetch", () => {
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
-      body: querystring.stringify({
+      body: JSON.stringify({
         recordingId: testRecordingId,
-        tag: JSON.stringify(testTag)
+        tag: testTag
       }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });
@@ -46,9 +45,9 @@ describe("deleteTag() calls fetch", () => {
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "DELETE",
-      body: querystring.stringify({ tagId: JSON.stringify(testTagId) }),
+      body: JSON.stringify({ tagId: testTagId }),
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/json; charset=utf-8"
       }
     });
   });

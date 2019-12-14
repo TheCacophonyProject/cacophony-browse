@@ -1,36 +1,41 @@
 <template>
   <div
-    ref="scrubber"
     :style="{
       height: `${heightForTracks}px`,
-      width: `${canvasWidth}px`
+      width: `${canvasWidth}px`,
+      padding: `0px ${sidePadding}px 0px ${sidePadding}px`
     }"
     class="track-scrubber"
   >
-    <div v-if="!isLoaded" class="loading">
-      Loading track info...
-    </div>
-    <div v-else>
+    <div ref="scrubber">
+      <div v-if="!isLoaded" class="loading">
+        Loading track info...
+      </div>
       <div
-        v-for="(track, index) in tracks"
-        :key="index"
-        :title="`Track ${index + 1}`"
-        :style="{
-          background: colours[index % colours.length],
-          top: `${index * 13}px`,
-          width: getWidthForTrack(track),
-          left: getOffsetForTrack(track),
-          opacity: index === currentTrack ? 1.0 : 0.5
-        }"
-        class="scrub-track"
-      />
-      <div
-        :style="{
-          right: `${canvasWidth - offsetForCurrentTime}px`,
-          pointerEvents: 'none'
-        }"
-        class="playhead"
-      />
+        v-else
+        :style="{ height: `${heightForTracks}px`, position: 'relative' }"
+      >
+        <div
+          :style="{
+            right: `${scrubberWidth - offsetForCurrentTime}px`,
+            pointerEvents: 'none'
+          }"
+          class="playhead"
+        />
+        <div
+          v-for="(track, index) in tracks"
+          :key="index"
+          :title="`Track ${index + 1}`"
+          :style="{
+            background: colours[index % colours.length],
+            top: `${index * 13}px`,
+            width: getWidthForTrack(track),
+            left: getOffsetForTrack(track),
+            opacity: index === currentTrack ? 1.0 : 0.5
+          }"
+          class="scrub-track"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -73,6 +78,10 @@ export default {
     canvasWidth: {
       type: Number,
       required: true
+    },
+    sidePadding: {
+      type: Number,
+      required: true
     }
   },
   data() {
@@ -81,6 +90,9 @@ export default {
     };
   },
   computed: {
+    scrubberWidth() {
+      return this.canvasWidth - this.sidePadding * 2;
+    },
     isLoaded() {
       return this.tracks && this.tracks.length && this.duration;
     },
@@ -104,20 +116,20 @@ export default {
     getWidthForTrack(track: Track): string {
       const trackDuration = track.data.end_s - track.data.start_s;
       const ratio = trackDuration / this.duration;
-      return `${ratio * this.canvasWidth}px`;
+      return `${ratio * this.scrubberWidth}px`;
     },
     getOffsetForTrack(track: Track): string {
       return `${this.getOffsetForTime(track.data.start_s)}px`;
     },
     getOffsetForTime(time: number): number {
-      const pixelsPerSecond = this.canvasWidth / this.duration;
+      const pixelsPerSecond = this.scrubberWidth / this.duration;
       return pixelsPerSecond * time;
     },
     pointerMove(event: Event) {
       event.preventDefault();
       const x =
         getPositionXForEvent(event) - this.scrubber.getBoundingClientRect().x;
-      const timeOffset = x / this.canvasWidth;
+      const timeOffset = x / this.scrubberWidth;
       this.$emit("set-playback-time", timeOffset * this.duration);
     },
     pointerEnd(event: Event) {
@@ -190,7 +202,6 @@ export default {
 }
 .scrub-track {
   transition: opacity 0.3s linear;
-  position: absolute;
   height: 12px;
   border-radius: 5px;
 }
