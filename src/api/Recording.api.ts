@@ -4,6 +4,7 @@ import * as querystring from "querystring";
 
 export default {
   query,
+  queryCount,
   id,
   comment,
   del,
@@ -135,6 +136,12 @@ export interface Tag {
   confidence: number;
 }
 
+export interface QueryResultCount {
+  count: number;
+  success: boolean;
+  messages: string[];
+}
+
 export interface QueryResult<T> {
   count: number;
   limit: string; // NOTE(jon): Actually, a number, but comes back as a string...
@@ -162,6 +169,15 @@ function query(params: any): Promise<FetchResult<QueryResult<RecordingInfo>>> {
   // Params must include where (stringified JSON), limit, offset
   // Params can also include tagMode, tags, order
   const url = `${config.api}${apiPath}?${querystring.stringify(params)}`;
+  return fetch(url, {
+    method: "GET"
+  });
+}
+
+function queryCount(params: any): Promise<FetchResult<QueryResultCount>> {
+  // Params must include where (stringified JSON), limit, offset
+  // Params can also include tagMode, tags, order
+  const url = `${config.api}${apiPath}/count?${querystring.stringify(params)}`;
   return fetch(url, {
     method: "GET"
   });

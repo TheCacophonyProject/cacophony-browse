@@ -294,7 +294,11 @@ export default {
   watch: {
     $route() {
       // Create/update the query object from the route string
-      this.parseCurrentRoute();
+      const queryHasChanged =
+        JSON.stringify(this.lastQuery) !== JSON.stringify(this.query);
+      if (queryHasChanged) {
+        this.parseCurrentRoute();
+      }
     }
   },
   mounted() {
@@ -396,6 +400,12 @@ export default {
         if (routeQuery.hasOwnProperty(key)) {
           target[key] = routeQuery[key];
         }
+      }
+      if (target.hasOwnProperty("limit")) {
+        target.limit = Number(target.limit);
+      }
+      if (target.hasOwnProperty("offset")) {
+        target.offset = Number(target.offset);
       }
       if (routeQuery.where) {
         target.where = JSON.parse(routeQuery.where);
@@ -620,12 +630,7 @@ export default {
               kind: "dataSeparator",
               hour: thisDate
             };
-            if (
-              prevDate === null ||
-              roundDate(thisDate).getTime() !== roundDate(prevDate).getTime()
-            ) {
-              item.date = thisDate;
-            }
+            item.date = thisDate;
             this.tableItems.push(item);
             prevDate = thisDate;
           }
