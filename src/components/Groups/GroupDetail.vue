@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <b-row class="group-detail">
-      <b-col class="users-detail col-12 col-lg-7">
+    <b-row>
+      <b-col class="col-12 col-lg-7">
         <h2>Users <help :help-text="usersHelpTip" /></h2>
         <div class="description-and-button-wrapper">
           <p>
@@ -21,36 +21,54 @@
             <span>Add user</span>
           </b-button>
         </div>
-        <b-table
-          :items="group.GroupUsers"
-          :fields="groupUsersTableFields"
-          :sort-by="userSortBy"
-          striped
-          hover
-          outlined
-          responsive
-        >
-          <template slot="admin" slot-scope="data">
-            {{ data.item.isAdmin ? "Yes" : "No" }}
-          </template>
+        <div v-if="!group.GroupUsers.length">
+          <b-card class="no-content-placeholder">
+            <p>This group has no users associated with it.</p>
+          </b-card>
+        </div>
+        <div v-else>
+          <b-table
+            :items="group.GroupUsers"
+            :fields="groupUsersTableFields"
+            :sort-by="userSortBy"
+            striped
+            hover
+            outlined
+            responsive
+          >
+            <template slot="admin" slot-scope="data">
+              {{ data.item.isAdmin ? "Yes" : "No" }}
+            </template>
 
-          <template slot="controls" slot-scope="data">
-            <b-button
-              v-b-tooltip.hover
-              v-if="isGroupAdmin"
-              title="Remove user from group"
-              class="trash-button"
-              variant="light"
-              @click="removeUser(data.item.username, uiUser)"
-            >
-              <font-awesome-icon
-                icon="trash"
-                size="1x"
-                style="cursor: pointer;"
-              />
-            </b-button>
-          </template>
-        </b-table>
+            <template slot="controls" slot-scope="data">
+              <b-modal
+                id="group-user-remove-self"
+                title="Remove yourself from group"
+                @ok="removeUser(data.item.username)"
+                ok-title="Remove"
+                ok-variant="danger"
+                v-model="showUserRemoveSelfModal"
+              >
+                <p>
+                  Are you sure you want to remove yourself from this group? You
+                  will no longer be able to view recordings from the devices in
+                  this group and you will not be able to add yourself back to
+                  the group.
+                </p>
+              </b-modal>
+              <b-button
+                v-b-tooltip.hover
+                v-if="isGroupAdmin"
+                title="Remove user from group"
+                class="trash-button"
+                variant="light"
+                @click="removeUserCheckIfSelf(data.item.username, uiUser)"
+              >
+                <font-awesome-icon icon="trash" size="1x" />
+              </b-button>
+            </template>
+          </b-table>
+        </div>
       </b-col>
 
       <b-col class="devices-detail col-12 col-lg-5">
@@ -102,7 +120,7 @@ export default {
       groupUsersTableFields: [
         {
           key: "username",
-          label: "User Name",
+          label: "Username",
           sortable: "true"
         },
         { key: "admin", label: "Administrator" },
@@ -127,17 +145,17 @@ export default {
       devicesHelpTip: {
         title:
           "Devices specify which group they belong to when they first register. They can't be edited here."
-      }
+      },
+      showUserRemoveSelfModal: false
     };
   },
   computed: mapState({
     uiUser: state => state.User.userData.username,
     isGroupAdmin: function() {
-      // FIXME - This seems to return the wrong result in Firefox
       if (this.user && this.group.GroupUsers) {
         const username = this.user.username;
         return (
-          this.user.globalPermission == "write" ||
+          this.user.globalPermission === "write" ||
           this.group.GroupUsers.some(
             user => user.isAdmin && user.username === username
           )
@@ -147,71 +165,20 @@ export default {
     }
   }),
   methods: {
-    async removeUser(username, uiUser) {
-      if (username == uiUser) {
-        // TODO make this dialog look nicer (same for device)
-        var retVal = confirm(
-          "Are you sure you want to remove yourself from this group?  If you countinue " +
-            "will no longer be able to view recordings from the devices in this group and you will not be able to " +
-            "add yourself back to the group.\n\nDo you want to continue ?"
-        );
-        if (retVal == false) {
-          return;
-        }
-      }
+    async removeUser(userName) {
       await this.$store.dispatch("Groups/REMOVE_GROUP_USER", {
-        userName: username,
+        userName,
         groupName: this.group.groupname
       });
+    },
+
+    async removeUserCheckIfSelf(userName, uiUser) {
+      if (userName == uiUser) {
+        this.showUserRemoveSelfModal = true;
+      } else {
+        this.removeUser(userName);
+      }
     }
   }
 };
 </script>
-
-<style lang="scss" scoped>
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
-
-.view.container-fluid {
-  padding: 0;
-}
-
-h2 {
-  font-size: x-large;
-}
-
-.description-and-button-wrapper {
-  display: flex;
-  flex-flow: row;
-  align-items: center;
-  margin-bottom: 1em;
-  p {
-    margin-bottom: 0;
-  }
-  .add-button {
-    white-space: nowrap;
-    margin-left: auto;
-  }
-}
-
-.help {
-  color: $gray-400;
-  font-size: large;
-}
-
-@include media-breakpoint-down(sm) {
-  .add-button {
-    position: fixed;
-    bottom: 1em;
-    right: 1em;
-    z-index: 1;
-  }
-}
-
-button.trash-button {
-  padding: 0 0.5em;
-  background: transparent;
-  border: none;
-}
-</style>

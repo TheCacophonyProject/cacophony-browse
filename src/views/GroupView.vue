@@ -1,8 +1,9 @@
 <template>
-  <b-container fluid style="padding: 0">
-    <b-jumbotron class="jumbotron-admin" fluid>
+  <b-container fluid class="admin">
+    <b-jumbotron class="jumbotron" fluid>
       <div>
         <b-link
+          class="back-link"
           :to="{
             name: 'groups'
           }"
@@ -13,9 +14,7 @@
       </div>
       <h1>
         <font-awesome-icon icon="users" size="xs" />
-        <span v-if="!fetched" class="group-name-placeholder"
-          >loading group name</span
-        >
+        <span v-if="!fetched" class="name-placeholder">loading group name</span>
         <span v-else>
           {{ group && group.groupname }}
         </span>
@@ -72,10 +71,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.group-name-placeholder {
-  color: #ccc;
-  font-style: italic;
-}
-</style>

@@ -1,13 +1,29 @@
 <template>
-  <b-container>
-    <header v-if="fetched">
-      <h1>Device: {{ device.devicename }}</h1>
-      <icon-link
-        :icon="['fas', 'angle-left']"
-        :link="{ name: 'devices' }"
-        :position="'right'"
-      />
-    </header>
+  <b-container fluid class="admin">
+    <b-jumbotron class="jumbotron" fluid>
+      <div>
+        <b-link
+          class="back-link"
+          :to="{
+            name: 'devices'
+          }"
+        >
+          <font-awesome-icon icon="angle-left" size="xs" />
+          <span>Back to devices</span>
+        </b-link>
+      </div>
+      <h1>
+        <font-awesome-icon icon="microchip" size="xs" />
+        <span v-if="!fetched" class="name-placeholder"
+          >loading device name</span
+        >
+        <span v-else>
+          <span>{{ device && device.devicename }}</span>
+        </span>
+      </h1>
+      <p class="lead">Manage the users associated with this device.</p>
+    </b-jumbotron>
+
     <spinner :fetching="!fetched" />
     <div v-if="device && fetched">
       <device-detail :device="device" :user="currentUser" />
@@ -19,11 +35,10 @@
 import { mapState } from "vuex";
 import DeviceDetail from "../components/Devices/DeviceDetail.vue";
 import Spinner from "../components/Spinner.vue";
-import IconLink from "../components/IconLink.vue";
 
 export default {
   name: "DeviceView",
-  components: { DeviceDetail, Spinner, IconLink },
+  components: { DeviceDetail, Spinner },
   props: {},
   computed: mapState({
     device: state => state.Devices.currentDevice,
@@ -48,19 +63,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-header {
-  display: flex;
-  justify-content: space-between;
-  flex-direction: row;
-  align-items: center;
-  margin: 1.5rem 0;
-}
-
-h1 {
-  font-size: x-large;
-  margin: 0;
-  font-weight: bold;
-}
-</style>

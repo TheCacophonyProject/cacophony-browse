@@ -1,6 +1,6 @@
 <template v-if="groups">
-  <b-container fluid style="padding: 0">
-    <b-jumbotron class="jumbotron-admin" fluid>
+  <b-container fluid class="admin">
+    <b-jumbotron class="jumbotron" fluid>
       <h1>Your groups</h1>
       <p class="lead">
         Groups link together devices with the users who can view their

@@ -31,10 +31,23 @@ const actions = {
   },
 
   async ADD_USER({ commit }, { username, device, admin }) {
-    commit("fetching");
-    await api.device.addUserToDevice(username, device.id, admin);
-    await _getDevice(device.devicename, commit);
-    commit("fetched");
+    const { success } = await api.device.addUserToDevice(
+      username,
+      device.id,
+      admin
+    );
+
+    if (!success) {
+      return false;
+    } else {
+      await _getDevice(device.devicename, commit);
+      // FIXME: A bunch of different components all rely on this fetched state.
+      //  Modal to add user to device in admin area is only dismissed when fetching is true
+      commit("fetching");
+      setTimeout(() => {
+        commit("fetched");
+      }, 10);
+    }
   },
 
   async REMOVE_USER({ commit }, { userName, device }) {

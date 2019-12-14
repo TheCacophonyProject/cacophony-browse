@@ -18,10 +18,10 @@
       </b-col>
 
       <b-col v-if="!groups.length" class="col-12 col-lg-8">
-        <b-card>
-          <h1>
+        <b-card class="no-content-placeholder">
+          <h5>
             You don't belong to any groups yet
-          </h1>
+          </h5>
           <p>
             If you are setting up a device, create a group. All the devices you
             manage will be linked together through this group, so choose a name
@@ -30,7 +30,7 @@
         </b-card>
       </b-col>
       <b-col v-else class="col-12 col-lg-8">
-        <div class="list-group">
+        <div class="list-wrapper">
           <router-link
             v-for="(group, index) in orderedGroups"
             :key="index"
@@ -63,41 +63,3 @@ export default {
   })
 };
 </script>
-
-<style lang="scss" scoped>
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
-
-.add-button-wrapper {
-  text-align: right;
-}
-
-@include media-breakpoint-down(sm) {
-  .add-button {
-    position: fixed;
-    bottom: 1em;
-    right: 1em;
-    z-index: 2;
-  }
-}
-
-@include media-breakpoint-up(sm) {
-  .add-button {
-    margin-bottom: 1em;
-  }
-}
-
-.list-group {
-  .list-group-item-action {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    justify-content: space-between;
-    overflow: auto;
-    .icon {
-      color: $link-color;
-    }
-  }
-}
-</style>

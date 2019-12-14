@@ -1,3 +1,5 @@
+@import '~bootstrap/scss/bootstrap.scss';
+
 h1 {
     font-size: x-large;
     margin: 1.5rem 0;
@@ -45,18 +47,5 @@ h1 {
   -moz-appearance: none;
 }
 
-
-/* Admin */
-
-.jumbotron-admin {
-  background: #f8f9fa;
-  padding-top: 1em;
-  padding-bottom: 1.5em;
-}
-
-
-.jumbotron-admin h1 {
-  font-size: x-large;
-}
-
 @import "login-register.css";
+@import "admin.scss";

@@ -1,65 +1,93 @@
 <template>
-  <b-card bg-variant="light">
-    <h3>Add user</h3>
+  <b-modal
+    id="device-add-user"
+    title="Add user to device"
+    @ok="addUser"
+    @shown="setFocusAndReset"
+    ok-title="Add"
+    :ok-disabled="isDisabled"
+  >
+    <b-form @submit="addUser">
+      <b-form-group label-for="input-username" label="Username">
+        <b-form-input
+          ref="input-username"
+          id="input-username"
+          @update="resetFormSubmission"
+          v-model="$v.form.username.$model"
+          :state="usernameState"
+          aria-describedby="username-live-help username-live-feedback"
+          type="text"
+          autofocus
+          class="input"
+        ></b-form-input>
+        <b-form-invalid-feedback id="username-live-feedback">
+          This username couldn't be found.
+        </b-form-invalid-feedback>
 
-    <b-form inline class="add-user-form" @submit="addUser">
-      <b-input
-        id="input-groupname"
-        :state="!$v.form.username.$error"
-        v-model="$v.form.username.$model"
-        aria-describedby="input1LiveFeedback"
-        type="text"
-        placeholder="Username"
-        autofocus
-        class="input"
-      />
+        <b-form-text id="username-live-help"
+          >Users can view recordings for this device.</b-form-text
+        >
+      </b-form-group>
 
-      <div class="options">
+      <b-form-group>
         <b-form-checkbox
+          id="input-user-admin"
           v-model="$v.form.isAdmin.$model"
           plain
           value="true"
           unchecked-value="false"
         >
-          Admin?
+          Make this user an administrator
         </b-form-checkbox>
-        <b-button
-          :disabled="$v.form.$invalid || !fetched"
-          type="submit"
-          variant="primary"
-        >
-          Add User to Device
-        </b-button>
-      </div>
+        <b-form-text id="input-user-admin-help">
+          Administrators can add and remove users from this device.
+        </b-form-text>
+      </b-form-group>
     </b-form>
-  </b-card>
+  </b-modal>
 </template>
 
 <script>
 import { required } from "vuelidate/lib/validators";
-import { mapState } from "vuex";
+
+const initialFormState = {
+  username: null,
+  isAdmin: false
+};
 
 export default {
   name: "DeviceAddUser",
+  props: {
+    device: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
-      form: {
-        username: null,
-        isAdmin: false
-      }
+      form: { ...initialFormState },
+      formSubmissionFailed: false
     };
   },
   computed: {
-    usernameInvalidFeedback() {
-      if (this.$v.form.username.$invalid) {
-        return `Username is required`;
-      }
-      return null;
+    usernameIsEmpty() {
+      return (
+        this.$v.form.username.$model === null ||
+        this.$v.form.username.$model === ""
+      );
     },
-    ...mapState({
-      device: state => state.Devices.currentDevice,
-      fetched: state => state.Devices.fetched
-    })
+    usernameState() {
+      if (this.usernameIsEmpty) {
+        return null;
+      }
+      if (this.formSubmissionFailed) {
+        return false;
+      }
+      return !this.$v.form.username.$error;
+    },
+    isDisabled() {
+      return this.usernameIsEmpty;
+    }
   },
   validations: {
     form: {
@@ -70,63 +98,30 @@ export default {
     }
   },
   methods: {
-    async addUser(event) {
+    resetFormSubmission() {
+      this.formSubmissionFailed = false;
+    },
+    addUser: async function(event) {
       event.preventDefault();
 
       if (!this.$v.$invalid) {
         const params = {
           username: this.$v.form.username.$model,
-          device: this.device,
-          admin: this.$v.form.isAdmin.$model
+          admin: this.$v.form.isAdmin.$model,
+          device: this.device
         };
 
-        await this.$store.dispatch("Devices/ADD_USER", params);
+        const result = await this.$store.dispatch("Devices/ADD_USER", params);
+
+        if (result === false) {
+          this.formSubmissionFailed = true;
+        }
       }
+    },
+    setFocusAndReset() {
+      this.form = { ...initialFormState };
+      this.$refs["input-username"].focus();
     }
   }
 };
 </script>
-
-<style scoped>
-.add-user-form {
-  flex-wrap: wrap;
-}
-
-.input {
-  width: 100%;
-  margin-right: 0;
-  margin-bottom: 1rem;
-}
-
-.options {
-  flex-direction: row;
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-h3 {
-  font-size: large;
-  font-weight: bold;
-}
-
-@media only screen and (min-width: 576px) {
-  .add-user-form {
-    flex-wrap: nowrap;
-    justify-content: space-around;
-  }
-
-  .input {
-    width: auto;
-    margin-right: 1rem;
-    margin-bottom: 0;
-  }
-
-  .options {
-    flex-direction: row;
-    display: flex;
-    justify-content: space-between;
-    width: auto;
-  }
-}
-</style>
