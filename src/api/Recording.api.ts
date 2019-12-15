@@ -10,7 +10,8 @@ export default {
   tracks,
   addTrackTag,
   deleteTrackTag,
-  replaceTrackTag
+  replaceTrackTag,
+  needsTag
 };
 
 export type DeviceId = number;
@@ -20,7 +21,7 @@ export type TagId = number;
 export type UserId = number;
 export type TrackTagId = number;
 export type GroupId = number;
-type JwtToken<T> = string;
+export type JwtToken<T> = string;
 type UtcTimestamp = string;
 
 interface FetchResult<T> {
@@ -73,6 +74,27 @@ export interface RecordingInfo {
     previewSecs: number;
   };
 }
+
+export interface LimitedTrack {
+  TrackId: TrackId;
+  data: {
+    start_s: number;
+    end_s: number;
+    positions: [Seconds, Rectangle][];
+    num_frames: number;
+  };
+  tags: string[];
+  needsTagging: boolean;
+}
+
+export interface TagLimitedRecording {
+  RecordingId: RecordingId,
+  DeviceId: DeviceId,
+  tracks: LimitedTrack[],
+  recordingJWT: JwtToken<Mp4File>;
+  tagJWT: JwtToken<TrackTag>;
+}
+
 type Mp4File = "string";
 type CptvFile = "string";
 export interface Recording {
@@ -125,9 +147,14 @@ export interface TrackTag {
   confidence?: number;
   automatic?: boolean;
   data?: "";
-  createdAt: UtcTimestamp;
+  createdAt?: UtcTimestamp;
   updatedAt?: UtcTimestamp;
   User?: User;
+}
+
+export interface LimitedTrackTag {
+  TrackTagId: TrackTagId;
+  what: string;
 }
 
 export interface Tag {
@@ -150,6 +177,7 @@ export interface QueryResult<T> {
   success: boolean;
 }
 
+// TODO: Unify this with the TagMode type in the API, extract both into a third Types/Interfaces repo.
 export type TagMode =
   | "any"
   | "no-human"
@@ -159,31 +187,25 @@ export type TagMode =
   | "both-tagged"
   | "untagged";
 
-export interface Query {
-  where: {
-    duration: { $gte: number };
-    type: RecordingType;
-  };
+type JsonString = string;
+
+export interface RecordingQuery {
+  where: JsonString; // Stringified: { duration: { $gte: number }; type: RecordingType; }
   limit: number;
   offset: number;
-  tagMode: TagMode;
+  tagMode?: TagMode;
+  tags?: string[],
+  order?: any // TODO - It's not clear what order accepts (it's a sequelize thing), but nobody seems to use it right now.
 }
 
 const apiPath = "/api/v1/recordings";
 
-function query(params: any): Promise<FetchResult<QueryResult<RecordingInfo>>> {
-  // Params must include where (stringified JSON), limit, offset
-  // Params can also include tagMode, tags, order
-  return CacophonyApi.get(`${apiPath}?${querystring.stringify(params)}`);
+function query(params: RecordingQuery): Promise<FetchResult<QueryResult<RecordingInfo>>> {
+  return CacophonyApi.get(`${apiPath}?${querystring.stringify(params as any)}`);
 }
 
-function queryCount(params: any): Promise<FetchResult<QueryResultCount>> {
-  // Params must include where (stringified JSON), limit, offset
-  // Params can also include tagMode, tags, order
-  const url = `${config.api}${apiPath}/count?${querystring.stringify(params)}`;
-  return fetch(url, {
-    method: "GET"
-  });
+function queryCount(params: RecordingQuery): Promise<FetchResult<QueryResultCount>> {
+  return CacophonyApi.get(`${apiPath}/count?${querystring.stringify(params as any)}`)
 }
 
 function id(id: RecordingId): Promise<FetchResult<Recording>> {
@@ -227,13 +249,17 @@ function replaceTrackTag(
 function addTrackTag(
   tag: Tag,
   recordingId: RecordingId,
-  trackId: TrackId
+  trackId: TrackId,
+  tagJWT?: JwtToken<TrackTag>,
 ): Promise<FetchResult<{ trackTagId: number; success: boolean }>> {
-  const body = {
+  const body: any = {
     what: tag.what,
     confidence: tag.confidence,
-    automatic: false
+    automatic: false,
   };
+  if (tagJWT !== undefined) {
+    body.tagJWT = tagJWT;
+  }
   return CacophonyApi.post(
     `${apiPath}/${recordingId}/tracks/${trackId}/tags`,
     body
@@ -242,9 +268,26 @@ function addTrackTag(
 
 function deleteTrackTag(
   tag: TrackTag,
-  recordingId: RecordingId
+  recordingId: RecordingId,
+  tagJWT?: JwtToken<TrackTag>
 ): Promise<FetchResult<any>> {
-  return CacophonyApi.delete(
-    `${apiPath}/${recordingId}/tracks/${tag.TrackId}/tags/${tag.id}`
-  );
+  let requestUri = `${apiPath}/${recordingId}/tracks/${tag.TrackId}/tags/${tag.id}`;
+  if (tagJWT !== undefined) {
+    requestUri += `?tagJWT=${tagJWT}`;
+  }
+  return CacophonyApi.delete(requestUri);
+}
+
+interface RecordingToTag {
+  id: RecordingId;
+  deviceId: DeviceId;
+  tracks: Track[];
+}
+
+function needsTag(biasToDeviceId?: DeviceId): Promise<RecordingToTag> {
+  let requestUri = `${apiPath}/needs-tag`;
+  if (biasToDeviceId !== undefined) {
+    requestUri += `?deviceId=${biasToDeviceId}`;
+  }
+  return CacophonyApi.get(requestUri);
 }

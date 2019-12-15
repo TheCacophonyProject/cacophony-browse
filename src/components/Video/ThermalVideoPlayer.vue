@@ -377,9 +377,17 @@ export default {
       };
       // First check if the last position we got is still the current position?
       // See if tracks are in range.
-      const tracks = currentTrackOnly
-        ? [this.tracks[this.currentTrack]]
-        : this.tracks;
+      let tracks;
+      if (currentTrackOnly) {
+        if (this.tracks.length) {
+          tracks = [this.tracks[this.currentTrack]];
+        } else {
+          tracks = [];
+        }
+      } else {
+        tracks = this.tracks;
+      }
+
       return tracks
         .filter(
           ({ data: { start_s, end_s } }) =>

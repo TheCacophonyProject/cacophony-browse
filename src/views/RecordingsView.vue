@@ -188,14 +188,6 @@ export default {
       } else {
         this.currentPage = 1;
       }
-
-      /**
-      const queryHasChanged =
-        JSON.stringify(this.lastQuery) !== JSON.stringify(this.query);
-      if (queryHasChanged) {
-        this.parseCurrentRoute();
-      }
-       */
     }
   },
   mounted() {
@@ -205,11 +197,6 @@ export default {
     if (this.$route.query.offset) {
       this.currentPage = Math.ceil(this.$route.query.offset / this.perPage) + 1;
     }
-
-    /**
-        this.parseCurrentRoute();
-    this.updateRouteQuery();
-     */
   },
   computed: {
     tableItemsChunkedByDayAndHour() {
@@ -277,9 +264,9 @@ export default {
     },
     submitNewQuery(whereQuery) {
       this.serialisedQuery = whereQuery;
-      this.getRecordings(whereQuery);
+      this.getRecording(whereQuery);
     },
-    async getRecordings(whereQuery) {
+    async getRecording(whereQuery) {
       // Remove previous values
       this.countMessage = "";
       this.recordings = [];
