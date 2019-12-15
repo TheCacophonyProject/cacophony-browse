@@ -23,13 +23,13 @@ const actions = {
     commit("fetched");
   },
 
-  async GET_GROUP({ commit, state }, groupname) {
+  async GET_GROUP({ commit }, groupname) {
     commit("fetching");
-    await _getGroup(groupname, commit, state);
+    await _getGroup(groupname, commit);
     commit("fetched");
   },
 
-  async ADD_GROUP({ commit, state }, groupname) {
+  async ADD_GROUP({ commit }, groupname) {
     commit("fetching");
     const { success, result } = await api.groups.addNewGroup(groupname);
     if (!success) {
@@ -54,7 +54,7 @@ const actions = {
     if (!success) {
       return false;
     } else {
-      await _getGroup(state.currentGroup.groupname, commit, state);
+      await _getGroup(state.currentGroup.groupname, commit);
       // FIXME: A bunch of different components all rely on this fetched state.
       //  Modal to add user to group in admin area is only dismissed when fetching is true
       commit("fetching");
@@ -67,7 +67,7 @@ const actions = {
   async REMOVE_GROUP_USER({ commit, state }, { groupName, userName }) {
     commit("fetching");
     await api.groups.removeGroupUser(groupName, userName);
-    await _getGroup(state.currentGroup.groupname, commit, state);
+    await _getGroup(state.currentGroup.groupname, commit);
     commit("fetched");
   }
 };
