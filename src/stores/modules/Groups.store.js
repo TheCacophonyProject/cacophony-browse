@@ -35,7 +35,7 @@ const actions = {
     if (!success) {
       return result.message;
     } else {
-      await _getGroup(groupname, commit, state);
+      await _getGroup(groupname, commit);
       // FIXME: A bunch of different components all rely on this fetched state.
       //  Modal to add user to group in admin area is only dismissed when fetching is true
       commit("fetching");

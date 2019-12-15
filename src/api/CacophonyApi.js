@@ -5,7 +5,7 @@ async function fetchJsonWithMethod(
   endpoint,
   method,
   body,
-  suppressGlobalMessaging
+  suppressGlobalMessaging = false
 ) {
   return fetch(
     `${config.api}${endpoint}`,

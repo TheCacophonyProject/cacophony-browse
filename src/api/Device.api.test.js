@@ -38,7 +38,7 @@ describe("addUserToDevice() calls fetch", () => {
       testIsAdmin = true;
 
     await devicesApi.addUserToDevice(testUser, testDeviceId, testIsAdmin);
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
       body: JSON.stringify({
@@ -70,7 +70,7 @@ describe("removeUserFromDevice() calls fetch", () => {
       testDeviceId = 654321;
 
     await devicesApi.removeUserFromDevice(testUser, testDeviceId);
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "DELETE",
       body: JSON.stringify({
