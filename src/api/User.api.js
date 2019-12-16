@@ -7,6 +7,7 @@ export default {
   register,
   updateFields,
   persistFields,
+  getEUAVersion,
   token
 };
 
@@ -17,12 +18,20 @@ function login(usernameOrEmail, password) {
   });
 }
 
-function persistUser(username, token, email, globalPermission, userId) {
+function persistUser(
+  username,
+  token,
+  email,
+  globalPermission,
+  userId,
+  acceptedEUA
+) {
   localStorage.setItem("username", username);
   localStorage.setItem("JWT", token);
   localStorage.setItem("email", email);
   localStorage.setItem("globalPermission", globalPermission);
   localStorage.setItem("userId", userId);
+  localStorage.setItem("acceptedEUA", acceptedEUA);
 }
 
 function persistFields(data) {
@@ -36,16 +45,21 @@ function logout() {
   localStorage.setItem("JWT", "");
   localStorage.setItem("email", "");
   localStorage.setItem("globalPermission", "");
+  localStorage.setItem("acceptedEUA", "");
 }
-function register(username, password, email) {
+function register(username, password, email, endUserAgreement) {
   return CacophonyApi.post("/api/v1/Users", {
     username: username,
     password: password,
+    endUserAgreement: endUserAgreement,
     email: email
   });
 }
 function updateFields(fields) {
   return CacophonyApi.patch("/api/v1/Users", fields);
+}
+function getEUAVersion() {
+  return CacophonyApi.get("/api/v1/endUserAgreement/latest");
 }
 
 async function token() {
