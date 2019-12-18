@@ -55,10 +55,7 @@
         </b-col>
 
         <b-col cols="6" md="3">
-          <b-button-group
-            v-b-tooltip.hover.top="'Download the files for this recording'"
-            class="btn-block"
-          >
+          <b-button-group class="btn-block">
             <b-dropdown text="Download" right class="btn-block">
               <b-dropdown-item :href="downloadFileUrl" target="_blank">
                 <font-awesome-icon :icon="['far', 'file-video']" />
@@ -74,7 +71,6 @@
 
         <b-col cols="6" md="3">
           <b-button
-            v-b-tooltip.hover.bottomleft="'Delete this recording'"
             :disabled="deleteDisabled"
             variant="danger"
             block
@@ -105,7 +101,6 @@
         <template slot="deleteButton" slot-scope="row">
           <button class="button btn">
             <font-awesome-icon
-              v-b-tooltip.hover.left="'Delete'"
               icon="trash"
               @click="$emit('deleteTag', row.item.tag.id)"
             />
