@@ -2,8 +2,7 @@
   <div
     :style="{
       height: `${heightForTracks}px`,
-      width: `${canvasWidth}px`,
-      padding: `0px ${sidePadding}px 0px ${sidePadding}px`
+      width: `${canvasWidth}px`
     }"
     class="track-scrubber"
   >
@@ -13,12 +12,16 @@
       </div>
       <div
         v-else
-        :style="{ height: `${heightForTracks}px`, position: 'relative' }"
+        :style="{
+          height: `${heightForTracks}px`,
+          position: 'relative'
+        }"
       >
         <div
           :style="{
-            right: `${scrubberWidth - offsetForCurrentTime}px`,
-            pointerEvents: 'none'
+            right: `${canvasWidth - playheadOffsetForCurrentTime}px`,
+            pointerEvents: 'none',
+            paddingLeft: `${sidePadding}px`
           }"
           class="playhead"
         />
@@ -108,6 +111,9 @@ export default {
     offsetForCurrentTime() {
       return this.getOffsetForTime(this.currentVideoTime);
     },
+    playheadOffsetForCurrentTime() {
+      return this.getPlayheadOffsetForTime(this.currentVideoTime);
+    },
     heightForTracks() {
       return this.numTracks === 0 ? 0 : Math.max(25, 13 * this.numTracks);
     }
@@ -119,16 +125,25 @@ export default {
       return `${ratio * this.scrubberWidth}px`;
     },
     getOffsetForTrack(track: Track): string {
-      return `${this.getOffsetForTime(track.data.start_s)}px`;
+      return `${this.getOffsetForTime(track.data.start_s) +
+        this.sidePadding}px`;
     },
     getOffsetForTime(time: number): number {
       const pixelsPerSecond = this.scrubberWidth / this.duration;
       return pixelsPerSecond * time;
     },
+    getPlayheadOffsetForTime(time: number): number {
+      const pixelsPerSecond = this.scrubberWidth / this.duration;
+      return this.sidePadding + pixelsPerSecond * time;
+    },
     pointerMove(event: Event) {
       event.preventDefault();
-      const x =
-        getPositionXForEvent(event) - this.scrubber.getBoundingClientRect().x;
+      const x = Math.max(
+        0,
+        getPositionXForEvent(event) -
+          this.scrubber.getBoundingClientRect().x -
+          this.sidePadding
+      );
       const timeOffset = x / this.scrubberWidth;
       this.$emit("set-playback-time", timeOffset * this.duration);
     },
@@ -204,6 +219,7 @@ export default {
   transition: opacity 0.3s linear;
   height: 12px;
   border-radius: 5px;
+  position: absolute;
 }
 .playhead {
   height: 100%;
