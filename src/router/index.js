@@ -16,6 +16,7 @@ import AddEmailView from "../views/AddEmailView.vue";
 import AnalysisView from "../views/AnalysisView.vue";
 import VisitsView from "../views/VisitsView.vue";
 import TaggingView from "../views/TaggingView.vue";
+import EndUserAgreementView from "../views/EndUserAgreementView.vue";
 
 Vue.use(Router);
 
@@ -101,15 +102,29 @@ function createRouter() {
         path: "/tagging",
         name: "tagging",
         component: TaggingView
+      },
+      {
+        path: "/end_user_agreement",
+        name: "endUserAgreement",
+        component: EndUserAgreementView
       }
     ]
   });
 
-  router.beforeEach((to, from, next) => {
+  router.beforeEach(async (to, from, next) => {
+    const now = new Date();
+    const euaUpdatedAt = new Date(store.getters["User/euaUpdatedAt"]);
+    // Update latest User Agreement once an hour
+    if (now - euaUpdatedAt > 1000 * 60 * 60) {
+      await store.dispatch("User/GET_END_USER_AGREEMENT_VERSION");
+    }
     const isLoggedIn = store.getters["User/isLoggedIn"];
     const hasEmail = store.getters["User/hasEmail"];
-    if (isLoggedIn && hasEmail) {
-      if (["login", "register", "addEmail"].includes(to.name)) {
+    const acceptedEUA = store.getters["User/acceptedEUA"];
+    if (isLoggedIn && hasEmail && acceptedEUA) {
+      if (
+        ["login", "register", "addEmail", "endUserAgreement"].includes(to.name)
+      ) {
         return next({
           name: "home"
         });
@@ -124,12 +139,23 @@ function createRouter() {
       } else {
         return next();
       }
+    } else if (isLoggedIn && !acceptedEUA) {
+      if (to.name !== "endUserAgreement") {
+        return next({
+          name: "endUserAgreement",
+          query: {
+            nextUrl: to.fullPath
+          }
+        });
+      } else {
+        return next();
+      }
     } else if (to.matched.some(record => record.meta.noAuth)) {
       return next();
     }
     next({
       path: "/login",
-      params: {
+      query: {
         nextUrl: to.fullPath
       }
     });
