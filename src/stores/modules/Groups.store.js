@@ -39,6 +39,7 @@ const actions = {
       // FIXME: A bunch of different components all rely on this fetched state.
       //  Modal to add user to group in admin area is only dismissed when fetching is true
       commit("fetching");
+      // FIXME This is a hack. Fix eventually. If we don't set a timeout fetching never gets set
       setTimeout(() => {
         commit("fetched");
       }, 10);
