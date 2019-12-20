@@ -73,6 +73,27 @@
             />
           </b-form-group>
 
+          <b-form-group
+            label="EndUserAgreement"
+            label-class="sr-only"
+            label-for="input-end-user-agreement"
+          >
+            <b-form-checkbox
+              id="input-end-user-agreement"
+              v-model="$v.form.endUserAgreement.$model"
+              value="accepted"
+              unchecked-value="not-accepted"
+            >
+              I agree to the terms of the
+              <a
+                target="_blank"
+                href="https://www.2040.co.nz/pages/2040-end-user-agreement"
+              >
+                end user agreement
+              </a>
+            </b-form-checkbox>
+          </b-form-group>
+
           <b-button
             :disabled="$v.form.$invalid"
             type="submit"
@@ -110,7 +131,8 @@ export default {
         username: "",
         email: "",
         password: "",
-        passwordConfirm: ""
+        passwordConfirm: "",
+        endUserAgreement: "not-accepted"
       },
       errorMessage: null
     };
@@ -156,6 +178,9 @@ export default {
       passwordConfirm: {
         required,
         sameAsPassword: sameAs("password")
+      },
+      endUserAgreement: {
+        value: value => value == "accepted"
       }
     }
   },
