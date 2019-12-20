@@ -1,11 +1,5 @@
 <template>
-  <div
-    class="tagging-view"
-    v-if="
-      currentUser.globalPermission === 'read' ||
-        currentUser.globalPermission === 'write'
-    "
-  >
+  <div class="tagging-view">
     <AddCustomTrackTag
       @addTag="addCustomTag"
       :allow-comment="false"
@@ -74,6 +68,9 @@
 
           <b-button :disabled="!readyToTag" @click="markTrackAsSkipped">
             <span>Skip track</span>
+          </b-button>
+          <b-button :disabled="!readyToTag" @click="nextRecordingUnbiased">
+            <span>Skip recording</span>
           </b-button>
         </div>
       </div>
@@ -223,6 +220,14 @@ export default Vue.extend({
       await this.getRecording(currentDeviceId);
       this.loading = false;
     },
+    async nextRecordingUnbiased() {
+      this.currentRecording = null;
+      this.tracks = [];
+      this.readyToPlay = false;
+      this.loading = true;
+      await this.getRecording();
+      this.loading = false;
+    },
     addCustomTag({ what }) {
       this.addTag(what);
     },
@@ -307,6 +312,10 @@ export default Vue.extend({
       const { result, success } = recordingResponse;
       if (success) {
         const recording = result.rows[0];
+        // Make sure it's not a recording we've seen before and skipped tracks from.
+        if (this.history.find(prev => prev.recording.id === recording.id)) {
+          return await this.getRecording();
+        }
         this.currentRecording = recording;
         this.tracks = recording.tracks.map((track, trackIndex) => ({
           ...track,
