@@ -10,9 +10,23 @@
       @toggled-search-panel="searchPanelIsCollapsed = !searchPanelIsCollapsed"
     />
     <div :class="['search-content-wrapper']">
+      <b-alert
+        v-model="showInfo"
+        variant="info"
+        dismissible
+        @dismissed="infoDismissed"
+      >
+        {{ infoMessage }}
+      </b-alert>
+
       <div class="search-results">
         <div class="results-summary">
-          <h1>Visits</h1>
+          <div style="display:flex;">
+            <h1 style="flex-grow: 100;">Visits</h1>
+            <div style="align-self: flex-end;">
+              <b-button variant="link" @click="showInfo = true">Help</b-button>
+            </div>
+          </div>
           <h2 v-if="countMessage">
             {{ countMessage }}
           </h2>
@@ -167,6 +181,9 @@ export default {
   components: { QueryRecordings, EventSummary },
   data() {
     return {
+      showInfo: this.isInfoShown(),
+      infoMessage: `Visits are multiple recordings and tracks combined into a likely visit of a single predator/animal. 
+      Each visit can be expanded by clicking the header to show the events ( a track of a recording) which make up this visit.`,
       tableDateTimeFormat: "L LTS",
       tableDateFormat: "L",
       tableTimeFormat: "LTS",
@@ -235,6 +252,12 @@ export default {
     }
   },
   methods: {
+    isInfoShown() {
+      return localStorage.getItem("visitInfo") != "0";
+    },
+    infoDismissed() {
+      localStorage.setItem("visitInfo", "0");
+    },
     eventsByRec(visitEvents: VisitEvent[]) {
       const eventsByRec = [];
       let recEvent;
