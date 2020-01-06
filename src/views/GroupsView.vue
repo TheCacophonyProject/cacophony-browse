@@ -1,33 +1,24 @@
 <template v-if="groups">
-  <b-container>
-    <h1>Your Groups <help :help-text="helpTip" /></h1>
+  <b-container fluid class="admin">
+    <b-jumbotron class="jumbotron" fluid>
+      <h1>Your groups</h1>
+      <p class="lead">
+        Groups link together devices with the users who can view their
+        recordings. Click on a group to see its devices and users.
+      </p>
+    </b-jumbotron>
     <group-listing :groups="groups" />
-    <group-add />
   </b-container>
 </template>
 
 <script>
-import GroupAdd from "../components/Groups/GroupAdd.vue";
 import GroupListing from "../components/Groups/GroupListing.vue";
-import Help from "../components/Help.vue";
 import { mapState } from "vuex";
 
 export default {
   name: "GroupsView",
   components: {
-    GroupAdd,
-    GroupListing,
-    Help
-  },
-  data() {
-    return {
-      helpTip: {
-        title: "Groups",
-        content:
-          "<p>Groups link together devices with the users who can view their recordings</p> " +
-          "<p>Click on a group to see its devices and users.</p>"
-      }
-    };
+    GroupListing
   },
   computed: mapState({
     groups: state => state.Groups.groups

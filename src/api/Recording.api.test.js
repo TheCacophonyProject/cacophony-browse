@@ -81,7 +81,7 @@ describe("comment() calls fetch", () => {
     const testComment = "some comment";
 
     await recordingApi.comment(testComment, null);
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "PATCH",
       body: JSON.stringify({
@@ -112,7 +112,7 @@ describe("del() calls fetch", () => {
 
   test("with the correct request params", async () => {
     await recordingApi.del(null);
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "DELETE"
     });

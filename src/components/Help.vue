@@ -1,5 +1,7 @@
 <template>
-  <span v-b-tooltip.hover="helpTip" class="float-right help">?</span>
+  <span v-b-tooltip.hover="helpTip" class="float-right help">
+    <font-awesome-icon icon="question-circle" size="xs" />
+  </span>
 </template>
 
 <script>
@@ -15,16 +17,9 @@ export default {
     return {
       helpTip: {
         html: true,
-        title: this.helpText.title,
-        content: this.helpText.content
+        title: this.helpText.title
       }
     };
   }
 };
 </script>
-
-<style scoped>
-.help {
-  color: #28a745;
-}
-</style>

@@ -1,14 +1,23 @@
 import { fetch } from "./fetch";
 import config from "../config";
 
-async function fetchJsonWithMethod(endpoint, method, body) {
-  return fetch(`${config.api}${endpoint}`, {
-    method: method,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8"
+async function fetchJsonWithMethod(
+  endpoint,
+  method,
+  body,
+  suppressGlobalMessaging = false
+) {
+  return fetch(
+    `${config.api}${endpoint}`,
+    {
+      method: method,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      body: JSON.stringify(body)
     },
-    body: JSON.stringify(body)
-  });
+    suppressGlobalMessaging
+  );
 }
 
 export default {
@@ -27,9 +36,11 @@ export default {
    * These fields can easily be resolved using object destructuring to directly assign the required information.
    * @param {string} endpoint - The cacophony API endpoint to target, for example `/api/v1/users`.
    * @param {*} [body] - An object to go in the request body that will be sent as JSON.
+   * @param {boolean} suppressGlobalMessaging: ability to suppress the global messaging and handle it at a component level. Ideally the option might be passed down from the component but for now we're setting the preference in the API layer. Not ideal, could be improved.
    * @returns {Promise<{result: *, success: boolean, status: number}>}
    */
-  post: async (endpoint, body) => fetchJsonWithMethod(endpoint, "POST", body),
+  post: async (endpoint, body, suppressGlobalMessaging) =>
+    fetchJsonWithMethod(endpoint, "POST", body, suppressGlobalMessaging),
 
   /**
    * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
