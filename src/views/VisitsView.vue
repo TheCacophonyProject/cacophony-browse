@@ -24,7 +24,10 @@
           <div style="display:flex;">
             <h1 style="flex-grow: 100;">Visits</h1>
             <div style="align-self: flex-end;">
-              <b-button variant="link" @click="showInfo = true">Help</b-button>
+              <b-button variant="link" @click="showInfo = true">
+                <font-awesome-icon icon="question-circle" size="s" />
+                Help</b-button
+              >
             </div>
           </div>
           <h2 v-if="countMessage">
@@ -182,8 +185,7 @@ export default {
   data() {
     return {
       showInfo: this.isInfoShown(),
-      infoMessage: `Visits are multiple recordings and tracks combined into a likely visit of a single predator/animal. 
-      Each visit can be expanded by clicking the header to show the events ( a track of a recording) which make up this visit.`,
+      infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
       tableDateTimeFormat: "L LTS",
       tableDateFormat: "L",
       tableTimeFormat: "LTS",
