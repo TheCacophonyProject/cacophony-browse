@@ -185,10 +185,12 @@ export default {
     },
     bindRateChange() {
       const rate = localStorage.getItem("playbackrate");
+      const htmlPlayer = this.$refs.player.$refs.video;
+
       if (rate) {
-        this.htmlPlayer.playbackRate = rate;
+        htmlPlayer.playbackRate = rate;
       }
-      this.htmlPlayer.onratechange = this.ratechange;
+      htmlPlayer.onratechange = this.ratechange;
     },
     startScrub() {
       this.wasPaused = this.htmlPlayer.paused;
@@ -206,11 +208,12 @@ export default {
     setVideoUrl() {
       this.loading = true;
       this.ended = false;
-      if (this.htmlPlayer) {
+      const htmlPlayer = this.$refs.player.$refs.video;
+      if (htmlPlayer) {
         const rate = localStorage.getItem("playbackrate");
         if (rate) {
-          this.htmlPlayer.playbackRate = rate;
-          this.htmlPlayer.onratechange = null;
+          htmlPlayer.playbackRate = rate;
+          htmlPlayer.onratechange = null;
         }
       }
       // first must make sure the width to be loaded is also correct.
@@ -325,8 +328,10 @@ export default {
       this.videoJsPlayer.currentTime(time);
     },
     ratechange() {
-      if (this.htmlPlayer) {
-        localStorage.setItem("playbackrate", this.htmlPlayer.playbackRate);
+      const htmlPlayer = this.$refs.player.$refs.video;
+
+      if (htmlPlayer) {
+        localStorage.setItem("playbackrate", htmlPlayer.playbackRate);
       }
     },
     seeking(event) {
