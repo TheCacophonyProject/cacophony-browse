@@ -266,7 +266,8 @@ export default {
   mounted() {
     this.isAudio = this.recordingType === "audio";
     this.parseCurrentRoute();
-    this.updateRouteQuery();
+    this.lastQuery = JSON.parse(JSON.stringify(this.query));
+    this.$emit("submit", this.serialiseQuery(this.query, true));
   },
   updated() {
     if (!this.loadedQuery) {
