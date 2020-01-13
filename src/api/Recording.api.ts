@@ -88,9 +88,9 @@ export interface LimitedTrack {
 }
 
 export interface TagLimitedRecording {
-  RecordingId: RecordingId,
-  DeviceId: DeviceId,
-  tracks: LimitedTrack[],
+  RecordingId: RecordingId;
+  DeviceId: DeviceId;
+  tracks: LimitedTrack[];
   recordingJWT: JwtToken<Mp4File>;
   tagJWT: JwtToken<TrackTag>;
 }
@@ -194,18 +194,24 @@ export interface RecordingQuery {
   limit: number;
   offset: number;
   tagMode?: TagMode;
-  tags?: string[],
-  order?: any // TODO - It's not clear what order accepts (it's a sequelize thing), but nobody seems to use it right now.
+  tags?: string[];
+  order?: any; // TODO - It's not clear what order accepts (it's a sequelize thing), but nobody seems to use it right now.
 }
 
 const apiPath = "/api/v1/recordings";
 
-function query(params: RecordingQuery): Promise<FetchResult<QueryResult<RecordingInfo>>> {
+function query(
+  params: RecordingQuery
+): Promise<FetchResult<QueryResult<RecordingInfo>>> {
   return CacophonyApi.get(`${apiPath}?${querystring.stringify(params as any)}`);
 }
 
-function queryCount(params: RecordingQuery): Promise<FetchResult<QueryResultCount>> {
-  return CacophonyApi.get(`${apiPath}/count?${querystring.stringify(params as any)}`)
+function queryCount(
+  params: RecordingQuery
+): Promise<FetchResult<QueryResultCount>> {
+  return CacophonyApi.get(
+    `${apiPath}/count?${querystring.stringify(params as any)}`
+  );
 }
 
 function id(id: RecordingId): Promise<FetchResult<Recording>> {
@@ -250,12 +256,12 @@ function addTrackTag(
   tag: Tag,
   recordingId: RecordingId,
   trackId: TrackId,
-  tagJWT?: JwtToken<TrackTag>,
+  tagJWT?: JwtToken<TrackTag>
 ): Promise<FetchResult<{ trackTagId: number; success: boolean }>> {
   const body: any = {
     what: tag.what,
     confidence: tag.confidence,
-    automatic: false,
+    automatic: false
   };
   if (tagJWT !== undefined) {
     body.tagJWT = tagJWT;
