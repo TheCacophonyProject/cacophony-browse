@@ -10,9 +10,26 @@
       @toggled-search-panel="searchPanelIsCollapsed = !searchPanelIsCollapsed"
     />
     <div :class="['search-content-wrapper']">
+      <b-alert
+        v-model="showInfo"
+        variant="info"
+        dismissible
+        @dismissed="infoDismissed"
+      >
+        {{ infoMessage }}
+      </b-alert>
+
       <div class="search-results">
         <div class="results-summary">
-          <h1>Visits</h1>
+          <div style="display:flex;">
+            <h1 style="flex-grow: 100;">Visits</h1>
+            <div style="align-self: flex-end;">
+              <b-button variant="link" @click="showInfo = true">
+                <font-awesome-icon icon="question-circle" size="s" />
+                Help</b-button
+              >
+            </div>
+          </div>
           <h2 v-if="countMessage">
             {{ countMessage }}
           </h2>
@@ -167,6 +184,8 @@ export default {
   components: { QueryRecordings, EventSummary },
   data() {
     return {
+      showInfo: this.isInfoShown(),
+      infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
       tableDateTimeFormat: "L LTS",
       tableDateFormat: "L",
       tableTimeFormat: "LTS",
@@ -235,6 +254,12 @@ export default {
     }
   },
   methods: {
+    isInfoShown() {
+      return localStorage.getItem("visitInfo") != "0";
+    },
+    infoDismissed() {
+      localStorage.setItem("visitInfo", "0");
+    },
     eventsByRec(visitEvents: VisitEvent[]) {
       const eventsByRec = [];
       let recEvent;

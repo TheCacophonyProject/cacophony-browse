@@ -272,7 +272,8 @@ export default {
   mounted() {
     this.isAudio = this.recordingType === "audio";
     this.parseCurrentRoute();
-    this.updateRouteQuery();
+    this.saveLastQuery();
+    this.$emit("submit", this.serialiseQuery(this.query, true));
   },
   updated() {
     if (!this.loadedQuery) {
@@ -289,6 +290,9 @@ export default {
     }
   },
   methods: {
+    saveLastQuery() {
+      this.lastQuery = JSON.parse(JSON.stringify(this.query));
+    },
     updatePagination(perPage, page) {
       this.query.limit = perPage;
       const newOffset = Math.max(0, (page - 1) * perPage);
@@ -347,7 +351,7 @@ export default {
     },
     updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
-      this.lastQuery = JSON.parse(JSON.stringify(this.query));
+      this.saveLastQuery();
       this.$router.push({
         path: this.path,
         query: this.serialiseQuery(this.query)

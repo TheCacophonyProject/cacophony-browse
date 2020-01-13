@@ -33,7 +33,10 @@ import {
   faVideo,
   faWrench,
   faUser,
-  faUserCog
+  faUserCog,
+  faPlus,
+  faUserPlus,
+  faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faCalendar,
@@ -94,7 +97,10 @@ library.add(
   faWindowClose,
   faWrench,
   faUser,
-  faUserCog
+  faUserCog,
+  faPlus,
+  faUserPlus,
+  faChevronRight
 );
 
 export default FontAwesomeIcon;

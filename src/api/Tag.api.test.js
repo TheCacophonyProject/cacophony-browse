@@ -13,7 +13,7 @@ describe("addTag() calls fetch", () => {
       testTag = { someKey: "some value" };
 
     await tagApi.addTag(testTag, testRecordingId);
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
       body: JSON.stringify({
@@ -42,7 +42,7 @@ describe("deleteTag() calls fetch", () => {
     const testTagId = 123456;
 
     await tagApi.deleteTag(testTagId);
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "DELETE",
       body: JSON.stringify({ tagId: testTagId }),

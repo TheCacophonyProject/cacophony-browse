@@ -11,7 +11,7 @@ describe("Actions", () => {
         rows: [{ devicename: "a", id: 1 }, { devicename: "b", id: 2 }]
       }
     },
-    testResponse = { result: testResult },
+    testResponse = { result: testResult, success: true },
     commit = jest.fn(),
     state = {
       currentDevice: testResult.devices[0],
@@ -20,6 +20,7 @@ describe("Actions", () => {
 
   beforeEach(() => {
     api.getDevices.mockReturnValueOnce(testResponse);
+    api.addUserToDevice.mockReturnValueOnce({ success: true });
   });
 
   function _expectGetDevicesCalled(commit) {
@@ -69,10 +70,6 @@ describe("Actions", () => {
         testObject.device.id,
         testObject.admin
       );
-    });
-
-    test("calls _getDevice(devicename, commit, state)", async () => {
-      _expectGetDevicesCalled(commit);
     });
   });
 

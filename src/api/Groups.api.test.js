@@ -15,7 +15,7 @@ describe("addGroup(groupName) calls authenticatedFetch", () => {
 
     await groupApi.addNewGroup(testGroupName);
 
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
       body: JSON.stringify({ groupname: testGroupName }),
@@ -46,7 +46,7 @@ describe("addGroupUser(groupName, userName, isAdmin) calls authenticatedFetch", 
 
     await groupApi.addGroupUser(testGroup, testUserName, testBoolAdmin);
 
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "POST",
       body: JSON.stringify({
@@ -80,7 +80,7 @@ describe("removeGroupUser(groupName,username) calls authenticatedFetch", () => {
 
     await groupApi.removeGroupUser(testGroup, testUserName);
 
-    expect(fetch.mock.calls[0]).toHaveLength(2);
+    expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
       method: "DELETE",
       body: JSON.stringify({ group: testGroup, username: testUserName }),
