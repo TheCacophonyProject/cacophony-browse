@@ -84,10 +84,10 @@
       </b-button>
     </div>
     <div>
-      <h4 v-if="readyToTag">
+      <h4 v-if="readyToTag || !loading">
         Tagging: Track {{ currentTrackIndex + 1 }},
-        <a :href="`/recording/${currentRecording.id}`">
-          Recording #{{ currentRecording.id }}
+        <a :href="`/recording/${currentRecording.RecordingId}`">
+          Recording #{{ currentRecording.RecordingId }}
         </a>
       </h4>
       <h4 v-else>Loading recording</h4>
@@ -313,7 +313,11 @@ export default Vue.extend({
       if (success) {
         const recording = result.rows[0];
         // Make sure it's not a recording we've seen before and skipped tracks from.
-        if (this.history.find(prev => prev.recording.id === recording.id)) {
+        if (
+          this.history.find(
+            prev => prev.recording.RecordingId === recording.RecordingId
+          ) !== undefined
+        ) {
           return await this.getRecording();
         }
         this.currentRecording = recording;
@@ -322,6 +326,16 @@ export default Vue.extend({
           trackIndex,
           tags: []
         }));
+
+        // Advance to next untagged track
+        let nextIndex = 0;
+        while (
+          nextIndex < this.tracks.length &&
+          !this.tracks[nextIndex].needsTagging
+        ) {
+          nextIndex++;
+        }
+        this.currentTrackIndex = nextIndex;
       }
       return success;
     }
