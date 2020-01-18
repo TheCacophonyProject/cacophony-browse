@@ -303,12 +303,7 @@ export default Vue.extend({
       }, 300);
     },
     async getRecording(biasToDeviceId?: DeviceId): Promise<boolean> {
-      let recordingResponse;
-      if (biasToDeviceId !== undefined) {
-        recordingResponse = await api.recording.needsTag();
-      } else {
-        recordingResponse = await api.recording.needsTag(biasToDeviceId);
-      }
+      const recordingResponse = await api.recording.needsTag(biasToDeviceId);
       const { result, success } = recordingResponse;
       if (success) {
         const recording = result.rows[0];
