@@ -11,11 +11,17 @@ function getDevices() {
 }
 
 function addUserToDevice(username, deviceId, admin) {
-  return CacophonyApi.post("/api/v1/devices/users", {
-    username: username,
-    deviceId: deviceId,
-    admin: admin
-  });
+  const suppressGlobalMessaging = true;
+
+  return CacophonyApi.post(
+    "/api/v1/devices/users",
+    {
+      username: username,
+      deviceId: deviceId,
+      admin: admin
+    },
+    suppressGlobalMessaging
+  );
 }
 
 function removeUserFromDevice(username, deviceId) {

@@ -15,9 +15,10 @@ const defaults = {
  * These fields can easily be resolved using object destructuring to directly assign the required information.
  * @param {RequestInfo} url The full url to send the request to
  * @param {RequestInit} init: The RequestInit info for things such as headers and body
+ * @param {boolean} suppressGlobalMessaging: ability to suppress the global messaging and handle it at a component level. Ideally the option might be passed down from the component but for now we're setting the preference in the API layer. Not ideal, could be improved.
  * @returns {Promise<{result: any, success: boolean, status: number}>}
  */
-export async function fetch(url, init) {
+export async function fetch(url, init, suppressGlobalMessaging = false) {
   init = {
     ...defaults,
     ...init,
@@ -39,7 +40,9 @@ export async function fetch(url, init) {
     );
     router.push("login");
   } else {
-    handleMessages(result, status);
+    if (!suppressGlobalMessaging) {
+      handleMessages(result, status); //TODO: don't have this on the fetch function; handle errors more explicitly (this should remove the suppressGlobalMessaging hack). Do we global error messages?
+    }
   }
   return { result, status, success: response.ok };
 }

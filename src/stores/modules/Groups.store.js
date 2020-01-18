@@ -23,34 +23,52 @@ const actions = {
     commit("fetched");
   },
 
-  async GET_GROUP({ commit, state }, groupname) {
+  async GET_GROUP({ commit }, groupname) {
     commit("fetching");
-    await _getGroup(groupname, commit, state);
+    await _getGroup(groupname, commit);
     commit("fetched");
   },
 
-  async ADD_GROUP({ commit, state }, groupname) {
+  async ADD_GROUP({ commit }, groupname) {
     commit("fetching");
-    const { success } = await api.groups.addNewGroup(groupname);
+    const { success, result } = await api.groups.addNewGroup(groupname);
     if (!success) {
-      commit("fetched");
-      throw "There were errors";
+      return result.message;
+    } else {
+      await _getGroup(groupname, commit);
+      // FIXME: A bunch of different components all rely on this fetched state.
+      //  Modal to add user to group in admin area is only dismissed when fetching is true
+      commit("fetching");
+      // FIXME This is a hack. Fix eventually. If we don't set a timeout fetching never gets set
+      setTimeout(() => {
+        commit("fetched");
+      }, 10);
     }
-    await _getGroup(groupname, commit, state);
-    commit("fetched");
   },
 
   async ADD_GROUP_USER({ commit, state }, { groupName, userName, isAdmin }) {
-    commit("fetching");
-    await api.groups.addGroupUser(groupName, userName, isAdmin);
-    await _getGroup(state.currentGroup.groupname, commit, state);
-    commit("fetched");
+    const { success } = await api.groups.addGroupUser(
+      groupName,
+      userName,
+      isAdmin
+    );
+    if (!success) {
+      return false;
+    } else {
+      await _getGroup(state.currentGroup.groupname, commit);
+      // FIXME: A bunch of different components all rely on this fetched state.
+      //  Modal to add user to group in admin area is only dismissed when fetching is true
+      commit("fetching");
+      setTimeout(() => {
+        commit("fetched");
+      }, 10);
+    }
   },
 
   async REMOVE_GROUP_USER({ commit, state }, { groupName, userName }) {
     commit("fetching");
     await api.groups.removeGroupUser(groupName, userName);
-    await _getGroup(state.currentGroup.groupname, commit, state);
+    await _getGroup(state.currentGroup.groupname, commit);
     commit("fetched");
   }
 };

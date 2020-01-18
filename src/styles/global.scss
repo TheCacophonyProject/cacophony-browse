@@ -1,3 +1,5 @@
+@import '~bootstrap/scss/bootstrap.scss';
+
 h1 {
     font-size: x-large;
     margin: 1.5rem 0;
@@ -45,13 +47,5 @@ h1 {
   -moz-appearance: none;
 }
 
-&.tagged {
-  border: 2px solid green !important;
-}
-&.ai-tagged {
-  border: 2px solid gold !important;
-}
-&.ai-tagged.tagged {
-  border: 2px solid $info !important;
-}
 @import "login-register.css";
+@import "admin.scss";

@@ -9,7 +9,7 @@ describe("Actions", () => {
   const testResult = {
       groups: [{ groupname: "a" }, { groupname: "b" }]
     },
-    testResponse = { result: testResult },
+    testResponse = { result: testResult, success: true },
     commit = jest.fn(),
     state = {
       currentGroup: testResult.groups[0],
@@ -18,9 +18,10 @@ describe("Actions", () => {
 
   beforeEach(() => {
     api.getGroups.mockReturnValueOnce(testResponse);
+    api.addGroupUser.mockReturnValueOnce({ success: true });
   });
 
-  function _expectGetGroupsCalled(commit) {
+  async function _expectGetGroupsCalled(commit) {
     expect(api.getGroups).toHaveBeenCalledTimes(1);
     expect(commit).toHaveBeenCalledTimes(4);
     expect(commit).toHaveBeenNthCalledWith(1, "fetching");
@@ -34,7 +35,12 @@ describe("Actions", () => {
       "receiveGroups",
       testResult.groups
     );
-    expect(commit).toHaveBeenLastCalledWith("fetched");
+    // FIXME This is filthy, but so is the fetching/fetched variables works atm
+    await new Promise(resolve => {
+      setTimeout(() => {
+        resolve(expect(commit).toHaveBeenLastCalledWith("fetched"));
+      }, 15);
+    });
   }
 
   describe("GET_GROUPS", () => {
@@ -83,19 +89,17 @@ describe("Actions", () => {
 
     beforeEach(async () => {
       api.addNewGroup.mockReturnValueOnce({
-        result: { errors: "an error" },
+        result: { message: "an error" },
         success: false
       });
     });
 
     test("calls api.groups.addNewGroup()", async () => {
-      try {
-        await GroupsStore.actions.ADD_GROUP({ commit, state }, testString);
-      } catch (e) {
-        expect(commit).toHaveBeenLastCalledWith("fetched");
-        return;
-      }
-      throw new Error("Add group should have thrown an error");
+      const message = await GroupsStore.actions.ADD_GROUP(
+        { commit, state },
+        testString
+      );
+      expect(message).toBe("an error");
     });
   });
 

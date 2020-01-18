@@ -1,0 +1,117 @@
+/* Admin area */
+
+.admin {
+
+  &.view.container-fluid {
+    padding: 0;
+    @include media-breakpoint-down(sm) {
+      padding-bottom: 4em; // add extra padding so that add button doesn't overlap content at the bottom of the page on mobile view
+    }
+  }
+
+  .no-content-placeholder {
+    color: $text-muted;
+    text-align: center;
+    font-size: $font-size-sm;
+    &:not(.card-body) {
+      padding: 2em 0;
+    }
+    p:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  .jumbotron {
+    background: #f8f9fa;
+    padding-top: 0.5em;
+    padding-bottom: 1.5em;
+    h1 {
+      font-size: x-large;
+      .svg-inline--fa{
+        vertical-align: baseline;
+      }
+    }
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 0.5em;
+    font-size: 0.9em;
+  }
+
+  .add-button-wrapper {
+    text-align: right;
+  }
+
+  @include media-breakpoint-down(sm) {
+    .add-button {
+      position: fixed;
+      bottom: 1em;
+      right: 1em;
+      z-index: 2;
+    }
+    .lead {
+      display: none;
+    }
+  }
+
+  @include media-breakpoint-up(sm) {
+    .add-button {
+      margin-bottom: 1em;
+    }
+  }
+
+  .list-wrapper {
+    .list-group-item-action {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      justify-content: space-between;
+      overflow: auto;
+      .icon {
+        color: $link-color;
+      }
+    }
+  }
+
+  /* Specific group and device view*/
+
+  .name-placeholder {
+    color: #ccc;
+    font-style: italic;
+  }
+
+  h2 {
+    font-size: x-large;
+  }
+
+  .description-and-button-wrapper {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    margin-bottom: 1em;
+    p {
+      margin-bottom: 0;
+      margin-right: 1em;
+    }
+    .add-button {
+      white-space: nowrap;
+      margin-left: auto;
+    }
+  }
+
+  .help {
+    color: $gray-400;
+    font-size: large;
+  }
+
+  button.trash-button {
+    padding: 0 0.5em;
+    background: transparent;
+    border: none;
+  }
+
+}
+
+
+
