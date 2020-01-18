@@ -264,9 +264,9 @@ export default {
     },
     submitNewQuery(whereQuery) {
       this.serialisedQuery = whereQuery;
-      this.getRecordings(whereQuery);
+      this.getRecording(whereQuery);
     },
-    async getRecordings(whereQuery) {
+    async getRecording(whereQuery) {
       // Remove previous values
       this.countMessage = "";
       this.recordings = [];
@@ -308,12 +308,7 @@ export default {
               kind: "dataSeparator",
               hour: thisDate
             };
-            if (
-              prevDate === null ||
-              roundDate(thisDate).getTime() !== roundDate(prevDate).getTime()
-            ) {
-              item.date = thisDate;
-            }
+            item.date = thisDate;
             this.tableItems.push(item);
             prevDate = thisDate;
           }

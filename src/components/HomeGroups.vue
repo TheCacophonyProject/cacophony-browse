@@ -29,6 +29,9 @@ export default {
   computed: mapState({
     groups: state => state.Groups.groups
   })
+
+  // TODO(jon): Would be better to have a single API query to load recording counts for all groups the user is
+  //  is part of.
 };
 </script>
 

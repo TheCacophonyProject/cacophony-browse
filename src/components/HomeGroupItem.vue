@@ -12,7 +12,7 @@
 
 <script>
 import { mapState } from "vuex";
-import api from "../api/Recording.api";
+import recordingsApi from "../api/Recording.api";
 
 export default {
   name: "HomeGroupItem",
@@ -34,7 +34,7 @@ export default {
     query() {
       return {
         where: JSON.stringify({
-          DeviceId: this.group.Devices.map(d => d.id)
+          GroupId: this.group.id
         })
       };
     }
@@ -51,24 +51,13 @@ export default {
     // Query params
     const where = {
       recordingDateTime: dateQuery,
-      DeviceId: this.group.Devices.map(d => d.id)
+      GroupId: this.group.id
     };
-    const limit = 1000;
     const params = {
       where: JSON.stringify(where),
-      limit: limit,
-      offset: 0,
       tagMode: "any"
     };
-
-    // Get all data (first 1000 rows)
-    let { result: allData } = await api.query(params);
-    // Check whether all data was fetched
-    // if not, run again with increased limit to get all rows
-    if (allData.count > limit) {
-      params.limit = allData.count;
-      ({ result: allData } = await api.query(params));
-    }
+    const { result: allData } = await recordingsApi.queryCount(params);
     this.count = allData.count;
   }
 };

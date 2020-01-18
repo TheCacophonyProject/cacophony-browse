@@ -190,7 +190,7 @@ export default {
       if (rate) {
         htmlPlayer.playbackRate = rate;
       }
-      htmlPlayer.onratechange = this.ratechange;
+      htmlPlayer.onratechange = this.ratechange.bind(this);
     },
     startScrub() {
       this.wasPaused = this.htmlPlayer.paused;
@@ -382,9 +382,16 @@ export default {
       };
       // First check if the last position we got is still the current position?
       // See if tracks are in range.
-      const tracks = currentTrackOnly
-        ? [this.tracks[this.currentTrack]]
-        : this.tracks;
+      let tracks;
+      if (currentTrackOnly) {
+        if (this.tracks.length && this.tracks[this.currentTrack]) {
+          tracks = [this.tracks[this.currentTrack]];
+        } else {
+          tracks = [];
+        }
+      } else {
+        tracks = this.tracks;
+      }
       return tracks
         .filter(
           ({ data: { start_s, end_s } }) =>

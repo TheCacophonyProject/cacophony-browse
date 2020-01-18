@@ -259,7 +259,13 @@ export default {
       }
     },
     $route() {
-      this.parseCurrentRoute(false);
+      // FIXME(jon): Back buttons with pagination is currently broken.
+
+      const queryHasChanged =
+        JSON.stringify(this.lastQuery) !== JSON.stringify(this.query);
+      if (queryHasChanged) {
+        this.parseCurrentRoute(false);
+      }
       this.$emit("submit", this.serialiseQuery(this.query, true));
     }
   },
