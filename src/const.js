@@ -75,6 +75,18 @@ var allLabels = {
     value: "sealion",
     text: "sealion"
   },
+  deer: {
+    value: "deer",
+    text: "deer"
+  },
+  sheep: {
+    value: "sheep",
+    text: "sheep"
+  },
+  goat: {
+    value: "goat",
+    text: "goat"
+  },
   unknown: {
     value: "unknown",
     text: "unknown"
@@ -162,6 +174,9 @@ const DefaultLabels = {
     allLabels.insect,
     allLabels.penguin,
     allLabels.sealion,
+    allLabels.deer,
+    allLabels.sheep,
+    allLabels.goat,
     allLabels.unknown,
     allLabels.pest,
     allLabels.part
