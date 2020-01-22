@@ -21,14 +21,15 @@
             <span>Add user</span>
           </b-button>
         </div>
-        <div v-if="!group.GroupUsers.length">
+
+        <div v-if="!group.hasOwnProperty('Users') || !group.Users.length">
           <b-card class="no-content-placeholder">
             <p>This group has no users associated with it.</p>
           </b-card>
         </div>
         <div v-else>
           <b-table
-            :items="group.GroupUsers"
+            :items="group.Users"
             :fields="groupUsersTableFields"
             :sort-by="userSortBy"
             striped
@@ -37,7 +38,7 @@
             responsive
           >
             <template slot="admin" slot-scope="data">
-              {{ data.item.isAdmin ? "Yes" : "No" }}
+              {{ data.item.GroupUsers.admin ? "Yes" : "No" }}
             </template>
 
             <template slot="controls" slot-scope="data">
@@ -152,12 +153,12 @@ export default {
   computed: mapState({
     uiUser: state => state.User.userData.username,
     isGroupAdmin: function() {
-      if (this.user && this.group.GroupUsers) {
+      if (this.user && this.group.Users) {
         const username = this.user.username;
         return (
           this.user.globalPermission === "write" ||
-          this.group.GroupUsers.some(
-            user => user.isAdmin && user.username === username
+          this.group.Users.some(
+            user => user.GroupUsers.admin && user.username === username
           )
         );
       }
@@ -173,7 +174,7 @@ export default {
     },
 
     async removeUserCheckIfSelf(userName, uiUser) {
-      if (userName == uiUser) {
+      if (userName === uiUser) {
         this.showUserRemoveSelfModal = true;
       } else {
         this.removeUser(userName);
