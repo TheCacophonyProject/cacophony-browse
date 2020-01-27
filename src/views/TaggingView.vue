@@ -32,6 +32,23 @@
             @request-next-recording="nextRecording"
             @ready-to-play="playerIsReady"
           />
+          <div class="actions">
+            <b-button
+              :disabled="!readyToTag || history.length === 0"
+              @click="undo"
+            >
+              Undo last action
+            </b-button>
+            <b-button @click="showMotionPaths = !showMotionPaths">
+              {{ showMotionPaths ? "Hide" : "Show" }} motion paths
+            </b-button>
+            <b-button
+              variant="danger"
+              @click="deleteVideo"
+              v-if="currentUser.globalPermission === 'write'"
+              >Delete recording</b-button
+            >
+          </div>
         </div>
       </div>
       <div class="controls">
@@ -75,14 +92,7 @@
         </div>
       </div>
     </div>
-    <div class="actions">
-      <b-button :disabled="!readyToTag || history.length === 0" @click="undo">
-        Undo last action
-      </b-button>
-      <b-button @click="showMotionPaths = !showMotionPaths">
-        {{ showMotionPaths ? "Hide" : "Show" }} motion paths
-      </b-button>
-    </div>
+
     <div>
       <h4 v-if="readyToTag || !loading">
         Tagging: Track {{ currentTrackIndex + 1 }},
@@ -168,6 +178,11 @@ export default Vue.extend({
       this.currentRecording = recording;
       this.tracks = tracks;
       this.currentTrackIndex = trackIndex;
+    },
+    async deleteVideo() {
+      this.readyToPlay = false;
+      await api.recording.del(this.currentRecording.RecordingId);
+      await this.nextRecording();
     },
     playerIsReady() {
       this.readyToPlay = true;
@@ -452,7 +467,7 @@ export default Vue.extend({
   background: orange;
 }
 .actions {
-  padding: 10px 0;
+  padding: 10px 10px 10px 0;
   display: flex;
   justify-content: space-between;
 }

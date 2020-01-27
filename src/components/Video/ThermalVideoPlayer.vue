@@ -29,6 +29,7 @@
       @ended="showEndedOverlay"
       @canplay="canPlay"
       @ready="playerReady"
+      @error="videoError"
     />
     <transition name="fade">
       <div class="load-overlay" v-if="loading">
@@ -117,12 +118,7 @@ export default {
         width: "800px",
         playbackRates: [0.5, 1, 2, 4, 8],
         inactivityTimeout: 0,
-        sources: [
-          {
-            type: "video/mp4",
-            src: "blah blah"
-          }
-        ]
+        sources: []
       },
       vjsButtonWidth: 50, //button width + duration margin
       canvasWidth: 800,
@@ -161,7 +157,6 @@ export default {
   },
   mounted() {
     this.initOverlayCanvas();
-    this.setVideoUrl();
     window.addEventListener("resize", this.onResize);
   },
   beforeDestroy() {
@@ -219,10 +214,17 @@ export default {
       // first must make sure the width to be loaded is also correct.
       this.playerOptions.width = this.canvasWidth + "px";
       this.playerOptions.height = this.canvasHeight + "px";
-      this.$data.playerOptions.sources[0].src = this.videoUrl;
-      // if tracks is loaded then select the first track
-      if (this.currentTrack !== 0) {
-        this.$emit("trackSelected", 0);
+      if (this.videoUrl) {
+        this.$data.playerOptions.sources = [
+          {
+            type: "video/mp4",
+            src: this.videoUrl
+          }
+        ];
+        // if tracks is loaded then select the first track
+        if (this.currentTrack !== 0) {
+          this.$emit("trackSelected", 0);
+        }
       }
     },
     replay() {
@@ -243,6 +245,9 @@ export default {
       this.bindRateChange();
       this.selectTrack();
       this.playerIsReady = true;
+    },
+    videoError() {
+      this.requestNextVideo();
     },
     selectTrack() {
       this.lastDisplayedVideoTime = -1;
