@@ -292,7 +292,7 @@ interface RecordingToTag {
 
 function needsTag(biasToDeviceId?: DeviceId): Promise<RecordingToTag> {
   let requestUri = `${apiPath}/needs-tag`;
-  if (biasToDeviceId !== undefined) {
+  if (biasToDeviceId != null) {
     requestUri += `?deviceId=${biasToDeviceId}`;
   }
   return CacophonyApi.get(requestUri);
