@@ -86,8 +86,13 @@ export default {
         }
         return "";
       },
-      fileSource: state =>
-        `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`,
+      fileSource: state => {
+        return (
+          (state.Video.downloadFileJWT &&
+            `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`) ||
+          ""
+        );
+      },
       rawSource: state =>
         `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`
     })
