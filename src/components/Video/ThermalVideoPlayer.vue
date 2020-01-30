@@ -276,6 +276,7 @@ export default {
       this.canvasHeight = this.scale * 120 + 30;
       this.videoJsPlayer.width(this.canvasWidth);
       this.videoJsPlayer.height(this.canvasHeight);
+      this.$refs.container.style.minHeight = `${this.canvasHeight}px`;
 
       // Make canvas be sharp on retina displays:
       const canvas = this.$refs.canvas;
