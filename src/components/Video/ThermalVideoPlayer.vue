@@ -148,16 +148,13 @@ export default {
     htmlPlayer(): HTMLVideoElement {
       return this.$refs.player.$refs.video;
     },
-    videoJsPlayer(): Player {
-      return this.$refs.player.player;
-    },
     hasTracks(): boolean {
       return this.tracks && this.tracks.length !== 0;
     }
   },
   mounted() {
-    this.initOverlayCanvas();
     this.setVideoUrl();
+    this.initOverlayCanvas();
     window.addEventListener("resize", this.onResize);
   },
   beforeDestroy() {
@@ -191,13 +188,13 @@ export default {
     startScrub() {
       this.wasPaused = this.htmlPlayer.paused;
       if (!this.wasPaused) {
-        this.videoJsPlayer.pause();
+        this.videoJsPlayer().pause();
       }
       this.isScrubbing = true;
     },
     endScrub() {
       if (!this.wasPaused) {
-        this.videoJsPlayer.play();
+        this.videoJsPlayer().play();
       }
       this.isScrubbing = false;
     },
@@ -229,10 +226,10 @@ export default {
       }
     },
     replay() {
-      this.videoJsPlayer.pause();
-      this.videoJsPlayer.currentTime(0);
-      this.videoJsPlayer.trigger("loadstart");
-      this.videoJsPlayer.play();
+      this.videoJsPlayer().pause();
+      this.videoJsPlayer().currentTime(0);
+      this.videoJsPlayer().trigger("loadstart");
+      this.videoJsPlayer().play();
       if (this.currentTrack !== 0) {
         this.$emit("trackSelected", 0);
       }
@@ -245,6 +242,10 @@ export default {
     playerReady() {
       this.bindRateChange();
       this.selectTrack();
+
+      // first must make sure the width to be loaded is also correct.
+      this.playerOptions.width = this.canvasWidth + "px";
+      this.playerOptions.height = this.canvasHeight + "px";
       this.playerIsReady = true;
     },
     videoError() {
@@ -270,8 +271,9 @@ export default {
       this.canvasWidth = this.$refs.container.clientWidth;
       this.scale = this.canvasWidth / 160;
       this.canvasHeight = this.scale * 120 + 30;
-      this.videoJsPlayer.width(this.canvasWidth);
-      this.videoJsPlayer.height(this.canvasHeight);
+      this.videoJsPlayer().width(this.canvasWidth);
+      this.videoJsPlayer().height(this.canvasHeight);
+      this.$refs.container.style.minHeight = `${this.canvasHeight}px`;
 
       // Make canvas be sharp on retina displays:
       const canvas = this.$refs.canvas;
@@ -331,7 +333,7 @@ export default {
       }
     },
     setTimeAndRedraw(time) {
-      this.videoJsPlayer.currentTime(time);
+      this.videoJsPlayer() && this.videoJsPlayer().currentTime(time);
     },
     ratechange() {
       const htmlPlayer = this.$refs.player.$refs.video;
@@ -346,6 +348,9 @@ export default {
       if (event.type === "seeking") {
         this.draw();
       }
+    },
+    videoJsPlayer(): Player {
+      return this.$refs.player && this.$refs.player.player;
     },
     drawRectWithText(context, { trackIndex, rectWidth, rectHeight, x, y }) {
       const hitIndex = this.tracks.findIndex(
@@ -415,12 +420,12 @@ export default {
         });
     },
     draw() {
-      if (this.videoJsPlayer && this.htmlPlayer) {
+      if (this.videoJsPlayer() && this.htmlPlayer) {
         // NOTE: Since our video is 9fps, we're don't need to update this at 60fps.
         const frameTime = 1 / 9;
         try {
           // NOTE: This is just to suppress a spurious type error inside videojs when it hasn't initialised properly yet.
-          this.currentVideoTime = this.videoJsPlayer.currentTime();
+          this.currentVideoTime = this.videoJsPlayer().currentTime();
         } catch (e) {
           this.currentVideoTime = 0;
         }
@@ -464,8 +469,8 @@ export default {
           }
           this.lastDisplayedVideoTime = currentFrame;
         }
-        requestAnimationFrame(this.draw.bind(this));
       }
+      requestAnimationFrame(this.draw.bind(this));
     }
   }
 };
