@@ -335,7 +335,7 @@ export default {
       }
     },
     setTimeAndRedraw(time) {
-      this.videoJsPlayer.currentTime(time);
+      this.videoJsPlayer && this.videoJsPlayer.currentTime(time);
     },
     ratechange() {
       const htmlPlayer = this.$refs.player.$refs.video;
