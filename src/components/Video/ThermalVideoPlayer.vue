@@ -157,6 +157,7 @@ export default {
   },
   mounted() {
     this.initOverlayCanvas();
+    this.setVideoUrl();
     window.addEventListener("resize", this.onResize);
   },
   beforeDestroy() {
