@@ -156,8 +156,8 @@ export default {
     }
   },
   mounted() {
-    this.initOverlayCanvas();
     this.setVideoUrl();
+    this.initOverlayCanvas();
     window.addEventListener("resize", this.onResize);
   },
   beforeDestroy() {
@@ -245,6 +245,10 @@ export default {
     playerReady() {
       this.bindRateChange();
       this.selectTrack();
+
+      // first must make sure the width to be loaded is also correct.
+      this.playerOptions.width = this.canvasWidth + "px";
+      this.playerOptions.height = this.canvasHeight + "px";
       this.playerIsReady = true;
     },
     videoError() {
