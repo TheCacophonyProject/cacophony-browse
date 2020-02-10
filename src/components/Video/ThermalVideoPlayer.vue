@@ -301,7 +301,8 @@ export default {
             if (
               rect.x <= x &&
               rect.x + rect.rectWidth > x &&
-              (rect.y <= y && rect.y + rect.rectHeight > y)
+              rect.y <= y &&
+              rect.y + rect.rectHeight > y
             ) {
               return rect;
             }

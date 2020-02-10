@@ -244,8 +244,8 @@ export default {
       return (
         !this.isCustomDateRange ||
         (this.isCustomDateRange &&
-          (this.query.where.recordingDateTime["$gt"] !== "" &&
-            this.query.where.recordingDateTime["$lt"] !== ""))
+          this.query.where.recordingDateTime["$gt"] !== "" &&
+          this.query.where.recordingDateTime["$lt"] !== "")
       );
     }
   },

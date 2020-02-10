@@ -36,6 +36,7 @@
             hover
             outlined
             responsive
+            data-cy="users-table"
           >
             <template slot="admin" slot-scope="data">
               {{ data.item.DeviceUsers.admin ? "Yes" : "No" }}
