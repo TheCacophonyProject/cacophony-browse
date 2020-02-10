@@ -16,6 +16,7 @@
             v-b-tooltip.hover
             title="Add user to group"
             class="add-button"
+            data-cy="add_button"
           >
             <font-awesome-icon icon="user-plus" size="xs" />
             <span>Add user</span>
@@ -29,16 +30,17 @@
         </div>
         <div v-else>
           <b-table
-            :items="group.Users"
+            :items="group.GroupUsers"
             :fields="groupUsersTableFields"
             :sort-by="userSortBy"
             striped
             hover
             outlined
             responsive
+            data-cy="users-table"
           >
             <template slot="admin" slot-scope="data">
-              {{ data.item.GroupUsers.admin ? "Yes" : "No" }}
+              {{ data.item.isAdmin ? "Yes" : "No" }}
             </template>
 
             <template slot="controls" slot-scope="data">
@@ -82,6 +84,7 @@
           hover
           outlined
           responsive
+          data-cy="devices-table"
         >
           <template slot="devicename" slot-scope="row">
             <b-link

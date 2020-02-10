@@ -7,7 +7,7 @@
     ok-title="Add"
     :ok-disabled="isDisabled"
   >
-    <b-form @submit="addUser">
+    <b-form @submit="addUser" data-cy="add-user-form">
       <b-form-group label-for="input-username" label="Username">
         <b-form-input
           ref="input-username"
@@ -19,6 +19,7 @@
           type="text"
           autofocus
           class="input"
+          data-cy="user-name-input"
         ></b-form-input>
 
         <b-form-invalid-feedback id="username-live-feedback">

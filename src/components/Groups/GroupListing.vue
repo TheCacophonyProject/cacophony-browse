@@ -30,7 +30,7 @@
         </b-card>
       </b-col>
       <b-col v-else class="col-12 col-lg-8">
-        <div class="list-wrapper">
+        <div class="list-wrapper" data-cy="groups-list">
           <router-link
             v-for="(group, index) in orderedGroups"
             :key="index"
