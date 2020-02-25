@@ -79,6 +79,7 @@ import SelectDuration from "./SelectDuration.vue";
 import SelectDate from "./SelectDate.vue";
 import SelectRecordingType from "./SelectRecordingType.vue";
 import SelectDateRange from "./SelectDateRange.vue";
+import Vue from "vue";
 
 export default {
   name: "QueryRecordings",
@@ -361,6 +362,10 @@ export default {
       if (!this.onlyRecordingType) {
         this.$store.commit("User/updateRecordingTypePref", this.recordingType);
       }
+
+      // Every time we submit a new query, we need to clear the offset param, as if we are on page 2+ of the results,
+      // we can end up with an offset that is greater than the number of results in the new query.
+      Vue.delete(this.query, "offset");
       this.updateRouteQuery();
       this.toggleSearchPanel();
     },
