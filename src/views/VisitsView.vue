@@ -1,174 +1,187 @@
 <template>
-  <b-container fluid style="display:flex">
-    <QueryRecordings
-      ref="queryRec"
-      :disabled="queryPending"
-      :onlyRecordingType="'video'"
-      :path="'visits'"
-      :is-collapsed="searchPanelIsCollapsed"
-      @submit="submitNewQuery"
-      @toggled-search-panel="searchPanelIsCollapsed = !searchPanelIsCollapsed"
-    />
-    <div :class="['search-content-wrapper']">
-      <b-alert
-        v-model="showInfo"
-        variant="info"
-        dismissible
-        @dismissed="infoDismissed"
+  <b-container fluid>
+    <b-row>
+      <div
+        :class="[
+          'search-filter-wrapper',
+          { 'is-collapsed': searchPanelIsCollapsed }
+        ]"
       >
-        {{ infoMessage }}
-      </b-alert>
+        <QueryRecordings
+          ref="queryRec"
+          :disabled="queryPending"
+          :onlyRecordingType="'video'"
+          :path="'visits'"
+          :is-collapsed="searchPanelIsCollapsed"
+          @submit="submitNewQuery"
+          @toggled-search-panel="
+            searchPanelIsCollapsed = !searchPanelIsCollapsed
+          "
+        />
+      </div>
+      <div :class="['search-content-wrapper']">
+        <b-alert
+          v-model="showInfo"
+          variant="info"
+          dismissible
+          @dismissed="infoDismissed"
+        >
+          {{ infoMessage }}
+        </b-alert>
 
-      <div class="search-results">
-        <div class="results-summary">
-          <div style="display:flex;">
-            <h1 style="flex-grow: 100;">Visits</h1>
-            <div style="align-self: flex-end;">
-              <b-button variant="link" @click="showInfo = true">
-                <font-awesome-icon icon="question-circle" size="s" />
-                Help</b-button
-              >
-            </div>
-          </div>
-          <h2 v-if="countMessage">
-            {{ countMessage }}
-          </h2>
-          <h5 v-else>
-            Loading...
-          </h5>
-          <p class="search-description" v-html="searchDescription"></p>
-          <div v-if="!queryPending" class="results">
-            <div v-if="visits.length > 0">
-              <div
-                v-for="(itemsByDay, index_a) in visitsByDayAndHour"
-                :key="index_a"
-              >
-                <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
-                <div
-                  v-for="(itemsByHour, index_b) in itemsByDay"
-                  :key="index_b"
+        <div class="search-results">
+          <div class="results-summary">
+            <div style="display:flex;">
+              <h1 style="flex-grow: 100;">Visits</h1>
+              <div style="align-self: flex-end;">
+                <b-button variant="link" @click="showInfo = true">
+                  <font-awesome-icon icon="question-circle" size="s" />
+                  Help</b-button
                 >
-                  <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
-
-                  <b-table
-                    class="visits-table"
-                    :items="itemsByHour"
-                    :fields="visitFields"
-                    @row-clicked="expandAdditionalInfo"
-                    striped
-                    responsive
-                  >
-                    <template slot="what" slot-scope="row">
-                      <div class="what-image">
-                        <img
-                          v-if="whatImage(row.item)"
-                          :src="whatImage(row.item)"
-                          class="tag-img"
-                        />
-                        {{ row.item.what }}
-                      </div>
-                    </template>
-                    <template slot="device" slot-scope="row">
-                      <div class="device-cell">
-                        {{ row.item.device }}
-                      </div>
-                    </template>
-                    <template slot="date" slot-scope="row">
-                      {{ row.item.events[0].start.format(tableDateFormat) }}
-                    </template>
-
-                    <template slot="start" slot-scope="row">
-                      {{ row.item.events[0].start.format(tableTimeFormat) }}
-                    </template>
-                    <template slot="end" slot-scope="row">
-                      {{
-                        row.item.events[row.item.events.length - 1].end.format(
-                          tableTimeFormat
-                        )
-                      }}
-                    </template>
-                    <template slot="events" slot-scope="row">
-                      {{ row.item.events.length }}
-                    </template>
-                    <template slot="row-details" slot-scope="row">
-                      <div
-                        v-for="(visitEvents, index_e) in eventsByRec(
-                          row.item.events
-                        )"
-                        :key="index_e"
-                        class="rec-events"
-                      >
-                        <div class="event-recording">
-                          <font-awesome-icon
-                            :icon="['far', 'file-video']"
-                            size="1x"
-                          />
-                          {{
-                            visitEvents[0].recStart.format(tableDateTimeFormat)
-                          }}
-                        </div>
-                        <EventSummary
-                          v-for="(item, index) in visitEvents"
-                          :item="item"
-                          :trackNumber="index + 1"
-                          :key="index"
-                          :what="row.item.what"
-                        />
-                      </div>
-                    </template>
-                  </b-table>
-                </div>
               </div>
-
-              <h1>Visit Summary Per Device</h1>
-              <div v-for="devMap in data" :key="devMap.id">
-                <div v-if="Object.entries(devMap.animals).length > 0">
-                  <b-row>
-                    <b-col>
-                      {{ devMap.deviceName }}
-                    </b-col>
-                  </b-row>
-
-                  <b-table
-                    :items="Object.entries(devMap.animals)"
-                    :fields="fields"
-                    striped
-                    responsive
+            </div>
+            <h2 v-if="countMessage">
+              {{ countMessage }}
+            </h2>
+            <h5 v-else>
+              Loading...
+            </h5>
+            <p class="search-description" v-html="searchDescription"></p>
+            <div v-if="!queryPending" class="results">
+              <div v-if="visits.length > 0">
+                <div
+                  v-for="(itemsByDay, index_a) in visitsByDayAndHour"
+                  :key="index_a"
+                >
+                  <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+                  <div
+                    v-for="(itemsByHour, index_b) in itemsByDay"
+                    :key="index_b"
                   >
-                    <template slot="what" slot-scope="row">
-                      {{ row.item[0] }}
-                    </template>
-                    <template slot="start" slot-scope="row">
-                      {{ row.item[1].start.format(tableDateTimeFormat) }}
-                    </template>
-                    <template slot="end" slot-scope="row">
-                      {{ row.item[1].end.format(tableDateTimeFormat) }}
-                    </template>
-                    <template slot="visits" slot-scope="row">
-                      {{ row.item[1].visits.length }}
-                    </template>
-                  </b-table>
+                    <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+
+                    <b-table
+                      class="visits-table"
+                      :items="itemsByHour"
+                      :fields="visitFields"
+                      @row-clicked="expandAdditionalInfo"
+                      striped
+                      responsive
+                    >
+                      <template slot="what" slot-scope="row">
+                        <div class="what-image">
+                          <img
+                            v-if="whatImage(row.item)"
+                            :src="whatImage(row.item)"
+                            class="tag-img"
+                          />
+                          {{ row.item.what }}
+                        </div>
+                      </template>
+                      <template slot="device" slot-scope="row">
+                        <div class="device-cell">
+                          {{ row.item.device }}
+                        </div>
+                      </template>
+                      <template slot="date" slot-scope="row">
+                        {{ row.item.events[0].start.format(tableDateFormat) }}
+                      </template>
+
+                      <template slot="start" slot-scope="row">
+                        {{ row.item.events[0].start.format(tableTimeFormat) }}
+                      </template>
+                      <template slot="end" slot-scope="row">
+                        {{
+                          row.item.events[
+                            row.item.events.length - 1
+                          ].end.format(tableTimeFormat)
+                        }}
+                      </template>
+                      <template slot="events" slot-scope="row">
+                        {{ row.item.events.length }}
+                      </template>
+                      <template slot="row-details" slot-scope="row">
+                        <div
+                          v-for="(visitEvents, index_e) in eventsByRec(
+                            row.item.events
+                          )"
+                          :key="index_e"
+                          class="rec-events"
+                        >
+                          <div class="event-recording">
+                            <font-awesome-icon
+                              :icon="['far', 'file-video']"
+                              size="1x"
+                            />
+                            {{
+                              visitEvents[0].recStart.format(
+                                tableDateTimeFormat
+                              )
+                            }}
+                          </div>
+                          <EventSummary
+                            v-for="(item, index) in visitEvents"
+                            :item="item"
+                            :trackNumber="index + 1"
+                            :key="index"
+                            :what="row.item.what"
+                          />
+                        </div>
+                      </template>
+                    </b-table>
+                  </div>
+                </div>
+
+                <h1>Visit Summary Per Device</h1>
+                <div v-for="devMap in data" :key="devMap.id">
+                  <div v-if="Object.entries(devMap.animals).length > 0">
+                    <b-row>
+                      <b-col>
+                        {{ devMap.deviceName }}
+                      </b-col>
+                    </b-row>
+
+                    <b-table
+                      :items="Object.entries(devMap.animals)"
+                      :fields="fields"
+                      striped
+                      responsive
+                    >
+                      <template slot="what" slot-scope="row">
+                        {{ row.item[0] }}
+                      </template>
+                      <template slot="start" slot-scope="row">
+                        {{ row.item[1].start.format(tableDateTimeFormat) }}
+                      </template>
+                      <template slot="end" slot-scope="row">
+                        {{ row.item[1].end.format(tableDateTimeFormat) }}
+                      </template>
+                      <template slot="visits" slot-scope="row">
+                        {{ row.item[1].visits.length }}
+                      </template>
+                    </b-table>
+                  </div>
                 </div>
               </div>
             </div>
+            <div v-else class="results loading">
+              <div
+                v-for="i in 10"
+                :style="{
+                  background: `rgba(240, 240, 240, ${1 / i}`
+                }"
+                :key="i"
+                class="recording-placeholder"
+              />
+            </div>
           </div>
-          <div v-else class="results loading">
-            <div
-              v-for="i in 10"
-              :style="{
-                background: `rgba(240, 240, 240, ${1 / i}`
-              }"
-              :key="i"
-              class="recording-placeholder"
-            />
+          <div v-if="countMessage === 'No matches'" class="no-results">
+            <h6 class="text-muted">No recordings found</h6>
+            <p class="small text-muted">Try modifying your search criteria.</p>
           </div>
-        </div>
-        <div v-if="countMessage === 'No matches'" class="no-results">
-          <h6 class="text-muted">No recordings found</h6>
-          <p class="small text-muted">Try modifying your search criteria.</p>
         </div>
       </div>
-    </div>
+    </b-row>
   </b-container>
 </template>
 <script lang="ts">
@@ -466,13 +479,19 @@ $main-content-width: 640px;
   text-align: center;
 }
 
+.search-filter-wrapper {
+  background: $gray-100;
+  position: relative;
+  border-right: 1px solid $gray-200;
+}
+
 @include media-breakpoint-down(md) {
   .search-filter-wrapper {
     position: fixed;
     top: 0;
     left: 0;
     transform: translate(0);
-    max-width: var(--search-panel-width);
+    width: var(--search-panel-width);
     z-index: 2;
     transition: transform 0.2s;
     &.is-collapsed {

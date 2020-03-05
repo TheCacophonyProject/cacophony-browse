@@ -584,7 +584,7 @@ $main-content-width: 640px;
     top: 0;
     left: 0;
     transform: translate(0);
-    max-width: var(--search-panel-width);
+    width: var(--search-panel-width);
     z-index: 2;
     transition: transform 0.2s;
     &.is-collapsed {
