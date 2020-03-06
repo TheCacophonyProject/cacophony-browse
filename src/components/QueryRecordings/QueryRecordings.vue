@@ -1,11 +1,5 @@
 <template>
-  <div
-    :class="[
-      'query-recordings',
-      'search-filter-wrapper',
-      { 'is-collapsed': isCollapsed }
-    ]"
-  >
+  <div :class="['query-recordings', { 'is-collapsed': isCollapsed }]">
     <b-button
       :class="['search-panel-toggle-btn', { 'is-collapsed': isCollapsed }]"
       variant="primary"
@@ -645,7 +639,7 @@ $main-content-width: 640px;
     top: 0;
     left: 0;
     transform: translate(0);
-    max-width: var(--search-panel-width);
+    width: var(--search-panel-width);
     z-index: 2;
     transition: transform 0.2s;
     &.is-collapsed {
