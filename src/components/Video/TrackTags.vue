@@ -39,7 +39,7 @@
             {{ row.item.User.username }}
           </span>
           <span v-else>
-            Cacophony AI
+            {{ aiName(row.item) }}
           </span>
         </template>
         <template slot="confidence" slot-scope="row">
@@ -110,6 +110,13 @@ export default {
   },
   computed: {},
   methods: {
+    aiName: function(trackTag) {
+      if (trackTag.data && trackTag.data.name) {
+        return "AI " + trackTag.data.name;
+      } else {
+        return "Cacophony AI";
+      }
+    },
     what: function(what) {
       // Struggling to get images to show correctly so using work-around
       // suggested at bottom of this page.
