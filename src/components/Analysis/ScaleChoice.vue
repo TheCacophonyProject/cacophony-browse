@@ -20,7 +20,10 @@ export default {
   },
   data: function() {
     return {
-      types: [{ text: "Log", value: false }, { text: "Log", value: true }]
+      types: [
+        { text: "Log", value: false },
+        { text: "Log", value: true }
+      ]
     };
   },
   methods: {}

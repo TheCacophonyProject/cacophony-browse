@@ -40,7 +40,10 @@ module.exports = merge(common, {
       excludeChunks: ["prod"],
       inject: "body"
     }),
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin({
+      openAnalyzer: !process.env["IS_CI_ENV"],
+      analyzerMode: process.env["IS_CI_ENV"] ? "disabled" : "server"
+    })
   ],
   optimization: {
     splitChunks: {
