@@ -9,7 +9,7 @@ const distDir = path.resolve(__dirname, "../dist");
 
 module.exports = merge(common, {
   mode: "development",
-  entry: "./src/load.js",
+  entry: { load: "./src/load.js" },
   output: {
     path: distDir,
     publicPath: "/",
@@ -27,9 +27,8 @@ module.exports = merge(common, {
   ],
   devServer: {
     contentBase: distDir,
-    historyApiFallback: true,
-    noInfo: true,
-    overlay: true
+    hot: true,
+    stats: "minimal"
   },
   devtool: "#eval-source-map"
 });
