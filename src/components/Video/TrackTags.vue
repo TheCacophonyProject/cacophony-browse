@@ -27,7 +27,7 @@
           <div class="what-image">
             <img
               v-if="what(row.item.what).link"
-              :src="what(row.item.what).link"
+              :src="what(row.item.what).what"
               class="tag-img"
             />
             {{ row.item.what }}

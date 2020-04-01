@@ -50,25 +50,34 @@
             <div v-if="!queryPending" class="results">
               <div v-if="visits.length > 0">
                 <div
-                  v-for="(itemsByDay, index_a) in visitsByDayAndHour"
+                  v-for="(dayVisits, index_a) in visitsByDayAndHour"
                   :key="index_a"
                 >
-                  <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
+                  <h4 class="recordings-day">
+                    <div class="event-recording">
+                      <span v-if="dayVisits.audioBaitDay">
+                        <font-awesome-icon icon="volume-up" size="xs" />
+                      </span>
+                      {{ dayVisits.relativeDay() }}
+                    </div>
+                  </h4>
                   <div
-                    v-for="(itemsByHour, index_b) in itemsByDay"
+                    v-for="(hourVisits, index_b) in dayVisits.visitsByHour"
                     :key="index_b"
                   >
-                    <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
+                    <h5 class="recordings-hour">{{ hourVisits.getHour() }}</h5>
 
                     <b-table
                       class="visits-table"
-                      :items="itemsByHour"
+                      :items="hourVisits.visits"
                       :fields="visitFields"
                       @row-clicked="expandAdditionalInfo"
                       striped
-                      responsive
                     >
-                      <template slot="what" slot-scope="row">
+                      <template v-slot:cell(what)="row">
+                        <span class="audio-bait" v-if="row.item.audioBaitVisit">
+                          <font-awesome-icon icon="volume-up" size="xs" />
+                        </span>
                         <div class="what-image">
                           <img
                             v-if="whatImage(row.item)"
@@ -78,32 +87,40 @@
                           {{ row.item.what }}
                         </div>
                       </template>
-                      <template slot="device" slot-scope="row">
+                      <template v-slot:cell(device)="row">
                         <div class="device-cell">
                           {{ row.item.device }}
                         </div>
                       </template>
-                      <template slot="date" slot-scope="row">
-                        {{ row.item.events[0].start.format(tableDateFormat) }}
-                      </template>
-
-                      <template slot="start" slot-scope="row">
-                        {{ row.item.events[0].start.format(tableTimeFormat) }}
-                      </template>
-                      <template slot="end" slot-scope="row">
+                      <template v-slot:cell(date)="data">
                         {{
-                          row.item.events[
-                            row.item.events.length - 1
-                          ].end.format(tableTimeFormat)
+                          formatDate(
+                            data.item.events[data.item.events.length - 1].start,
+                            tableDateFormat
+                          )
                         }}
                       </template>
-                      <template slot="events" slot-scope="row">
+
+                      <template v-slot:cell(start)="row">
+                        {{
+                          formatDate(
+                            row.item.events[row.item.events.length - 1].start,
+                            tableTimeFormat
+                          )
+                        }}
+                      </template>
+                      <template v-slot:cell(end)="row">
+                        {{
+                          formatDate(row.item.events[0].end, tableTimeFormat)
+                        }}
+                      </template>
+                      <template v-slot:cell(events)="row">
                         {{ row.item.events.length }}
                       </template>
                       <template slot="row-details" slot-scope="row">
                         <div
-                          v-for="(visitEvents, index_e) in eventsByRec(
-                            row.item.events
+                          v-for="(visitEvents, index_e) in sortEventsByRec(
+                            row.item
                           )"
                           :key="index_e"
                           class="rec-events"
@@ -111,21 +128,35 @@
                           <div class="event-recording">
                             <font-awesome-icon
                               :icon="['far', 'file-video']"
-                              size="1x"
+                              size="xs"
                             />
                             {{
-                              visitEvents[0].recStart.format(
+                              formatDate(
+                                visitEvents.recStart,
                                 tableDateTimeFormat
                               )
                             }}
                           </div>
-                          <EventSummary
-                            v-for="(item, index) in visitEvents"
-                            :item="item"
-                            :trackNumber="index + 1"
-                            :key="index"
-                            :what="row.item.what"
-                          />
+                          <b-container>
+                            <div
+                              v-for="(item, index) in visitEvents.events"
+                              :key="index"
+                            >
+                              <AudioSummary
+                                v-if="isAudioBait(item)"
+                                :item="item"
+                              />
+                              <EventSummary
+                                v-else
+                                :item="item"
+                                :trackNumber="
+                                  visitEvents.tracks - item.trackNumber
+                                "
+                                :key="index"
+                                :what="row.item.what"
+                              />
+                            </div>
+                          </b-container>
                         </div>
                       </template>
                     </b-table>
@@ -147,16 +178,16 @@
                       striped
                       responsive
                     >
-                      <template slot="what" slot-scope="row">
+                      <template v-slot:cell(what)="row">
                         {{ row.item[0] }}
                       </template>
-                      <template slot="start" slot-scope="row">
-                        {{ row.item[1].start.format(tableDateTimeFormat) }}
+                      <template v-slot:cell(start)="row">
+                        {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
                       </template>
-                      <template slot="end" slot-scope="row">
-                        {{ row.item[1].end.format(tableDateTimeFormat) }}
+                      <template v-slot:cell(end)="row">
+                        {{ formatDate(row.item[1].end, tableDateTimeFormat) }}
                       </template>
-                      <template slot="visits" slot-scope="row">
+                      <template v-slot:cell(visits)="row">
                         {{ row.item[1].visits.length }}
                       </template>
                     </b-table>
@@ -186,21 +217,23 @@
 </template>
 <script lang="ts">
 /* global require */
-import { RecordingInfo } from "../api/Recording.api";
-import { DeviceVisits, VisitEvent, DeviceVisitMap, Visit } from "../visits";
+import * as moment from "moment";
+import { Visit, DayVisits } from "../api/visits";
 import DefaultLabels from "../const.js";
 import EventSummary from "../components/EventSummary.vue";
+import AudioSummary from "../components/AudioBaitSummary.vue";
+
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import api from "../api/index";
 export default {
   name: "VisitsView",
-  components: { QueryRecordings, EventSummary },
+  components: { QueryRecordings, EventSummary, AudioSummary },
   data() {
     return {
       showInfo: this.isInfoShown(),
       infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
       tableDateTimeFormat: "L LTS",
-      tableDateFormat: "L",
+      tableDateFormat: "DD MMM",
       tableTimeFormat: "LTS",
       searchDescription: null,
       eventMaxTimeSeconds: 60 * 10,
@@ -219,8 +252,7 @@ export default {
       visitFields: [
         {
           key: "what",
-          label: "",
-          thStyle: { display: "none" }
+          label: ""
         },
         { key: "device", label: "Device" },
         { key: "date", label: "Date" },
@@ -240,59 +272,84 @@ export default {
   computed: {
     visitsByDayAndHour() {
       const visitsByDay = [];
-      let visitsByHour = [];
-      let hourVisits = [];
-      let current = null;
-      for (const item of this.visits) {
-        const thisItem = {
-          date: item.end,
-          dayDate: item.end.format("YYYY-MM-DD"),
-          hour: item.end.format("HH")
-        };
+      let currentDay = null;
 
-        if (!current || thisItem.dayDate != current.dayDate) {
-          visitsByHour = [];
-          visitsByDay.push(visitsByHour);
-          hourVisits = [];
-          visitsByHour.push(hourVisits);
-          current = thisItem;
-        } else if (thisItem.hour != current.hour) {
-          hourVisits = [];
-          visitsByHour.push(hourVisits);
-          current = thisItem;
+      for (const item of this.visits) {
+        if (!currentDay || !currentDay.isSameDay(item)) {
+          currentDay = new DayVisits(item);
+          visitsByDay.push(currentDay);
+        } else {
+          currentDay.addVisit(item);
         }
-        hourVisits.push(item);
       }
       return visitsByDay;
     }
   },
   methods: {
+    formatDate(date: string, formatStr: string): string {
+      return moment(date).format(formatStr);
+    },
     isInfoShown() {
       return localStorage.getItem("visitInfo") != "0";
     },
     infoDismissed() {
       localStorage.setItem("visitInfo", "0");
     },
-    eventsByRec(visitEvents: VisitEvent[]) {
+    isAudioBait(event: any) {
+      return event.hasOwnProperty("DeviceId");
+    },
+    // sorts in descending order visit events (audio bait and tracks) grouped by recordings
+    sortEventsByRec(visit: Visit) {
       const eventsByRec = [];
       let recEvent;
       let recID;
-      for (const item of visitEvents) {
+
+      var audioBaitEvents = visit.audioBaitEvents.slice();
+      audioBaitEvents.sort(function(a, b) {
+        return moment(a.dateTime) > moment(b.dateTime) ? 1 : -1;
+      });
+      let audioevent = audioBaitEvents.pop();
+      let audioTime;
+      if (audioevent) {
+        audioTime = moment(audioevent.dateTime);
+      }
+      let audioBaitBefore = false;
+      let trackNum = 0;
+
+      for (const item of visit.events) {
+        audioBaitBefore = audioTime && audioTime.isAfter(moment(item.start));
+        // new recording
         if (!recID || item.recID != recID) {
           recID = item.recID;
-          recEvent = [];
+          recEvent = { recStart: item.recStart, tracks: 0, events: [] };
           eventsByRec.push(recEvent);
+          trackNum = 0;
         }
-        recEvent.push(item);
+
+        // add all audio bait events before this recording
+        while (audioBaitBefore) {
+          recEvent.events.push(audioevent);
+          audioevent = audioBaitEvents.pop();
+          audioTime = null;
+          if (audioevent) {
+            audioTime = moment(audioevent.dateTime);
+          }
+          audioBaitBefore = audioTime && audioTime.isAfter(moment(item.start));
+        }
+        item.trackNumber = trackNum;
+        recEvent.events.push(item);
+        recEvent.tracks += 1;
+        trackNum += 1;
       }
+
+      // add remaining events
+      if (audioevent) {
+        audioBaitEvents.push(audioevent);
+      }
+      recEvent.events.splice(recEvent.events.length, 0, ...audioBaitEvents);
       return eventsByRec;
     },
-    relativeDay(days) {
-      return days[0][0].end.format("YYYY-MM-DD");
-    },
-    hour(hours) {
-      return hours[0].end.format("ha");
-    },
+
     whatImage: function(visit: Visit) {
       let image = null;
       if (visit.what == DefaultLabels.allLabels.kiwi.value) {
@@ -300,8 +357,10 @@ export default {
       } else {
         image = visit.what + ".png";
       }
+
       try {
-        return require("../assets/video/" + image);
+        const link = require("../assets/video/" + image);
+        return link.default;
       } catch (e) {
         return;
       }
@@ -314,9 +373,11 @@ export default {
     },
     getData: async function(whereQuery) {
       this.fetching = true;
+      this.visits = [];
+      this.data = [];
       // Extract query information
       this.queryPending = true;
-      const { result, success } = await api.recording.query(whereQuery);
+      const { result, success } = await api.recording.queryVisit(whereQuery);
       this.queryPending = false;
       this.searchDescription = this.$refs.queryRec.searchDescription();
       if (!success) {
@@ -326,59 +387,40 @@ export default {
           });
         return;
       }
-      this.recordings = result.rows;
+      const eventsByDevice = result.rows;
       this.count = result.count;
       if (result.count > 0) {
         this.countMessage = `${result.count} matches found (total)`;
       } else if (result.count === 0) {
         this.countMessage = "No matches";
       }
-
-      var eventsByDevice = this.calculatVisits(result.rows);
-      this.visits = this.visits.filter(function(visit) {
-        return (
-          visit.events.length > 0 &&
-          visit.what != DefaultLabels.allLabels.bird.value &&
-          visit.what != DefaultLabels.allLabels.falsePositive.value
-        );
-      });
+      this.visits = [];
+      for (const devId in eventsByDevice) {
+        const animalMap = eventsByDevice[devId].animals;
+        for (const animal in animalMap) {
+          this.visits.push(
+            ...animalMap[animal].visits.filter(this.filterVisit)
+          );
+        }
+      }
       this.visits = this.visits.sort(function(a, b) {
-        return a.start < b.start;
+        return a.start < b.start ? 1 : -1;
       });
-
       this.data = eventsByDevice;
     },
-    calculatVisits(recordings: RecordingInfo[]): DeviceVisitMap {
-      this.visits = [];
-      const userID = this.$store.state.User.userData.id;
-      const deviceMap: DeviceVisitMap = {};
-      for (const rec of recordings) {
-        let devVisits = deviceMap[rec.DeviceId];
-        if (!devVisits) {
-          devVisits = new DeviceVisits(
-            rec.Device.devicename,
-            rec.DeviceId,
-            userID
-          );
-          deviceMap[rec.DeviceId] = devVisits;
-        }
-        const newVisits = devVisits.calculateTrackVisits(rec);
-        this.visits.push(...newVisits);
-      }
-      return deviceMap;
+    filterVisit(visit: Visit): boolean {
+      return (
+        visit.events.length > 0 &&
+        visit.what != DefaultLabels.allLabels.bird.value &&
+        visit.what != DefaultLabels.allLabels.falsePositive.value
+      );
     }
   }
 };
 </script>
 <style lang="scss">
-.visits-table > table > thead {
-  display: none;
-}
-
-.visits-table > table > tbody > tr td:first-child {
-  padding: 0 0.75rem 0 0.75rem;
-  vertical-align: middle;
-  width: 138px;
+.visits-table > tbody > tr td:first-child {
+  position: relative;
 }
 
 .device-cell {
@@ -454,8 +496,8 @@ $main-content-width: 640px;
     padding: 0.5rem 0;
     font-size: 1em;
     font-weight: 600;
-    border-bottom: 1px solid $gray-200;
   }
+
   .recordings-day {
     position: sticky;
     top: 0;
@@ -463,7 +505,6 @@ $main-content-width: 640px;
     padding: 0.5rem 0;
     font-size: 1em;
     font-weight: 600;
-    border-bottom: 1px solid $gray-200;
   }
 
   .recordings-hour {
@@ -500,10 +541,21 @@ $main-content-width: 640px;
   }
 }
 
+.what-image {
+  display: inline-block;
+  margin-left: 0.4rem;
+}
+
 .tag-img {
   max-width: 30px;
   max-height: 30px;
   margin-right: 0.2rem;
+}
+
+.audio-bait {
+  position: absolute;
+  top: 0px;
+  left: 4px;
 }
 
 @include media-breakpoint-up(md) {
