@@ -48,6 +48,36 @@
             </h5>
             <p class="search-description" v-html="searchDescription"></p>
             <div v-if="!queryPending" class="results">
+              <h1>Visit Summary Per Device</h1>
+              <div v-for="devMap in deviceVisits" :key="devMap.id">
+                <div v-if="Object.entries(devMap.animals).length > 0">
+                  <b-row>
+                    <b-col>
+                      {{ devMap.deviceName }}
+                    </b-col>
+                  </b-row>
+
+                  <b-table
+                    :items="Object.entries(devMap.animals)"
+                    :fields="fields"
+                    striped
+                    responsive
+                  >
+                    <template v-slot:cell(what)="row">
+                      {{ row.item[0] }}
+                    </template>
+                    <template v-slot:cell(start)="row">
+                      {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
+                    </template>
+                    <template v-slot:cell(end)="row">
+                      {{ formatDate(row.item[1].end, tableDateTimeFormat) }}
+                    </template>
+                    <template v-slot:cell(visits)="row">
+                      {{ row.item[1].visits.length }}
+                    </template>
+                  </b-table>
+                </div>
+              </div>
               <div v-if="visits.length > 0">
                 <div
                   v-for="(dayVisits, index_a) in visitsByDayAndHour"
@@ -176,37 +206,6 @@
                     </div>
                   </div>
                 </div>
-
-                <h1>Visit Summary Per Device</h1>
-                <div v-for="devMap in deviceVisits" :key="devMap.id">
-                  <div v-if="Object.entries(devMap.animals).length > 0">
-                    <b-row>
-                      <b-col>
-                        {{ devMap.deviceName }}
-                      </b-col>
-                    </b-row>
-
-                    <b-table
-                      :items="Object.entries(devMap.animals)"
-                      :fields="fields"
-                      striped
-                      responsive
-                    >
-                      <template v-slot:cell(what)="row">
-                        {{ row.item[0] }}
-                      </template>
-                      <template v-slot:cell(start)="row">
-                        {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
-                      </template>
-                      <template v-slot:cell(end)="row">
-                        {{ formatDate(row.item[1].end, tableDateTimeFormat) }}
-                      </template>
-                      <template v-slot:cell(visits)="row">
-                        {{ row.item[1].visits.length }}
-                      </template>
-                    </b-table>
-                  </div>
-                </div>
               </div>
             </div>
             <div v-else class="results loading">
@@ -285,7 +284,7 @@ export default {
       offset: 0,
       loadText: "Load More Visits",
       canLoadMore: true,
-      visitLimit: 300
+      visitLimit: 1
     };
   },
   computed: {
@@ -448,19 +447,21 @@ export default {
           this.deviceVisits[devId] = eventsByDevice[devId];
           merged = true;
         }
+
+        const existingAnimalMap = this.deviceVisits[devId].animals;
         for (const animal in animalMap) {
           const filtered = animalMap[animal].visits.filter(this.filterVisit);
           this.visits.push(...filtered);
 
           // merge new visits with old device visits
           if (mergeResults && !merged) {
-            if (!(animal in this.deviceVisits[devId])) {
-              this.deviceVisits[devId][animal] = animalMap[animal];
+            if (!(animal in existingAnimalMap)) {
+              existingAnimalMap[animal] = animalMap[animal];
             } else {
-              this.deviceVisits[devId][animal].visits.push(
-                ...animalMap[animal]
+              existingAnimalMap[animal].visits.push(
+                ...animalMap[animal].visits
               );
-              this.deviceVisits[devId][animal].start = animalMap[animal].start;
+              existingAnimalMap[animal].start = animalMap[animal].start;
             }
           }
         }
@@ -474,7 +475,6 @@ export default {
     },
     filterVisit(visit: Visit): boolean {
       return (
-        !visit.incomplete &&
         visit.events.length > 0 &&
         visit.what != DefaultLabels.allLabels.bird.value &&
         visit.what != DefaultLabels.allLabels.falsePositive.value
