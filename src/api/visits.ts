@@ -24,6 +24,7 @@ export class Visit {
   audioBaitDay: boolean;
   audioBaitEvents: Event[];
   audioBaitVisit: boolean;
+  incomplete: boolean;
 }
 
 export class Event {

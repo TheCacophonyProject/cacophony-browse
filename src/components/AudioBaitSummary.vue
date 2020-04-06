@@ -1,14 +1,18 @@
 <template>
   <b-row class="audio-row" no-gutters>
-    <span>
-      <font-awesome-icon icon="volume-up" size="xs" />
-    </span>
-    <div class="audio-title">
-      {{ capitilizeFirst(item.fileName) }}
-    </div>
-    <div class="audio-time">
-      {{ formatDate(item.dateTime, "LTS") }}
-    </div>
+    <b-col cols="6">
+      <span class="audio-bait">
+        <font-awesome-icon icon="volume-up" size="xs" />
+      </span>
+      <span class="audio-title">
+        {{ capitilizeFirst(item.fileName) }}
+      </span>
+    </b-col>
+    <b-col cols="2">
+      <div class="audio-time">
+        {{ formatDate(item.dateTime, "LTS") }}
+      </div>
+    </b-col>
   </b-row>
 </template>
 
@@ -44,9 +48,6 @@ export default {
 .audio-title {
   font-weight: 600;
   margin-left: 10px;
-}
-.audio-time {
-  margin-left: 20px;
 }
 .event-summary {
   background-color: rgba(0, 0, 0, 0.03);

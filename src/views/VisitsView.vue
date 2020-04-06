@@ -35,7 +35,7 @@
               <h1 style="flex-grow: 100;">Visits</h1>
               <div style="align-self: flex-end;">
                 <b-button variant="link" @click="showInfo = true">
-                  <font-awesome-icon icon="question-circle" size="s" />
+                  <font-awesome-icon icon="question-circle" size="sm" />
                   Help</b-button
                 >
               </div>
@@ -66,7 +66,6 @@
                     :key="index_b"
                   >
                     <h5 class="recordings-hour">{{ hourVisits.getHour() }}</h5>
-
                     <b-table
                       class="visits-table"
                       :items="hourVisits.visits"
@@ -92,10 +91,12 @@
                           {{ row.item.device }}
                         </div>
                       </template>
-                      <template v-slot:cell(date)="data">
+                      <template v-slot:cell(date)="deviceVisits">
                         {{
                           formatDate(
-                            data.item.events[data.item.events.length - 1].start,
+                            deviceVisits.item.events[
+                              deviceVisits.item.events.length - 1
+                            ].start,
                             tableDateFormat
                           )
                         }}
@@ -160,11 +161,24 @@
                         </div>
                       </template>
                     </b-table>
+                    <div v-if="loadingMore">
+                      Loading...
+                    </div>
+                    <div v-else>
+                      <b-button v-if="canLoadMore" @click="loadMoreVisits()">
+                        <span v-if="loadingMore">
+                          Loading...
+                        </span>
+                        <span v-else>
+                          {{ loadText }}
+                        </span>
+                      </b-button>
+                    </div>
                   </div>
                 </div>
 
                 <h1>Visit Summary Per Device</h1>
-                <div v-for="devMap in data" :key="devMap.id">
+                <div v-for="devMap in deviceVisits" :key="devMap.id">
                   <div v-if="Object.entries(devMap.animals).length > 0">
                     <b-row>
                       <b-col>
@@ -206,7 +220,7 @@
               />
             </div>
           </div>
-          <div v-if="countMessage === 'No matches'" class="no-results">
+          <div v-if="countMessage === 'No visits'" class="no-results">
             <h6 class="text-muted">No recordings found</h6>
             <p class="small text-muted">Try modifying your search criteria.</p>
           </div>
@@ -241,8 +255,9 @@ export default {
       queryPending: false,
       count: null,
       countMessage: null,
-      data: {},
+      deviceVisits: {},
       visits: [],
+      loadingMore: false,
       fields: [
         { key: "what", label: "Animal" },
         { key: "start", label: "First Visit" },
@@ -266,7 +281,11 @@ export default {
         { key: "start", label: "Event Start" },
         { key: "confidence", label: "Confidence" },
         { key: "unidentified", label: "Assumed" }
-      ]
+      ],
+      offset: 0,
+      loadText: "Load More Visits",
+      canLoadMore: true,
+      visitLimit: 300
     };
   },
   computed: {
@@ -369,14 +388,22 @@ export default {
       this.$set(row, "_showDetails", !row._showDetails);
     },
     submitNewQuery(whereQuery) {
-      this.getData(whereQuery);
+      this.getVisits(whereQuery, true);
     },
-    getData: async function(whereQuery) {
-      this.fetching = true;
-      this.visits = [];
-      this.data = [];
+    loadMoreVisits() {
+      this.loadingMore = true;
+      const query = this.$refs.queryRec.getQuery(true);
+      query["offset"] = this.offset;
+      this.getVisits(query, false);
+      this.loadingMore = false;
+    },
+    getVisits: async function(whereQuery, newQuery: boolean) {
       // Extract query information
+      if (newQuery) {
+        this.offset = 0;
+      }
       this.queryPending = true;
+      whereQuery["limit"] = this.visitLimit;
       const { result, success } = await api.recording.queryVisit(whereQuery);
       this.queryPending = false;
       this.searchDescription = this.$refs.queryRec.searchDescription();
@@ -387,29 +414,67 @@ export default {
           });
         return;
       }
-      const eventsByDevice = result.rows;
-      this.count = result.count;
-      if (result.count > 0) {
-        this.countMessage = `${result.count} matches found (total)`;
-      } else if (result.count === 0) {
-        this.countMessage = "No matches";
+      if (newQuery) {
+        this.visits = [];
+        this.deviceVisits = result.rows;
+        this.offset = 0;
+        this.canLoadMore = true;
       }
-      this.visits = [];
+      this.processVisits(result, !newQuery);
+    },
+    processVisits(result, mergeResults: boolean) {
+      if (result.numRecordings == 0) {
+        this.canLoadMore = false;
+        return;
+      }
+      const eventsByDevice = result.rows;
+      if (mergeResults) {
+        this.count += result.numVisits;
+      } else {
+        this.count = result.numVisits;
+      }
+      this.offset = result.queryOffset;
+      this.canLoadMore = result.hasMoreVisits;
+      if (result.count > 0) {
+        this.countMessage = `${this.count} visits found (total)`;
+      } else if (result.count === 0) {
+        this.countMessage = "No visits";
+      }
+
       for (const devId in eventsByDevice) {
+        let merged = false;
         const animalMap = eventsByDevice[devId].animals;
+        if (mergeResults && !(devId in this.deviceVisits)) {
+          this.deviceVisits[devId] = eventsByDevice[devId];
+          merged = true;
+        }
         for (const animal in animalMap) {
-          this.visits.push(
-            ...animalMap[animal].visits.filter(this.filterVisit)
-          );
+          const filtered = animalMap[animal].visits.filter(this.filterVisit);
+          this.visits.push(...filtered);
+
+          // merge new visits with old device visits
+          if (mergeResults && !merged) {
+            if (!(animal in this.deviceVisits[devId])) {
+              this.deviceVisits[devId][animal] = animalMap[animal];
+            } else {
+              this.deviceVisits[devId][animal].visits.push(
+                ...animalMap[animal]
+              );
+              this.deviceVisits[devId][animal].start = animalMap[animal].start;
+            }
+          }
         }
       }
       this.visits = this.visits.sort(function(a, b) {
+        if (a.start == b.start) {
+          return a.id - b.id;
+        }
         return a.start < b.start ? 1 : -1;
       });
-      this.data = eventsByDevice;
     },
     filterVisit(visit: Visit): boolean {
       return (
+        !visit.incomplete &&
         visit.events.length > 0 &&
         visit.what != DefaultLabels.allLabels.bird.value &&
         visit.what != DefaultLabels.allLabels.falsePositive.value
@@ -573,5 +638,26 @@ $main-content-width: 640px;
 }
 .display-toggle {
   margin-right: 5px;
+}
+
+.sticky-footer {
+  background: $white;
+  border-top: 1px solid $gray-200;
+  padding: 7px;
+  .pagination-per-page {
+    max-width: $main-content-width;
+    margin: 0 auto;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    .results-per-page {
+      width: auto;
+      float: right;
+    }
+  }
+  .pagination {
+    margin-bottom: 0;
+    justify-content: center;
+  }
 }
 </style>
