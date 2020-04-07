@@ -418,7 +418,7 @@ export default {
       }
 
       whereQuery["limit"] = this.visitLimit;
-      const { result, success } = await api.recording.queryVisit(whereQuery);
+      const { result, success } = await api.recording.queryVisits(whereQuery);
       this.searchDescription = this.$refs.queryRec.searchDescription();
       if (!success) {
         result.messages &&

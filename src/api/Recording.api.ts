@@ -3,7 +3,7 @@ import * as querystring from "querystring";
 import { DeviceVisitMap } from "./visits";
 export default {
   query,
-  queryVisit,
+  queryVisits,
   queryCount,
   id,
   comment,
@@ -207,7 +207,7 @@ function query(
   return CacophonyApi.get(`${apiPath}?${querystring.stringify(params as any)}`);
 }
 
-function queryVisit(
+function queryVisits(
   params: RecordingQuery
 ): Promise<FetchResult<QueryResult<DeviceVisitMap>>> {
   return CacophonyApi.get(
