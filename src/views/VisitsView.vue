@@ -34,6 +34,7 @@
             <div style="display:flex;">
               <h1 style="flex-grow: 100;">Visits</h1>
               <div style="align-self: flex-end;">
+                <CsvDownload :params="getQuery()" :visits="true" />
                 <b-button variant="link" @click="showInfo = true">
                   <font-awesome-icon icon="question-circle" size="sm" />
                   Help</b-button
@@ -53,7 +54,9 @@
                 <div v-if="Object.entries(devMap.animals).length > 0">
                   <b-row>
                     <b-col>
-                      {{ devMap.deviceName }}
+                      <h2>
+                        {{ devMap.deviceName }}
+                      </h2>
                     </b-col>
                   </b-row>
 
@@ -195,7 +198,11 @@
                       Loading...
                     </div>
                     <div v-else>
-                      <b-button v-if="canLoadMore" @click="loadMoreVisits()">
+                      <b-button
+                        v-if="canLoadMore"
+                        variant="link"
+                        @click="loadMoreVisits()"
+                      >
                         <span v-if="loadingMore">
                           Loading...
                         </span>
@@ -235,12 +242,12 @@ import { Visit, DayVisits } from "../api/visits";
 import DefaultLabels from "../const.js";
 import EventSummary from "../components/EventSummary.vue";
 import AudioSummary from "../components/AudioBaitSummary.vue";
-
+import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import api from "../api/index";
 export default {
   name: "VisitsView",
-  components: { QueryRecordings, EventSummary, AudioSummary },
+  components: { QueryRecordings, EventSummary, AudioSummary, CsvDownload },
   data() {
     return {
       showInfo: this.isInfoShown(),
@@ -284,7 +291,7 @@ export default {
       offset: 0,
       loadText: "Load More Visits",
       canLoadMore: true,
-      visitLimit: 1
+      visitLimit: 300
     };
   },
   computed: {
@@ -386,13 +393,20 @@ export default {
     expandAdditionalInfo(row) {
       this.$set(row, "_showDetails", !row._showDetails);
     },
+    getQuery() {
+      if (this.$refs.queryRec) {
+        return this.$refs.queryRec.getQuery(true);
+      }
+      return {};
+    },
     submitNewQuery(whereQuery) {
       this.getVisits(whereQuery, true);
     },
     loadMoreVisits() {
       this.loadingMore = true;
-      const query = this.$refs.queryRec.getQuery(true);
-      query["offset"] = this.offset;
+      const query = this.getQuery();
+      query["offset"] = 0;
+      //this.offset;
       this.getVisits(query, false);
       this.loadingMore = false;
     },
@@ -400,11 +414,11 @@ export default {
       // Extract query information
       if (newQuery) {
         this.offset = 0;
+        this.queryPending = true;
       }
-      this.queryPending = true;
+
       whereQuery["limit"] = this.visitLimit;
       const { result, success } = await api.recording.queryVisit(whereQuery);
-      this.queryPending = false;
       this.searchDescription = this.$refs.queryRec.searchDescription();
       if (!success) {
         result.messages &&
@@ -418,6 +432,7 @@ export default {
         this.deviceVisits = result.rows;
         this.offset = 0;
         this.canLoadMore = true;
+        this.queryPending = false;
       }
       this.processVisits(result, !newQuery);
     },
@@ -434,9 +449,9 @@ export default {
       }
       this.offset = result.queryOffset;
       this.canLoadMore = result.hasMoreVisits;
-      if (result.count > 0) {
+      if (this.count > 0) {
         this.countMessage = `${this.count} visits found (total)`;
-      } else if (result.count === 0) {
+      } else if (this.count === 0) {
         this.countMessage = "No visits";
       }
 

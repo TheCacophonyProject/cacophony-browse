@@ -13,6 +13,9 @@
         {{ formatDate(item.dateTime, "LTS") }}
       </div>
     </b-col>
+    <b-col cols="1">
+      {{ item.EventDetail.details.volume }}
+    </b-col>
   </b-row>
 </template>
 

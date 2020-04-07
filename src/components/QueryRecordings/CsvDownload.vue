@@ -16,6 +16,10 @@ export default {
     params: {
       type: Object,
       required: true
+    },
+    visits: {
+      type: Boolean,
+      required: false
     }
   },
   methods: {
@@ -26,6 +30,7 @@ export default {
       });
       params.offset = 0;
       params.limit = 100000;
+      params.type = this.visits ? "visits" : "recordings";
       const url =
         `${config.api}/api/v1/recordings/report?` +
         querystring.stringify(params);
