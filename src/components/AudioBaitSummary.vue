@@ -52,20 +52,4 @@ export default {
   font-weight: 600;
   margin-left: 10px;
 }
-.event-summary {
-  background-color: rgba(0, 0, 0, 0.03);
-  margin-left: 1em;
-  margin-right: 1em;
-  padding: 0.5em;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
-  color: unset;
-  div {
-    color: inherit;
-  }
-  &:hover {
-    box-shadow: 0 1px 3px $gray-400;
-    text-decoration: unset;
-  }
-}
 </style>

@@ -194,22 +194,20 @@
                         </div>
                       </template>
                     </b-table>
-                    <div v-if="loadingMore">
-                      Loading...
-                    </div>
-                    <div v-else>
-                      <b-button
-                        v-if="canLoadMore"
-                        variant="link"
-                        @click="loadMoreVisits()"
-                      >
-                        <span v-if="loadingMore">
-                          Loading...
-                        </span>
-                        <span v-else>
-                          {{ loadText }}
-                        </span>
-                      </b-button>
+                    <div class="load-more">
+                      <div v-if="loadingMore">
+                        Loading...
+                      </div>
+                      <div v-else>
+                        <b-button v-if="canLoadMore" @click="loadMoreVisits()">
+                          <span v-if="loadingMore">
+                            Loading...
+                          </span>
+                          <span v-else>
+                            {{ loadText }}
+                          </span>
+                        </b-button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -405,8 +403,7 @@ export default {
     loadMoreVisits() {
       this.loadingMore = true;
       const query = this.getQuery();
-      query["offset"] = 0;
-      //this.offset;
+      query["offset"] = this.offset;
       this.getVisits(query, false);
       this.loadingMore = false;
     },
@@ -655,24 +652,9 @@ $main-content-width: 640px;
   margin-right: 5px;
 }
 
-.sticky-footer {
-  background: $white;
-  border-top: 1px solid $gray-200;
-  padding: 7px;
-  .pagination-per-page {
-    max-width: $main-content-width;
-    margin: 0 auto;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-    .results-per-page {
-      width: auto;
-      float: right;
-    }
-  }
-  .pagination {
-    margin-bottom: 0;
-    justify-content: center;
-  }
+.load-more {
+  margin-bottom: 0;
+  text-align: center;
+  justify-content: center;
 }
 </style>
