@@ -121,7 +121,7 @@
                       </template>
                       <template v-slot:cell(device)="row">
                         <div class="device-cell">
-                          {{ row.item.device }}
+                          {{ row.item.deviceName }}
                         </div>
                       </template>
                       <template v-slot:cell(date)="deviceVisits">
@@ -425,6 +425,7 @@ export default {
         return;
       }
       if (newQuery) {
+        this.countMessage = "No Visits";
         this.visits = [];
         this.deviceVisits = result.rows;
         this.offset = 0;

@@ -40,13 +40,16 @@ export class VisitSummary {
   end: moment.Moment;
   start: moment.Moment;
 }
+
 export interface AnimalMap {
   [key: string]: VisitSummary;
 }
+
 export class DeviceVisits {
   animals: AnimalMap;
   lastVisit: Visit;
 }
+
 export interface DeviceVisitMap {
   [key: number]: DeviceVisits;
 }
