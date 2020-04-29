@@ -4,11 +4,11 @@
     class="event-summary row no-gutters"
     @click="event => navigateToRecording(event, item)"
   >
-    <b-col class="track-title" cols="6">
+    <b-col class="track-title" cols="5">
       <span>Track </span>
       {{ trackNumber }}
     </b-col>
-    <b-col cols="2">
+    <b-col cols="3">
       {{ formatDate(item.start, "LTS") }}
     </b-col>
     <b-col>
@@ -22,7 +22,7 @@
         Unidentified
       </span>
       <span v-else>
-        {{ capitilizeFirst(what) }}
+        {{ capitalizeFirst(what) }}
       </span>
     </b-col>
   </a>
@@ -51,7 +51,7 @@ export default {
     formatDate(date: string, formatStr: string): string {
       return moment(date).format(formatStr);
     },
-    capitilizeFirst(value: string) {
+    capitalizeFirst(value: string) {
       return value.charAt(0).toUpperCase() + value.substring(1);
     },
     navigateToRecording(event, visEvent: VisitEvent) {
@@ -73,6 +73,7 @@ export default {
 .track-title {
   font-weight: 600;
 }
+
 .event-summary {
   width: 100%;
   background-color: #b7d2ef;

@@ -1,14 +1,14 @@
 <template>
   <b-row class="audio-row" no-gutters>
-    <b-col cols="6">
+    <b-col cols="5">
       <span class="audio-bait">
         <font-awesome-icon icon="volume-up" size="xs" />
       </span>
       <span class="audio-title">
-        {{ capitilizeFirst(item.fileName) }}
+        {{ capitalizeFirst(item.fileName) }}
       </span>
     </b-col>
-    <b-col cols="2">
+    <b-col cols="3">
       <div class="audio-time">
         {{ formatDate(item.dateTime, "LTS") }}
       </div>
@@ -33,7 +33,7 @@ export default {
     formatDate(date: string, formatStr: string): string {
       return moment(date).format(formatStr);
     },
-    capitilizeFirst(value: string) {
+    capitalizeFirst(value: string) {
       return value.charAt(0).toUpperCase() + value.substring(1);
     }
   }

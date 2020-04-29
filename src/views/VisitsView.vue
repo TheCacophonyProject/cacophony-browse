@@ -50,38 +50,39 @@
             <p class="search-description" v-html="searchDescription"></p>
             <div v-if="!queryPending" class="results">
               <h1>Visit Summary Per Device</h1>
-              <div v-for="devMap in deviceVisits" :key="devMap.id">
-                <div v-if="Object.entries(devMap.animals).length > 0">
-                  <b-row>
-                    <b-col>
-                      <h2>
-                        {{ devMap.deviceName }}
-                      </h2>
-                    </b-col>
-                  </b-row>
-
-                  <b-table
-                    :items="Object.entries(devMap.animals)"
-                    :fields="fields"
-                    striped
-                    responsive
-                  >
-                    <template v-slot:cell(what)="row">
-                      {{ row.item[0] }}
-                    </template>
-                    <template v-slot:cell(start)="row">
-                      {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
-                    </template>
-                    <template v-slot:cell(end)="row">
-                      {{ formatDate(row.item[1].end, tableDateTimeFormat) }}
-                    </template>
-                    <template v-slot:cell(visits)="row">
-                      {{ row.item[1].visits.length }}
-                    </template>
-                  </b-table>
+              <div class="scrollable">
+                <div v-for="devMap in deviceVisits" :key="devMap.id">
+                  <div v-if="Object.entries(devMap.animals).length > 0">
+                    <b-row>
+                      <b-col>
+                        <h2>
+                          {{ devMap.deviceName }}
+                        </h2>
+                      </b-col>
+                    </b-row>
+                    <b-table
+                      class="device-table"
+                      :items="Object.entries(devMap.animals)"
+                      :fields="fields"
+                      striped
+                    >
+                      <template v-slot:cell(what)="row">
+                        {{ row.item[0] }}
+                      </template>
+                      <template v-slot:cell(start)="row">
+                        {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
+                      </template>
+                      <template v-slot:cell(end)="row">
+                        {{ formatDate(row.item[1].end, tableDateTimeFormat) }}
+                      </template>
+                      <template v-slot:cell(visits)="row">
+                        {{ row.item[1].visits.length }}
+                      </template>
+                    </b-table>
+                  </div>
                 </div>
               </div>
-              <div v-if="visits.length > 0">
+              <div v-if="visits.length > 0" class="scrollable">
                 <div
                   v-for="(dayVisits, index_a) in visitsByDayAndHour"
                   :key="index_a"
@@ -496,7 +497,21 @@ export default {
   }
 };
 </script>
+
 <style lang="scss">
+.b-table-details {
+  background-color: white !important;
+  curosr: default;
+}
+</style>
+
+<style scoped lang="scss">
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+$main-content-width: 640px;
+
 .visits-table > tbody > tr td:first-child {
   position: relative;
 }
@@ -513,18 +528,20 @@ export default {
   height: 48px;
 }
 
-.visits-table .b-table-details {
-  background-color: white !important;
-  curosr: default;
+@include media-breakpoint-down(sm) {
+  .scrollable {
+    max-width: calc(100vw - 3em);
+    overflow: auto;
+  }
+
+  .device-table {
+    min-wdith: 640px;
+  }
+
+  .visits-table {
+    min-width: 640px;
+  }
 }
-</style>
-
-<style scoped lang="scss">
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins";
-
-$main-content-width: 640px;
 
 .search-content-wrapper {
   margin: 0 auto;
@@ -549,30 +566,9 @@ $main-content-width: 640px;
     margin-bottom: 2px;
   }
 
-  @include media-breakpoint-down(md) {
-    .recordings-hour {
-      position: sticky;
-      top: 0;
-      right: 0;
-      text-align: right;
-      margin-top: -2.8rem;
-      padding: 0.7rem 0;
-    }
-  }
-
-  @include media-breakpoint-up(md) {
-    .recordings-hour {
-      display: inline-block;
-      position: sticky;
-      float: left;
-      top: 40px;
-      margin-left: -60px;
-      margin-top: 15px;
-    }
-  }
-  .event-recording {
-    padding: 0.5rem 0;
-    font-size: 1em;
+  .recordings-hour {
+    position: sticky;
+    font-size: 0.9em;
     font-weight: 600;
   }
 
@@ -585,8 +581,27 @@ $main-content-width: 640px;
     font-weight: 600;
   }
 
-  .recordings-hour {
-    font-size: 0.9em;
+  @include media-breakpoint-down(sm) {
+    .recordings-hour {
+      padding: 0.7rem 0;
+      float: left;
+    }
+  }
+
+  @include media-breakpoint-up(sm) {
+    .recordings-hour {
+      display: inline-block;
+      position: sticky;
+      float: left;
+      top: 40px;
+      margin-left: -60px;
+      margin-top: 15px;
+    }
+  }
+
+  .event-recording {
+    padding: 0.5rem 0;
+    font-size: 1em;
     font-weight: 600;
   }
 }
