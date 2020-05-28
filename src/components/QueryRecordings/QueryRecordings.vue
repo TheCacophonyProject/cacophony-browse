@@ -352,6 +352,9 @@ export default {
         query: this.serialiseQuery(this.query)
       });
     },
+    getQuery(useForApiCall = false) {
+      return this.serialiseQuery(this.query, useForApiCall);
+    },
     submit: function() {
       if (!this.onlyRecordingType) {
         this.$store.commit("User/updateRecordingTypePref", this.recordingType);

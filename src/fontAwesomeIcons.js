@@ -35,6 +35,7 @@ import {
   faUser,
   faUserCog,
   faPlus,
+  faVolumeUp,
   faUserPlus,
   faChevronRight
 } from "@fortawesome/free-solid-svg-icons";
@@ -100,7 +101,8 @@ library.add(
   faUserCog,
   faPlus,
   faUserPlus,
-  faChevronRight
+  faChevronRight,
+  faVolumeUp
 );
 
 export default FontAwesomeIcon;
