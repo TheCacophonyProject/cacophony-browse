@@ -195,22 +195,22 @@
                         </div>
                       </template>
                     </b-table>
-                    <div class="load-more">
-                      <div v-if="loadingMore">
-                        Loading...
-                      </div>
-                      <div v-else>
-                        <b-button v-if="canLoadMore" @click="loadMoreVisits()">
-                          <span v-if="loadingMore">
-                            Loading...
-                          </span>
-                          <span v-else>
-                            {{ loadText }}
-                          </span>
-                        </b-button>
-                      </div>
-                    </div>
                   </div>
+                </div>
+              </div>
+              <div class="load-more">
+                <div v-if="loadingMore">
+                  Loading...
+                </div>
+                <div v-else>
+                  <b-button v-if="canLoadMore" @click="loadMoreVisits()">
+                    <span v-if="loadingMore">
+                      Loading...
+                    </span>
+                    <span v-else>
+                      {{ loadText }}
+                    </span>
+                  </b-button>
                 </div>
               </div>
             </div>
