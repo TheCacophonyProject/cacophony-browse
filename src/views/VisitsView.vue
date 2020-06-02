@@ -503,6 +503,19 @@ export default {
   background-color: white !important;
   curosr: default;
 }
+
+.visits-table > tbody > tr td:first-child {
+  position: relative;
+}
+
+.visits-table > tbody > tr td:first-child {
+  position: relative;
+}
+
+.visits-table table > tbody > tr:not(.b-table-details) {
+  cursor: pointer;
+  height: 48px;
+}
 </style>
 
 <style scoped lang="scss">
@@ -512,20 +525,11 @@ export default {
 
 $main-content-width: 640px;
 
-.visits-table > tbody > tr td:first-child {
-  position: relative;
-}
-
 .device-cell {
   width: 151px;
   height: 28px;
   overflow-x: hidden;
   overflow-y: hidden;
-}
-
-.visits-table table > tbody > tr:not(.b-table-details) {
-  cursor: pointer;
-  height: 48px;
 }
 
 @include media-breakpoint-down(sm) {
