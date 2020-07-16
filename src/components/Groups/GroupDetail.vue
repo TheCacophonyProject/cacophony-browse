@@ -39,11 +39,11 @@
             responsive
             data-cy="users-table"
           >
-            <template slot="admin" slot-scope="data">
+            <template v-slot:cell(admin)="data">
               {{ data.item.isAdmin ? "Yes" : "No" }}
             </template>
 
-            <template slot="controls" slot-scope="data">
+            <template v-slot:cell(deleteButton)="data">
               <b-modal
                 id="group-user-remove-self"
                 title="Remove yourself from group"
@@ -86,7 +86,7 @@
           responsive
           data-cy="devices-table"
         >
-          <template slot="devicename" slot-scope="row">
+          <template v-slot:cell(devicename)="row">
             <b-link
               :to="{
                 name: 'device',

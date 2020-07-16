@@ -113,8 +113,8 @@
                         </span>
                         <div class="what-image">
                           <img
-                            v-if="whatImage(row.item)"
-                            :src="whatImage(row.item)"
+                            onerror="this.style.display='none'"
+                            :src="imgSrc(row.item.what)"
                             class="tag-img"
                           />
                           {{ row.item.what }}
@@ -152,7 +152,7 @@
                       <template v-slot:cell(events)="row">
                         {{ row.item.events.length }}
                       </template>
-                      <template slot="row-details" slot-scope="row">
+                      <template v-slot:cell(row-details)="row">
                         <div
                           v-for="(visitEvents, index_e) in sortEventsByRec(
                             row.item
@@ -235,10 +235,9 @@
   </b-container>
 </template>
 <script lang="ts">
-/* global require */
 import * as moment from "moment";
 import { Visit, DayVisits } from "../api/visits";
-import DefaultLabels from "../const.js";
+import DefaultLabels, { imgSrc } from "../const.js";
 import EventSummary from "../components/EventSummary.vue";
 import AudioSummary from "../components/AudioBaitSummary.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
@@ -310,6 +309,7 @@ export default {
     }
   },
   methods: {
+    imgSrc,
     formatDate(date: string, formatStr: string): string {
       return moment(date).format(formatStr);
     },
@@ -372,22 +372,6 @@ export default {
       }
       recEvent.events.splice(recEvent.events.length, 0, ...audioBaitEvents);
       return eventsByRec;
-    },
-
-    whatImage: function(visit: Visit) {
-      let image = null;
-      if (visit.what == DefaultLabels.allLabels.kiwi.value) {
-        image = "kiwi.png";
-      } else {
-        image = visit.what + ".png";
-      }
-
-      try {
-        const link = require("../assets/video/" + image);
-        return link.default;
-      } catch (e) {
-        return;
-      }
     },
     expandAdditionalInfo(row) {
       this.$set(row, "_showDetails", !row._showDetails);

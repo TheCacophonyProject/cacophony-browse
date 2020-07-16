@@ -3,7 +3,7 @@
     <b-form>
       <b-form-group label="Tag:" horizontal>
         <b-form-select v-model="whatTag" :options="whatOptions">
-          <template slot="first">
+          <template>
             <option :value="null" disabled>Choose a tag.. </option>
           </template>
         </b-form-select>

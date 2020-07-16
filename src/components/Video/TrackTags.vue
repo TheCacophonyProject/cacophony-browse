@@ -23,18 +23,18 @@
         small
         responsive
       >
-        <template slot="what" slot-scope="row">
+        <template v-slot:cell(what)="row">
           <div class="what-image">
             <img
-              v-if="what(row.item.what).link"
-              :src="what(row.item.what).link"
+              onerror="this.style.display='none'"
+              :src="imgSrc(row.item.what)"
               class="tag-img"
             />
             {{ row.item.what }}
           </div>
         </template>
 
-        <template slot="who" slot-scope="row">
+        <template v-slot:cell(who)="row">
           <span v-if="row.item.User">
             {{ row.item.User.username }}
           </span>
@@ -42,7 +42,7 @@
             {{ aiName(row.item) }}
           </span>
         </template>
-        <template slot="confidence" slot-scope="row">
+        <template v-slot:cell(confidence)="row">
           {{ confidence(row.item.confidence) }}
         </template>
         <!-- Be careful about changing the tooltips to use a placement
@@ -53,7 +53,7 @@
              - https://github.com/TheCacophonyProject/cacophony-browse/issues/180
              - ttps://github.com/TheCacophonyProject/cacophony-browse/issues/185
           -->
-        <template slot="buttons" slot-scope="row">
+        <template v-slot:cell(buttons)="row">
           <button
             v-b-tooltip.hover.left="'Confirm the automatic tag'"
             v-if="row.item.automatic && !userTagExists(row.item.what)"
@@ -78,8 +78,7 @@
 </template>
 
 <script>
-/* global require */
-import DefaultLabels from "../../const.js";
+import { imgSrc } from "../../const.js";
 
 export default {
   name: "TrackTags",
@@ -110,29 +109,12 @@ export default {
   },
   computed: {},
   methods: {
+    imgSrc,
     aiName: function(trackTag) {
       if (trackTag.data && trackTag.data.name) {
         return "AI " + trackTag.data.name;
       } else {
         return "Cacophony AI";
-      }
-    },
-    what: function(what) {
-      // Struggling to get images to show correctly so using work-around
-      // suggested at bottom of this page.
-      // TODO implement alternative that doesn't use 'require' in this manner
-      // https://bootstrap-vue.js.org/docs/reference/images/
-      let image = null;
-      if (what == DefaultLabels.allLabels.kiwi.value) {
-        image = "kiwi.png";
-      } else {
-        image = what + ".png";
-      }
-      try {
-        const link = require("../../assets/video/" + image);
-        return { link, what };
-      } catch (e) {
-        return { what };
       }
     },
     confidence: function(confidence) {
