@@ -9,7 +9,11 @@
           :class="['btn btn-light btn-tag equal-flex', getClass(animal)]"
           @click="quickTag(animal)"
         >
-          <img :title="getTitle(animal)" :src="imgSrc(animal)" />
+          <img
+            onerror="this.style.display='none'"
+            :title="getTitle(animal)"
+            :src="imgSrc(animal)"
+          />
           <div class="tag-name">{{ animal }}</div>
         </button>
       </div>
