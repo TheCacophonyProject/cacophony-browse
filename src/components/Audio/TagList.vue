@@ -12,10 +12,10 @@
       responsive
       @deleteTag="deleteTag($event)"
     >
-      <template slot="startTime" slot-scope="row">
+      <template v-slot:cell(startTime)="row">
         {{ row.item.tag.startTime }}
       </template>
-      <template slot="replayButton" slot-scope="row">
+      <template v-slot:cell(replayButton)="row">
         <font-awesome-icon
           v-b-tooltip.hover="'Replay'"
           :icon="['fa', 'play']"
@@ -25,7 +25,7 @@
         />
       </template>
 
-      <template slot="deleteButton" slot-scope="row">
+      <template v-slot:cell(deleteButton)="row">
         <font-awesome-icon
           v-b-tooltip.hover="'Delete tag'"
           icon="trash"
