@@ -16,7 +16,11 @@
     </b-button>
     <b-form-group>
       <h2>Search recordings</h2>
-      <SelectDevice v-model="devices" />
+      <SelectDevice
+        :selected-devices="selectedDevices"
+        :selected-groups="selectedGroups"
+        @update-device-selection="updateDeviceSelection"
+      />
       <div v-if="!onlyRecordingType">
         <SelectRecordingType v-model="recordingType" />
       </div>
@@ -122,7 +126,9 @@ export default {
       isAudio: true,
       advanced: false,
       loadedQuery: false,
-      isCustomDateRange: false
+      isCustomDateRange: false,
+      selectedDevices: [],
+      selectedGroups: []
     };
   },
   computed: {
@@ -224,14 +230,6 @@ export default {
         }
       }
     },
-    devices: {
-      get() {
-        return this.query.where.DeviceId;
-      },
-      set(value) {
-        this.query.where.DeviceId = value;
-      }
-    },
     groups: function() {
       return this.$store.state.Groups;
     },
@@ -315,23 +313,19 @@ export default {
             this.$set(target.where, "dateRange", { all: true });
           }
         }
-        if (!target.where.hasOwnProperty("DeviceId")) {
-          this.$set(target.where, "DeviceId", []);
-        }
         if (!target.where.duration) {
           this.$set(target.where, "duration", {});
-        }
-        if (target.where.DeviceId && target.where.DeviceGroups) {
-          target.where.DeviceId = [
-            ...target.where.DeviceId,
-            ...target.where.DeviceGroups
-          ];
-        } else if (target.where.DeviceGroups) {
-          target.where.DeviceId = [...target.where.DeviceGroups];
         }
       }
       if (routeQuery.tags) {
         target.tags = JSON.parse(routeQuery.tags);
+      }
+
+      if (routeQuery.hasOwnProperty("groups")) {
+        this.selectedGroups = JSON.parse(routeQuery.groups);
+      }
+      if (routeQuery.hasOwnProperty("devices")) {
+        this.selectedDevices = JSON.parse(routeQuery.devices);
       }
     },
     parseCurrentRoute(addState = true) {
@@ -376,7 +370,6 @@ export default {
     resetQuery() {
       return {
         where: {
-          DeviceId: [],
           duration: {
             $gte: "0",
             $lte: ""
@@ -456,44 +449,6 @@ export default {
       }
       this.addIfSet(where, query.where.duration["$gte"], "duration", "$gte");
       this.addIfSet(where, query.where.duration["$lte"], "duration", "$lte");
-      // add devices and devices from groups
-      if (query.where.DeviceId.length !== 0) {
-        const deviceIds = [];
-        for (const device of query.where.DeviceId) {
-          if (typeof device === "object") {
-            if (typeof device.id === "number") {
-              // Add single devices
-              deviceIds.push(device.id);
-            } else {
-              // NOTE: if the device is a group, the id is a string.
-              // Add groups of devices
-              where.DeviceGroups = where.DeviceGroups || [];
-              where.DeviceGroups.push(device.id);
-              if (device.devices) {
-                for (const item of device.devices) {
-                  deviceIds.push(item.id);
-                }
-              }
-            }
-          } else if (typeof device === "number") {
-            // We're reconstituting this from the query params, so we only have
-            // device ids at this stage, we don't have the labels.
-            deviceIds.push(device);
-          }
-        }
-        // Dedupe ids.
-        where.DeviceId = deviceIds.reduce((acc, id) => {
-          !acc.includes(id) && acc.push(id);
-          return acc;
-        }, []);
-        if (where.DeviceGroups && where.DeviceGroups.length !== 0) {
-          // Dedupe ids.
-          where.DeviceGroups = where.DeviceGroups.reduce((acc, id) => {
-            !acc.includes(id) && acc.push(id);
-            return acc;
-          }, []);
-        }
-      }
 
       if (useForApiCall) {
         // Map between the mismatch in video type types between frontend and backend
@@ -504,8 +459,18 @@ export default {
         }
         // Remove the group param, since the API doesn't handle that, we're just using
         // it to accurately share search parameters via urls.
-        delete where.DeviceGroups;
         delete where.dateRange;
+
+        if (this.selectedDevices.length > 0 && this.selectedGroups.length > 0) {
+          where["Op.or"] = [
+            { DeviceId: this.selectedDevices },
+            { GroupId: this.selectedGroups }
+          ];
+        } else if (this.selectedGroups.length > 0) {
+          where.GroupId = this.selectedGroups;
+        } else if (this.selectedDevices.length > 0) {
+          where.DeviceId = this.selectedDevices;
+        }
       }
 
       const params = {
@@ -519,6 +484,15 @@ export default {
         }
       }
 
+      if (!useForApiCall) {
+        if (this.selectedDevices.length > 0) {
+          params.devices = this.selectedDevices;
+        }
+        if (this.selectedGroups.length > 0) {
+          params.groups = this.selectedGroups;
+        }
+      }
+
       if (query.tags && query.tags.length > 0) {
         params.tags = query.tags;
       }
@@ -528,19 +502,32 @@ export default {
           params[key] = JSON.stringify(val);
         }
       }
+
       return params;
     },
+
+    devicesDescription() {
+        const numDevices = this.selectedDevices.length;
+        const numGroups = this.selectedGroups.length;
+        const total = numDevices + numGroups;
+
+        const multipleSuffix = total > 1 ? "s" : "";
+
+        if (total === 0) {
+          return "All devices"
+        } else if (numDevices && numGroups) {
+          return `${total} groups and devices`;
+        } else if (numGroups) {
+          return `${total} group${multipleSuffix}`;
+        }
+        return `${total} device${multipleSuffix}`;
+    },
+
     searchDescription() {
       // Get the current search query, not the live updated one.
       if (this.lastQuery !== null) {
         const query = this.lastQuery;
-        const numDevices = query.where.DeviceId.length;
-        const multipleDeviceSuffix = numDevices > 1 ? "s" : "";
-        const devices =
-          numDevices !== 0
-            ? `${numDevices} device${multipleDeviceSuffix}`
-            : "All devices";
-
+        const devices = this.devicesDescription();
         if (this.onlyRecordingType) {
           query.where.type = this.onlyRecordingType;
         } else if (!query.where.type) {
@@ -603,6 +590,14 @@ export default {
         );
       } else {
         return "";
+      }
+    },
+    updateDeviceSelection(eventData) {
+      if (eventData.hasOwnProperty("devices")) {
+        this.selectedDevices = eventData.devices;
+      }
+      if (eventData.hasOwnProperty("groups")) {
+        this.selectedGroups = eventData.groups;
       }
     }
   }
