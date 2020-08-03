@@ -606,7 +606,9 @@ $main-content-width: 640px;
     max-height: calc(100vh - var(--navbar-height));
   }
   .sticky-footer {
-    position: sticky;
+    position: fixed;
+    left: 0;
+    right: 0;
     bottom: 0;
   }
 }
