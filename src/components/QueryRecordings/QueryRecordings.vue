@@ -24,15 +24,10 @@
       <div v-if="!onlyRecordingType">
         <SelectRecordingType v-model="recordingType" />
       </div>
-      <SelectDateRange v-model="dateRange" />
-      <b-form-row v-if="isCustomDateRange">
-        <b-col sm="6">
-          <SelectDate v-model="fromDate" title="From Date" />
-        </b-col>
-        <b-col sm="6">
-          <SelectDate v-model="toDate" title="To Date" />
-        </b-col>
-      </b-form-row>
+      <SelectDateRange 
+        :dateData="dates" 
+        @update-dates="updateDates"
+        @update-date-description="updateDateDescription"/>
       <b-form-row>
         <b-col>
           <b-button
@@ -128,7 +123,9 @@ export default {
       loadedQuery: false,
       isCustomDateRange: false,
       selectedDevices: [],
-      selectedGroups: []
+      selectedGroups: [],
+      dates: {days: "3"},
+      dateDescription: ""
     };
   },
   computed: {
@@ -175,44 +172,6 @@ export default {
         }
       }
     },
-    dateRange: {
-      get() {
-        return this.query.where.dateRange || {};
-      },
-      set(value) {
-        this.query.where.dateRange = value;
-        this.isCustomDateRange =
-          (this.query.where.dateRange && this.query.where.dateRange.isCustom) ||
-          false;
-      }
-    },
-    fromDate: {
-      get() {
-        return this.query.where.recordingDateTime["$gt"] || "";
-      },
-      set(value) {
-        this.query.where.recordingDateTime["$gt"] = value;
-      }
-    },
-    toDate: {
-      get() {
-        return (
-          (this.query.where.recordingDateTime["$lt"] &&
-            this.query.where.recordingDateTime["$lt"].replace(
-              " 23:59:59",
-              ""
-            )) ||
-          ""
-        );
-      },
-      set(value) {
-        if (value && value.trim() !== "") {
-          this.query.where.recordingDateTime["$lt"] = `${value} 23:59:59`;
-        } else {
-          this.query.where.recordingDateTime["$lt"] = "";
-        }
-      }
-    },
     animals: {
       get() {
         return this.rawAnimals;
@@ -222,7 +181,7 @@ export default {
         this.query.tags = value.map(option =>
           option.value ? option.value : option.text
         );
-        this.hasSpecifiedTags = this.query.tags.length > 0;
+        this.hasSpecifiedTags = this.rawAnimals > 0;
         if (this.hasSpecifiedTags) {
           if (!this.canHaveTags) {
             this.tagTypes = "tagged";
@@ -301,18 +260,6 @@ export default {
       }
       if (routeQuery.where) {
         target.where = JSON.parse(routeQuery.where);
-        if (!target.where.recordingDateTime) {
-          this.$set(target.where, "recordingDateTime", {});
-        }
-        if (!target.where.dateRange) {
-          this.$set(target.where, "dateRange", {});
-        } else {
-          if (target.where.dateRange === "customDateRange") {
-            this.$set(target.where, "dateRange", { isCustom: true });
-          } else if (target.where.dateRange === "all") {
-            this.$set(target.where, "dateRange", { all: true });
-          }
-        }
         if (!target.where.duration) {
           this.$set(target.where, "duration", {});
         }
@@ -321,6 +268,11 @@ export default {
         target.tags = JSON.parse(routeQuery.tags);
       }
 
+      this.dates = {
+        days: routeQuery.days,
+        toDate: routeQuery.toDate,
+        fromDate: routeQuery.fromDate
+      }
       if (routeQuery.hasOwnProperty("groups")) {
         this.selectedGroups = JSON.parse(routeQuery.groups);
       }
@@ -377,9 +329,6 @@ export default {
           recordingDateTime: {
             $gt: "",
             $lt: ""
-          },
-          dateRange: {
-            relativeDateRange: -30
           }
         },
         tagMode: "any",
@@ -407,46 +356,6 @@ export default {
         where.type =
           query.where.type || this.$store.state.User.recordingTypePref;
       }
-      if (query.where.hasOwnProperty("dateRange")) {
-        // If it's a custom range, that can be inferred by the presence of recordingDateTime.
-        // Otherwise, we'll synthesise recordingDateTime here from relative time.
-        if (query.where.dateRange.hasOwnProperty("all")) {
-          where.dateRange = "all";
-        } else if (query.where.dateRange.hasOwnProperty("relativeDateRange")) {
-          const now = new Date();
-          const relativeRangeDays = parseInt(
-            query.where.dateRange.relativeDateRange
-          );
-          const past = moment(now).add(relativeRangeDays, "days");
-          where.dateRange = {
-            relativeDateRange: relativeRangeDays
-          };
-          where.recordingDateTime = {
-            $lt: this.formatQueryDate(now),
-            $gt: this.formatQueryDate(past)
-          };
-        } else if (query.where.hasOwnProperty("recordingDateTime")) {
-          if (
-            query.where.recordingDateTime.hasOwnProperty("$gt") &&
-            query.where.recordingDateTime.hasOwnProperty("$lt")
-          ) {
-            where.dateRange = "customDateRange";
-            // assume custom dateRange
-            this.addIfSet(
-              where,
-              query.where.recordingDateTime["$gt"],
-              "recordingDateTime",
-              "$gt"
-            );
-            this.addIfSet(
-              where,
-              query.where.recordingDateTime["$lt"],
-              "recordingDateTime",
-              "$lt"
-            );
-          }
-        }
-      }
       this.addIfSet(where, query.where.duration["$gte"], "duration", "$gte");
       this.addIfSet(where, query.where.duration["$lte"], "duration", "$lte");
 
@@ -471,6 +380,23 @@ export default {
         } else if (this.selectedDevices.length > 0) {
           where.DeviceId = this.selectedDevices;
         }
+    
+        let from = this.dates.from;
+        let until = this.dates.to; 
+        if (this.dates.hasOwnProperty("days") && this.dates.days !== "") {
+          // We must do this at the time the button is pushed
+          const now = new Date();
+          from = this.formatQueryDate(moment(now).add(this.dates.days, "days"));
+        } 
+        if (from || until) {
+          where.recordingDateTime = {};
+          if (from) {
+            where.recordingDateTime["$gt"] =  from;
+          }
+          if (until) {
+            where.recordingDateTime["$lt"] =  until;
+          }
+        }
       }
 
       const params = {
@@ -485,6 +411,10 @@ export default {
       }
 
       if (!useForApiCall) {
+        params.days = this.dates.days;
+        params.fromDate = this.dates.fromDate;
+        params.toDate = this.dates.toDate;
+        
         if (this.selectedDevices.length > 0) {
           params.devices = this.selectedDevices;
         }
@@ -545,7 +475,7 @@ export default {
           query.where.dateRange && query.where.dateRange.isCustom;
         const isAll = query.where.dateRange && query.where.dateRange.all;
         const relativeDateRange = Math.abs(
-          Number(query.where.dateRange.relativeDateRange)
+          Number(3000)
         );
         let timespan;
         if (relativeDateRange === 1) {
@@ -599,6 +529,12 @@ export default {
       if (eventData.hasOwnProperty("groups")) {
         this.selectedGroups = eventData.groups;
       }
+    },
+    updateDates(eventData) {
+      this.dates = eventData;
+    },
+    updateDateDescription(description) {
+      this.dateDescription = description;
     }
   }
 };

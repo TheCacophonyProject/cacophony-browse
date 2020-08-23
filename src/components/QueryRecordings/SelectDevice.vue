@@ -33,7 +33,10 @@ export default {
     placeholder: function() {
       if (!this.fetched) {
         return "loading";
-      } else if (this.selectedDevices.length == 0 && this.selectedGroups.length == 0) {
+      } else if (
+        this.selectedDevices.length == 0 &&
+        this.selectedGroups.length == 0
+      ) {
         return "all devices";
       } else {
         return "add more devices";
@@ -44,22 +47,26 @@ export default {
       devices: state =>
         state.Devices.devices.map(device => {
           return {
-            id: 'D' + device.id,
+            id: "D" + device.id,
             name: device.devicename
           };
         }),
       groups: state =>
         state.Groups.groups.map(group => {
           return {
-            id: 'G' + group.id,
+            id: "G" + group.id,
             name: group.groupname + " (group)",
             devices: group.Devices
           };
         })
     }),
     selectedValues: function() {
-      const selectedDs = this.selectedDevices.map(deviceId => this.devices.find(({ id }) => 'D' + deviceId === id));
-      const selectedGs = this.selectedGroups.map(groupId => this.groups.find(({ id }) => 'G' + groupId === id));
+      const selectedDs = this.selectedDevices.map(deviceId =>
+        this.devices.find(({ id }) => "D" + deviceId === id)
+      );
+      const selectedGs = this.selectedGroups.map(groupId =>
+        this.groups.find(({ id }) => "G" + groupId === id)
+      );
       return [...selectedDs, ...selectedGs];
     },
     options: function() {
@@ -68,20 +75,24 @@ export default {
   },
   methods: {
     updateSelected(selectedObjects) {
-      const devices = this.getIdsWithPrefix(selectedObjects, 'D');
-      const groups = this.getIdsWithPrefix(selectedObjects, 'G');
+      const devices = this.getIdsWithPrefix(selectedObjects, "D");
+      const groups = this.getIdsWithPrefix(selectedObjects, "G");
       const updatedSelection = {
         devices: devices,
         groups: groups
-      }
+      };
       // this causes the v-model in the parent component to get updated
-      this.$emit('update-device-selection', updatedSelection);
-    }, 
+      this.$emit("update-device-selection", updatedSelection);
+    },
 
     getIdsWithPrefix(objects, prefix) {
-      const prefixed =  objects.filter(item => item.id.substring(0, prefix.length) === prefix);
-      return prefixed.map(item => parseInt(item.id.substring(prefix.length, item.id.length)));
-    }    
+      const prefixed = objects.filter(
+        item => item.id.substring(0, prefix.length) === prefix
+      );
+      return prefixed.map(item =>
+        parseInt(item.id.substring(prefix.length, item.id.length))
+      );
+    }
   },
   created: async function() {
     await this.$store.dispatch("Devices/GET_DEVICES");
