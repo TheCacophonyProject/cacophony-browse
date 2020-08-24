@@ -25,7 +25,7 @@
         <SelectRecordingType v-model="recordingType" />
       </div>
       <SelectDateRange 
-        :dateData="dates" 
+        v-model="dates" 
         @update-dates="updateDates"
         @update-date-description="updateDateDescription"/>
       <b-form-row>
@@ -50,7 +50,7 @@
         :can-have-sub-tags="canHaveTags"
       />
       <b-button
-        :disabled="!isCustomDateRangeAndRangeIsValid || disabled"
+        :disabled="disabled"
         block
         variant="primary"
         @click="submit"
@@ -114,52 +114,23 @@ export default {
   data() {
     return {
       lastQuery: null,
-      query: this.resetQuery(),
+      lastQueryDescription: "",
+      query: {},
       rawAnimals: [],
       hasSpecifiedTags: false,
       canHaveTags: false,
       isAudio: true,
       advanced: false,
       loadedQuery: false,
-      isCustomDateRange: false,
       selectedDevices: [],
       selectedGroups: [],
       dates: {days: "3"},
-      dateDescription: ""
+      dateDescription: "", 
+      duration: {}  , 
+      recordingType: ""
     };
   },
   computed: {
-    recordingType: {
-      get() {
-        if (this.onlyRecordingType) {
-          return this.onlyRecordingType;
-        }
-        return (
-          this.query.where.type ||
-          this.$store.state.User.recordingTypePref ||
-          "both"
-        );
-      },
-      set(value) {
-        this.query.where.type = value;
-        // If it is an audio recording, then animals and tag types should be
-        // disabled as these filters do not apply to audio recordings
-        this.isAudio = value !== "video";
-      }
-    },
-    duration: {
-      get() {
-        const duration = this.query.where.duration;
-        return {
-          low: duration["$gte"],
-          high: duration["$lte"]
-        };
-      },
-      set(value) {
-        this.query.where.duration["$gte"] = value.low;
-        this.query.where.duration["$lte"] = value.high;
-      }
-    },
     tagTypes: {
       get() {
         return this.query.tagMode;
@@ -192,14 +163,6 @@ export default {
     groups: function() {
       return this.$store.state.Groups;
     },
-    isCustomDateRangeAndRangeIsValid: function() {
-      return (
-        !this.isCustomDateRange ||
-        (this.isCustomDateRange &&
-          this.query.where.recordingDateTime["$gt"] !== "" &&
-          this.query.where.recordingDateTime["$lt"] !== "")
-      );
-    }
   },
   watch: {
     isAudio: function() {
@@ -214,18 +177,19 @@ export default {
       // FIXME(jon): Back buttons with pagination is currently broken.
 
       const queryHasChanged =
-        JSON.stringify(this.lastQuery) !== JSON.stringify(this.query);
+        JSON.stringify(this.lastQuery) !== JSON.stringify(this.serialiseQueryForRecall());
       if (queryHasChanged) {
         this.parseCurrentRoute(false);
       }
-      this.$emit("submit", this.serialiseQuery(this.query, true));
-    }
+      this.$emit("submit", this.serialiseQueryForApi());
+    } 
   },
   mounted() {
+    this.resetToDefaultQuery();
     this.isAudio = this.recordingType === "audio";
     this.parseCurrentRoute();
     this.saveLastQuery();
-    this.$emit("submit", this.serialiseQuery(this.query, true));
+    this.$emit("submit", this.serialiseQueryForApi());
   },
   updated() {
     if (!this.loadedQuery) {
@@ -243,7 +207,8 @@ export default {
   },
   methods: {
     saveLastQuery() {
-      this.lastQuery = JSON.parse(JSON.stringify(this.query));
+      this.lastQuery = this.serialiseQueryForRecall();
+      this.lastQueryDescription = this.makeSearchDescription();
     },
     updatePagination(perPage, page) {
       this.query.limit = perPage;
@@ -251,28 +216,37 @@ export default {
       this.query.offset = newOffset;
       this.updateRouteQuery();
     },
-    deserialiseRouteIntoQuery(routeQuery, target) {
-      target = target || this.query;
-      for (const key in routeQuery) {
-        if (routeQuery.hasOwnProperty(key)) {
-          target[key] = routeQuery[key];
-        }
+    copyIfExists(itemName, source, destination) {
+      if (source.hasOwnProperty(itemName)) {
+        destination[itemName] = source[itemName];
       }
-      if (routeQuery.where) {
-        target.where = JSON.parse(routeQuery.where);
-        if (!target.where.duration) {
-          this.$set(target.where, "duration", {});
-        }
+    },
+    deserialiseRouteIntoQuery(routeQuery) {
+      const target = this.query;
+
+      this.copyIfExists("tagMode", routeQuery, target);
+      this.copyIfExists("offset", routeQuery, target);
+      this.copyIfExists("limit", routeQuery, target);
+
+      if (routeQuery.hasOwnProperty("minS")) { 
+        this.duration.low = routeQuery.minS;
       }
+      if (routeQuery.hasOwnProperty("maxS")) { 
+        this.duration = routeQuery.maxS;
+      }      
+
       if (routeQuery.tags) {
         target.tags = JSON.parse(routeQuery.tags);
       }
+
+      this.recordingType = routeQuery.type;
 
       this.dates = {
         days: routeQuery.days,
         toDate: routeQuery.toDate,
         fromDate: routeQuery.fromDate
       }
+
       if (routeQuery.hasOwnProperty("groups")) {
         this.selectedGroups = JSON.parse(routeQuery.groups);
       }
@@ -280,26 +254,56 @@ export default {
         this.selectedDevices = JSON.parse(routeQuery.devices);
       }
     },
+    serialiseQueryForRecall() {
+      const params = {
+        tagMode: this.query.tagMode,
+        minS: this.duration.low,
+        maxS: this.duration.high,
+        tags: this.query.tags,
+        limit: this.query.limit,
+        offset: this.query.offset,
+        days: this.dates.days,
+        fromDate: this.dates.fromDate,
+        toDate: this.dates.toDate,
+        groups: this.selectedGroups,
+        devices: this.selectedDevices,
+      };
+
+      params.type = this.recordingType;
+
+      for (const key in params) {
+        const val = params[key];
+        if (typeof val === "object") {
+          if (val.length == 0) {
+            delete params[val];
+          }
+          else {
+            params[key] = JSON.stringify(val);
+          }
+        }
+      }
+
+      return params;
+    },
+
     parseCurrentRoute(addState = true) {
+      this.resetToDefaultQuery();
       if (Object.keys(this.$route.query).length === 0) {
         // Populate the url params if we got here without them, ie. /recordings
-        this.query = this.resetQuery();
         if (addState) {
           this.updateRouteQuery();
         }
+      } else {
+        this.deserialiseRouteIntoQuery(this.$route.query);
       }
-      this.deserialiseRouteIntoQuery(this.$route.query);
     },
     updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
       this.saveLastQuery();
       this.$router.push({
         path: this.path,
-        query: this.serialiseQuery(this.query)
+        query: this.serialiseQueryForRecall()
       });
-    },
-    getQuery(useForApiCall = false) {
-      return this.serialiseQuery(this.query, useForApiCall);
     },
     submit: function() {
       if (!this.onlyRecordingType) {
@@ -319,21 +323,15 @@ export default {
     toggleSearchPanel: function() {
       this.$emit("toggled-search-panel");
     },
-    resetQuery() {
-      return {
-        where: {
-          duration: {
-            $gte: "0",
-            $lte: ""
-          },
-          recordingDateTime: {
-            $gt: "",
-            $lt: ""
-          }
-        },
+    resetToDefaultQuery() {
+      this.selectedDevices = [];
+      this.selectedGroups = [];
+      this.dates = {};
+      this.duration = {};
+      this.recordingType = this.$store.state.User.recordingTypePref || "both";
+      this.query = {
         tagMode: "any",
         tags: [],
-        type: ""
       };
     },
     formatQueryDate(date) {
@@ -345,59 +343,41 @@ export default {
         map[submap][key] = value;
       }
     },
-    serialiseQuery(query, useForApiCall = false) {
-      if (!query) {
-        return {};
-      }
+    serialiseQueryForApi() {
+      const query = this.query;
       const where = {};
-      if (this.onlyRecordingType) {
-        where.type = this.onlyRecordingType;
-      } else {
-        where.type =
-          query.where.type || this.$store.state.User.recordingTypePref;
-      }
-      this.addIfSet(where, query.where.duration["$gte"], "duration", "$gte");
-      this.addIfSet(where, query.where.duration["$lte"], "duration", "$lte");
+      this.addIfSet(where, this.duration.low, "duration", "$gte");
+      this.addIfSet(where, this.duration.high, "duration", "$lte");
 
-      if (useForApiCall) {
-        // Map between the mismatch in video type types between frontend and backend
-        if (where.type === "video") {
-          where.type = "thermalRaw";
-        } else if (where.type === "both") {
-          delete where.type;
-        }
-        // Remove the group param, since the API doesn't handle that, we're just using
-        // it to accurately share search parameters via urls.
-        delete where.dateRange;
-
-        if (this.selectedDevices.length > 0 && this.selectedGroups.length > 0) {
-          where["Op.or"] = [
-            { DeviceId: this.selectedDevices },
-            { GroupId: this.selectedGroups }
-          ];
-        } else if (this.selectedGroups.length > 0) {
-          where.GroupId = this.selectedGroups;
-        } else if (this.selectedDevices.length > 0) {
-          where.DeviceId = this.selectedDevices;
-        }
-    
-        let from = this.dates.from;
-        let until = this.dates.to; 
-        if (this.dates.hasOwnProperty("days") && this.dates.days !== "") {
-          // We must do this at the time the button is pushed
-          const now = new Date();
-          from = this.formatQueryDate(moment(now).add(this.dates.days, "days"));
-        } 
-        if (from || until) {
-          where.recordingDateTime = {};
-          if (from) {
-            where.recordingDateTime["$gt"] =  from;
-          }
-          if (until) {
-            where.recordingDateTime["$lt"] =  until;
-          }
-        }
+      // Map between the mismatch in video type types between frontend and backend
+      if (this.recordingType === "video") {
+        where.type = "thermalRaw";
+      } else if (this.recordingType !== "both") {
+        where.type = this.recordingType;
       }
+
+      // Remove the group param, since the API doesn't handle that, we're just using
+      // it to accurately share search parameters via urls.
+      if (this.selectedDevices.length > 0 && this.selectedGroups.length > 0) {
+        where["Op.or"] = [
+          { DeviceId: this.selectedDevices },
+          { GroupId: this.selectedGroups }
+        ];
+      } else if (this.selectedGroups.length > 0) {
+        where.GroupId = this.selectedGroups;
+      } else if (this.selectedDevices.length > 0) {
+        where.DeviceId = this.selectedDevices;
+      }
+  
+      let from = this.dates.from;
+      let until = this.dates.to; 
+      if (this.dates.hasOwnProperty("days") && this.dates.days !== "all") {
+        // We must do this at the time the button is pushed
+        const now = new Date();
+        from = this.formatQueryDate(moment(now).add(this.dates.days, "days"));
+      } 
+      this.addIfSet(where, from, "recordingDateTime", "$gt");
+      this.addIfSet(where, until, "recordingDateTime", "$lt");
 
       const params = {
         where: where,
@@ -407,19 +387,6 @@ export default {
         params.limit = query.limit;
         if (query.offset) {
           params.offset = query.offset;
-        }
-      }
-
-      if (!useForApiCall) {
-        params.days = this.dates.days;
-        params.fromDate = this.dates.fromDate;
-        params.toDate = this.dates.toDate;
-        
-        if (this.selectedDevices.length > 0) {
-          params.devices = this.selectedDevices;
-        }
-        if (this.selectedGroups.length > 0) {
-          params.groups = this.selectedGroups;
         }
       }
 
@@ -452,28 +419,25 @@ export default {
         }
         return `${total} device${multipleSuffix}`;
     },
-
     searchDescription() {
+      return this.lastQueryDescription;
+    },
+    makeSearchDescription() {
       // Get the current search query, not the live updated one.
       if (this.lastQuery !== null) {
         const query = this.lastQuery;
         const devices = this.devicesDescription();
-        if (this.onlyRecordingType) {
-          query.where.type = this.onlyRecordingType;
-        } else if (!query.where.type) {
-          query.where.type = this.$store.state.User.recordingTypePref;
-        }
-        const recordings =
-          query.where.type === "both" ? "audio and video" : query.where.type;
+
+      const recordings =
+          this.recordingType === "both" ? "audio and video" : this.recordingType;
         const numAnimals = query.tags.length;
         const multipleAnimalSuffix = numAnimals > 1 ? "s" : "";
         const tagsText =
           numAnimals === 0
             ? "all animals"
             : `${numAnimals} animal${multipleAnimalSuffix}`;
-        const isCustom =
-          query.where.dateRange && query.where.dateRange.isCustom;
-        const isAll = query.where.dateRange && query.where.dateRange.all;
+        const isCustom = false;
+        const isAll = query.days === "all";
         const relativeDateRange = Math.abs(
           Number(3000)
         );
@@ -486,11 +450,10 @@ export default {
           timespan = `last ${relativeDateRange} days`;
         }
 
-        const duration = query.where.duration;
         const durationFrom =
-          duration.hasOwnProperty("$gte") && Number(duration["$gte"]);
+          query.hasOwnProperty("minS") && Number(query["minS"]);
         const durationTo =
-          duration.hasOwnProperty("$lte") && Number(duration["$lte"]);
+          query.hasOwnProperty("maxS") && Number(query["maxS"]);
         let durationStr = "";
         if (
           durationFrom !== false &&
@@ -505,9 +468,9 @@ export default {
         if (!isAll) {
           if (isCustom) {
             timespan = `between <strong>${moment(
-              query.where.recordingDateTime["$gt"]
+              query.fromDate
             ).format("L")}</strong>&nbsp;
-              and&nbsp;<strong>${moment(query.where.recordingDateTime["$lt"])
+              and&nbsp;<strong>${moment(query.toDate["$lt"])
                 .add(1, "days")
                 .format("L")}</strong>${durationStr}`;
           } else {

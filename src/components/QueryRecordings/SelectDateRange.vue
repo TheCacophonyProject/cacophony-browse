@@ -32,7 +32,7 @@ export default {
   name: "SelectDateRange",  
   components: { SelectDate },
   props: {
-    dateData: {
+    value: {
       type: Object,
       required: true
     }
@@ -110,10 +110,10 @@ export default {
 
   watch: {
     serialisedData: function (val) {
-      this.$emit("update-dates", this.serialisedData);
+      this.$emit("input", this.serialisedData);
       this.$emit("update-date-description", this.makeDateDescription());
     },
-    dateData: function (val) {
+    value: function (val) {
       this.deserialise(val);
     }
   }
