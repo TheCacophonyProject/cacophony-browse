@@ -173,23 +173,11 @@ export default {
         this.tagTypes = "any";
       }
     },
-    $route() {
-      // FIXME(jon): Back buttons with pagination is currently broken.
-
-      const queryHasChanged =
-        JSON.stringify(this.lastQuery) !== JSON.stringify(this.serialiseQueryForRecall());
-      if (queryHasChanged) {
-        this.parseCurrentRoute(false);
-      }
-      this.$emit("submit", this.serialiseQueryForApi());
-    } 
   },
   mounted() {
     this.resetToDefaultQuery();
-    this.isAudio = this.recordingType === "audio";
     this.parseCurrentRoute();
-    this.saveLastQuery();
-    this.$emit("submit", this.serialiseQueryForApi());
+    this.makeApiRequest();
   },
   updated() {
     if (!this.loadedQuery) {
@@ -210,33 +198,44 @@ export default {
       this.lastQuery = this.serialiseQueryForRecall();
       this.lastQueryDescription = this.makeSearchDescription();
     },
+    queryHasChanged() {
+      return JSON.stringify(this.lastQuery) !== JSON.stringify(this.serialiseQueryForRecall());
+    },
     updatePagination(perPage, page) {
       this.query.limit = perPage;
       const newOffset = Math.max(0, (page - 1) * perPage);
       this.query.offset = newOffset;
       this.updateRouteQuery();
     },
-    copyIfExists(itemName, source, destination) {
+    setOnlyIfExists(itemName, source, destination) {
       if (source.hasOwnProperty(itemName)) {
         destination[itemName] = source[itemName];
+      }
+    },
+    makeArray(value) {
+      if (typeof value === "object") {
+        return value;
+      }
+      else {
+        return (value) ? [ value ] : [];
       }
     },
     deserialiseRouteIntoQuery(routeQuery) {
       const target = this.query;
 
-      this.copyIfExists("tagMode", routeQuery, target);
-      this.copyIfExists("offset", routeQuery, target);
-      this.copyIfExists("limit", routeQuery, target);
+      this.setOnlyIfExists("tagMode", routeQuery, target);
+      this.setOnlyIfExists("offset", routeQuery, target);
+      this.setOnlyIfExists("limit", routeQuery, target);
 
       if (routeQuery.hasOwnProperty("minS")) { 
         this.duration.low = routeQuery.minS;
       }
       if (routeQuery.hasOwnProperty("maxS")) { 
-        this.duration = routeQuery.maxS;
+        this.duration.high = routeQuery.maxS;
       }      
 
-      if (routeQuery.tags) {
-        target.tags = JSON.parse(routeQuery.tags);
+      if (routeQuery.hasOwnProperty("tag")) {
+        target.tags = this.makeArray(routeQuery.tag);
       }
 
       this.recordingType = routeQuery.type;
@@ -247,63 +246,52 @@ export default {
         fromDate: routeQuery.fromDate
       }
 
-      if (routeQuery.hasOwnProperty("groups")) {
-        this.selectedGroups = JSON.parse(routeQuery.groups);
+      if (routeQuery.hasOwnProperty("group")) {
+        this.selectedGroups = this.makeArray(routeQuery.group);
       }
-      if (routeQuery.hasOwnProperty("devices")) {
-        this.selectedDevices = JSON.parse(routeQuery.devices);
+      if (routeQuery.hasOwnProperty("device")) {
+        this.selectedDevices = this.makeArray(routeQuery.device);
       }
+
+      this.isAudio = this.recordingType === "audio";
     },
     serialiseQueryForRecall() {
       const params = {
         tagMode: this.query.tagMode,
         minS: this.duration.low,
         maxS: this.duration.high,
-        tags: this.query.tags,
+        tag: this.query.tags,
         limit: this.query.limit,
         offset: this.query.offset,
         days: this.dates.days,
         fromDate: this.dates.fromDate,
         toDate: this.dates.toDate,
-        groups: this.selectedGroups,
-        devices: this.selectedDevices,
+        group: this.selectedGroups,
+        device: this.selectedDevices,
+        type: this.recordingType,
       };
-
-      params.type = this.recordingType;
-
-      for (const key in params) {
-        const val = params[key];
-        if (typeof val === "object") {
-          if (val.length == 0) {
-            delete params[val];
-          }
-          else {
-            params[key] = JSON.stringify(val);
-          }
-        }
-      }
 
       return params;
     },
 
-    parseCurrentRoute(addState = true) {
+    parseCurrentRoute() {
       this.resetToDefaultQuery();
       if (Object.keys(this.$route.query).length === 0) {
         // Populate the url params if we got here without them, ie. /recordings
-        if (addState) {
-          this.updateRouteQuery();
-        }
+        this.updateRouteQuery();
       } else {
         this.deserialiseRouteIntoQuery(this.$route.query);
       }
     },
+
     updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
-      this.saveLastQuery();
-      this.$router.push({
-        path: this.path,
-        query: this.serialiseQueryForRecall()
-      });
+      if (this.queryHasChanged()) {  
+        this.$router.push({
+          path: this.path,
+          query: this.serialiseQueryForRecall()
+        });
+      }
     },
     submit: function() {
       if (!this.onlyRecordingType) {
@@ -312,9 +300,14 @@ export default {
 
       // Every time we submit a new query, we need to clear the offset param, as if we are on page 2+ of the results,
       // we can end up with an offset that is greater than the number of results in the new query.
-      Vue.delete(this.query, "offset");
+      Vue.delete(this.query, "offset");      
       this.updateRouteQuery();
+      this.makeApiRequest();
+    },
+    makeApiRequest: function() {
+      this.saveLastQuery();
       this.toggleSearchPanel();
+      this.$emit("submit", this.serialiseQueryForApi());
     },
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
     toggleAdvancedSearch: function() {
@@ -424,66 +417,61 @@ export default {
     },
     makeSearchDescription() {
       // Get the current search query, not the live updated one.
-      if (this.lastQuery !== null) {
-        const query = this.lastQuery;
-        const devices = this.devicesDescription();
+      const devices = this.devicesDescription();
 
       const recordings =
           this.recordingType === "both" ? "audio and video" : this.recordingType;
-        const numAnimals = query.tags.length;
-        const multipleAnimalSuffix = numAnimals > 1 ? "s" : "";
-        const tagsText =
-          numAnimals === 0
-            ? "all animals"
-            : `${numAnimals} animal${multipleAnimalSuffix}`;
-        const isCustom = false;
-        const isAll = query.days === "all";
-        const relativeDateRange = Math.abs(
-          Number(3000)
-        );
-        let timespan;
-        if (relativeDateRange === 1) {
-          timespan = "last 24 hours";
-        } else if (isAll || isNaN(relativeDateRange)) {
-          timespan = "";
-        } else {
-          timespan = `last ${relativeDateRange} days`;
-        }
-
-        const durationFrom =
-          query.hasOwnProperty("minS") && Number(query["minS"]);
-        const durationTo =
-          query.hasOwnProperty("maxS") && Number(query["maxS"]);
-        let durationStr = "";
-        if (
-          durationFrom !== false &&
-          durationTo !== false &&
-          durationTo !== 0
-        ) {
-          durationStr = ` with durations <strong>${durationFrom}</strong>&nbsp;&ndash;&nbsp;<strong>${durationTo}s</strong>`;
-        } else if (durationFrom !== false && durationFrom !== 0) {
-          durationStr = ` with durations <strong>> ${durationFrom}s</strong>`;
-        }
-
-        if (!isAll) {
-          if (isCustom) {
-            timespan = `between <strong>${moment(
-              query.fromDate
-            ).format("L")}</strong>&nbsp;
-              and&nbsp;<strong>${moment(query.toDate["$lt"])
-                .add(1, "days")
-                .format("L")}</strong>${durationStr}`;
-          } else {
-            timespan = `in the <strong>${timespan}</strong>`;
-          }
-        }
-        return (
-          `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
-          `${timespan}${durationStr}`
-        );
+      const numAnimals = this.query.tags.length;
+      const multipleAnimalSuffix = numAnimals > 1 ? "s" : "";
+      const tagsText =
+        numAnimals === 0
+          ? "all animals"
+          : `${numAnimals} animal${multipleAnimalSuffix}`;
+      const isCustom = false;
+      const isAll = this.dates.days === "all";
+      const relativeDateRange = Math.abs(
+        Number(3000)
+      );
+      let timespan;
+      if (relativeDateRange === 1) {
+        timespan = "last 24 hours";
+      } else if (isAll || isNaN(relativeDateRange)) {
+        timespan = "";
       } else {
-        return "";
+        timespan = `last ${relativeDateRange} days`;
       }
+
+      const durationFrom =
+        this.duration.hasOwnProperty("low") && Number(this.duration["low"]);
+      const durationTo =
+        this.duration.hasOwnProperty("high") && Number(this.durationy["high"]);
+      let durationStr = "";
+      if (
+        durationFrom !== false &&
+        durationTo !== false &&
+        durationTo !== 0
+      ) {
+        durationStr = ` with durations <strong>${durationFrom}</strong>&nbsp;&ndash;&nbsp;<strong>${durationTo}s</strong>`;
+      } else if (durationFrom !== false && durationFrom !== 0) {
+        durationStr = ` with durations <strong>> ${durationFrom}s</strong>`;
+      }
+
+      if (!isAll) {
+        if (isCustom) {
+          timespan = `between <strong>${moment(
+            this.fromDate
+          ).format("L")}</strong>&nbsp;
+            and&nbsp;<strong>${moment(query.toDate["$lt"])
+              .add(1, "days")
+              .format("L")}</strong>${durationStr}`;
+        } else {
+          timespan = `in the <strong>${timespan}</strong>`;
+        }
+      }
+      return (
+        `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
+        `${timespan}${durationStr}`
+      );
     },
     updateDeviceSelection(eventData) {
       if (eventData.hasOwnProperty("devices")) {

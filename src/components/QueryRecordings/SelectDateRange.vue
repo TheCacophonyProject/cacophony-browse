@@ -100,8 +100,8 @@ export default {
         this.dateRange = "custom";
       } 
 
-      this.fromDate = dateObject.from;
-      this.toDate = dateObject.to;
+      this.fromDate = dateObject.from || "";
+      this.toDate = dateObject.to  || "";
     },
     makeDateDescription() {
       return "blah blah blah";
