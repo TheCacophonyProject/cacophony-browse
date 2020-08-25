@@ -10,7 +10,7 @@ This is a web interface for querying with and interacting with Cacophony Project
 npm install
 
 # create config file
-cp dev-config.js.TEMPLATE to dev-config.js
+cp dev-config.js.TEMPLATE dev-config.js
 # now edit the config file to point to correct API server
 
 # serve with hot reload at localhost:8080
