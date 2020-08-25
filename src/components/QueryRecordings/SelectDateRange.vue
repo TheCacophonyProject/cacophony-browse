@@ -6,21 +6,11 @@
         v-model="dateRange"
         :options="options"
       />
-    <b-form-row>
-      <b-col>
-      Device data no {{ serialisedData }}
-      </b-col>
-    </b-form-row>
-
     </b-form-group>
-    <b-form-row v-if="dateRange === 'custom'">
-      <b-col sm="6">
-        <SelectDate v-model="fromDate" title="From" />
-      </b-col>
-      <b-col sm="6">
-        <SelectDate v-model="toDate" title="To" />
-      </b-col>
-    </b-form-row>
+    <b-form-group>
+      <SelectDate v-model="fromDate" v-if="dateRange === 'custom'" title="From" />
+      <SelectDate v-model="toDate" v-if="dateRange === 'custom'" title="To" />
+    </b-form-group>
   </div>
 </template>
 
@@ -78,12 +68,8 @@ export default {
     serialisedData: function () {
       let dateData = {};
       if (this.dateRange === 'custom') {
-        if (this.toDate && this.toDate.trim() !== "") {
-          dateData.from = this.fromDate + " 00:00:00";
-        }
-        if (this.toDate && this.toDate.trim() !== "") {
-          dateData.to = this.toDate + " 00:00:00";
-        }
+        dateData.from = this.fromDate;
+        dateData.to = this.toDate;
       } else {
         dateData.days = this.dateRange;
       }
@@ -113,9 +99,9 @@ export default {
       this.$emit("input", this.serialisedData);
       this.$emit("update-date-description", this.makeDateDescription());
     },
-    value: function (val) {
+    value: function(val) {
       this.deserialise(val);
-    }
+    },
   }
 };
 </script>

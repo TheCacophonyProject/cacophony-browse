@@ -24,10 +24,7 @@
       <div v-if="!onlyRecordingType">
         <SelectRecordingType v-model="recordingType" />
       </div>
-      <SelectDateRange 
-        v-model="dates" 
-        @update-dates="updateDates"
-        @update-date-description="updateDateDescription"/>
+      <SelectDateRange v-model="dates" />
       <b-form-row>
         <b-col>
           <b-button
@@ -42,12 +39,10 @@
         </b-col>
       </b-form-row>
       <SelectDuration v-if="advanced" v-model="duration" />
-      <SelectTagTypes v-if="advanced" v-model="tagTypes" :disabled="isAudio" />
-      <SelectAnimal
-        v-if="advanced"
-        v-model="animals"
-        :disabled="isAudio"
-        :can-have-sub-tags="canHaveTags"
+      <SelectTags 
+        v-if="advanced" 
+        v-model="tagData" 
+        :isDisabled="isAudio"         
       />
       <b-button
         :disabled="disabled"
@@ -66,7 +61,7 @@
 import moment from "moment";
 import DefaultLabels from "../../const.js";
 import SelectDevice from "./SelectDevice.vue";
-import SelectTagTypes from "./SelectTagTypes.vue";
+import SelectTags from "./SelectTags.vue";
 import SelectAnimal from "./SelectAnimal.vue";
 import SelectDuration from "./SelectDuration.vue";
 import SelectDate from "./SelectDate.vue";
@@ -79,7 +74,7 @@ export default {
   components: {
     SelectDateRange,
     SelectDevice,
-    SelectTagTypes,
+    SelectTags,
     SelectAnimal,
     SelectDuration,
     SelectDate,
@@ -117,81 +112,35 @@ export default {
       lastQueryDescription: "",
       query: {},
       rawAnimals: [],
-      hasSpecifiedTags: false,
-      canHaveTags: false,
-      isAudio: true,
       advanced: false,
-      loadedQuery: false,
       selectedDevices: [],
       selectedGroups: [],
-      dates: {days: "3"},
+      dates: {},
       dateDescription: "", 
       duration: {}  , 
-      recordingType: ""
+      recordingType: "",
+      tagData: {}
     };
   },
   computed: {
-    tagTypes: {
-      get() {
-        return this.query.tagMode;
-      },
-      set(value) {
-        this.query.tagMode = value;
-        this.canHaveTags = this.canHaveSpecifiedTags(value);
-        if (!this.canHaveTags) {
-          this.animals = [];
-        }
-      }
-    },
-    animals: {
-      get() {
-        return this.rawAnimals;
-      },
-      set(value) {
-        this.rawAnimals = value;
-        this.query.tags = value.map(option =>
-          option.value ? option.value : option.text
-        );
-        this.hasSpecifiedTags = this.rawAnimals > 0;
-        if (this.hasSpecifiedTags) {
-          if (!this.canHaveTags) {
-            this.tagTypes = "tagged";
-          }
-        }
-      }
+    isAudio : function () {
+      return this.recordingType === "audio";
     },
     groups: function() {
       return this.$store.state.Groups;
     },
   },
-  watch: {
-    isAudio: function() {
-      if (this.isAudio) {
-        // Reset any existing filters for animals and tag types when searching
-        // for audio recordings
-        this.animals = [];
-        this.tagTypes = "any";
-      }
-    },
-  },
   mounted() {
     this.resetToDefaultQuery();
-    this.parseCurrentRoute();
-    this.makeApiRequest();
-  },
-  updated() {
-    if (!this.loadedQuery) {
-      this.loadedQuery = true;
-      // If there was an advanced query, start with the advanced toggle area open.
-      this.advanced =
-        this.query.tags.length !== 0 ||
-        this.query.tagMode !== "any" ||
-        (this.query.where && this.query.where.duration.hasOwnProperty("$lte"));
-      this.canHaveTags = this.canHaveSpecifiedTags(this.query.tagMode);
-      this.animals = this.query.tags.map(tag =>
-        DefaultLabels.searchLabels().find(({ value }) => tag === value)
-      );
+
+    if (Object.keys(this.$route.query).length === 0) {
+      // Populate the url params if we got here without them, ie. /recordings
+      this.updateRouteQuery();
+    } else {
+      this.deserialiseRouteIntoQuery(this.$route.query);
     }
+
+    this.makeApiRequest();
   },
   methods: {
     saveLastQuery() {
@@ -220,12 +169,25 @@ export default {
         return (value) ? [ value ] : [];
       }
     },
+    setAdvancedInitalState() {
+      // If there was an advanced query, start with the advanced toggle area open.
+      this.advanced =
+        this.tagData.hasData ||
+        this.duration.hasOwnProperty("high") ||
+        this.duration.hasOwnProperty("low");
+    },
     deserialiseRouteIntoQuery(routeQuery) {
       const target = this.query;
 
-      this.setOnlyIfExists("tagMode", routeQuery, target);
+
       this.setOnlyIfExists("offset", routeQuery, target);
       this.setOnlyIfExists("limit", routeQuery, target);
+
+      this.setOnlyIfExists("tagMode", routeQuery, this.tagData);
+      if (routeQuery.hasOwnProperty("tag")) {
+        target.tags = this.makeArray(routeQuery.tag);
+      }
+
 
       if (routeQuery.hasOwnProperty("minS")) { 
         this.duration.low = routeQuery.minS;
@@ -235,15 +197,17 @@ export default {
       }      
 
       if (routeQuery.hasOwnProperty("tag")) {
-        target.tags = this.makeArray(routeQuery.tag);
+        target.tagData.tags = this.makeArray(routeQuery.tag);
       }
 
-      this.recordingType = routeQuery.type;
+      if (routeQuery.hasOwnProperty("type")) {
+        this.recordingType = routeQuery.type;
+      }
 
       this.dates = {
         days: routeQuery.days,
-        toDate: routeQuery.toDate,
-        fromDate: routeQuery.fromDate
+        to: routeQuery.to,
+        from: routeQuery.from
       }
 
       if (routeQuery.hasOwnProperty("group")) {
@@ -253,35 +217,25 @@ export default {
         this.selectedDevices = this.makeArray(routeQuery.device);
       }
 
-      this.isAudio = this.recordingType === "audio";
+      this.setAdvancedInitalState();
     },
     serialiseQueryForRecall() {
       const params = {
-        tagMode: this.query.tagMode,
+        tagMode: this.tagData.tagMode,
         minS: this.duration.low,
         maxS: this.duration.high,
-        tag: this.query.tags,
+        tag: this.tagData.tags,
         limit: this.query.limit,
         offset: this.query.offset,
         days: this.dates.days,
-        fromDate: this.dates.fromDate,
-        toDate: this.dates.toDate,
+        from: this.dates.from ,
+        to: this.dates.to,
         group: this.selectedGroups,
         device: this.selectedDevices,
         type: this.recordingType,
       };
 
       return params;
-    },
-
-    parseCurrentRoute() {
-      this.resetToDefaultQuery();
-      if (Object.keys(this.$route.query).length === 0) {
-        // Populate the url params if we got here without them, ie. /recordings
-        this.updateRouteQuery();
-      } else {
-        this.deserialiseRouteIntoQuery(this.$route.query);
-      }
     },
 
     updateRouteQuery() {
@@ -293,6 +247,7 @@ export default {
         });
       }
     },
+
     submit: function() {
       if (!this.onlyRecordingType) {
         this.$store.commit("User/updateRecordingTypePref", this.recordingType);
@@ -304,12 +259,12 @@ export default {
       this.updateRouteQuery();
       this.makeApiRequest();
     },
+
     makeApiRequest: function() {
       this.saveLastQuery();
       this.toggleSearchPanel();
       this.$emit("submit", this.serialiseQueryForApi());
     },
-    canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
     toggleAdvancedSearch: function() {
       this.advanced = !this.advanced;
     },
@@ -319,13 +274,14 @@ export default {
     resetToDefaultQuery() {
       this.selectedDevices = [];
       this.selectedGroups = [];
-      this.dates = {};
+      this.dates = {
+        days: 30
+      };
       this.duration = {};
       this.recordingType = this.$store.state.User.recordingTypePref || "both";
-      this.query = {
-        tagMode: "any",
-        tags: [],
-      };
+      this.tagData = {
+        hasData: false
+      }
     },
     formatQueryDate(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
@@ -337,7 +293,6 @@ export default {
       }
     },
     serialiseQueryForApi() {
-      const query = this.query;
       const where = {};
       this.addIfSet(where, this.duration.low, "duration", "$gte");
       this.addIfSet(where, this.duration.high, "duration", "$lte");
@@ -365,27 +320,32 @@ export default {
       let from = this.dates.from;
       let until = this.dates.to; 
       if (this.dates.hasOwnProperty("days") && this.dates.days !== "all") {
-        // We must do this at the time the button is pushed
+        // For the previous x days we want to do it at the time the submit is pressed and not cache it.  
+        // they could have had the window open for a few days.  
         const now = new Date();
-        from = this.formatQueryDate(moment(now).add(this.dates.days, "days"));
+        from = this.formatQueryDate(moment(now).add(-1 * this.dates.days, "days"));
       } 
       this.addIfSet(where, from, "recordingDateTime", "$gt");
       this.addIfSet(where, until, "recordingDateTime", "$lt");
 
       const params = {
         where: where,
-        tagMode: query.tagMode
       };
-      if (query.limit) {
-        params.limit = query.limit;
-        if (query.offset) {
-          params.offset = query.offset;
+
+      if (this.tagData.hasData){
+        params.tagMode = this.tagData.tagMode;
+        if (this.tagData.tags.length > 0) {
+          params.tags = this.tagData.tags;
+        }
+      }
+ 
+      if (this.query.limit) {
+        params.limit = this.query.limit;
+        if (this.query.offset) {
+          params.offset = this.query.offset;
         }
       }
 
-      if (query.tags && query.tags.length > 0) {
-        params.tags = query.tags;
-      }
       for (const key in params) {
         const val = params[key];
         if (typeof val === "object") {
@@ -421,7 +381,7 @@ export default {
 
       const recordings =
           this.recordingType === "both" ? "audio and video" : this.recordingType;
-      const numAnimals = this.query.tags.length;
+      const numAnimals = (this.tagData.tags) ? this.tagData.tags.length : 0;
       const multipleAnimalSuffix = numAnimals > 1 ? "s" : "";
       const tagsText =
         numAnimals === 0
@@ -473,6 +433,7 @@ export default {
         `${timespan}${durationStr}`
       );
     },
+
     updateDeviceSelection(eventData) {
       if (eventData.hasOwnProperty("devices")) {
         this.selectedDevices = eventData.devices;
@@ -481,12 +442,6 @@ export default {
         this.selectedGroups = eventData.groups;
       }
     },
-    updateDates(eventData) {
-      this.dates = eventData;
-    },
-    updateDateDescription(description) {
-      this.dateDescription = description;
-    }
   }
 };
 </script>
