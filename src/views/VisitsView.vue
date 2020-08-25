@@ -152,7 +152,7 @@
                       <template v-slot:cell(events)="row">
                         {{ row.item.events.length }}
                       </template>
-                      <template v-slot:cell(row-details)="row">
+                      <template v-slot:row-details="row">
                         <div
                           v-for="(visitEvents, index_e) in sortEventsByRec(
                             row.item
