@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SelectTagTypes v-model="tagType" :disabled="isDisabled" />
+    <SelectTagTypes v-model="mode" :disabled="isDisabled" />
     <SelectAnimal
     v-model="animals"
     :disabled="isDisabled"
@@ -30,42 +30,74 @@ export default {
   },
   data() {
     return {
-      animals: [],
-      tagType: "any",
+      animalData: [],
+      tagMode: "any",
     };
   },
   computed: {
-    canHaveTags: function() {
-        return this.canHaveSpecifiedTags(this.tagType);
+    animals: {
+        get: function() {
+            return this.animalData;
+        },
+        set: function(value) {
+            this.animalData = value;
+            if (value.length > 0) {
+                if (!this.canHaveTags) {
+                    this.tagMode = "tagged";
+                }
+            }
+            this.updateValue();
+        }
     },
-    serialisedData: function () {
+
+    mode: {
+        get: function() {
+            return this.tagMode;
+        },
+        set: function(value) {
+            this.tagMode = value;
+            if (!this.canHaveTags) {
+                this.animals = [];
+            }
+            this.updateValue();
+        }
+    },
+
+    canHaveTags: function() {
+        return this.canHaveSpecifiedTags(this.tagMode);
+    }
+  },
+  mounted: function() {
+    this.deserialise(this.value);
+  },
+  methods: {
+    updateValue: function () {
+        let returnVal = {};
         if (this.isDisabled) {
-            return {
+            returnVal = {
                 tags: [],
                 tagMode: "any",
                 hasData: false
             };
         }
 
-        return {
-            tags: this.makeTagList(this.animals),
-            tagMode: this.tagType,
-            hasData: ((this.tagType !== "any") || (this.animals.length > 1))
+        returnVal = {
+            tags: this.makeTagList(this.animalData),
+            tagMode: this.tagMode,
+            desciption: this.makeTagDescription()
         };
-    }
-  },
-  methods: {
+        this.$emit("input", returnVal);
+    },
     deserialise(tagObject) {
         if (tagObject.hasOwnProperty("tagMode")) {
-            this.tagType = tagObject.tagMode;
+            this.tagMode = tagObject.tagMode;
         }
         if (tagObject.hasOwnProperty("tags") && 
-            !this.arraysAreEqual(this.makeTagList(this.animals), tagObject.tags)) {
-            this.animals = tagObject.tags;
+            !this.arraysAreEqual(this.makeTagList(this.animalData), tagObject.tags)) {
+
+            this.animalData = tagObject.tags.map(tag =>
+               DefaultLabels.searchLabels().find(({ value }) => tag === value));
         }
-    },
-    makeDateDescription() {
-      return "blah blah animals";
     },
     makeTagList(tagObjects) {
         return tagObjects.map(option =>
@@ -75,10 +107,15 @@ export default {
         return(JSON.stringify(a1)==JSON.stringify(a2));
     },
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
+    makeTagDescription() {
+      const numanimalData = this.animalData.length;
+      const multipleanimalDatauffix = numanimalData > 1 ? "s" : "";
+      const tagsText =
+        numanimalData === 0
+          ? "all animalData"
+          : `${numanimalData} animal${multipleanimalDatauffix}`;
+    }
   },
-      // this.animals = this.query.tags.map(tag =>
-      //   DefaultLabels.searchLabels().find(({ value }) => tag === value)
-      // );
 
   watch: {
     serialisedData: function (val) {
@@ -87,19 +124,6 @@ export default {
     value: function (val) {
       this.deserialise(val);
     },
-    animals: function (val) {
-        const hasSpecifiedTags = this.rawAnimals > 0;
-        if (hasSpecifiedTags) {
-            if (!this.canHaveTags()) {
-                this.tagType = "tagged";
-            }
-        }
-    },
-    tagType: function (val) {
-        if (!this.canHaveSpecifiedTags(val)) {
-            this.animals = "";
-        }
-    }
   }
 };
 </script>

@@ -143,6 +143,18 @@ export default {
     this.makeApiRequest();
   },
   methods: {
+    resetToDefaultQuery() {
+      this.selectedDevices = [];
+      this.selectedGroups = [];
+      this.dates = {
+        days: 30
+      };
+      this.duration = {};
+      this.recordingType = this.$store.state.User.recordingTypePref || "both";
+      this.tagData = {
+        tagMode: "any"
+      }
+    },
     saveLastQuery() {
       this.lastQuery = this.serialiseQueryForRecall();
       this.lastQueryDescription = this.makeSearchDescription();
@@ -172,32 +184,25 @@ export default {
     setAdvancedInitalState() {
       // If there was an advanced query, start with the advanced toggle area open.
       this.advanced =
-        this.tagData.hasData ||
-        this.duration.hasOwnProperty("high") ||
-        this.duration.hasOwnProperty("low");
+        this.hasTagData() ||
+        this.duration.hasOwnProperty("maxS") ||
+        this.duration.hasOwnProperty("minS");
+    },
+    hasTagData() {
+      return this.tagMode !== "any" ||
+        (this.tagData.tags && this.tagData.tags.length > 1);
     },
     deserialiseRouteIntoQuery(routeQuery) {
-      const target = this.query;
-
-
-      this.setOnlyIfExists("offset", routeQuery, target);
-      this.setOnlyIfExists("limit", routeQuery, target);
+      this.setOnlyIfExists("offset", routeQuery, this.query);
+      this.setOnlyIfExists("limit", routeQuery, this.query);
 
       this.setOnlyIfExists("tagMode", routeQuery, this.tagData);
-      if (routeQuery.hasOwnProperty("tag")) {
-        target.tags = this.makeArray(routeQuery.tag);
-      }
 
-
-      if (routeQuery.hasOwnProperty("minS")) { 
-        this.duration.low = routeQuery.minS;
-      }
-      if (routeQuery.hasOwnProperty("maxS")) { 
-        this.duration.high = routeQuery.maxS;
-      }      
+      this.setOnlyIfExists("minS", routeQuery, this.duration);
+      this.setOnlyIfExists("maxS", routeQuery, this.duration);
 
       if (routeQuery.hasOwnProperty("tag")) {
-        target.tagData.tags = this.makeArray(routeQuery.tag);
+        this.tagData.tags = this.makeArray(routeQuery.tag);
       }
 
       if (routeQuery.hasOwnProperty("type")) {
@@ -222,8 +227,8 @@ export default {
     serialiseQueryForRecall() {
       const params = {
         tagMode: this.tagData.tagMode,
-        minS: this.duration.low,
-        maxS: this.duration.high,
+        minS: this.duration.minS,
+        maxS: this.duration.maxS,
         tag: this.tagData.tags,
         limit: this.query.limit,
         offset: this.query.offset,
@@ -271,18 +276,6 @@ export default {
     toggleSearchPanel: function() {
       this.$emit("toggled-search-panel");
     },
-    resetToDefaultQuery() {
-      this.selectedDevices = [];
-      this.selectedGroups = [];
-      this.dates = {
-        days: 30
-      };
-      this.duration = {};
-      this.recordingType = this.$store.state.User.recordingTypePref || "both";
-      this.tagData = {
-        hasData: false
-      }
-    },
     formatQueryDate(date) {
       return moment(date).format("YYYY-MM-DD HH:mm:ss");
     },
@@ -294,8 +287,8 @@ export default {
     },
     serialiseQueryForApi() {
       const where = {};
-      this.addIfSet(where, this.duration.low, "duration", "$gte");
-      this.addIfSet(where, this.duration.high, "duration", "$lte");
+      this.addIfSet(where, this.duration.minS, "duration", "$gte");
+      this.addIfSet(where, this.duration.maxS, "duration", "$lte");
 
       // Map between the mismatch in video type types between frontend and backend
       if (this.recordingType === "video") {
@@ -332,9 +325,9 @@ export default {
         where: where,
       };
 
-      if (this.tagData.hasData){
+      if (this.hasTagData()){
         params.tagMode = this.tagData.tagMode;
-        if (this.tagData.tags.length > 0) {
+        if (this.tagData.tags && this.tagData.tags.length > 0) {
           params.tags = this.tagData.tags;
         }
       }
@@ -378,56 +371,13 @@ export default {
     makeSearchDescription() {
       // Get the current search query, not the live updated one.
       const devices = this.devicesDescription();
+      const tagsText = this.tagData.description || "";
+      const timespan = this.dates.description || "";
+      const durationStr = this.duration.description || "";
 
       const recordings =
           this.recordingType === "both" ? "audio and video" : this.recordingType;
-      const numAnimals = (this.tagData.tags) ? this.tagData.tags.length : 0;
-      const multipleAnimalSuffix = numAnimals > 1 ? "s" : "";
-      const tagsText =
-        numAnimals === 0
-          ? "all animals"
-          : `${numAnimals} animal${multipleAnimalSuffix}`;
-      const isCustom = false;
-      const isAll = this.dates.days === "all";
-      const relativeDateRange = Math.abs(
-        Number(3000)
-      );
-      let timespan;
-      if (relativeDateRange === 1) {
-        timespan = "last 24 hours";
-      } else if (isAll || isNaN(relativeDateRange)) {
-        timespan = "";
-      } else {
-        timespan = `last ${relativeDateRange} days`;
-      }
 
-      const durationFrom =
-        this.duration.hasOwnProperty("low") && Number(this.duration["low"]);
-      const durationTo =
-        this.duration.hasOwnProperty("high") && Number(this.durationy["high"]);
-      let durationStr = "";
-      if (
-        durationFrom !== false &&
-        durationTo !== false &&
-        durationTo !== 0
-      ) {
-        durationStr = ` with durations <strong>${durationFrom}</strong>&nbsp;&ndash;&nbsp;<strong>${durationTo}s</strong>`;
-      } else if (durationFrom !== false && durationFrom !== 0) {
-        durationStr = ` with durations <strong>> ${durationFrom}s</strong>`;
-      }
-
-      if (!isAll) {
-        if (isCustom) {
-          timespan = `between <strong>${moment(
-            this.fromDate
-          ).format("L")}</strong>&nbsp;
-            and&nbsp;<strong>${moment(query.toDate["$lt"])
-              .add(1, "days")
-              .format("L")}</strong>${durationStr}`;
-        } else {
-          timespan = `in the <strong>${timespan}</strong>`;
-        }
-      }
       return (
         `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
         `${timespan}${durationStr}`

@@ -17,7 +17,6 @@
 <script>
 import SelectDate from "./SelectDate.vue";
 
-
 export default {
   name: "SelectDateRange",  
   components: { SelectDate },
