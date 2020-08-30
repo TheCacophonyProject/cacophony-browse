@@ -39,17 +39,8 @@
         </b-col>
       </b-form-row>
       <SelectDuration v-if="advanced" v-model="duration" />
-      <SelectTags 
-        v-if="advanced" 
-        v-model="tagData" 
-        :isDisabled="isAudio"         
-      />
-      <b-button
-        :disabled="disabled"
-        block
-        variant="primary"
-        @click="submit"
-      >
+      <SelectTags v-if="advanced" v-model="tagData" :isDisabled="isAudio" />
+      <b-button :disabled="disabled" block variant="primary" @click="submit">
         <span v-if="!disabled">Search</span>
         <span v-else>Searching...</span>
       </b-button>
@@ -59,12 +50,9 @@
 
 <script>
 import moment from "moment";
-import DefaultLabels from "../../const.js";
 import SelectDevice from "./SelectDevice.vue";
 import SelectTags from "./SelectTags.vue";
-import SelectAnimal from "./SelectAnimal.vue";
 import SelectDuration from "./SelectDuration.vue";
-import SelectDate from "./SelectDate.vue";
 import SelectRecordingType from "./SelectRecordingType.vue";
 import SelectDateRange from "./SelectDateRange.vue";
 import Vue from "vue";
@@ -75,9 +63,7 @@ export default {
     SelectDateRange,
     SelectDevice,
     SelectTags,
-    SelectAnimal,
     SelectDuration,
-    SelectDate,
     SelectRecordingType
   },
   props: {
@@ -116,19 +102,19 @@ export default {
       selectedDevices: [],
       selectedGroups: [],
       dates: {},
-      dateDescription: "", 
-      duration: {}  , 
+      dateDescription: "",
+      duration: {},
       recordingType: "",
       tagData: {}
     };
   },
   computed: {
-    isAudio : function () {
+    isAudio: function() {
       return this.recordingType === "audio";
     },
     groups: function() {
       return this.$store.state.Groups;
-    },
+    }
   },
   mounted() {
     this.resetToDefaultQuery();
@@ -153,14 +139,17 @@ export default {
       this.recordingType = this.$store.state.User.recordingTypePref || "both";
       this.tagData = {
         tagMode: "any"
-      }
+      };
     },
     saveLastQuery() {
       this.lastQuery = this.serialiseQueryForRecall();
       this.lastQueryDescription = this.makeSearchDescription();
     },
     queryHasChanged() {
-      return JSON.stringify(this.lastQuery) !== JSON.stringify(this.serialiseQueryForRecall());
+      return (
+        JSON.stringify(this.lastQuery) !==
+        JSON.stringify(this.serialiseQueryForRecall())
+      );
     },
     updatePagination(perPage, page) {
       this.query.limit = perPage;
@@ -176,9 +165,8 @@ export default {
     makeArray(value) {
       if (typeof value === "object") {
         return value;
-      }
-      else {
-        return (value) ? [ value ] : [];
+      } else {
+        return value ? [value] : [];
       }
     },
     setAdvancedInitalState() {
@@ -189,8 +177,10 @@ export default {
         this.duration.hasOwnProperty("minS");
     },
     hasTagData() {
-      return this.tagMode !== "any" ||
-        (this.tagData.tags && this.tagData.tags.length > 1);
+      return (
+        this.tagMode !== "any" ||
+        (this.tagData.tags && this.tagData.tags.length > 1)
+      );
     },
     deserialiseRouteIntoQuery(routeQuery) {
       this.setOnlyIfExists("offset", routeQuery, this.query);
@@ -213,7 +203,7 @@ export default {
         days: routeQuery.days,
         to: routeQuery.to,
         from: routeQuery.from
-      }
+      };
 
       if (routeQuery.hasOwnProperty("group")) {
         this.selectedGroups = this.makeArray(routeQuery.group);
@@ -233,11 +223,11 @@ export default {
         limit: this.query.limit,
         offset: this.query.offset,
         days: this.dates.days,
-        from: this.dates.from ,
+        from: this.dates.from,
         to: this.dates.to,
         group: this.selectedGroups,
         device: this.selectedDevices,
-        type: this.recordingType,
+        type: this.recordingType
       };
 
       return params;
@@ -245,7 +235,7 @@ export default {
 
     updateRouteQuery() {
       // Update the url query params string so that this search can be easily shared.
-      if (this.queryHasChanged()) {  
+      if (this.queryHasChanged()) {
         this.$router.push({
           path: this.path,
           query: this.serialiseQueryForRecall()
@@ -260,7 +250,7 @@ export default {
 
       // Every time we submit a new query, we need to clear the offset param, as if we are on page 2+ of the results,
       // we can end up with an offset that is greater than the number of results in the new query.
-      Vue.delete(this.query, "offset");      
+      Vue.delete(this.query, "offset");
       this.updateRouteQuery();
       this.makeApiRequest();
     },
@@ -309,29 +299,31 @@ export default {
       } else if (this.selectedDevices.length > 0) {
         where.DeviceId = this.selectedDevices;
       }
-  
+
       let from = this.dates.from;
-      let until = this.dates.to; 
+      const until = this.dates.to;
       if (this.dates.hasOwnProperty("days") && this.dates.days !== "all") {
-        // For the previous x days we want to do it at the time the submit is pressed and not cache it.  
-        // they could have had the window open for a few days.  
+        // For the previous x days we want to do it at the time the submit is pressed and not cache it.
+        // they could have had the window open for a few days.
         const now = new Date();
-        from = this.formatQueryDate(moment(now).add(-1 * this.dates.days, "days"));
-      } 
+        from = this.formatQueryDate(
+          moment(now).add(-1 * this.dates.days, "days")
+        );
+      }
       this.addIfSet(where, from, "recordingDateTime", "$gt");
       this.addIfSet(where, until, "recordingDateTime", "$lt");
 
       const params = {
-        where: where,
+        where: where
       };
 
-      if (this.hasTagData()){
+      if (this.hasTagData()) {
         params.tagMode = this.tagData.tagMode;
         if (this.tagData.tags && this.tagData.tags.length > 0) {
           params.tags = this.tagData.tags;
         }
       }
- 
+
       if (this.query.limit) {
         params.limit = this.query.limit;
         if (this.query.offset) {
@@ -350,20 +342,20 @@ export default {
     },
 
     devicesDescription() {
-        const numDevices = this.selectedDevices.length;
-        const numGroups = this.selectedGroups.length;
-        const total = numDevices + numGroups;
+      const numDevices = this.selectedDevices.length;
+      const numGroups = this.selectedGroups.length;
+      const total = numDevices + numGroups;
 
-        const multipleSuffix = total > 1 ? "s" : "";
+      const multipleSuffix = total > 1 ? "s" : "";
 
-        if (total === 0) {
-          return "All devices"
-        } else if (numDevices && numGroups) {
-          return `${total} groups and devices`;
-        } else if (numGroups) {
-          return `${total} group${multipleSuffix}`;
-        }
-        return `${total} device${multipleSuffix}`;
+      if (total === 0) {
+        return "All devices";
+      } else if (numDevices && numGroups) {
+        return `${total} groups and devices`;
+      } else if (numGroups) {
+        return `${total} group${multipleSuffix}`;
+      }
+      return `${total} device${multipleSuffix}`;
     },
     searchDescription() {
       return this.lastQueryDescription;
@@ -376,7 +368,7 @@ export default {
       const durationStr = this.duration.description || "";
 
       const recordings =
-          this.recordingType === "both" ? "audio and video" : this.recordingType;
+        this.recordingType === "both" ? "audio and video" : this.recordingType;
 
       return (
         `<strong>${devices}</strong>, <strong>${recordings} recordings</strong> and <strong>${tagsText}</strong> ` +
@@ -391,7 +383,7 @@ export default {
       if (eventData.hasOwnProperty("groups")) {
         this.selectedGroups = eventData.groups;
       }
-    },
+    }
   }
 };
 </script>

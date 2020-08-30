@@ -2,13 +2,14 @@
   <div>
     <b-form-group>
       <label>Date range</label>
-      <b-form-select
-        v-model="dateRange"
-        :options="options"
-      />
+      <b-form-select v-model="dateRange" :options="options" />
     </b-form-group>
     <b-form-group>
-      <SelectDate v-model="fromDate" v-if="dateRange === 'custom'" title="From" />
+      <SelectDate
+        v-model="fromDate"
+        v-if="dateRange === 'custom'"
+        title="From"
+      />
       <SelectDate v-model="toDate" v-if="dateRange === 'custom'" title="To" />
     </b-form-group>
   </div>
@@ -18,7 +19,7 @@
 import SelectDate from "./SelectDate.vue";
 
 export default {
-  name: "SelectDateRange",  
+  name: "SelectDateRange",
   components: { SelectDate },
   props: {
     value: {
@@ -46,15 +47,15 @@ export default {
         },
         {
           value: 30,
-          text: "Last 30 days",
+          text: "Last 30 days"
         },
         {
           value: 90,
           text: "Last 90 days"
         },
-        { 
+        {
           value: "all",
-          text: "All" 
+          text: "All"
         },
         {
           value: "custom",
@@ -64,14 +65,15 @@ export default {
     };
   },
   computed: {
-    serialisedData: function () {
-      let dateData = {};
-      if (this.dateRange === 'custom') {
+    serialisedData: function() {
+      const dateData = {};
+      if (this.dateRange === "custom") {
         dateData.from = this.fromDate;
         dateData.to = this.toDate;
       } else {
         dateData.days = this.dateRange;
       }
+      dateData.description = this.makeDateDescription();
       return dateData;
     }
   },
@@ -83,24 +85,43 @@ export default {
         this.dateRange = dateObject.days;
       } else {
         this.dateRange = "custom";
-      } 
+      }
 
       this.fromDate = dateObject.from || "";
-      this.toDate = dateObject.to  || "";
+      this.toDate = dateObject.to || "";
     },
     makeDateDescription() {
-      return "blah blah blah";
+      if (this.dateRange === "all") {
+        return " in all recordings";
+      } else if (this.dateRange === "custom") {
+        const start = this.fromDate.length ? this.fromDate.split(" ")[0] : "";
+        const end = this.toDate.length > 0 ? this.toDate.split(" ")[0] : "";
+        if (start.length > 0) {
+          if (end.length > 0) {
+            return ` recorded between <strong>${start} and ${end}</strong>`;
+          } else {
+            return ` recorded after <strong>${start}</strong>`;
+          }
+        } else if (end.length > 0) {
+          return ` srecorded after <strong>${end}</strong>`;
+        } else {
+          return " in all recordings ";
+        }
+      } else if (this.dateRange == 1) {
+        return " in the <strong>last 24 hours</strong> ";
+      } else {
+        return ` in the <strong>last ${this.dateRange} days</strong>`;
+      }
     }
   },
 
   watch: {
-    serialisedData: function (val) {
-      this.$emit("input", this.serialisedData);
-      this.$emit("update-date-description", this.makeDateDescription());
+    serialisedData: function(value) {
+      this.$emit("input", value);
     },
     value: function(val) {
       this.deserialise(val);
-    },
+    }
   }
 };
 </script>

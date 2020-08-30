@@ -117,22 +117,19 @@ export default {
     makeDurationDescription(duration) {
       if (duration.hasOwnProperty("minS")) {
         if (duration.hasOwnProperty("maxS")) {
-          return ` with durations <strong>${duration.minS}s</strong>&nbsp;&ndash;&nbsp;<strong>${duration.minS}s</strong>`;
+          return ` with duration <strong>${duration.minS}s</strong>&nbsp;&ndash;&nbsp;<strong>${duration.maxS}s</strong>`;
+        } else {
+          return ` longer than <strong>${duration.minS}s</strong>`;
         }
-        else {
-          return ` with minimum duration <strong>${duration.minS}s</strong>`;
-        }
-      }
-      else if (duration.hasOwnProperty("maxS")) {
-        return ` with maximum duration <strong>${duration.maxS}s</strong>`;
-      }
-      else {
+      } else if (duration.hasOwnProperty("maxS")) {
+        return ` shorter than <strong>${duration.maxS}s</strong>`;
+      } else {
         return "";
       }
     },
 
     emitUpdatedValue(duration) {
-      if (duration.minS === "0") {
+      if (duration.minS === "0" || duration.mins === "") {
         delete duration.minS;
       }
 
