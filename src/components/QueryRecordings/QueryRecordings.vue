@@ -95,7 +95,6 @@ export default {
   data() {
     return {
       lastQuery: null,
-      lastQueryDescription: "",
       query: {},
       rawAnimals: [],
       advanced: false,
@@ -105,7 +104,7 @@ export default {
       dateDescription: "",
       duration: {},
       recordingType: "",
-      tagData: {}
+      tagData: {},
     };
   },
   computed: {
@@ -116,7 +115,7 @@ export default {
       return this.$store.state.Groups;
     }
   },
-  mounted() {
+  created() {
     this.resetToDefaultQuery();
 
     if (Object.keys(this.$route.query).length === 0) {
@@ -126,6 +125,8 @@ export default {
       this.deserialiseRouteIntoQuery(this.$route.query);
     }
 
+  }, 
+  mounted() {
     this.makeApiRequest();
   },
   methods: {
@@ -143,7 +144,7 @@ export default {
     },
     saveLastQuery() {
       this.lastQuery = this.serialiseQueryForRecall();
-      this.lastQueryDescription = this.makeSearchDescription();
+      this.$emit("description", this.makeSearchDescription());
     },
     queryHasChanged() {
       return (
@@ -356,9 +357,6 @@ export default {
         return `${total} group${multipleSuffix}`;
       }
       return `${total} device${multipleSuffix}`;
-    },
-    searchDescription() {
-      return this.lastQueryDescription;
     },
     makeSearchDescription() {
       // Get the current search query, not the live updated one.

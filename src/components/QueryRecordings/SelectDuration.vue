@@ -75,7 +75,8 @@ export default {
       return this.getOptionForValue(this.value);
     }
   },
-  mounted() {
+  created() {
+    this.updateDurationType(this.selectedOption);
     this.isCustom = this.getOptionForValue(this.value).isCustom;
   },
   methods: {
