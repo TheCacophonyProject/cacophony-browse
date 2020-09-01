@@ -155,6 +155,7 @@ export default {
       const newOffset = Math.max(0, (page - 1) * perPage);
       this.query.offset = newOffset;
       this.updateRouteQuery();
+      this.makeApiRequest();
     },
     setOnlyIfExists(itemName, source, destination) {
       if (source.hasOwnProperty(itemName)) {

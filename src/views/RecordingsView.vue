@@ -231,8 +231,11 @@ export default {
       delete queryCopy.days;
       delete queryCopy.from;
       delete queryCopy.to;
+
       // delete type as this is controlled by the view
       delete queryCopy.type;
+      delete queryCopy.limit;
+      delete queryCopy.offset;
 
       return querystring.stringify(queryCopy);
     }
