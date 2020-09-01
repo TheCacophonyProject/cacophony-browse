@@ -14,7 +14,7 @@
           :path="'visits'"
           :is-collapsed="searchPanelIsCollapsed"
           @submit="submitNewQuery"
-          @description="nextQueryDescription"
+          @description="saveNextQueryDescription"
           @toggled-search-panel="
             searchPanelIsCollapsed = !searchPanelIsCollapsed
           "
@@ -35,7 +35,7 @@
             <div style="display:flex;">
               <h1 style="flex-grow: 100;">Visits</h1>
               <div style="align-self: flex-end;">
-                <CsvDownload :params="serialisedQuery" :visits="true" />
+                <CsvDownload :params="queryParams" :visits="true" />
                 <b-button variant="link" @click="showInfo = true">
                   <font-awesome-icon icon="question-circle" size="sm" />
                   Help</b-button
@@ -250,7 +250,7 @@ export default {
   components: { QueryRecordings, EventSummary, AudioSummary, CsvDownload },
   data() {
     return {
-      serialisedQuery: {},
+      queryParams: {},
       showInfo: this.isInfoShown(),
       infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
       tableDateTimeFormat: "L LTS",
@@ -402,7 +402,7 @@ export default {
       return {};
     },
     submitNewQuery(whereQuery) {
-      this.serialisedQuery = whereQuery;
+      this.queryParams = whereQuery;
       this.getVisits(whereQuery, true);
     },
     saveNextQueryDescription(description) {

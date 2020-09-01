@@ -49,7 +49,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import SelectDevice from "./SelectDevice.vue";
 import SelectTags from "./SelectTags.vue";
 import SelectDuration from "./SelectDuration.vue";
@@ -104,7 +103,7 @@ export default {
       dateDescription: "",
       duration: {},
       recordingType: "",
-      tagData: {},
+      tagData: {}
     };
   },
   computed: {
@@ -124,8 +123,7 @@ export default {
     } else {
       this.deserialiseRouteIntoQuery(this.$route.query);
     }
-
-  }, 
+  },
   mounted() {
     this.makeApiRequest();
   },
@@ -226,10 +224,23 @@ export default {
         days: this.dates.days,
         from: this.dates.from,
         to: this.dates.to,
-        group: this.selectedGroups,
-        device: this.selectedDevices,
         type: this.recordingType
       };
+
+      if (this.selectedDevices.length > 0) {
+        params.device = this.selectedDevices;
+      }
+
+      if (this.selectedGroups.length > 0) {
+        params.group = this.selectedGroups;
+      }
+
+      // remove undefined elements
+      for (const key in params) {
+        if (!params[key] || params[key] === []) {
+          delete params[key];
+        }
+      }
 
       return params;
     },
@@ -259,7 +270,7 @@ export default {
     makeApiRequest: function() {
       this.saveLastQuery();
       this.toggleSearchPanel();
-      this.$emit("submit", this.serialiseQueryForApi());
+      this.$emit("submit", this.serialiseQueryForRecall());
     },
     toggleAdvancedSearch: function() {
       this.advanced = !this.advanced;
@@ -267,81 +278,6 @@ export default {
     toggleSearchPanel: function() {
       this.$emit("toggled-search-panel");
     },
-    formatQueryDate(date) {
-      return moment(date).format("YYYY-MM-DD HH:mm:ss");
-    },
-    addIfSet(map, value, submap, key) {
-      if (value && value.trim() !== "") {
-        map[submap] = map[submap] || {};
-        map[submap][key] = value;
-      }
-    },
-    serialiseQueryForApi() {
-      const where = {};
-      this.addIfSet(where, this.duration.minS, "duration", "$gte");
-      this.addIfSet(where, this.duration.maxS, "duration", "$lte");
-
-      // Map between the mismatch in video type types between frontend and backend
-      if (this.recordingType === "video") {
-        where.type = "thermalRaw";
-      } else if (this.recordingType !== "both") {
-        where.type = this.recordingType;
-      }
-
-      // Remove the group param, since the API doesn't handle that, we're just using
-      // it to accurately share search parameters via urls.
-      if (this.selectedDevices.length > 0 && this.selectedGroups.length > 0) {
-        where["Op.or"] = [
-          { DeviceId: this.selectedDevices },
-          { GroupId: this.selectedGroups }
-        ];
-      } else if (this.selectedGroups.length > 0) {
-        where.GroupId = this.selectedGroups;
-      } else if (this.selectedDevices.length > 0) {
-        where.DeviceId = this.selectedDevices;
-      }
-
-      let from = this.dates.from;
-      const until = this.dates.to;
-      if (this.dates.hasOwnProperty("days") && this.dates.days !== "all") {
-        // For the previous x days we want to do it at the time the submit is pressed and not cache it.
-        // they could have had the window open for a few days.
-        const now = new Date();
-        from = this.formatQueryDate(
-          moment(now).add(-1 * this.dates.days, "days")
-        );
-      }
-      this.addIfSet(where, from, "recordingDateTime", "$gt");
-      this.addIfSet(where, until, "recordingDateTime", "$lt");
-
-      const params = {
-        where: where
-      };
-
-      if (this.hasTagData()) {
-        params.tagMode = this.tagData.tagMode;
-        if (this.tagData.tags && this.tagData.tags.length > 0) {
-          params.tags = this.tagData.tags;
-        }
-      }
-
-      if (this.query.limit) {
-        params.limit = this.query.limit;
-        if (this.query.offset) {
-          params.offset = this.query.offset;
-        }
-      }
-
-      for (const key in params) {
-        const val = params[key];
-        if (typeof val === "object") {
-          params[key] = JSON.stringify(val);
-        }
-      }
-
-      return params;
-    },
-
     devicesDescription() {
       const numDevices = this.selectedDevices.length;
       const numGroups = this.selectedGroups.length;

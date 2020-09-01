@@ -1,7 +1,7 @@
 <template>
   <a
     v-if="displayStyle === 'card'"
-    :href="`/recording/${item.id}`"
+    :href="`/recording/${this.item.id}?${queryStr}`"
     class="recording-summary"
     @click="event => navigateToRecording(event, item.id)"
   >
@@ -100,6 +100,10 @@ export default {
       type: String,
       required: true,
       default: "cards"
+    },
+    queryStr: {
+      type: String,
+      default: ""
     }
   },
   computed: {

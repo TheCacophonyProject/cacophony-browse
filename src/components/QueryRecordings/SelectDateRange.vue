@@ -67,7 +67,6 @@ export default {
   created() {
     this.deserialise(this.value);
     this.$emit("input", this.serialisedData);
-
   },
   computed: {
     serialisedData: function() {
@@ -117,7 +116,6 @@ export default {
       } else {
         return ` in the <strong>last ${this.dateRange} days</strong>`;
       }
-      return " in all recordings";
     }
   },
 

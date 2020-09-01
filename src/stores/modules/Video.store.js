@@ -78,14 +78,11 @@ const getters = {
 };
 
 const actions = {
-  async QUERY_RECORDING(_, { params, direction, skipMessage }) {
+  async QUERY_RECORDING(_, { params, skipMessage }) {
     const { result, success } = await api.recording.query(params);
     if (!success || !result.rows || result.rows.length == 0) {
       if (!skipMessage) {
-        store.dispatch(
-          "Messaging/WARN",
-          `No ${direction} recording for this device.`
-        );
+        store.dispatch("Messaging/WARN", `No more recordings for this search.`);
       }
       return false;
     }
