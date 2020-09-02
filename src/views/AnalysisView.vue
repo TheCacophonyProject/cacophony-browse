@@ -146,17 +146,17 @@ export default {
   },
   methods: {
     getData: async function() {
-      this.fetching = true;      
-      
+      this.fetching = true;
+
       const limit = 1000;
       const searchParams = {
         type: this.recording,
         days: this.dateRange,
-        limit: limit,
-      }      
+        limit: limit
+      };
 
       if (this.showGroups !== "all") {
-        searchParams.group = [ group.id ];
+        searchParams.group = [this.showGroups];
       }
 
       // Get all data (first 1000 rows)
@@ -236,13 +236,13 @@ export default {
       const deviceName = array[0]._model.label;
       const device = this.devices.find(device => {
         return device.name === deviceName;
-      });      
+      });
 
       const searchParams = {
         type: this.recordingType,
         days: this.dateRange,
-        device: [ device.id ]
-      }  
+        device: [device.id]
+      };
 
       this.$router.push({
         path: "recordings",
