@@ -243,7 +243,7 @@ function makeApiQuery(query: RecordingQuery): any {
   const hasDevices = query.hasOwnProperty("device") && query.device.length > 0;
   const hasGroups = query.hasOwnProperty("group") && query.group.length > 0;
   if (hasDevices && hasGroups) {
-    apiWhere["Op.or"] = [{ DeviceId: query.device }, { GroupId: query.group }];
+    apiWhere["$or"] = [{ DeviceId: query.device }, { GroupId: query.group }];
   } else if (hasGroups) {
     apiWhere["GroupId"] = query.group;
   } else if (hasDevices) {
