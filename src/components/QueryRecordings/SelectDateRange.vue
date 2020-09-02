@@ -54,6 +54,10 @@ export default {
           text: "Last 90 days"
         },
         {
+          value: 365,
+          text: "Last year"
+        },
+        {
           value: "all",
           text: "All"
         },
