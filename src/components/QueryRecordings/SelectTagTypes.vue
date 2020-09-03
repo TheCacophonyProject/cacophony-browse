@@ -8,6 +8,7 @@
       :disabled="disabled"
       placeholder="any"
       @input="$emit('input', $event)"
+      data-cy="tag-select"
     />
   </b-form-group>
 </template>
