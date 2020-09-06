@@ -35,6 +35,7 @@
             variant="link"
             class="toggle-advanced-search-btn"
             @click="() => toggleAdvancedSearch()"
+            data-cy="advanced-options"
           >
             Advanced search
             <font-awesome-icon v-if="!advanced" :icon="['fas', 'caret-down']" />
