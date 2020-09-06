@@ -5,6 +5,7 @@
       :value="selectedOption"
       :options="options"
       @input="updateDurationType"
+      data-cy="duration-select"
     />
     <b-form-row
       v-if="isCustom"

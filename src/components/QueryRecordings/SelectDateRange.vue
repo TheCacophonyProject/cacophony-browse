@@ -5,6 +5,7 @@
       :value="value"
       :options="options"
       @input="$emit('input', $event)"
+      data-cy="date-select"
     />
   </b-form-group>
 </template>

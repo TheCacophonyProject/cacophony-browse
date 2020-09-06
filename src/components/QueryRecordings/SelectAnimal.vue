@@ -10,6 +10,7 @@
       label="text"
       track-by="value"
       @input="$emit('input', $event)"
+      data-cy="animal-select"
     />
   </b-form-group>
 </template>

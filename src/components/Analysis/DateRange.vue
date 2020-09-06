@@ -1,6 +1,6 @@
 <template>
   <b-form-group label="Date range">
-    <b-button-group :vertical="vertical">
+    <b-button-group :vertical="vertical" data-cy="date-select">
       <b-btn
         v-for="(date, index) in dates"
         :key="index"
