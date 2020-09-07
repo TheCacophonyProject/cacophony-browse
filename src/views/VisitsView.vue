@@ -14,6 +14,7 @@
           :path="'visits'"
           :is-collapsed="searchPanelIsCollapsed"
           @submit="submitNewQuery"
+          @description="saveNextQueryDescription"
           @toggled-search-panel="
             searchPanelIsCollapsed = !searchPanelIsCollapsed
           "
@@ -34,7 +35,7 @@
             <div style="display:flex;">
               <h1 style="flex-grow: 100;">Visits</h1>
               <div style="align-self: flex-end;">
-                <CsvDownload :params="getQuery()" :visits="true" />
+                <CsvDownload :params="queryParams" :visits="true" />
                 <b-button variant="link" @click="showInfo = true">
                   <font-awesome-icon icon="question-circle" size="sm" />
                   Help</b-button
@@ -47,7 +48,7 @@
             <h5 v-else>
               Loading...
             </h5>
-            <p class="search-description" v-html="searchDescription"></p>
+            <p class="search-description" v-html="currentQueryDescription"></p>
             <div v-if="!queryPending" class="results">
               <h1>Visit Summary Per Device</h1>
               <div class="scrollable">
@@ -248,12 +249,14 @@ export default {
   components: { QueryRecordings, EventSummary, AudioSummary, CsvDownload },
   data() {
     return {
+      queryParams: {},
       showInfo: this.isInfoShown(),
       infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
       tableDateTimeFormat: "L LTS",
       tableDateFormat: "DD MMM",
       tableTimeFormat: "LTS",
-      searchDescription: null,
+      currentQueryDescription: null,
+      nextQueryDescription: null,
       eventMaxTimeSeconds: 60 * 10,
       searchPanelIsCollapsed: true,
       queryPending: false,
@@ -383,7 +386,11 @@ export default {
       return {};
     },
     submitNewQuery(whereQuery) {
+      this.queryParams = whereQuery;
       this.getVisits(whereQuery, true);
+    },
+    saveNextQueryDescription(description) {
+      this.nextQueryDescription = description;
     },
     loadMoreVisits() {
       this.loadingMore = true;
@@ -401,7 +408,7 @@ export default {
 
       whereQuery["limit"] = this.visitLimit;
       const { result, success } = await api.recording.queryVisits(whereQuery);
-      this.searchDescription = this.$refs.queryRec.searchDescription();
+      this.currentQueryDescription = this.nextQueryDescription;
       if (!success) {
         result.messages &&
           result.messages.forEach(message => {
@@ -409,6 +416,7 @@ export default {
           });
         return;
       }
+      this.currentQueryDescription = this.nextQueryDescription;
       if (newQuery) {
         this.countMessage = "No Visits";
         this.visits = [];

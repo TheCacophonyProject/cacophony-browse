@@ -113,16 +113,6 @@ export default {
         };
       });
     },
-    type: function() {
-      switch (this.recordingType) {
-        case "video":
-          return "thermalRaw";
-        case "audio":
-          return "audio";
-        default:
-          return ["thermalRaw", "audio"];
-      }
-    },
     vertical: function() {
       // Change button orientation to vertical on small screen sizes
       return this.width < 576;
@@ -157,26 +147,25 @@ export default {
   methods: {
     getData: async function() {
       this.fetching = true;
-      // Extract query information
-      const where = {
-        type: this.type,
-        recordingDateTime: this.dateQuery()
-      };
+
       const limit = 1000;
-      const params = {
-        where: JSON.stringify(where),
-        limit: limit,
-        offset: 0,
-        tagMode: "any"
+      const searchParams = {
+        type: this.recording,
+        days: this.dateRange,
+        limit: limit
       };
 
+      if (this.showGroups !== "all") {
+        searchParams.group = [this.showGroups];
+      }
+
       // Get all data (first 1000 rows)
-      let { result: allData } = await api.query(params);
+      let { result: allData } = await api.query(searchParams);
       // Check whether all data was fetched
       // if not, run again with increased limit to get all rows
       if (allData.count > limit) {
-        params.limit = allData.count;
-        ({ result: allData } = await api.query(params));
+        searchParams.limit = allData.count;
+        ({ result: allData } = await api.query(searchParams));
       }
       // Count the number of recordings for each device
       this.devices.map(device => (this.deviceCount[device.id] = 0));
@@ -237,66 +226,27 @@ export default {
       }
       this.fetching = false;
     },
-    dateQuery() {
-      const toDate = new Date();
-
-      if (this.dateRange === 0) {
-        // All time option
-        return {
-          $lt: this.formatQueryDate(toDate)
-        };
-      } else {
-        const fromDate = new Date(
-          toDate.getTime() - this.dateRange * 24 * 60 * 60 * 1000
-        );
-        return {
-          $gt: this.formatQueryDate(fromDate),
-          $lt: this.formatQueryDate(toDate)
-        };
-      }
-    },
     padLeft(str, char, len) {
       while (str.toString().length < len) {
         str = `${char}${str}`;
       }
       return str;
     },
-    formatQueryDate(date) {
-      return `${date.getFullYear()}-${this.padLeft(
-        date.getMonth() + 1,
-        "0",
-        2
-      )}-${this.padLeft(date.getDate(), "0", 2)} ${this.padLeft(
-        date.getHours(),
-        "0",
-        2
-      )}:${this.padLeft(date.getMinutes(), "0", 2)}:${this.padLeft(
-        date.getSeconds(),
-        "0",
-        2
-      )}`;
-    },
     gotoRecordingsSearchPage(array) {
       const deviceName = array[0]._model.label;
       const device = this.devices.find(device => {
         return device.name === deviceName;
       });
-      const whereQuery = {
-        DeviceId: [device],
-        type: this.recordingType
+
+      const searchParams = {
+        type: this.recordingType,
+        days: this.dateRange,
+        device: [device.id]
       };
-      if (this.dateRange === 0) {
-        whereQuery.dateRange = "all";
-      } else {
-        whereQuery.dateRange = "customDateRange";
-        whereQuery.recordingDateTime = this.dateQuery();
-      }
 
       this.$router.push({
         path: "recordings",
-        query: {
-          where: JSON.stringify(whereQuery)
-        }
+        query: searchParams
       });
     }
   }
