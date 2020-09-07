@@ -255,5 +255,15 @@ export const TagColours = [
   "white"
 ];
 
-export { allLabels };
+function imgSrc(what) {
+  let image = null;
+  if (what == DefaultLabels.allLabels.kiwi.value) {
+    image = "kiwi.png";
+  } else {
+    image = what + ".png";
+  }
+  return "/" + image;
+}
+
+export { allLabels, imgSrc };
 export default DefaultLabels;

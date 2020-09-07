@@ -10,6 +10,7 @@
       track-by="id"
       label="name"
       @input="updateSelected"
+      data-cy="device-select"
     />
   </b-form-group>
 </template>
