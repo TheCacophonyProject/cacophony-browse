@@ -83,7 +83,7 @@ export default {
       returnVal = {
         tags: this.makeTagList(this.animalData),
         tagMode: this.tagMode,
-        desciption: this.makeTagDescription()
+        description: this.makeTagDescription()
       };
       this.$emit("input", returnVal);
     },
@@ -110,11 +110,16 @@ export default {
     },
     canHaveSpecifiedTags: DefaultLabels.canHaveSpecifiedTags,
     makeTagDescription() {
-      const numanimalData = this.animalData.length;
-      const multipleanimalDatauffix = numanimalData > 1 ? "s" : "";
-      return numanimalData === 0
-        ? "all animalData"
-        : `${numanimalData} animal${multipleanimalDatauffix}`;
+      const numAnimals = this.animalData.length;
+      switch (numAnimals) {
+        case 0:
+          return "";
+        case 1: 
+          return `only ${this.makeTagList(this.animalData)[0]}s`;
+        default: {
+          return `only ${numAnimals} types of animals`;
+        }    
+      }
     }
   },
 

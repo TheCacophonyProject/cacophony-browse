@@ -86,9 +86,7 @@ export default {
     },
 
     getIdsWithPrefix(objects, prefix) {
-      const prefixed = objects.filter(
-        item => item.id.substring(0, prefix.length) === prefix
-      );
+      const prefixed = objects.filter(item => item.id.startsWith(prefix));
       return prefixed.map(item =>
         parseInt(item.id.substring(prefix.length, item.id.length))
       );

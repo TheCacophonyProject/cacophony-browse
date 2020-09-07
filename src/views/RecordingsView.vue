@@ -60,7 +60,7 @@
                     v-for="(item, index) in itemsByHour"
                     :item="item"
                     :key="`${index}_${getResultsDisplayStyle}`"
-                    :queryStr="viewRecordingQueryString"
+                    :futureSearchQuery="viewRecordingQuery"
                     :display-style="getResultsDisplayStyle"
                   />
                 </div>
@@ -137,7 +137,6 @@ import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import RecordingSummary from "../components/RecordingSummary.vue";
 import api from "../api/index";
-import * as querystring from "querystring";
 
 const roundDate = (date, toHour = false) => {
   const d = new Date(date.getTime());
@@ -224,7 +223,7 @@ export default {
     getResultsDisplayStyle() {
       return this.showCards ? "card" : "row";
     },
-    viewRecordingQueryString() {
+    viewRecordingQuery() {
       const queryCopy = JSON.parse(JSON.stringify(this.serialisedQuery));
 
       // delete date data as we use this to find the next/previous recordings
@@ -237,7 +236,7 @@ export default {
       delete queryCopy.limit;
       delete queryCopy.offset;
 
-      return querystring.stringify(queryCopy);
+      return queryCopy;
     }
   },
   methods: {

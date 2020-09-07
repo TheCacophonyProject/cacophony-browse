@@ -157,42 +157,24 @@ export default {
       this.updateRouteQuery();
       this.makeApiRequest();
     },
-    setOnlyIfExists(itemName, source, destination) {
-      if (source.hasOwnProperty(itemName)) {
-        destination[itemName] = source[itemName];
-      }
-    },
-    makeArray(value) {
-      if (typeof value === "object") {
-        return value;
-      } else {
-        return value ? [value] : [];
-      }
-    },
     setAdvancedInitalState() {
       // If there was an advanced query, start with the advanced toggle area open.
       this.advanced =
-        this.hasTagData() ||
+        (this.tagData && this.tagData.tagMode !== "any") ||
         this.duration.hasOwnProperty("maxS") ||
         this.duration.hasOwnProperty("minS");
     },
-    hasTagData() {
-      return (
-        this.tagMode !== "any" ||
-        (this.tagData.tags && this.tagData.tags.length > 1)
-      );
-    },
     deserialiseRouteIntoQuery(routeQuery) {
-      this.setOnlyIfExists("offset", routeQuery, this.query);
-      this.setOnlyIfExists("limit", routeQuery, this.query);
+      setOnlyIfExists("offset", routeQuery, this.query);
+      setOnlyIfExists("limit", routeQuery, this.query);
 
-      this.setOnlyIfExists("tagMode", routeQuery, this.tagData);
+      setOnlyIfExists("tagMode", routeQuery, this.tagData);
 
-      this.setOnlyIfExists("minS", routeQuery, this.duration);
-      this.setOnlyIfExists("maxS", routeQuery, this.duration);
+      setOnlyIfExists("minS", routeQuery, this.duration);
+      setOnlyIfExists("maxS", routeQuery, this.duration);
 
       if (routeQuery.hasOwnProperty("tag")) {
-        this.tagData.tags = this.makeArray(routeQuery.tag);
+        this.tagData.tags = makeArray(routeQuery.tag);
       }
 
       if (routeQuery.hasOwnProperty("type")) {
@@ -206,42 +188,36 @@ export default {
       };
 
       if (routeQuery.hasOwnProperty("group")) {
-        this.selectedGroups = this.makeArray(routeQuery.group);
+        this.selectedGroups = makeArray(routeQuery.group);
       }
       if (routeQuery.hasOwnProperty("device")) {
-        this.selectedDevices = this.makeArray(routeQuery.device);
+        this.selectedDevices = makeArray(routeQuery.device);
       }
 
       this.setAdvancedInitalState();
     },
     serialiseQueryForRecall() {
+      if (this.isAudio) {
+        this.tagData = {
+          tags: [],
+          tagMode: "any"
+        }
+      }
+
       const params = {
         tagMode: this.tagData.tagMode,
+        tag: this.tagData.tags,
         minS: this.duration.minS,
         maxS: this.duration.maxS,
-        tag: this.tagData.tags,
         limit: this.query.limit,
         offset: this.query.offset,
         days: this.dates.days,
         from: this.dates.from,
         to: this.dates.to,
-        type: this.recordingType
+        type: this.recordingType,
+        device: this.selectedDevices,
+        group: this.selectedGroups,
       };
-
-      if (this.selectedDevices.length > 0) {
-        params.device = this.selectedDevices;
-      }
-
-      if (this.selectedGroups.length > 0) {
-        params.group = this.selectedGroups;
-      }
-
-      // remove undefined elements
-      for (const key in params) {
-        if (!params[key] || params[key] === []) {
-          delete params[key];
-        }
-      }
 
       return params;
     },
@@ -321,6 +297,21 @@ export default {
     }
   }
 };
+
+function setOnlyIfExists(itemName, source, destination) {
+  if (source.hasOwnProperty(itemName)) {
+    destination[itemName] = source[itemName];
+  }
+};
+
+function makeArray(value) {
+  if (Array.isArray(value)) {
+    return value;
+  } else {
+    return value ? [value] : [];
+  }
+}
+
 </script>
 
 <style scoped lang="scss">

@@ -1,7 +1,6 @@
 <template>
   <a
     v-if="displayStyle === 'card'"
-    :href="`/recording/${this.item.id}?${queryStr}`"
     class="recording-summary"
     @click="event => navigateToRecording(event, item.id)"
   >
@@ -101,9 +100,9 @@ export default {
       required: true,
       default: "cards"
     },
-    queryStr: {
-      type: String,
-      default: ""
+    futureSearchQuery: {
+      type: Object,
+      default: {}
     }
   },
   computed: {
@@ -121,7 +120,8 @@ export default {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         // Don't change the route if we're ctrl-clicking
         this.$router.push({
-          path: `recording/${recordingId}`
+          path: `recording/${recordingId}`,
+          query: this.futureSearchQuery
         });
       }
     }

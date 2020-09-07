@@ -111,7 +111,7 @@ export default {
             return ` recorded after <strong>${start}</strong>`;
           }
         } else if (end.length > 0) {
-          return ` srecorded after <strong>${end}</strong>`;
+          return ` recorded after <strong>${end}</strong>`;
         } else {
           return " in all recordings ";
         }
