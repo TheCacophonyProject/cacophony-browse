@@ -202,7 +202,7 @@ export default {
         this.tagData = {
           tags: [],
           tagMode: "any"
-        }
+        };
       }
 
       const params = {
@@ -217,7 +217,7 @@ export default {
         to: this.dates.to,
         type: this.recordingType,
         device: this.selectedDevices,
-        group: this.selectedGroups,
+        group: this.selectedGroups
       };
 
       return params;
@@ -303,7 +303,7 @@ function setOnlyIfExists(itemName, source, destination) {
   if (source.hasOwnProperty(itemName)) {
     destination[itemName] = source[itemName];
   }
-};
+}
 
 function makeArray(value) {
   if (Array.isArray(value)) {
@@ -312,7 +312,6 @@ function makeArray(value) {
     return value ? [value] : [];
   }
 }
-
 </script>
 
 <style scoped lang="scss">

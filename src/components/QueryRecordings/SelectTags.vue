@@ -114,11 +114,11 @@ export default {
       switch (numAnimals) {
         case 0:
           return "";
-        case 1: 
+        case 1:
           return `only ${this.makeTagList(this.animalData)[0]}s`;
         default: {
           return `only ${numAnimals} types of animals`;
-        }    
+        }
       }
     }
   },

@@ -101,8 +101,7 @@ export default {
       default: "cards"
     },
     futureSearchQuery: {
-      type: Object,
-      default: {}
+      type: Object
     }
   },
   computed: {

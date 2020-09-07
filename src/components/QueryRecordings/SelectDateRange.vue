@@ -2,7 +2,11 @@
   <div>
     <b-form-group>
       <label>Date range</label>
-      <b-form-select v-model="dateRange" :options="options" data-cy="date-select"/>
+      <b-form-select
+        v-model="dateRange"
+        :options="options"
+        data-cy="date-select"
+      />
     </b-form-group>
     <b-form-group>
       <SelectDate
@@ -11,7 +15,12 @@
         title="From"
         data-cy="date-from"
       />
-      <SelectDate v-model="toDate" v-if="dateRange === 'custom'" title="To" data-cy="date-to"/>
+      <SelectDate
+        v-model="toDate"
+        v-if="dateRange === 'custom'"
+        title="To"
+        data-cy="date-to"
+      />
     </b-form-group>
   </div>
 </template>
