@@ -9,7 +9,8 @@
       :disabled="!fetched"
       track-by="id"
       label="name"
-      @input="$emit('input', $event)"
+      @input="updateSelected"
+      data-cy="device-select"
     />
   </b-form-group>
 </template>
@@ -20,7 +21,11 @@ import { mapState } from "vuex";
 export default {
   name: "SelectDevice",
   props: {
-    value: {
+    selectedDevices: {
+      type: Array,
+      required: true
+    },
+    selectedGroups: {
       type: Array,
       required: true
     }
@@ -29,10 +34,13 @@ export default {
     placeholder: function() {
       if (!this.fetched) {
         return "loading";
-      } else if (this.value.length > 0) {
-        return "add more devices";
-      } else {
+      } else if (
+        this.selectedDevices.length == 0 &&
+        this.selectedGroups.length == 0
+      ) {
         return "all devices";
+      } else {
+        return "add more devices";
       }
     },
     ...mapState({
@@ -40,53 +48,49 @@ export default {
       devices: state =>
         state.Devices.devices.map(device => {
           return {
-            id: device.id,
+            id: "D" + device.id,
             name: device.devicename
           };
         }),
       groups: state =>
         state.Groups.groups.map(group => {
           return {
-            id: "group" + group.id,
+            id: "G" + group.id,
             name: group.groupname + " (group)",
             devices: group.Devices
           };
         })
     }),
     selectedValues: function() {
-      // Allow the devices to just be defined by ids if we haven't already fetched
-      // the device labels etc. by the time the parent component initialises this one,
-      // supporting the use-case where we're re-populating this from a shared url.
-
-      // Gather a list of devices that belong to selected groups.
-      const groupDevices = this.value
-        .filter(id => typeof id === "string")
-        .map(groupId => this.groups.find(({ id }) => groupId === id))
-        .filter(item => item !== undefined)
-        .reduce((acc, group) => [...acc, ...group.devices], []);
-
-      return this.value
-        .map(device => {
-          if (typeof device === "number") {
-            // This is a device id:
-            return this.devices.find(({ id }) => device === id);
-          } else if (typeof device === "string") {
-            // This is a group id:
-            return this.groups.find(({ id }) => device === id);
-          } else {
-            return device;
-          }
-        })
-        .filter(
-          device =>
-            device !== undefined &&
-            // Remove items that belong to any selected groups:
-            groupDevices.find(groupDevice => groupDevice.id === device.id) ===
-              undefined
-        );
+      const selectedDs = this.selectedDevices.map(deviceId =>
+        this.devices.find(({ id }) => "D" + deviceId === id)
+      );
+      const selectedGs = this.selectedGroups.map(groupId =>
+        this.groups.find(({ id }) => "G" + groupId === id)
+      );
+      return [...selectedDs, ...selectedGs];
     },
     options: function() {
       return this.devices.concat(this.groups);
+    }
+  },
+  methods: {
+    updateSelected(selectedObjects) {
+      const devices = this.getIdsWithPrefix(selectedObjects, "D");
+      const groups = this.getIdsWithPrefix(selectedObjects, "G");
+      const updatedSelection = {
+        devices: devices,
+        groups: groups
+      };
+      // this causes the v-model in the parent component to get updated
+      this.$emit("update-device-selection", updatedSelection);
+    },
+
+    getIdsWithPrefix(objects, prefix) {
+      const prefixed = objects.filter(item => item.id.startsWith(prefix));
+      return prefixed.map(item =>
+        parseInt(item.id.substring(prefix.length, item.id.length))
+      );
     }
   },
   created: async function() {

@@ -1,7 +1,6 @@
 <template>
   <a
     v-if="displayStyle === 'card'"
-    :href="`/recording/${item.id}`"
     class="recording-summary"
     @click="event => navigateToRecording(event, item.id)"
   >
@@ -100,6 +99,9 @@ export default {
       type: String,
       required: true,
       default: "cards"
+    },
+    futureSearchQuery: {
+      type: Object
     }
   },
   computed: {
@@ -117,7 +119,8 @@ export default {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         // Don't change the route if we're ctrl-clicking
         this.$router.push({
-          path: `recording/${recordingId}`
+          path: `recording/${recordingId}`,
+          query: this.futureSearchQuery
         });
       }
     }
