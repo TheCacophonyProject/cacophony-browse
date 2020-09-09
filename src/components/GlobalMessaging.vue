@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div v-for="(item, index) in getMessages()" :key="index" class="row">
+    <div v-for="(item, index) in getMessages()" :key="index">
       <b-alert
         v-if="displayLevels.includes(item.level)"
         :variant="item.level"
@@ -8,9 +8,7 @@
         dismissible
         @dismissed="acknowledgeMessages"
       >
-        <div
-          class="col-sm-11 offset-sm-1 col-md-7 offset-md-2 col-lg-4 offset-lg-4 box"
-        >
+        <div class="box">
           <icon-link :icon="['fas', 'exclamation-triangle']" :colour="'red'" />
           Oops! Something went wrong. <br />
           Message is: "{{ item.message }}"
@@ -51,11 +49,10 @@ export default {
 <style scoped>
 .container {
   position: fixed;
-  width: 100%;
+  min-width: 100%;
   z-index: 1000;
   left: 0;
   right: 0;
-  max-width: 100000px;
   padding: 0;
   box-shadow: black;
   transition: all 500ms ease-in;
@@ -69,6 +66,7 @@ export default {
 
 .alert {
   position: absolute;
+  padding-left: 5%;
   margin-bottom: 0;
   border-radius: 0;
   width: 100%;
