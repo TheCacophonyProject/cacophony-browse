@@ -43,7 +43,7 @@
               {{ data.item.isAdmin ? "Yes" : "No" }}
             </template>
 
-            <template v-slot:cell(deleteButton)="data">
+            <template v-slot:cell(controls)="data">
               <b-modal
                 id="group-user-remove-self"
                 title="Remove yourself from group"
