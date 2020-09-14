@@ -8,6 +8,7 @@
         :title="title"
         :data="data"
         :log="logarithmic"
+        :message="introMessage"
         x-axis-label="Device Name"
         y-axis-label="Number of Recordings"
         @click="gotoRecordingsSearchPage($event)"
@@ -24,7 +25,6 @@
         <DeviceGroups v-model="showGroups" :all-groups="allGroups" />
       </b-col>
     </b-row>
-
     <div v-if="!fetching && unused.length > 0" class="mt-2">
       Devices with no recordings for the selected time period:
       <ul>
@@ -66,7 +66,8 @@ export default {
       unused: [],
       width: window.innerWidth,
       showGroups: "all",
-      logarithmic: false
+      logarithmic: false,
+      introMessage: "Please select a group"
     };
   },
   computed: {
@@ -139,7 +140,6 @@ export default {
   created: async function() {
     await this.$store.dispatch("Devices/GET_DEVICES");
     await this.$store.dispatch("Groups/GET_GROUPS");
-    await this.getData();
     window.addEventListener("resize", () => {
       this.width = window.innerWidth;
     });
@@ -147,6 +147,7 @@ export default {
   methods: {
     getData: async function() {
       this.fetching = true;
+      this.message = null;
 
       const limit = 1000;
       const searchParams = {
