@@ -3,10 +3,22 @@
     <label>{{ title }}</label>
     <b-form-row>
       <b-col sm="7">
-        <input v-model="date" type="date" class="form-control" :min="minDate" :max="maxDate"/>
+        <input
+          v-model="date"
+          type="date"
+          class="form-control"
+          :min="minDate"
+          :max="maxDate"
+        />
       </b-col>
       <b-col sm="5">
-        <input v-model="time" type="time" class="form-control" :min="minTime" :max="maxTime"/>
+        <input
+          v-model="time"
+          type="time"
+          class="form-control"
+          :min="minTime"
+          :max="maxTime"
+        />
       </b-col>
     </b-form-row>
   </b-form-group>
@@ -36,20 +48,20 @@ export default {
   data() {
     return {
       time: "",
-      date: "", 
+      date: ""
     };
   },
   methods: {
     parseDate(newDate) {
       this.date = parseDate(newDate);
-      let parsedTime = parseTime(newDate);
+      const parsedTime = parseTime(newDate);
 
       if (parsedTime.length > 0) {
         this.time = parsedTime;
       } else {
         this.time = "12:00";
       }
-    },
+    }
   },
   created: function() {
     this.parseDate(this.value);
@@ -95,13 +107,13 @@ function parseDate(fullDateTime) {
     }
   }
   return "";
-};
-  
+}
+
 function parseTime(fullDateTime) {
   if (fullDateTime) {
     var parts = fullDateTime.split(" ");
     if (parts.length == 2 && parts[1].length > 4) {
-      return parts[1].substring(0,5);
+      return parts[1].substring(0, 5);
     }
   }
   return "";
