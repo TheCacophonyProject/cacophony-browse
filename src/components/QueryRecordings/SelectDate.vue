@@ -3,10 +3,10 @@
     <label>{{ title }}</label>
     <b-form-row>
       <b-col sm="7">
-        <input v-model="date" type="date" class="form-control" />
+        <input v-model="date" type="date" class="form-control" :min="minDate" :max="maxDate"/>
       </b-col>
       <b-col sm="5">
-        <input v-model="time" type="time" class="form-control" />
+        <input v-model="time" type="time" class="form-control" :min="minTime" :max="maxTime"/>
       </b-col>
     </b-form-row>
   </b-form-group>
@@ -23,33 +23,56 @@ export default {
     value: {
       type: String,
       required: true
+    },
+    beforeDateTime: {
+      type: String,
+      default: ""
+    },
+    afterDateTime: {
+      type: String,
+      default: ""
     }
   },
   data() {
     return {
       time: "",
-      date: ""
+      date: "", 
     };
   },
   methods: {
     parseDate(newDate) {
-      if (newDate) {
-        var parts = newDate.split(" ");
-        if (parts.length == 2 && parts[1].length == 8) {
-          this.date = parts[0];
-          this.time = parts[1].substring(0, 5);
-          return;
-        }
-      }
+      this.date = parseDate(newDate);
+      let parsedTime = parseTime(newDate);
 
-      this.date = "";
-      this.time = "12:00";
-    }
+      if (parsedTime.length > 0) {
+        this.time = parsedTime;
+      } else {
+        this.time = "12:00";
+      }
+    },
   },
-  mounted: function() {
+  created: function() {
     this.parseDate(this.value);
   },
   computed: {
+    minDate: function() {
+      return parseDate(this.afterDateTime);
+    },
+    maxDate: function() {
+      return parseDate(this.beforeDateTime);
+    },
+    minTime: function() {
+      if (this.date === this.minDate) {
+        return parseTime(this.afterDateTime);
+      }
+      return "";
+    },
+    maxTime: function() {
+      if (this.date === this.maxDate) {
+        return parseTime(this.beforeDateTime);
+      }
+      return "";
+    },
     timeDate: function() {
       if (this.date.length > 0 && this.time.length > 0) {
         return this.date + " " + this.time + ":00";
@@ -63,4 +86,24 @@ export default {
     }
   }
 };
+
+function parseDate(fullDateTime) {
+  if (fullDateTime) {
+    var parts = fullDateTime.split(" ");
+    if (parts.length == 2 && parts[1].length > 4) {
+      return parts[0];
+    }
+  }
+  return "";
+};
+  
+function parseTime(fullDateTime) {
+  if (fullDateTime) {
+    var parts = fullDateTime.split(" ");
+    if (parts.length == 2 && parts[1].length > 4) {
+      return parts[1].substring(0,5);
+    }
+  }
+  return "";
+}
 </script>

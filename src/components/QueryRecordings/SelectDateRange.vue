@@ -11,12 +11,14 @@
     <b-form-group>
       <SelectDate
         v-model="fromDate"
+        :before-date-time="toDate || ''"
         v-if="dateRange === 'custom'"
         title="From"
         data-cy="date-from"
       />
       <SelectDate
         v-model="toDate"
+        :after-date-time="fromDate || ''"
         v-if="dateRange === 'custom'"
         title="To"
         data-cy="date-to"

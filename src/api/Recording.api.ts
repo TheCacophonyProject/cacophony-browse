@@ -252,7 +252,7 @@ function makeApiQuery(query: RecordingQuery): any {
 
   let from = query.from;
   const until = query.to;
-  if (query.hasOwnProperty("days") && query.days !== "all") {
+  if (query.hasOwnProperty("days") && query.days !== "all" && query.days) {
     // For the previous x days we want to do it at the time the submit is pressed and not cache it.
     // they could have had the window open for a few days.
     const now = new Date();
