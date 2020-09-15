@@ -1,5 +1,6 @@
 <template>
   <div style="position: relative; height:100%; width:100%">
+    <h2 v-if="message" class="message">{{ message }}</h2>
     <canvas :id="id" />
   </div>
 </template>
@@ -29,6 +30,10 @@ export default {
     log: {
       type: Boolean,
       default: false
+    },
+    message: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -110,5 +115,15 @@ export default {
   }
 };
 </script>
-
-<style scoped></style>
+<style scoped>
+.message {
+  position: absolute;
+  height: 50%;
+  width: 50%;
+  padding-top: 12%;
+  margin: 15% 25%;
+  text-align: center;
+  background: white;
+  color: darkgrey;
+}
+</style>
