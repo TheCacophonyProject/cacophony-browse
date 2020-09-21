@@ -32,9 +32,9 @@ export default {
         { text: "Last 24 Hours", value: 1 },
         { text: "Last 7 Days", value: 7 },
         { text: "Last 30 Days", value: 30 },
-        { text: "Last 60 Days", value: 60 },
-        { text: "Last 365 Days", value: 365 },
-        { text: "All Time", value: 0 }
+        { text: "Last 90 Days", value: 90 },
+        { text: "Last year", value: 365 },
+        { text: "All Time", value: "all" }
       ]
     };
   },

@@ -1,6 +1,8 @@
 import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
 import { DeviceVisitMap } from "./visits";
+import moment from "moment";
+
 export default {
   query,
   queryVisits,
@@ -12,7 +14,8 @@ export default {
   addTrackTag,
   deleteTrackTag,
   replaceTrackTag,
-  needsTag
+  needsTag,
+  makeApiQuery
 };
 
 export type DeviceId = number;
@@ -191,35 +194,115 @@ export type TagMode =
 type JsonString = string;
 
 export interface RecordingQuery {
-  where: JsonString; // Stringified: { duration: { $gte: number }; type: RecordingType; }
-  limit: number;
-  offset: number;
   tagMode?: TagMode;
-  tags?: string[];
+  minS?: string;
+  maxS?: string;
+  tag?: string[] | string;
+  limit?: number;
+  offset?: number;
+  days?: number | "all";
+  from?: string;
+  to?: string;
+  group?: number[];
+  device?: number[];
+  type?: string;
   order?: any; // TODO - It's not clear what order accepts (it's a sequelize thing), but nobody seems to use it right now.
 }
 
 const apiPath = "/api/v1/recordings";
 
 function query(
-  params: RecordingQuery
+  queryParams: RecordingQuery
 ): Promise<FetchResult<QueryResult<RecordingInfo>>> {
-  return CacophonyApi.get(`${apiPath}?${querystring.stringify(params as any)}`);
+  return CacophonyApi.get(
+    `${apiPath}?${querystring.stringify(makeApiQuery(queryParams))}`
+  );
+}
+
+function addIfSet(map: any, value: string, submap: string, key = "") {
+  if (value && value.trim() !== "") {
+    map[submap] = map[submap] || {};
+    map[submap][key] = value;
+  }
+}
+
+function makeApiQuery(query: RecordingQuery): any {
+  const apiWhere = {};
+  addIfSet(apiWhere, query.minS || "0", "duration", "$gte");
+  addIfSet(apiWhere, query.maxS, "duration", "$lte");
+
+  // Map between the mismatch in video type types between frontend and backend
+  if (query.type === "video") {
+    apiWhere["type"] = "thermalRaw";
+  } else if (query.type !== "both") {
+    apiWhere["type"] = query.type;
+  }
+
+  // Remove the group param, since the API doesn't handle that, we're just using
+  // it to accurately share search parameters via urls.
+  const hasDevices = query.hasOwnProperty("device") && query.device.length > 0;
+  const hasGroups = query.hasOwnProperty("group") && query.group.length > 0;
+  if (hasDevices && hasGroups) {
+    apiWhere["$or"] = [{ DeviceId: query.device }, { GroupId: query.group }];
+  } else if (hasGroups) {
+    apiWhere["GroupId"] = query.group;
+  } else if (hasDevices) {
+    apiWhere["DeviceId"] = query.device;
+  }
+
+  let from = query.from;
+  const until = query.to;
+  if (query.hasOwnProperty("days") && query.days !== "all" && query.days) {
+    // For the previous x days we want to do it at the time the submit is pressed and not cache it.
+    // they could have had the window open for a few days.
+    const now = new Date();
+    from = moment(now)
+      .add(-1 * query.days, "days")
+      .format("YYYY-MM-DD HH:mm:ss");
+  }
+  addIfSet(apiWhere, from, "recordingDateTime", "$gt");
+  addIfSet(apiWhere, until, "recordingDateTime", "$lt");
+
+  const apiParams = {};
+  const whereString = JSON.stringify(apiWhere);
+  if (whereString.length > 2) {
+    apiParams["where"] = whereString;
+  }
+  if (query.limit) {
+    apiParams["limit"] = query.limit;
+  }
+  if (query.offset) {
+    apiParams["offset"] = query.offset;
+  }
+  if (query.order) {
+    apiParams["order"] = query.order;
+  }
+  if (query.tagMode) {
+    apiParams["tagMode"] = query.tagMode;
+  }
+  if (query.tag && query.tag.length > 0) {
+    if (typeof query.tag === "string") {
+      query.tag = [query.tag];
+    }
+    apiParams["tags"] = JSON.stringify(query.tag);
+  }
+
+  return apiParams;
 }
 
 function queryVisits(
-  params: RecordingQuery
+  queryParams: RecordingQuery
 ): Promise<FetchResult<QueryResult<DeviceVisitMap>>> {
   return CacophonyApi.get(
-    `${apiPath}/visits?${querystring.stringify(params as any)}`
+    `${apiPath}/visits?${querystring.stringify(makeApiQuery(queryParams))}`
   );
 }
 
 function queryCount(
-  params: RecordingQuery
+  queryParams: RecordingQuery
 ): Promise<FetchResult<QueryResultCount>> {
   return CacophonyApi.get(
-    `${apiPath}/count?${querystring.stringify(params as any)}`
+    `${apiPath}/count?${querystring.stringify(makeApiQuery(queryParams))}`
   );
 }
 

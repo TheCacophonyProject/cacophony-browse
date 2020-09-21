@@ -1,6 +1,6 @@
 <template>
   <b-list-group-item
-    :to="{ path: 'recordings', query: query }"
+    :to="{ path: 'recordings', query: recordingsPageQuery }"
     class="d-flex justify-content-between align-items-center"
   >
     {{ group.groupname }}
@@ -31,32 +31,19 @@ export default {
     ...mapState({
       groups: state => state.Groups.groups
     }),
-    query() {
+    recordingsPageQuery() {
       return {
-        where: JSON.stringify({
-          GroupId: this.group.id
-        })
+        group: this.group.id,
+        days: 30
       };
     }
   },
   async mounted() {
-    // Last 24 hours
-    const toDate = new Date();
-    const fromDate = new Date(toDate.getTime() - 24 * 60 * 60 * 1000);
-    const dateQuery = {
-      $gt: fromDate.toISOString(),
-      $lt: toDate.toISOString()
+    const params = {
+      days: 1,
+      group: [this.group.id]
     };
 
-    // Query params
-    const where = {
-      recordingDateTime: dateQuery,
-      GroupId: this.group.id
-    };
-    const params = {
-      where: JSON.stringify(where),
-      tagMode: "any"
-    };
     const { result: allData } = await recordingsApi.queryCount(params);
     this.count = allData.count;
   }
