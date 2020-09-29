@@ -148,7 +148,7 @@ export default {
   methods: {
     getData: async function() {
       this.fetching = true;
-      this.message = null;
+      this.introMessage = null;
 
       const limit = 1000;
       const searchParams = {
