@@ -14,6 +14,7 @@
           :perPage="perPage"
           :path="'recordings'"
           :is-collapsed="searchPanelIsCollapsed"
+          @mounted="submitNewQuery"
           @submit="submitNewQuery"
           @description="saveNextQueryDescription"
           @toggled-search-panel="

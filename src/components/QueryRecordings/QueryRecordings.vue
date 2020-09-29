@@ -126,14 +126,14 @@ export default {
     }
   },
   mounted() {
-    this.makeApiRequest();
+    this.makeApiRequest("mounted");
   },
   methods: {
     resetToDefaultQuery() {
       this.selectedDevices = [];
       this.selectedGroups = [];
       this.dates = {
-        days: 30
+        days: 7
       };
       this.duration = {};
       this.recordingType = this.$store.state.User.recordingTypePref || "both";
@@ -245,10 +245,10 @@ export default {
       this.makeApiRequest();
     },
 
-    makeApiRequest: function() {
+    makeApiRequest: function(event="submit") {
       this.saveLastQuery();
       this.toggleSearchPanel();
-      this.$emit("submit", this.serialiseQueryForRecall());
+      this.$emit(event, this.serialiseQueryForRecall());
     },
     toggleAdvancedSearch: function() {
       this.advanced = !this.advanced;
