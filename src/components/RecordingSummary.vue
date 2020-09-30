@@ -125,9 +125,10 @@ export default {
       }
     },
     getRecordingPath(recordingId) {
-      return this.$router.resolve({         
+      return this.$router.resolve({
         path: `recording/${recordingId}`,
-        query: this.futureSearchQuery}).href;
+        query: this.futureSearchQuery
+      }).href;
     }
   }
 };

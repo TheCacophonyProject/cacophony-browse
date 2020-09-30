@@ -245,7 +245,7 @@ export default {
       this.makeApiRequest();
     },
 
-    makeApiRequest: function(event="submit") {
+    makeApiRequest: function(event = "submit") {
       this.saveLastQuery();
       this.toggleSearchPanel();
       this.$emit(event, this.serialiseQueryForRecall());

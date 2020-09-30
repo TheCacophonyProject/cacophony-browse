@@ -46,7 +46,8 @@
               {{ countMessage }}
             </h2>
             <h5 v-else-if="noQueryYet">
-              This query takes a long time to run.   Please select your group and then press search.
+              This query takes a long time to run. Please select your group and
+              then press search.
             </h5>
             <h5 v-else>
               Loading...
@@ -295,7 +296,7 @@ export default {
       offset: 0,
       loadText: "Load More Visits",
       canLoadMore: true,
-      visitLimit: 300, 
+      visitLimit: 300,
       noQueryYet: true
     };
   },
