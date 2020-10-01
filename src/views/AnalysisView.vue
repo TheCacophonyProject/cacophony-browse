@@ -67,7 +67,7 @@ export default {
       width: window.innerWidth,
       showGroups: "all",
       logarithmic: false,
-      introMessage: "Please select a group"
+      introMessage: ""
     };
   },
   computed: {
@@ -140,6 +140,7 @@ export default {
   created: async function() {
     await this.$store.dispatch("Devices/GET_DEVICES");
     await this.$store.dispatch("Groups/GET_GROUPS");
+    await this.getData();
     window.addEventListener("resize", () => {
       this.width = window.innerWidth;
     });

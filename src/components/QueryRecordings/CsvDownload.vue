@@ -13,8 +13,9 @@
 
 <script>
 import config from "../../config";
-import userapi from "../../api/User.api.js";
+import userapi from "../../api/User.api";
 import querystring from "querystring";
+import recordingsapi from "../../api/Recording.api";
 
 export default {
   name: "CsvDownload",
@@ -31,9 +32,8 @@ export default {
   methods: {
     async click() {
       const token = await userapi.token();
-      const params = Object.assign(this.params, {
-        jwt: token
-      });
+      const params = recordingsapi.makeApiQuery(this.params);
+      params.jwt = token;
       params.offset = 0;
       params.limit = 100000;
       params.type = this.visits ? "visits" : "recordings";

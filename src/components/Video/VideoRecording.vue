@@ -153,15 +153,17 @@ export default {
       }
     },
     async getNextRecording(direction, tagMode, tags, skipMessage) {
-      const params = this.$route.query;
+      const params = JSON.parse(JSON.stringify(this.$route.query));
 
       let order;
       switch (direction) {
         case "next":
+          params.to = null;
           params.from = this.recording.recordingDateTime;
           order = "ASC";
           break;
         case "previous":
+          params.from = null;
           params.to = this.recording.recordingDateTime;
           order = "DESC";
           break;

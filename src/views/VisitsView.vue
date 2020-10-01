@@ -45,11 +45,15 @@
             <h2 v-if="countMessage">
               {{ countMessage }}
             </h2>
+            <h5 v-else-if="noQueryYet">
+              This query takes a long time to run. Please select your group and
+              then press search.
+            </h5>
             <h5 v-else>
               Loading...
             </h5>
             <p class="search-description" v-html="currentQueryDescription"></p>
-            <div v-if="!queryPending" class="results">
+            <div v-if="!queryPending && !noQueryYet" class="results">
               <h1>Visit Summary Per Device</h1>
               <div class="scrollable">
                 <div v-for="devMap in deviceVisits" :key="devMap.id">
@@ -292,7 +296,8 @@ export default {
       offset: 0,
       loadText: "Load More Visits",
       canLoadMore: true,
-      visitLimit: 300
+      visitLimit: 300,
+      noQueryYet: true
     };
   },
   computed: {
@@ -401,6 +406,7 @@ export default {
     },
     getVisits: async function(whereQuery, newQuery: boolean) {
       // Extract query information
+      this.noQueryYet = false;
       if (newQuery) {
         this.offset = 0;
         this.queryPending = true;

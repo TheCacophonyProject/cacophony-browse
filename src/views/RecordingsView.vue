@@ -14,6 +14,7 @@
           :perPage="perPage"
           :path="'recordings'"
           :is-collapsed="searchPanelIsCollapsed"
+          @mounted="submitNewQuery"
           @submit="submitNewQuery"
           @description="saveNextQueryDescription"
           @toggled-search-panel="
@@ -72,12 +73,12 @@
                   <span>ID</span>
                   <span>Type</span>
                   <span>Device</span>
-                  <span>Group</span>
-                  <span>Location</span>
                   <span>Date</span>
                   <span>Time</span>
                   <span>Duration</span>
                   <span>Tags</span>
+                  <span>Group</span>
+                  <span>Location</span>
                   <span>Battery</span>
                 </div>
               </div>
@@ -88,6 +89,7 @@
                   :is-even-row="index % 2 === 1"
                   :key="`${index}_${getResultsDisplayStyle}`"
                   :display-style="getResultsDisplayStyle"
+                  :futureSearchQuery="viewRecordingQuery"
                 />
               </div>
             </div>
