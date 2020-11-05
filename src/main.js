@@ -9,6 +9,8 @@ import FontAwesomeIcon from "./fontAwesomeIcons";
 import store from "./stores";
 import "./styles/global.scss";
 import config from "./config";
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap-vue/dist/bootstrap-vue.css";
 
 export default function() {
   // https://bootstrap-vue.js.org/docs
