@@ -203,6 +203,15 @@ const DefaultLabels = {
       allLabels.bird.value
     ];
   },
+  wallabyQuickTagLabels: function() {
+    return [
+      allLabels.wallaby.value,
+      allLabels.possum.value,
+      allLabels.rodent.value,
+      allLabels.cat.value,
+      allLabels.bird.value
+    ];
+  },
   recordingLabels: function() {
     return [
       allLabels.missedTrack,
@@ -267,3 +276,5 @@ function imgSrc(what) {
 
 export { allLabels, imgSrc };
 export default DefaultLabels;
+
+export const WALLABY_GROUP = 160;
