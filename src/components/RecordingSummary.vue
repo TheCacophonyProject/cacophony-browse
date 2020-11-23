@@ -1,6 +1,7 @@
 <template>
   <a
     v-if="displayStyle === 'card'"
+    :href="getRecordingPath(item.id)"
     class="recording-summary"
     @click="event => navigateToRecording(event, item.id)"
   >
@@ -118,6 +119,7 @@ export default {
     navigateToRecording(event, recordingId) {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         // Don't change the route if we're ctrl-clicking
+        event.preventDefault();
         this.$router.push({
           path: `recording/${recordingId}`,
           query: this.futureSearchQuery

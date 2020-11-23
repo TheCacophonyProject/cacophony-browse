@@ -1,6 +1,6 @@
 <template>
-  <div class="spinner-wrapper">
-    <font-awesome-icon v-show="fetching" class="fa-spin" icon="cog" size="4x" />
+  <div class="spinner-wrapper" v-show="fetching">
+    <font-awesome-icon class="fa-spin" icon="cog" size="4x" />
   </div>
 </template>
 
