@@ -4,6 +4,7 @@ const common = require("./webpack.common");
 const webpack = require("webpack");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 module.exports = merge(common, {
   mode: "production",
@@ -15,7 +16,7 @@ module.exports = merge(common, {
   output: {
     path: path.resolve(__dirname, "../dist"),
     publicPath: "/",
-    filename: "[name].bundle.js"
+    filename: "[name].[hash].bundle.js"
   },
   plugins: [
     new webpack.LoaderOptionsPlugin({
@@ -38,6 +39,10 @@ module.exports = merge(common, {
       template: "index.template.ejs",
       excludeChunks: ["prod"],
       inject: "body"
+    }),
+    new BundleAnalyzerPlugin({
+      openAnalyzer: !process.env["IS_CI_ENV"],
+      analyzerMode: process.env["IS_CI_ENV"] ? "disabled" : "server"
     })
   ],
   optimization: {

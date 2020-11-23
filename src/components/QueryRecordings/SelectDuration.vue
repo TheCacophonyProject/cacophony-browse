@@ -5,26 +5,27 @@
       :value="selectedOption"
       :options="options"
       @input="updateDurationType"
+      data-cy="duration-select"
     />
     <b-form-row
       v-if="isCustom"
       style="margin-top: 15px; margin-left: 0; margin-right: 0;"
     >
       <b-form-input
-        :max="value.high"
-        :value="value.low"
+        :max="value.maxS"
+        :value="value.minS"
         type="number"
         min="0"
         class="form-control col-4"
-        @change="updateLow"
+        @change="updateMinS"
       />
       <label class="col-4 text-center col-form-label">to</label>
       <b-form-input
-        :min="value.low"
-        :value="value.high"
+        :min="value.minS"
+        :value="value.maxS"
         type="number"
         class="form-control col-4"
-        @change="updateHigh"
+        @change="updateMaxS"
       />
     </b-form-row>
   </b-form-group>
@@ -43,26 +44,26 @@ export default {
     return {
       options: [
         {
-          value: { low: "0", high: "" },
+          value: { minS: "0", maxS: "" },
           text: "Any duration"
         },
         {
-          value: { low: "0", high: "20" },
+          value: { minS: "0", maxS: "20" },
           text: "Short (<20 seconds)"
         },
         {
-          value: { low: "20", high: "120" },
+          value: { minS: "20", maxS: "120" },
           text: "Medium (20 seconds - 2 minutes)"
         },
         {
-          value: { low: "120", high: "" },
+          value: { minS: "120", maxS: "" },
           text: "Long (> 2 minutes)"
         },
         {
           value: {
             isCustom: true,
-            low: "0",
-            high: "100"
+            minS: "0",
+            maxS: "100"
           },
           text: "Custom duration"
         }
@@ -75,47 +76,71 @@ export default {
       return this.getOptionForValue(this.value);
     }
   },
-  mounted() {
+  created() {
+    this.updateDurationType(this.selectedOption);
     this.isCustom = this.getOptionForValue(this.value).isCustom;
   },
   methods: {
-    getOptionForValue: function({ low, high }) {
-      low = Number(low);
-      high = Number(high) || Number.POSITIVE_INFINITY;
+    getOptionForValue: function(value) {
+      const minS = value.hasOwnProperty("minS") ? value.minS : "0";
+      const maxS = value.hasOwnProperty("maxS") ? value.maxS : "";
       for (const option of this.options) {
-        const optionLow = Number(option.value.low);
-        const optionHigh =
-          Number(option.value.high) || Number.POSITIVE_INFINITY;
-        if (optionLow === low && optionHigh === high) {
+        if (option.value.minS === minS && option.value.maxS === maxS) {
           return option.value;
         }
       }
       // Fallback to the custom option.
       return this.options[4].value;
     },
-    updateHigh: function(event) {
+    updateMaxS: function(event) {
       const newValue = {
-        high: event,
-        low: this.value.low
+        maxS: event,
+        minS: this.value.minS
       };
-      this.$emit("input", newValue);
+      this.emitUpdatedValue(newValue);
     },
-    updateLow: function(event) {
+    updateMinS: function(event) {
       const newValue = {
-        high: this.value.high,
-        low: event
+        maxS: this.value.maxS,
+        minS: event
       };
-      this.$emit("input", newValue);
+      this.emitUpdatedValue(newValue);
     },
     updateDurationType: function(val) {
       val = val.hasOwnProperty("value") ? val.value : val;
       this.isCustom = val.isCustom;
-      const { low, high } = val;
+      const { minS, maxS } = val;
       const e = {
-        high,
-        low
+        maxS,
+        minS
       };
-      this.$emit("input", e);
+      this.emitUpdatedValue(e);
+    },
+    makeDurationDescription(duration) {
+      if (duration.hasOwnProperty("minS")) {
+        if (duration.hasOwnProperty("maxS")) {
+          return ` with duration <strong>${duration.minS}s</strong>&nbsp;&ndash;&nbsp;<strong>${duration.maxS}s</strong>`;
+        } else {
+          return ` longer than <strong>${duration.minS}s</strong>`;
+        }
+      } else if (duration.hasOwnProperty("maxS")) {
+        return ` shorter than <strong>${duration.maxS}s</strong>`;
+      } else {
+        return "";
+      }
+    },
+
+    emitUpdatedValue(duration) {
+      if (duration.minS === "0" || duration.mins === "") {
+        delete duration.minS;
+      }
+
+      if (duration.maxS === "") {
+        delete duration.maxS;
+      }
+
+      duration.description = this.makeDurationDescription(duration);
+      this.$emit("input", duration);
     }
   }
 };

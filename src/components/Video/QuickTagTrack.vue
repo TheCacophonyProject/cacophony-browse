@@ -9,7 +9,11 @@
           :class="['btn btn-light btn-tag equal-flex', getClass(animal)]"
           @click="quickTag(animal)"
         >
-          <img :title="getTitle(animal)" :src="getSrc(animal)" />
+          <img
+            onerror="this.style.display='none'"
+            :title="getTitle(animal)"
+            :src="imgSrc(animal)"
+          />
           <div class="tag-name">{{ animal }}</div>
         </button>
       </div>
@@ -28,8 +32,9 @@
           @click="quickTag(otherTag.value)"
         >
           <img
+            onerror="this.style.display='none'"
             :title="getOtherTitle(otherTag.value)"
-            :src="getSrc(otherTag.value)"
+            :src="imgSrc(otherTag.value)"
           />
           <div class="tag-name">{{ otherTag.text }}</div>
         </button>
@@ -37,10 +42,7 @@
           v-b-modal="'custom-track-tag'"
           class="btn btn-light btn-tag equal-flex"
         >
-          <img
-            title="Open form to add other tag"
-            src="../../assets/video/plus.png"
-          />
+          <img title="Open form to add other tag" src="/plus.png" />
           <div class="tag-name">other...</div>
         </button>
       </div>
@@ -49,7 +51,7 @@
 </template>
 
 <script>
-import DefaultLabels from "../../const.js";
+import DefaultLabels, { imgSrc } from "../../const.js";
 export default {
   name: "QuickTagTrack",
   props: {
@@ -75,6 +77,7 @@ export default {
     };
   },
   methods: {
+    imgSrc,
     filterTags() {
       this.userTags = this.tags.filter(
         tag =>
@@ -106,9 +109,6 @@ export default {
     },
     getTitle(animal) {
       return "Mark as " + animal;
-    },
-    getSrc(animal) {
-      return "/" + animal + ".png";
     },
     getClass(animal) {
       let buttonClass = "tag-div";

@@ -8,7 +8,7 @@
     <div id="group-list-container" style="max-height: 50vh; overflow-y: auto;">
       <b-list-group>
         <HomeGroupItem
-          v-for="(group, index) in orderBy(groups, 'groupname')"
+          v-for="(group, index) in orderedGroups"
           :key="index"
           :group="group"
         />
@@ -20,15 +20,22 @@
 <script>
 import HomeGroupItem from "./HomeGroupItem.vue";
 import { mapState } from "vuex";
-import Vue2Filters from "vue2-filters";
 
 export default {
   name: "HomeGroups",
   components: { HomeGroupItem },
-  mixins: [Vue2Filters.mixin],
-  computed: mapState({
-    groups: state => state.Groups.groups
-  })
+  computed: {
+    ...mapState({
+      groups: state => state.Groups.groups
+    }),
+    orderedGroups: {
+      get() {
+        return [...this.groups].sort((a, b) => {
+          return a.groupname.toLowerCase() < b.groupname.toLowerCase() ? -1 : 1;
+        });
+      }
+    }
+  }
 
   // TODO(jon): Would be better to have a single API query to load recording counts for all groups the user is
   //  is part of.

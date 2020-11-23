@@ -144,29 +144,27 @@ export default {
       return 0;
     },
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
+      const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
         this.$router.push({
-          path: `/recording/${this.recording.id}`
+          path: `/recording/${this.recording.id}`,
+          query: searchQueryCopy
         });
       }
     },
     async getNextRecording(direction, tagMode, tags, skipMessage) {
-      let where = {
-        DeviceId: this.recording.Device.id
-      };
+      const params = JSON.parse(JSON.stringify(this.$route.query));
 
       let order;
       switch (direction) {
         case "next":
-          where.recordingDateTime = {
-            $gt: this.recording.recordingDateTime
-          };
+          params.to = null;
+          params.from = this.recording.recordingDateTime;
           order = "ASC";
           break;
         case "previous":
-          where.recordingDateTime = {
-            $lt: this.recording.recordingDateTime
-          };
+          params.from = null;
+          params.to = this.recording.recordingDateTime;
           order = "DESC";
           break;
         case "either":
@@ -182,25 +180,14 @@ export default {
         default:
           throw `invalid direction: '${direction}'`;
       }
-      order = JSON.stringify([["recordingDateTime", order]]);
-      where = JSON.stringify(where);
+      params.order = JSON.stringify([["recordingDateTime", order]]);
 
-      const params = {
-        where,
-        order,
-        limit: 1,
-        offset: 0
-      };
+      params.limit = 1;
+      params.type = "video";
+      delete params.offset;
 
-      if (tags) {
-        params.tags = JSON.stringify(tags);
-      }
-      if (tagMode) {
-        params.tagMode = tagMode;
-      }
       return await this.$store.dispatch("Video/QUERY_RECORDING", {
         params,
-        direction,
         skipMessage
       });
     },

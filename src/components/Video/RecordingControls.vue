@@ -95,10 +95,10 @@
         hover
         responsive
       >
-        <template slot="whatDetail" slot-scope="row">
+        <template v-slot:cell(whatDetail)="row">
           {{ whatDetail(row.item) }}
         </template>
-        <template slot="deleteButton" slot-scope="row">
+        <template v-slot:cell(deleteButton)="row">
           <button class="button btn">
             <font-awesome-icon
               icon="trash"

@@ -1,15 +1,15 @@
 <template>
   <a
     :href="`/recording/${item.recID}/${item.trackID}`"
-    class="event-summary row"
+    class="event-summary row no-gutters"
     @click="event => navigateToRecording(event, item)"
   >
-    <b-col class="track-title">
+    <b-col class="track-title" cols="5">
       <span>Track </span>
       {{ trackNumber }}
     </b-col>
-    <b-col>
-      {{ item.start.format("LT") }}
+    <b-col cols="3">
+      {{ formatDate(item.start, "LTS") }}
     </b-col>
     <b-col>
       <div v-if="item.confidence != 0">
@@ -22,14 +22,15 @@
         Unidentified
       </span>
       <span v-else>
-        {{ capitilizeFirst(what) }}
+        {{ capitalizeFirst(what) }}
       </span>
     </b-col>
   </a>
 </template>
 
 <script lang="ts">
-import { VisitEvent } from "../visits";
+import * as moment from "moment";
+import { VisitEvent } from "../api/visits";
 export default {
   name: "EventSummary",
   props: {
@@ -47,7 +48,10 @@ export default {
     }
   },
   methods: {
-    capitilizeFirst(value: string) {
+    formatDate(date: string, formatStr: string): string {
+      return moment(date).format(formatStr);
+    },
+    capitalizeFirst(value: string) {
       return value.charAt(0).toUpperCase() + value.substring(1);
     },
     navigateToRecording(event, visEvent: VisitEvent) {
@@ -69,10 +73,10 @@ export default {
 .track-title {
   font-weight: 600;
 }
+
 .event-summary {
-  background-color: rgba(0, 0, 0, 0.03);
-  margin-left: 1em;
-  margin-right: 1em;
+  width: 100%;
+  background-color: #b7d2ef;
   padding: 0.5em;
   cursor: pointer;
   transition: box-shadow 0.2s;

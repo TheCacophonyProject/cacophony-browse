@@ -1,6 +1,6 @@
 const path = require("path");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
@@ -55,7 +55,7 @@ module.exports = {
   },
   plugins: [
     new VueLoaderPlugin(),
-    new CleanWebpackPlugin(["dist"], { root: path.resolve(__dirname, "..") }),
+    new CleanWebpackPlugin(),
     new CopyWebpackPlugin(["src/assets/favicon"])
   ],
   resolve: {

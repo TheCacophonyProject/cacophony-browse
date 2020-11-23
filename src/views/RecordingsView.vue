@@ -14,7 +14,9 @@
           :perPage="perPage"
           :path="'recordings'"
           :is-collapsed="searchPanelIsCollapsed"
+          @mounted="submitNewQuery"
           @submit="submitNewQuery"
+          @description="saveNextQueryDescription"
           @toggled-search-panel="
             searchPanelIsCollapsed = !searchPanelIsCollapsed
           "
@@ -41,7 +43,7 @@
             <h5 v-else>
               Loading...
             </h5>
-            <p class="search-description" v-html="searchDescription" />
+            <p class="search-description" v-html="currentQueryDescription" />
           </div>
           <div v-if="!queryPending" class="results">
             <div v-if="showCards">
@@ -59,6 +61,7 @@
                     v-for="(item, index) in itemsByHour"
                     :item="item"
                     :key="`${index}_${getResultsDisplayStyle}`"
+                    :futureSearchQuery="viewRecordingQuery"
                     :display-style="getResultsDisplayStyle"
                   />
                 </div>
@@ -73,12 +76,12 @@
                   <span>ID</span>
                   <span>Type</span>
                   <span>Device</span>
-                  <span>Group</span>
-                  <span>Location</span>
                   <span>Date</span>
                   <span>Time</span>
                   <span>Duration</span>
                   <span>Tags</span>
+                  <span>Group</span>
+                  <span>Location</span>
                   <span>Battery</span>
                 </div>
               </div>
@@ -89,6 +92,7 @@
                   :is-even-row="index % 2 === 1"
                   :key="`${index}_${getResultsDisplayStyle}`"
                   :display-style="getResultsDisplayStyle"
+                  :futureSearchQuery="viewRecordingQuery"
                 />
               </div>
             </div>
@@ -156,7 +160,8 @@ export default {
   props: {},
   data() {
     return {
-      searchDescription: null,
+      currentQueryDescription: null,
+      nextQueryDescription: null,
       serialisedQuery: {},
       queryPending: false,
       searchPanelIsCollapsed: true,
@@ -222,6 +227,21 @@ export default {
     },
     getResultsDisplayStyle() {
       return this.showCards ? "card" : "row";
+    },
+    viewRecordingQuery() {
+      const queryCopy = JSON.parse(JSON.stringify(this.serialisedQuery));
+
+      // delete date data as we use this to find the next/previous recordings
+      delete queryCopy.days;
+      delete queryCopy.from;
+      delete queryCopy.to;
+
+      // delete type as this is controlled by the view
+      delete queryCopy.type;
+      delete queryCopy.limit;
+      delete queryCopy.offset;
+
+      return queryCopy;
     }
   },
   methods: {
@@ -269,6 +289,9 @@ export default {
       this.serialisedQuery = whereQuery;
       this.getRecording(whereQuery);
     },
+    saveNextQueryDescription(description) {
+      this.nextQueryDescription = description;
+    },
     async getRecording(whereQuery) {
       // Remove previous values
       this.countMessage = "";
@@ -278,7 +301,6 @@ export default {
       this.queryPending = true;
       const { result, success } = await api.recording.query(whereQuery);
       this.queryPending = false;
-      this.searchDescription = this.$refs.queryRec.searchDescription();
 
       // Remove previous values *again* since it's possible for the query to have been called twice
       // since it's async, and then you'd append values twice.
@@ -291,6 +313,7 @@ export default {
             this.$store.dispatch("Messaging/WARN", message);
           });
       } else {
+        this.currentQueryDescription = this.nextQueryDescription;
         this.recordings = result.rows;
         this.count = result.count;
         if (result.count > 0) {

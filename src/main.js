@@ -1,7 +1,6 @@
 import Vue from "vue";
 import App from "./App.vue";
 import BootstrapVue from "bootstrap-vue";
-import Vue2Filters from "vue2-filters";
 import "bootstrap/scss/bootstrap.scss";
 import Vuelidate from "vuelidate";
 import Multiselect from "vue-multiselect";
@@ -10,6 +9,8 @@ import FontAwesomeIcon from "./fontAwesomeIcons";
 import store from "./stores";
 import "./styles/global.scss";
 import config from "./config";
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap-vue/dist/bootstrap-vue.css";
 
 export default function() {
   // https://bootstrap-vue.js.org/docs
@@ -17,9 +18,6 @@ export default function() {
 
   //https://monterail.github.io/vuelidate
   Vue.use(Vuelidate);
-
-  //https://github.com/freearhey/vue2-filters
-  Vue.use(Vue2Filters);
 
   Vue.component("font-awesome-icon", FontAwesomeIcon);
 

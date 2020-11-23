@@ -1,7 +1,6 @@
 <template>
   <a
     v-if="displayStyle === 'card'"
-    :href="`/recording/${item.id}`"
     class="recording-summary"
     @click="event => navigateToRecording(event, item.id)"
   >
@@ -57,7 +56,7 @@
     </div>
   </a>
   <div v-else-if="item && item.id" class="recording-summary-row">
-    <a :href="`/recording/${item.id}`" target="_blank">
+    <a :href="getRecordingPath(item.id)" target="_blank">
       {{ item.id }}
     </a>
     <span v-if="item.type === 'audio'">
@@ -68,14 +67,14 @@
     </span>
 
     <span>{{ item.devicename }}</span>
-    <span>{{ item.groupname }}</span>
-    <span>{{ item.location }}</span>
     <span>{{ item.date }}</span>
     <span class="recording-time">{{ item.time }}</span>
     <span>{{ item.duration }}s</span>
     <span>
       <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />
     </span>
+    <span>{{ item.groupname }}</span>
+    <span>{{ item.location }}</span>
     <BatteryLevel
       v-if="item.other && item.other.batteryLevel"
       :battery-level="item.other.batteryLevel"
@@ -100,6 +99,9 @@ export default {
       type: String,
       required: true,
       default: "cards"
+    },
+    futureSearchQuery: {
+      type: Object
     }
   },
   computed: {
@@ -117,9 +119,16 @@ export default {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         // Don't change the route if we're ctrl-clicking
         this.$router.push({
-          path: `recording/${recordingId}`
+          path: `recording/${recordingId}`,
+          query: this.futureSearchQuery
         });
       }
+    },
+    getRecordingPath(recordingId) {
+      return this.$router.resolve({
+        path: `recording/${recordingId}`,
+        query: this.futureSearchQuery
+      }).href;
     }
   }
 };

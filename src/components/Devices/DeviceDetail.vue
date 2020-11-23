@@ -38,11 +38,11 @@
             responsive
             data-cy="users-table"
           >
-            <template slot="admin" slot-scope="data">
+            <template v-slot:cell(admin)="data">
               {{ data.item.DeviceUsers.admin ? "Yes" : "No" }}
             </template>
 
-            <template slot="controls" slot-scope="data">
+            <template v-slot:cell(controls)="data">
               <b-modal
                 id="device-user-remove-self"
                 title="Remove yourself from device"

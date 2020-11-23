@@ -19,7 +19,7 @@
         {{ track.data.end_s }}s <br />
         <span class="delta">
           (&#916;
-          {{ (track.data.end_s - track.data.start_s) | currency("", 1) }}s)
+          {{ (track.data.end_s - track.data.start_s).toFixed(1) }}s)
         </span>
       </div>
       <button

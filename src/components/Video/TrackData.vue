@@ -44,11 +44,8 @@
 </template>
 
 <script>
-import Vue2Filters from "vue2-filters";
-
 export default {
   name: "TrackData",
-  mixins: [Vue2Filters.mixin],
   props: {
     trackData: {
       type: Object,

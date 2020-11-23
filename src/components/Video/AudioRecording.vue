@@ -144,7 +144,6 @@ export default {
 
       return await this.$store.dispatch("Video/QUERY_RECORDING", {
         params,
-        direction,
         skipMessage
       });
     },

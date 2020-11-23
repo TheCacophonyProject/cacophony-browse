@@ -5,6 +5,7 @@
       :value="value"
       :options="options"
       @input="$emit('input', $event)"
+      data-cy="recording-select"
     />
   </b-form-group>
 </template>
