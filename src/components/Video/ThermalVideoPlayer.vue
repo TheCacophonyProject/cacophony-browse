@@ -517,7 +517,6 @@ export default {
   background-color: black;
   > * {
     position: relative;
-    top: calc(50% - 1em);
   }
 }
 
