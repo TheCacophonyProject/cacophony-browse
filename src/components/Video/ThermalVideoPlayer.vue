@@ -387,9 +387,10 @@ export default {
     getVideoFrameDataForAllTracksAtTime(currentTime, currentTrackOnly) {
       const search = (positions, currentTime) => {
         let i = positions.length - 1;
-        while (positions[i][0] > currentTime) {
+        while (positions[i] && positions[i][0] > currentTime) {
           i--;
         }
+        i = Math.max(0, i);
         return positions[i];
       };
       // First check if the last position we got is still the current position?
@@ -517,7 +518,6 @@ export default {
   background-color: black;
   > * {
     position: relative;
-    top: calc(50% - 1em);
   }
 }
 
