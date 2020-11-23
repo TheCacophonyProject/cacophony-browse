@@ -258,8 +258,5 @@ export default {
 .chart-container {
   height: 60vh;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 </style>

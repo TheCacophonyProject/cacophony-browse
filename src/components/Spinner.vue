@@ -20,8 +20,9 @@ export default {
 .spinner-wrapper {
   width: 100%;
   display: flex;
-  top: 50%;
-  transform: translateY(-50%);
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
 }
 .fa-spin {
   color: #f5f5f5;
