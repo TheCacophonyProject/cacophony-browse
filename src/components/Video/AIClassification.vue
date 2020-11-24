@@ -2,13 +2,14 @@
   <div class="AIClassification">
     <h6>AI classification:</h6>
     <div>
-      <span v-if="aiGuess.length > 0">
+      <span v-if="aiGuess">
         <img
           onerror="this.style.display='none'"
-          :src="imgSrc(aiGuess[0].what)"
+          :src="imgSrc(aiGuess.what)"
           class="tag-img"
+          :data-model="aiGuess.data.name"
         />
-        {{ aiGuess[0].what }}
+        {{ aiGuess.what }}
       </span>
       <span v-else>
         none
@@ -19,6 +20,7 @@
 
 <script>
 import { imgSrc } from "../../const.js";
+import { classifyTrack } from "../../classification.js";
 
 export default {
   name: "AIClassification",
@@ -33,14 +35,9 @@ export default {
     }
   },
   computed: {
-    model() {
-      if (this.isWallabyProject) {
-        return "Wallaby-Movement";
-      }
-      return "Resnet";
-    },
+
     aiGuess() {
-      return this.tags.filter(tag => tag.data && tag.data.name === this.model);
+      return classifyTrack(this.tags, this.isWallabyProject);
     }
   },
   methods: {

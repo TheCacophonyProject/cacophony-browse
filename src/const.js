@@ -154,6 +154,10 @@ var allLabels = {
   unidentified: {
     value: "unidentified",
     text: "unidentified"
+  },
+  vehicle: {
+    value: "vehicle",
+    text: "vehicle"
   }
 };
 
