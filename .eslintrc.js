@@ -21,6 +21,7 @@ module.exports = {
     "no-undef": ["warn"],
     "@typescript-eslint/no-unused-vars": ["warn"],
     "brace-style": ["warn"],
-    "prefer-const": ["warn"]
+    "prefer-const": ["warn"],
+    "prettier/prettier": ["warn"]
   }
 };

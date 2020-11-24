@@ -11,75 +11,84 @@ describe("query() translates to api correctly", () => {
   test("with limit or offset", () => {
     const query = {
       limit: 3,
-      offset: 1,
-    }
+      offset: 1
+    };
     expect(recordingApi.makeApiQuery(query)).toMatchObject(query);
   });
 
-  test("with days all", () =>{
-    const query = { 
+  test("with days all", () => {
+    const query = {
       days: "all"
     };
     expect(recordingApi.makeApiQuery(query)).toMatchObject({});
   });
 
-  test("with date to", () =>{
-    const query = { 
+  test("with date to", () => {
+    const query = {
       to: "2030-12-06"
     };
-    expect(recordingApi.makeApiQuery(query).where).toContain("\"recordingDateTime\":{\"$lt\":\"2030-12-06\"");
+    expect(recordingApi.makeApiQuery(query).where).toContain(
+      '"recordingDateTime":{"$lt":"2030-12-06"'
+    );
   });
 
-  test("with date to and date from", () =>{
-    const query = { 
+  test("with date to and date from", () => {
+    const query = {
       from: "2010-01-01",
       to: "2030-12-06"
     };
-    expect(recordingApi.makeApiQuery(query).where).toContain("\"recordingDateTime\":{\"$gt\":\"2010-01-01\",\"$lt\":\"2030-12-06\"");
+    expect(recordingApi.makeApiQuery(query).where).toContain(
+      '"recordingDateTime":{"$gt":"2010-01-01","$lt":"2030-12-06"'
+    );
   });
 
-  test("with animal tag (string)", () =>{
-    const query = { 
+  test("with animal tag (string)", () => {
+    const query = {
       tagMode: "tagged",
       tag: "cat"
     };
     expect(recordingApi.makeApiQuery(query)).toMatchObject({
       tagMode: "tagged",
-      tags: "[\"cat\"]"
+      tags: '["cat"]'
     });
   });
 
-  test("with animal tag as array", () =>{
-    const query = { 
+  test("with animal tag as array", () => {
+    const query = {
       tagMode: "tagged",
       tag: ["cat", "possum"]
     };
     expect(recordingApi.makeApiQuery(query)).toMatchObject({
       tagMode: "tagged",
-      tags: "[\"cat\",\"possum\"]"
+      tags: '["cat","possum"]'
     });
   });
 
-  test("with duration start time", () =>{
-    const query = { 
-      minS: "12",
+  test("with duration start time", () => {
+    const query = {
+      minS: "12"
     };
-    expect(recordingApi.makeApiQuery(query).where).toContain("\"duration\":{\"$gte\":\"12\"");
+    expect(recordingApi.makeApiQuery(query).where).toContain(
+      '"duration":{"$gte":"12"'
+    );
   });
 
-  test("with no duration defaults to 0", () =>{
-    expect(recordingApi.makeApiQuery({}).where).toContain("\"duration\":{\"$gte\":\"0\"");
+  test("with no duration defaults to 0", () => {
+    expect(recordingApi.makeApiQuery({}).where).toContain(
+      '"duration":{"$gte":"0"'
+    );
   });
 
-  test("with max duration", () =>{
-    const query = { 
+  test("with max duration", () => {
+    const query = {
       minS: "3",
-      maxS: "55",
+      maxS: "55"
     };
-    expect(recordingApi.makeApiQuery(query).where).toContain("\"duration\":{\"$gte\":\"3\",\"$lte\":\"55\"");
+    expect(recordingApi.makeApiQuery(query).where).toContain(
+      '"duration":{"$gte":"3","$lte":"55"'
+    );
   });
 });
-
 
 describe("query() calls fetch", () => {
   test("with the correct request params", async () => {
