@@ -235,23 +235,6 @@ export default {
       }
       return str;
     },
-    gotoRecordingsSearchPage(chartItems: string[]) {
-      const deviceName = chartItems[0];
-      const device = this.devices.find(device => {
-        return device.name === deviceName;
-      });
-
-      const searchParams: RecordingQuery = {
-        type: this.recordingType,
-        days: this.dateRange,
-        device: [device.id]
-      };
-
-      this.$router.push({
-        path: "recordings",
-        query: searchParams
-      });
-    },
     gotoVisitsSearchPage(chartItems: string[]) {
       const deviceName = chartItems[0];
       const device = this.devices.find(device => {
