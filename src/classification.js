@@ -12,12 +12,12 @@ function classifyTrackWallabyProject(aiTags) {
     const values = aiTags.filter(tag => tag.data.name.toLowerCase().includes("wallaby"));
 
     // Multiple tags so choose one. 
-    const movement2 = values.find(tag => tag.data.name === "AI Wallaby-Movement v2");
+    const movement2 = values.find(tag => tag.data.name === "Wallaby-Movement v2");
     if (movement2) {
         return movement2;
     }
 
-    const movement1 = values.find(tag => tag.data.name === "AI Wallaby-Movement v2");
+    const movement1 = values.find(tag => tag.data.name === "Wallaby-Movement");
     if (movement1) {
         return movement1;
     }
@@ -42,7 +42,7 @@ function classifyTrackBirdProject(aiTags) {
         return classifications[0];
     }
 
-    // Multiple tags so choose one. 
+    // more than one ai has classified this result.   Choose one.  
     const originalTag = classifications.find(tag => tag.data.name === "Original");
     if (originalTag && originalTag.what === "bird") {
         return originalTag;
