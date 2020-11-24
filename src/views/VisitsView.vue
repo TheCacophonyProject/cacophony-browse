@@ -248,6 +248,7 @@ import AudioSummary from "../components/AudioBaitSummary.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import api from "../api/index";
+import { RecordingQuery, VisitsQueryResult } from "../api/Recording.api";
 export default {
   name: "VisitsView",
   components: { QueryRecordings, EventSummary, AudioSummary, CsvDownload },
@@ -314,6 +315,13 @@ export default {
         }
       }
       return visitsByDay;
+    }
+  },
+  mounted() {
+    const query = this.getQuery();
+    if (query && query.device && query.device.length !== 0) {
+      this.searchPanelIsCollapsed = true;
+      this.submitNewQuery(query);
     }
   },
   methods: {
@@ -384,13 +392,13 @@ export default {
     expandAdditionalInfo(row) {
       this.$set(row, "_showDetails", !row._showDetails);
     },
-    getQuery() {
+    getQuery(): RecordingQuery {
       if (this.$refs.queryRec) {
-        return this.$refs.queryRec.getQuery(true);
+        return this.$refs.queryRec.serialiseQueryForRecall();
       }
       return {};
     },
-    submitNewQuery(whereQuery) {
+    submitNewQuery(whereQuery: RecordingQuery) {
       this.queryParams = whereQuery;
       this.getVisits(whereQuery, true);
     },
@@ -399,12 +407,12 @@ export default {
     },
     loadMoreVisits() {
       this.loadingMore = true;
-      const query = this.getQuery();
-      query["offset"] = this.offset;
+      const query: RecordingQuery = this.getQuery();
+      query.offset = this.offset;
       this.getVisits(query, false);
       this.loadingMore = false;
     },
-    getVisits: async function(whereQuery, newQuery: boolean) {
+    getVisits: async function(whereQuery: RecordingQuery, newQuery: boolean) {
       // Extract query information
       this.noQueryYet = false;
       if (newQuery) {
@@ -412,7 +420,7 @@ export default {
         this.queryPending = true;
       }
 
-      whereQuery["limit"] = this.visitLimit;
+      whereQuery.limit = this.visitLimit;
       const { result, success } = await api.recording.queryVisits(whereQuery);
       this.currentQueryDescription = this.nextQueryDescription;
       if (!success) {
@@ -433,7 +441,7 @@ export default {
       }
       this.processVisits(result, !newQuery);
     },
-    processVisits(result, mergeResults: boolean) {
+    processVisits(result: VisitsQueryResult, mergeResults: boolean) {
       if (result.numRecordings == 0) {
         this.canLoadMore = false;
         return;
@@ -452,7 +460,7 @@ export default {
         this.countMessage = "No visits";
       }
 
-      for (const devId in eventsByDevice) {
+      for (const devId of Object.keys(eventsByDevice)) {
         let merged = false;
         const animalMap = eventsByDevice[devId].animals;
         if (mergeResults && !(devId in this.deviceVisits)) {
@@ -461,13 +469,18 @@ export default {
         }
 
         const existingAnimalMap = this.deviceVisits[devId].animals;
-        for (const animal in animalMap) {
-          const filtered = animalMap[animal].visits.filter(this.filterVisit);
+        for (const animal of Object.keys(animalMap)) {
+          const filtered = animalMap[animal].visits.filter(
+            (visit: Visit): boolean =>
+              visit.events.length > 0 &&
+              visit.what != DefaultLabels.allLabels.bird.value &&
+              visit.what != DefaultLabels.allLabels.falsePositive.value
+          );
           this.visits.push(...filtered);
 
           // merge new visits with old device visits
           if (mergeResults && !merged) {
-            if (!(animal in existingAnimalMap)) {
+            if (!existingAnimalMap.hasOwnProperty(animal)) {
               existingAnimalMap[animal] = animalMap[animal];
             } else {
               existingAnimalMap[animal].visits.push(
@@ -484,13 +497,6 @@ export default {
         }
         return a.start < b.start ? 1 : -1;
       });
-    },
-    filterVisit(visit: Visit): boolean {
-      return (
-        visit.events.length > 0 &&
-        visit.what != DefaultLabels.allLabels.bird.value &&
-        visit.what != DefaultLabels.allLabels.falsePositive.value
-      );
     }
   }
 };

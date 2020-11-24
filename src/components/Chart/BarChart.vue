@@ -1,12 +1,12 @@
 <template>
-  <div style="position: relative; height:100%; width:100%">
+  <div class="chart-wrapper">
     <h2 v-if="message" class="message">{{ message }}</h2>
     <canvas :id="id" />
   </div>
 </template>
 
-<script>
-import Chart from "chart.js";
+<script lang="ts">
+import Chart, { ChartData } from "chart.js";
 
 export default {
   name: "BarChart",
@@ -43,10 +43,10 @@ export default {
     };
   },
   computed: {
-    chartData: function() {
+    chartData: function(): Chart.ChartConfiguration {
       return {
         type: "bar",
-        data: this.data,
+        data: this.data as ChartData,
         options: {
           responsive: true,
           scales: {
@@ -55,13 +55,13 @@ export default {
                 type: this.log ? "logarithmic" : "linear",
                 ticks: {
                   beginAtZero: true,
-                  userCallback: tick => {
+                  callback: (tick: number) => {
                     if (this.log) {
                       var remain =
                         tick /
                         Math.pow(10, Math.floor(Chart.helpers.log10(tick)));
                       if (remain === 1 || remain === 2 || remain === 5) {
-                        return tick.toString();
+                        return tick;
                       }
                       return "";
                     } else {
@@ -93,16 +93,31 @@ export default {
             display: false
           },
           maintainAspectRatio: false,
-          onClick: (event, array) => {
-            if (array.length > 0) {
+          onClick: (
+            event: Event,
+            chartItems: {
+              _model: { label: string };
+            }[]
+          ) => {
+            if (chartItems.length > 0) {
               // Send click event if a bar is clicked on
-              this.$emit("click", array);
+              this.$emit(
+                "click",
+                chartItems.map(item => item._model.label)
+              );
             }
           },
-          onHover: (event, array) => {
-            if (array.length > 0) {
+          onHover: (
+            event: Event,
+            chartItems: {
+              _model: { label: string };
+            }[]
+          ) => {
+            if (chartItems.length > 0) {
               // Change pointer when hovering over a bar
-              event.target.style.cursor = "pointer";
+              (event.target as HTMLCanvasElement).style.cursor = "pointer";
+            } else {
+              (event.target as HTMLCanvasElement).style.cursor = "default";
             }
           }
         }
@@ -110,7 +125,7 @@ export default {
     }
   },
   mounted() {
-    const ctx = document.getElementById(this.id);
+    const ctx = document.getElementById(this.id) as HTMLCanvasElement;
     this.chart = new Chart(ctx, this.chartData);
   }
 };
@@ -125,5 +140,10 @@ export default {
   text-align: center;
   background: white;
   color: darkgrey;
+}
+.chart-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
 }
 </style>
