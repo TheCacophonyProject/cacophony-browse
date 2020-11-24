@@ -33,18 +33,24 @@
       {{ message }}
     </div>
     <div v-if="show" class="card-body">
+      <AIClassification
+        :tags="track.TrackTags"
+        :is-wallaby-project="isWallabyProject"
+      />
       <QuickTagTrack
         :tags="track.TrackTags"
         @addTag="addTag($event)"
         @deleteTag="deleteTag($event)"
       />
       <AddCustomTrackTag @addTag="addTag($event)" />
-      <TrackTags
-        :items="track.TrackTags"
-        @addTag="addTag($event)"
-        @deleteTag="deleteTag($event)"
-      />
-      <TrackData :track-data="track.data" />
+      <div v-if="isSuperUser()">
+        <TrackTags
+          :items="track.TrackTags"
+          @addTag="addTag($event)"
+          @deleteTag="deleteTag($event)"
+        />
+        <TrackData :track-data="track.data" />
+      </div>
     </div>
   </div>
 </template>
@@ -55,6 +61,7 @@ import TrackData from "./TrackData.vue";
 import QuickTagTrack from "./QuickTagTrack.vue";
 import TrackTags from "./TrackTags.vue";
 import AddCustomTrackTag from "./AddCustomTrackTag.vue";
+import AIClassification from "./AIClassification.vue";
 
 export default {
   name: "Track",
@@ -62,7 +69,8 @@ export default {
     TrackData,
     QuickTagTrack,
     TrackTags,
-    AddCustomTrackTag
+    AddCustomTrackTag,
+    AIClassification
   },
   props: {
     track: {
@@ -88,6 +96,10 @@ export default {
     colour: {
       type: String,
       default: "yellow"
+    },
+    isWallabyProject: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -155,6 +167,9 @@ export default {
     },
     headerClass() {
       return "selected-" + this.show;
+    },
+    isSuperUser() {
+      return this.$store.state.User.userData.isSuperUser;
     }
   }
 };

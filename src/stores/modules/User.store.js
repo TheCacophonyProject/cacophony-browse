@@ -9,6 +9,7 @@ const state = {
     username: localStorage.getItem("username"),
     email: localStorage.getItem("email"),
     globalPermission: getGlobalPermission(),
+    isSuperUser: isSuperUser(),
     acceptedEUA: localStorage.getItem("acceptedEUA")
   },
   latestEUA: localStorage.getItem("latestEUA"),
@@ -26,6 +27,9 @@ function getGlobalPermission() {
   return "off";
 }
 
+function isSuperUser() {
+  return getGlobalPermission() === "write";
+}
 // getters https://vuex.vuejs.org/guide/getters.html
 
 const getters = {

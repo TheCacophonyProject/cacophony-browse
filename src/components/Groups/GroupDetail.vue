@@ -159,7 +159,7 @@ export default {
       if (this.user && this.group.Users) {
         const username = this.user.username;
         return (
-          this.user.globalPermission === "write" ||
+          this.user.isSuperUser ||
           this.group.Users.some(
             user => user.GroupUsers.admin && user.username === username
           )
