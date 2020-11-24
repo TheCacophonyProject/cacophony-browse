@@ -117,7 +117,7 @@ export default {
       if (this.user && this.device.Users) {
         const username = this.user.username;
         return (
-          this.user.globalPermission === "write" ||
+          this.user.isSuperUser ||
           this.device.Users.some(
             user => user.DeviceUsers.admin && user.username === username
           )
