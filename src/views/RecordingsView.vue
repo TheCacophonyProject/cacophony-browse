@@ -67,7 +67,10 @@
                 </div>
               </div>
             </div>
-            <div v-else class="all-rows">
+            <div
+              v-else-if="tableItems && tableItems.length !== 0"
+              class="all-rows"
+            >
               <div class="results-header">
                 <div>
                   <span>ID</span>

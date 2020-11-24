@@ -1,7 +1,7 @@
 <template>
   <b-container>
     <ScaleChoice v-if="!fetching" v-model="logarithmic" />
-    <div style="height: 60vh; width: 100%">
+    <div class="chart-container">
       <Spinner :fetching="fetching" />
       <BarChart
         v-if="!fetching"
@@ -152,7 +152,7 @@ export default {
 
       const limit = 1000;
       const searchParams = {
-        type: this.recording,
+        type: this.recordingType,
         days: this.dateRange,
         limit: limit
       };
@@ -254,3 +254,9 @@ export default {
   }
 };
 </script>
+<style scoped lang="scss">
+.chart-container {
+  height: 60vh;
+  width: 100%;
+}
+</style>
