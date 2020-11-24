@@ -21,6 +21,7 @@
             :index="index"
             :num-tracks="tracks.length"
             :recording-id="getRecordingId()"
+            :is-wallaby-project="isWallabyProject()"
             :show="index === selectedTrack"
             :colour="colours[index % colours.length]"
             @trackSelected="trackSelected"
@@ -63,7 +64,7 @@ import RecordingControls from "./RecordingControls.vue";
 import ThermalVideoPlayer from "./ThermalVideoPlayer.vue";
 import TrackInfo from "./Track.vue";
 import RecordingProperties from "./RecordingProperties.vue";
-import { TagColours } from "../../const";
+import { TagColours, WALLABY_GROUP } from "../../const";
 
 export default {
   name: "VideoRecording",
@@ -199,6 +200,9 @@ export default {
     },
     getRecordingId() {
       return Number(this.$route.params.id);
+    },
+    isWallabyProject() {
+      return this.recording.GroupId == WALLABY_GROUP;
     },
     addTag(tag) {
       const id = Number(this.$route.params.id);

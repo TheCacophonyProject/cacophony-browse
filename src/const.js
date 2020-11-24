@@ -154,6 +154,10 @@ var allLabels = {
   unidentified: {
     value: "unidentified",
     text: "unidentified"
+  },
+  vehicle: {
+    value: "vehicle",
+    text: "vehicle"
   }
 };
 
@@ -199,6 +203,15 @@ const DefaultLabels = {
       allLabels.possum.value,
       allLabels.rodent.value,
       allLabels.hedgehog.value,
+      allLabels.cat.value,
+      allLabels.bird.value
+    ];
+  },
+  wallabyQuickTagLabels: function() {
+    return [
+      allLabels.wallaby.value,
+      allLabels.possum.value,
+      allLabels.rodent.value,
       allLabels.cat.value,
       allLabels.bird.value
     ];
@@ -267,3 +280,5 @@ function imgSrc(what) {
 
 export { allLabels, imgSrc };
 export default DefaultLabels;
+
+export const WALLABY_GROUP = 160;

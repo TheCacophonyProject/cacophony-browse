@@ -1,7 +1,7 @@
 <template>
   <div class="tag-buttons">
     <div class="tag-category">
-      <h6>Animals</h6>
+      <h6>Your classification:</h6>
       <div class="tag-btns-wrapper animals">
         <button
           v-for="animal in animals"
@@ -20,7 +20,6 @@
     </div>
 
     <div class="tag-category">
-      <h6>Other</h6>
       <div class="tag-btns-wrapper other">
         <button
           v-for="otherTag in otherTags"
@@ -58,6 +57,19 @@ export default {
     tags: {
       type: Array,
       required: true
+    },
+    isWallabyProject: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    animals: function() {
+      if (this.isWallabyProject) {
+        return DefaultLabels.wallabyQuickTagLabels();
+      } else {
+        return DefaultLabels.quickTagLabels();
+      }
     }
   },
   watch: {
@@ -71,7 +83,6 @@ export default {
   data() {
     return {
       userTags: [],
-      animals: DefaultLabels.quickTagLabels(),
       otherTags: DefaultLabels.otherTagLabels(),
       message: ""
     };
@@ -119,13 +130,13 @@ export default {
       if (userTag) {
         buttonClass += " tagged active";
       }
-      var aiTag = this.tags.find(function(tag) {
-        return tag.what == animal && tag.automatic;
-      });
+      // var aiTag = this.tags.find(function(tag) {
+      //   return tag.what == animal && tag.automatic;
+      // });
 
-      if (aiTag) {
-        buttonClass += " ai-tagged active";
-      }
+      // if (aiTag) {
+      //   buttonClass += " ai-tagged active";
+      // }
       return buttonClass;
     }
   }
@@ -147,6 +158,7 @@ export default {
       text-transform: uppercase;
       margin-top: 1em;
     }
+    margin-bottom: 1em;
   }
   .tag-btns-wrapper {
     display: flex;
