@@ -172,13 +172,19 @@ export interface QueryResultCount {
   messages: string[];
 }
 
-export interface QueryResult<T> {
-  count: number;
+export interface QueryResult<T> extends QueryResultCount {
+  statusCode: number;
   limit: string; // NOTE(jon): Actually, a number, but comes back as a string...
-  messages: string[];
   offset: string; // NOTE(jon): Actually, a number, but comes back as a string...
   rows: T[];
-  success: boolean;
+}
+
+export interface VisitsQueryResult extends QueryResult<DeviceVisitMap> {
+  hasMoreVisits: boolean;
+  totalRecordings: number;
+  numVisits: number;
+  queryOffset: number;
+  numRecordings: number;
 }
 
 // TODO: Unify this with the TagMode type in the API, extract both into a third Types/Interfaces repo.
@@ -292,7 +298,7 @@ function makeApiQuery(query: RecordingQuery): any {
 
 function queryVisits(
   queryParams: RecordingQuery
-): Promise<FetchResult<QueryResult<DeviceVisitMap>>> {
+): Promise<FetchResult<VisitsQueryResult>> {
   return CacophonyApi.get(
     `${apiPath}/visits?${querystring.stringify(makeApiQuery(queryParams))}`
   );
