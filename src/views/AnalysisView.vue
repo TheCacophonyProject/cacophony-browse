@@ -11,7 +11,7 @@
         :message="introMessage"
         x-axis-label="Device Name"
         y-axis-label="Number of Recordings"
-        @click="gotoRecordingsSearchPage($event)"
+        @click="gotoVisitsSearchPage($event)"
       />
     </div>
     <b-row>
@@ -36,14 +36,14 @@
   >
 </template>
 
-<script>
-import BarChart from "../components/Chart/BarChart.vue";
+<script lang="ts">
 import Spinner from "../components/Spinner.vue";
-import api from "../api/Recording.api";
+import api, { RecordingQuery } from "../api/Recording.api";
 import DateRange from "../components/Analysis/DateRange.vue";
 import RecordingType from "../components/Analysis/RecordingType.vue";
 import DeviceGroups from "../components/Analysis/DeviceGroups.vue";
 import ScaleChoice from "../components/Analysis/ScaleChoice.vue";
+import BarChart from "../components/Chart/BarChart.vue";
 
 export default {
   name: "AnalysisView",
@@ -147,11 +147,12 @@ export default {
   },
   methods: {
     getData: async function() {
+      // Gets data to pass into chart js:
       this.fetching = true;
       this.introMessage = null;
 
       const limit = 1000;
-      const searchParams = {
+      const searchParams: RecordingQuery = {
         type: this.recordingType,
         days: this.dateRange,
         limit: limit
@@ -234,20 +235,20 @@ export default {
       }
       return str;
     },
-    gotoRecordingsSearchPage(array) {
-      const deviceName = array[0]._model.label;
+    gotoVisitsSearchPage(chartItems: string[]) {
+      const deviceName = chartItems[0];
       const device = this.devices.find(device => {
         return device.name === deviceName;
       });
 
-      const searchParams = {
+      const searchParams: RecordingQuery = {
         type: this.recordingType,
         days: this.dateRange,
         device: [device.id]
       };
 
       this.$router.push({
-        path: "recordings",
+        path: "visits",
         query: searchParams
       });
     }
