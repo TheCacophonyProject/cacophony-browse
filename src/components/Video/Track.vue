@@ -39,6 +39,7 @@
       />
       <QuickTagTrack
         :tags="track.TrackTags"
+        :is-wallaby-project="isWallabyProject"
         @addTag="addTag($event)"
         @deleteTag="deleteTag($event)"
       />
