@@ -19,6 +19,7 @@ module.exports = {
     "no-console": ["warn"],
     "no-debugger": ["warn"],
     "no-undef": ["warn"],
+    "no-unused-vars": ["warn"],
     "@typescript-eslint/no-unused-vars": ["warn"],
     "brace-style": ["warn"],
     "prefer-const": ["warn"],

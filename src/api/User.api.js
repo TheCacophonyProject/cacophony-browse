@@ -1,21 +1,20 @@
 import CacophonyApi from "./CacophonyApi";
 
-export default {
-  login,
-  persistUser,
-  logout,
-  register,
-  updateFields,
-  persistFields,
-  getEUAVersion,
-  token
-};
-
 function login(usernameOrEmail, password) {
   return CacophonyApi.post("/authenticate_user", {
     nameOrEmail: usernameOrEmail,
     password: password
   });
+}
+
+function loginOther(username) {
+  return CacophonyApi.post("/authenticate_other_user_as_admin", {
+    name: username
+  });
+}
+
+function list() {
+  return CacophonyApi.get("/api/v1/listUsers");
 }
 
 function persistUser(
@@ -71,3 +70,16 @@ async function token() {
   }
   return result.token;
 }
+
+export default {
+  login,
+  loginOther,
+  persistUser,
+  list,
+  logout,
+  register,
+  updateFields,
+  persistFields,
+  getEUAVersion,
+  token
+};

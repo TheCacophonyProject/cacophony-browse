@@ -8,14 +8,14 @@
       <b-navbar-toggle target="navbarToggler" />
 
       <b-collapse id="navbarToggler" is-nav>
-        <b-navbar-nav v-if="isLoggedIn">
+        <b-navbar-nav>
           <b-nav-item to="/visits">Visits</b-nav-item>
           <b-nav-item to="/analysis">Analysis</b-nav-item>
           <b-nav-item to="/recordings">Recordings</b-nav-item>
           <b-nav-item to="/tagging">Power Tagger</b-nav-item>
         </b-navbar-nav>
 
-        <b-navbar-nav v-if="isLoggedIn" class="ml-auto">
+        <b-navbar-nav class="ml-auto">
           <b-nav-item-dropdown>
             <template slot="button-content">
               <font-awesome-icon icon="wrench" class="icon" />&nbsp;Admin
@@ -33,7 +33,6 @@
               />&nbsp;Devices</b-dropdown-item
             >
           </b-nav-item-dropdown>
-
           <b-nav-item-dropdown class="profile">
             <template slot="button-content">
               <font-awesome-icon
@@ -41,18 +40,13 @@
                 class="icon"
               />&nbsp;{{ userName }}
             </template>
-            <b-dropdown-item @click="logout"
-              ><font-awesome-icon
-                icon="power-off"
-                class="icon"
-              />&nbsp;Logout</b-dropdown-item
-            >
+            <b-dropdown-item v-if="isSuperUser" @click="changeViewingUser">
+              <font-awesome-icon icon="glasses" class="icon" />&nbsp;View user
+            </b-dropdown-item>
+            <b-dropdown-item @click="logout">
+              <font-awesome-icon icon="power-off" class="icon" />&nbsp;Logout
+            </b-dropdown-item>
           </b-nav-item-dropdown>
-        </b-navbar-nav>
-
-        <b-navbar-nav v-if="!isLoggedIn" class="ml-auto">
-          <b-nav-item to="/login">Login</b-nav-item>
-          <b-nav-item to="/register">Register</b-nav-item>
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
@@ -69,14 +63,18 @@ export default {
     };
   },
   computed: {
-    isLoggedIn() {
-      return this.$store.getters["User/isLoggedIn"];
+    isSuperUser() {
+      return this.globalPermission === "write";
     }
   },
   methods: {
     logout() {
       this.$store.dispatch("User/LOGOUT");
       this.$router.go("home");
+    },
+    changeViewingUser() {
+      // TODO(jon): Show a prompt to change which user we're viewing.
+      this.$emit("change-viewing-user");
     }
   }
 };
