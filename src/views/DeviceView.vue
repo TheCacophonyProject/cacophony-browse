@@ -26,7 +26,7 @@
 
     <spinner :fetching="!fetched" />
     <div v-if="device && fetched">
-      <device-detail :device="device" :user="currentUser" />
+      <device-detail :device="device" :user="currentUser" :software="softwareDetails" />
     </div>
   </b-container>
 </template>
@@ -35,30 +35,51 @@
 import { mapState } from "vuex";
 import DeviceDetail from "../components/Devices/DeviceDetail.vue";
 import Spinner from "../components/Spinner.vue";
+import api from "../api/index";
+
 
 export default {
   name: "DeviceView",
   components: { DeviceDetail, Spinner },
-  props: {},
   computed: mapState({
     device: state => state.Devices.currentDevice,
     fetched: state => state.Devices.fetched,
     currentUser: state => state.User.userData
   }),
-  watch: {
-    $route() {
-      this.fetchDevice();
+  data() {
+    return {
+      softwareDetails: { message: "Retreiving version information..." }
     }
   },
-  created: async function() {
-    await this.fetchDevice();
+  watch: {
+    $route() {
+      this.queryDevice();
+    }
+  },
+  created() {
+    this.queryDevice();  
   },
   methods: {
+    queryDevice: async function() {
+      await this.fetchDevice();
+      if (this.fetched) {
+        this.getSoftwareDetails(this.device.id);
+      }
+    },
     fetchDevice: async function() {
       await this.$store.dispatch(
         "Devices/GET_DEVICE",
         this.$route.params.devicename
       );
+    },
+    getSoftwareDetails: async function(deviceId) {
+      const results = await api.device.getLatestSoftwareVersion(deviceId);
+      if (results.success && results.result.rows.length > 0) {
+        this.softwareDetails.message = "Success";
+        this.softwareDetails.result = results.result.rows[0];
+      } else {
+        this.softwareDetails = { message:  "No version information available for this device."}
+      }
     }
   }
 };
