@@ -73,6 +73,18 @@ const actions = {
       commit("receiveLogin", result);
     }
   },
+  async LOGIN_OTHER({ commit }, result) {
+    commit("invalidateLogin");
+    api.user.persistUser(
+      result.userData.username,
+      result.token,
+      result.userData.email,
+      result.userData.globalPermission,
+      result.userData.id,
+      result.userData.endUserAgreement
+    );
+    commit("receiveLogin", result);
+  },
   LOGOUT(context) {
     context.commit("invalidateLogin");
     api.user.logout();

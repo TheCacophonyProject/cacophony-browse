@@ -20,6 +20,7 @@ import {
   faDownload,
   faExclamationTriangle,
   faGlasses,
+  faReply,
   faMicrochip,
   faMusic,
   faPlay,
@@ -35,6 +36,7 @@ import {
   faWrench,
   faUser,
   faUserCog,
+  faUserSecret,
   faPlus,
   faVolumeUp,
   faUserPlus,
@@ -90,6 +92,7 @@ library.add(
   faPowerOff,
   faQuestion,
   faQuestionCircle,
+  faReply,
   faSearch,
   faStar,
   faTimes,
@@ -103,6 +106,7 @@ library.add(
   faUserCog,
   faPlus,
   faUserPlus,
+  faUserSecret,
   faChevronRight,
   faVolumeUp
 );
