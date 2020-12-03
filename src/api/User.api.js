@@ -39,12 +39,13 @@ function persistFields(data) {
   }
 }
 function logout() {
-  localStorage.setItem("username", "");
-  localStorage.setItem("userId", "");
-  localStorage.setItem("JWT", "");
-  localStorage.setItem("email", "");
-  localStorage.setItem("globalPermission", "");
-  localStorage.setItem("acceptedEUA", "");
+  localStorage.removeItem("username");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("JWT");
+  localStorage.removeItem("email");
+  localStorage.removeItem("globalPermission");
+  localStorage.removeItem("acceptedEUA");
+  localStorage.removeItem("superUserCreds");
 }
 function register(username, password, email, endUserAgreement) {
   return CacophonyApi.post("/api/v1/Users", {

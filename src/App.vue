@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <div v-if="isLoggedIn() && isViewingAsOtherUser()">
+      Viewing as {{ superUserName }}
+    </div>
     <global-messaging />
     <nav-bar v-if="isLoggedIn()" @change-viewing-user="changeUserView" />
     <router-view class="view" />
@@ -39,8 +42,6 @@ export default {
     };
   },
   async created() {
-    // TODO(jon): Should fetch users into users data.  This will require an API update to be able to list users.
-
     // Should grab locally persisted shadow user if there is one.
     this.selectedUser = {
       id: Number(localStorage.getItem("userId")),
@@ -58,12 +59,40 @@ export default {
     NavBar,
     GlobalMessaging
   },
+
   methods: {
-    isLoggedIn: function() {
+    isLoggedIn() {
       return store.getters["User/isLoggedIn"];
+    },
+
+    superUserName() {
+      return this.superUserCreds()?.username;
+    },
+    superUserCreds() {
+      let superUserCreds = localStorage.getItem("superUserCreds");
+      if (superUserCreds) {
+        try {
+          superUserCreds = JSON.parse(superUserCreds);
+          return superUserCreds;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
     },
     changeUserView() {
       this.showChangeUserViewDialog = true;
+    },
+    isViewingAsOtherUser() {
+      const superUserCreds = this.superUserCreds();
+      if (
+        superUserCreds &&
+        superUserCreds.token &&
+        superUserCreds.token !== localStorage.getItem("JWT")
+      ) {
+        return true;
+      }
+      return false;
     },
     async changeViewingUser() {
       if (this.selectedUser) {
@@ -77,9 +106,6 @@ export default {
           email,
           id
         } = otherUser.result.userData;
-
-        // Save super-user creds to another localStorage location.
-
         User.persistUser(
           username,
           token,
@@ -88,7 +114,6 @@ export default {
           id,
           acceptedEUA
         );
-        // Save the JWT token as our token, and move the admin user settings into some other local storage?
       }
     }
   }

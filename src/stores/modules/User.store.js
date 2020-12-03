@@ -55,6 +55,13 @@ const actions = {
       payload.password
     );
     if (success) {
+      if (result.userData.globalPermission === "write") {
+        // Persist super user settings so that we can switch user views.
+        localStorage.setItem(
+          "superUserCreds",
+          JSON.stringify({ ...result.userData, token: result.token })
+        );
+      }
       api.user.persistUser(
         result.userData.username,
         result.token,
