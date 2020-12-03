@@ -89,7 +89,10 @@ export default {
     return {
       showChangeUserViewDialog: false,
       users: [],
-      selectedUser: null // View user starts out as the super user.
+      selectedUser: {
+        name:"",
+        id: ""
+      }
     }
   },
   async created() {
@@ -112,13 +115,6 @@ export default {
   methods: {
     async initUsersList() {
       if (this.isLoggedIn && this.isSuperUser) {
-        // Should grab locally persisted shadow user if there is one.
-        this.selectedUser = {
-          id: "",
-          name: ""
-        };
-
-        // Check if we are admin
         const usersList = await User.list();
         this.users = usersList.result.usersList.map(({username, id}) => ({
           name: username,
