@@ -1,6 +1,6 @@
 <template>
   <div class="nav-bar">
-    <div v-if="isLoggedIn && isViewingAsOtherUser()" class="super-user-bar">
+    <div v-if="isViewingAsOtherUser()" class="super-user-bar">
       <font-awesome-icon icon="glasses" class="icon" />
       <span
         ><strong>{{ superUserName() }}</strong> viewing as
@@ -91,7 +91,6 @@
 </template>
 
 <script>
-import store from "../stores";
 import User from "../api/User.api";
 
 export default {
@@ -117,9 +116,6 @@ export default {
     isSuperUser() {
       return this.globalPermission === "write";
     },
-    isLoggedIn() {
-      return store.getters["User/isLoggedIn"];
-    },
     showChangeUserViewDialog: {
       async set(val) {
         this.internalShowChangeUserViewDialog = val;
@@ -135,7 +131,7 @@ export default {
   },
   methods: {
     async initUsersList() {
-      if (this.isLoggedIn && this.isSuperUser) {
+      if (this.isSuperUser) {
         const usersList = await User.list();
         this.users = usersList.result.usersList
           .map(({ username, id }) => ({
