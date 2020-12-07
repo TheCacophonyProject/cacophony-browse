@@ -50,6 +50,11 @@
               v-if="aiGuessIsDifferentFromSomeUser"
               icon="times-circle"
             />
+            <span
+              v-if="aiGuessIsDifferentFromSomeUser && aiGuessIsSameAsSomeUser"
+            >
+              /
+            </span>
             <span v-if="disagreeingUsersCount > 1"
               >({{ disagreeingUsersCount }})</span
             >
