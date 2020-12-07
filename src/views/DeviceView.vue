@@ -26,7 +26,11 @@
 
     <spinner :fetching="!fetched" />
     <div v-if="device && fetched">
-      <device-detail :device="device" :user="currentUser" :software="softwareDetails" />
+      <device-detail
+        :device="device"
+        :user="currentUser"
+        :software="softwareDetails"
+      />
     </div>
   </b-container>
 </template>
@@ -36,7 +40,6 @@ import { mapState } from "vuex";
 import DeviceDetail from "../components/Devices/DeviceDetail.vue";
 import Spinner from "../components/Spinner.vue";
 import api from "../api/index";
-
 
 export default {
   name: "DeviceView",
@@ -49,7 +52,7 @@ export default {
   data() {
     return {
       softwareDetails: { message: "Retreiving version information..." }
-    }
+    };
   },
   watch: {
     $route() {
@@ -57,7 +60,7 @@ export default {
     }
   },
   created() {
-    this.queryDevice();  
+    this.queryDevice();
   },
   methods: {
     queryDevice: async function() {
@@ -78,7 +81,9 @@ export default {
         this.softwareDetails.message = "Success";
         this.softwareDetails.result = results.result.rows[0];
       } else {
-        this.softwareDetails = { message:  "No version information available for this device."}
+        this.softwareDetails = {
+          message: "No version information available for this device."
+        };
       }
     }
   }

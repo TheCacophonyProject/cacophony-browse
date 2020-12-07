@@ -35,7 +35,6 @@ export default {
     }
   },
   computed: {
-
     aiGuess() {
       return classifyTrack(this.tags, this.isWallabyProject);
     }

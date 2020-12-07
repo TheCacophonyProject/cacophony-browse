@@ -53,7 +53,7 @@
               >
                 <p>
                   Are you sure you want to remove yourself from this device? You
-                  will no longer be able to view recordings from this device and  
+                  will no longer be able to view recordings from this device and
                   you will not be able to add yourself back to the device.
                 </p>
               </b-modal>
@@ -71,13 +71,24 @@
           </b-table>
         </div>
         <h2>Current software</h2>
-        <div v-if="!software.result">
-          Message: {{ software.message }}
-        </div>
-        <div v-if="software.result" >
-          <div v-for="(version, component) in software.result.EventDetail.details" :key="version" >
-            <b>{{ component }}</b>: {{ version  }}     
-          </div>   
+        <div v-if="!software.result">Message: {{ software.message }}</div>
+        <div
+          v-if="
+            software.result &&
+              software.result.EventDetail &&
+              software.result.EventDetail.details
+          "
+        >
+          <div v-if="software.result.dateTime">
+            Status as at {{ dayOfSnapshot }}, {{ timeOfSnapshot }}
+          </div>
+          <div
+            v-for="(version, component) in software.result.EventDetail.details"
+            :key="component"
+          >
+            <b>{{ component }}</b
+            >: {{ version }}
+          </div>
         </div>
       </b-col>
     </b-row>
@@ -88,6 +99,7 @@
 import { mapState } from "vuex";
 import DeviceAddUser from "./DeviceAddUser.vue";
 import Help from "../Help.vue";
+import { toStringTodayYesterdayOrDate } from "../../helpers/datetime";
 
 export default {
   name: "DeviceDetail",
@@ -103,7 +115,7 @@ export default {
     },
     software: {
       type: Object,
-      required: true,
+      required: true
     }
   },
   data() {
@@ -121,7 +133,7 @@ export default {
       usersHelpTip: {
         title: "Only administrators can add new users."
       },
-      showUserRemoveSelfModal: false,
+      showUserRemoveSelfModal: false
     };
   },
   computed: mapState({
@@ -137,6 +149,19 @@ export default {
         );
       }
       return false;
+    },
+    dayOfSnapshot: function() {
+      if (this.software.result.dateTime) {
+        return toStringTodayYesterdayOrDate(
+          new Date(this.software.result.dateTime)
+        );
+      }
+    },
+    timeOfSnapshot: function() {
+      if (this.software.result.dateTime) {
+        const thisDate = new Date(this.software.result.dateTime);
+        return thisDate.toLocaleTimeString();
+      }
     }
   }),
   methods: {

@@ -184,7 +184,7 @@ const DefaultLabels = {
     allLabels.unknown,
     allLabels.pest,
     allLabels.part,
-    allLabels.vehicle 
+    allLabels.vehicle
   ],
   tagTypes: [
     allLabels.any,
