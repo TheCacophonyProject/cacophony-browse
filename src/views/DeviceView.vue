@@ -77,12 +77,13 @@ export default {
     },
     getSoftwareDetails: async function(deviceId) {
       const results = await api.device.getLatestSoftwareVersion(deviceId);
+
       if (results.success && results.result.rows.length > 0) {
         this.softwareDetails.message = "Success";
         this.softwareDetails.result = results.result.rows[0];
       } else {
         this.softwareDetails = {
-          message: "No version information available for this device."
+          message: "No version information is available for this device."
         };
       }
     }
