@@ -11,8 +11,9 @@
         >
           <img
             :alt="`Mark as ${animal}`"
-            onerror="this.style.display='none'"
+            onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
             :title="`Mark as ${animal}`"
+            class="img-tag"
             :src="imgSrc(animal)"
           />
           <span class="tag-name">{{ animal }}</span>
@@ -33,7 +34,8 @@
         >
           <img
             :alt="getOtherTitle(otherTag.value)"
-            onerror="this.style.display='none'"
+            class="img-tag"
+            onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
             :title="getOtherTitle(otherTag.value)"
             :src="imgSrc(otherTag.value)"
           />
@@ -71,24 +73,16 @@ export default {
     }
   },
   computed: {
+    blankImage() {
+      return "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
+    },
     aiGuess() {
       return classifyTrack(this.tags, this.isWallabyProject);
     },
     animals() {
-      const tags = this.isWallabyProject
+      return this.isWallabyProject
         ? DefaultLabels.wallabyQuickTagLabels()
         : DefaultLabels.quickTagLabels();
-      // Make sure we always show a button for a user tagged track if it's not in the default list:
-      const userTag = this.userTags[0];
-      if (userTag !== undefined && !tags.includes(userTag.what)) {
-        tags[1] = userTag.what;
-      }
-      // Make sure we always show a button with the AI guess if it's not in the default list:
-      const aiGuess = this.aiGuess;
-      if (aiGuess && !tags.includes(aiGuess.what)) {
-        tags[2] = aiGuess.what;
-      }
-      return tags;
     },
     userTags() {
       return this.tags.filter(
@@ -96,11 +90,28 @@ export default {
           tag.User &&
           tag.User.username === this.$store.state.User.userData.username
       );
+    },
+    otherTags() {
+      const otherTags = DefaultLabels.otherTagLabels();
+      // Make sure we always show a button with the AI guess if it's not in the default list:
+      const aiGuess = this.aiGuess;
+      if (
+        aiGuess &&
+        aiGuess.what !== "unidentified" &&
+        !this.animals.includes(aiGuess.what)
+      ) {
+        otherTags.unshift({ text: aiGuess.what, value: aiGuess.what });
+      }
+      // Make sure we always show a button for a user tagged track if it's not in the default list:
+      const userTag = this.userTags[0];
+      if (userTag !== undefined && !this.animals.includes(userTag.what)) {
+        otherTags.unshift({ text: userTag.what, value: userTag.what });
+      }
+      return otherTags;
     }
   },
   data() {
     return {
-      otherTags: DefaultLabels.otherTagLabels(),
       message: ""
     };
   },
@@ -151,6 +162,12 @@ export default {
 
 <style lang="scss" scoped>
 @import "../../styles/tag-colours";
+
+.img-tag {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+}
 
 .tag-buttons {
   margin-bottom: 1.2rem;

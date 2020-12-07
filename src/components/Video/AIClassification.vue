@@ -19,7 +19,7 @@
       <div v-if="aiGuess" class="guess-row">
         <div>
           <img
-            onerror="this.style.display='none'"
+            onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
             :src="imgSrc(aiGuess.what)"
             class="tag-img"
             :data-model="aiGuess.data.name"
@@ -36,25 +36,19 @@
           </b-button>
         </div>
         <div v-else class="confirmation">
-          <div>
-            <font-awesome-icon
-              v-if="aiGuessIsSameAsSomeUser"
-              icon="check-circle"
-            />
+          <div v-if="aiGuessIsSameAsSomeUser">
+            <font-awesome-icon icon="check-circle" />
             <span v-if="agreeingUsersCount > 1"
               >({{ agreeingUsersCount }})</span
             >
           </div>
-          <div>
-            <font-awesome-icon
-              v-if="aiGuessIsDifferentFromSomeUser"
-              icon="times-circle"
-            />
-            <span
-              v-if="aiGuessIsDifferentFromSomeUser && aiGuessIsSameAsSomeUser"
-            >
-              /
-            </span>
+          <span
+            v-if="aiGuessIsDifferentFromSomeUser && aiGuessIsSameAsSomeUser"
+          >
+            /
+          </span>
+          <div v-if="aiGuessIsDifferentFromSomeUser">
+            <font-awesome-icon icon="times-circle" />
             <span v-if="disagreeingUsersCount > 1"
               >({{ disagreeingUsersCount }})</span
             >
@@ -103,20 +97,27 @@ export default {
     },
     aiGuessIsDifferentFromSomeUser() {
       return (
-        this.userTags.length !== 0 && !this.userTags.includes(this.aiGuess.what)
+        this.userTags.length !== 0 &&
+        this.userTags.filter(tag => tag !== this.aiGuess.what).length > 0
       );
     },
     agreeingUsersCount() {
       return this.userTags.filter(tag => tag === this.aiGuess.what).length;
     },
     disagreeingUsersCount() {
-      return this.userTags.filter(tag => tag === !this.aiGuess.what).length;
+      return this.userTags.filter(tag => tag !== this.aiGuess.what).length;
     }
   },
   methods: {
     imgSrc,
     confirm() {
-      this.$emit("confirm-ai-guess", this.aiGuess);
+      // If we want to confirm an aiGuess of "unidentified", we need to map it to the user tag "unknown"
+      // which indicates that the user agrees that the subject is not identifiable
+      if (this.aiGuess.what === "unidentified") {
+        this.$emit("confirm-ai-guess", { what: "unknown" });
+      } else {
+        this.$emit("confirm-ai-guess", this.aiGuess);
+      }
     },
     reject() {
       this.$emit("reject-ai-guess");
@@ -135,6 +136,7 @@ h6 {
 .tag-img {
   max-width: 30px;
   max-height: 30px;
+  background: transparent;
   margin-right: 0.2rem;
 }
 .classification {
@@ -151,6 +153,12 @@ h6 {
     > span {
       font-size: smaller;
     }
+  }
+}
+.confirmation {
+  > div,
+  > span {
+    display: inline-block;
   }
 }
 .guess-row {
