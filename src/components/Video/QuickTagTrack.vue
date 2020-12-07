@@ -98,13 +98,19 @@ export default {
       if (
         aiGuess &&
         aiGuess.what !== "unidentified" &&
-        !this.animals.includes(aiGuess.what)
+        !this.animals.includes(aiGuess.what) &&
+        otherTags.find(({ value }) => value === aiGuess.what) === undefined
       ) {
         otherTags.unshift({ text: aiGuess.what, value: aiGuess.what });
       }
       // Make sure we always show a button for a user tagged track if it's not in the default list:
       const userTag = this.userTags[0];
-      if (userTag !== undefined && !this.animals.includes(userTag.what)) {
+      if (
+        userTag !== undefined &&
+        userTag.what !== "unknown" &&
+        !this.animals.includes(userTag.what) &&
+        otherTags.find(({ value }) => value === userTag.what) === undefined
+      ) {
         otherTags.unshift({ text: userTag.what, value: userTag.what });
       }
       return otherTags;

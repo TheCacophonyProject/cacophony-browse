@@ -46,7 +46,8 @@
         fade
         :show="showUserTaggingHintCountDown"
         variant="warning"
-        @dismissed="showUserTaggingHintCountDown = 0"
+        dismissible
+        @dismissed="showUserTaggingHintCountDown = false"
       >
         Click a classification button below to help teach the AI what this
         <em>really</em> is.
@@ -161,7 +162,7 @@ export default {
       });
     },
     promptUserToAddTag() {
-      this.showUserTaggingHintCountDown = 5;
+      this.showUserTaggingHintCountDown = true;
     },
     deleteTag(tag) {
       const recordingId = this.recordingId;
