@@ -10,11 +10,12 @@
           @click="quickTag(animal)"
         >
           <img
+            :alt="`Mark as ${animal}`"
             onerror="this.style.display='none'"
-            :title="getTitle(animal)"
+            :title="`Mark as ${animal}`"
             :src="imgSrc(animal)"
           />
-          <div class="tag-name">{{ animal }}</div>
+          <span class="tag-name">{{ animal }}</span>
         </button>
       </div>
     </div>
@@ -31,18 +32,23 @@
           @click="quickTag(otherTag.value)"
         >
           <img
+            :alt="getOtherTitle(otherTag.value)"
             onerror="this.style.display='none'"
             :title="getOtherTitle(otherTag.value)"
             :src="imgSrc(otherTag.value)"
           />
-          <div class="tag-name">{{ otherTag.text }}</div>
+          <span class="tag-name">{{ otherTag.text }}</span>
         </button>
         <button
           v-b-modal="'custom-track-tag'"
           class="btn btn-light btn-tag equal-flex"
         >
-          <img title="Open form to add other tag" src="/plus.png" />
-          <div class="tag-name">other...</div>
+          <img
+            alt="Add other tag"
+            title="Open form to add other tag"
+            src="/plus.png"
+          />
+          <span class="tag-name">other...</span>
         </button>
       </div>
     </div>
@@ -51,6 +57,7 @@
 
 <script>
 import DefaultLabels, { imgSrc } from "../../const.js";
+import { classifyTrack } from "../../classification";
 export default {
   name: "QuickTagTrack",
   props: {
@@ -64,43 +71,43 @@ export default {
     }
   },
   computed: {
-    animals: function() {
-      if (this.isWallabyProject) {
-        return DefaultLabels.wallabyQuickTagLabels();
-      } else {
-        return DefaultLabels.quickTagLabels();
+    aiGuess() {
+      return classifyTrack(this.tags, this.isWallabyProject);
+    },
+    animals() {
+      const tags = this.isWallabyProject
+        ? DefaultLabels.wallabyQuickTagLabels()
+        : DefaultLabels.quickTagLabels();
+      // Make sure we always show a button for a user tagged track if it's not in the default list:
+      const userTag = this.userTags[0];
+      if (userTag !== undefined && !tags.includes(userTag.what)) {
+        tags[1] = userTag.what;
       }
+      // Make sure we always show a button with the AI guess if it's not in the default list:
+      const aiGuess = this.aiGuess;
+      if (aiGuess && !tags.includes(aiGuess.what)) {
+        tags[2] = aiGuess.what;
+      }
+      return tags;
+    },
+    userTags() {
+      return this.tags.filter(
+        tag =>
+          tag.User &&
+          tag.User.username === this.$store.state.User.userData.username
+      );
     }
-  },
-  watch: {
-    tags: function() {
-      this.filterTags();
-    }
-  },
-  created: function() {
-    this.filterTags();
   },
   data() {
     return {
-      userTags: [],
       otherTags: DefaultLabels.otherTagLabels(),
       message: ""
     };
   },
   methods: {
     imgSrc,
-    filterTags() {
-      this.userTags = this.tags.filter(
-        tag =>
-          tag.User &&
-          tag.User.username == this.$store.state.User.userData.username
-      );
-    },
     quickTag(what) {
-      var found = this.userTags.find(function(tag) {
-        return tag.what == what;
-      });
-
+      const found = this.getUserTag(what);
       if (found) {
         this.$emit("deleteTag", found);
         return;
@@ -112,22 +119,21 @@ export default {
       this.$emit("addTag", tag);
     },
     getOtherTitle(other) {
-      if (other == DefaultLabels.allLabels.falsePositive.value) {
+      if (other === DefaultLabels.allLabels.falsePositive.value) {
         return "Mark as nothing or false positive (meaning there is no animal)";
-      } else if (other == DefaultLabels.allLabels.unknown.value) {
+      } else if (other === DefaultLabels.allLabels.unknown.value) {
         return "Mark as unknown (meaning the type of animal is unclear)";
       }
     },
-    getTitle(animal) {
-      return "Mark as " + animal;
+    hasUserTag(animal) {
+      return this.getUserTag(animal) !== undefined;
+    },
+    getUserTag(animal) {
+      return this.userTags.find(tag => tag.what === animal);
     },
     getClass(animal) {
       let buttonClass = "tag-div";
-      var userTag = this.userTags.find(function(tag) {
-        return tag.what == animal;
-      });
-
-      if (userTag) {
+      if (this.hasUserTag(animal)) {
         buttonClass += " tagged active";
       }
       // var aiTag = this.tags.find(function(tag) {
@@ -152,6 +158,7 @@ export default {
   flex-flow: row wrap;
   justify-content: space-between;
   .tag-category {
+    width: 100%;
     h6 {
       font-size: 0.75em;
       font-weight: 600;
@@ -164,18 +171,23 @@ export default {
     display: flex;
     .btn {
       margin-right: 4px;
+      > span {
+        display: inline-block;
+      }
     }
     .btn:last-child {
       margin-right: 0;
     }
   }
   .equal-flex {
-    flex: 1 1 0px;
+    flex: 1 1 0;
   }
   .btn-tag {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-left: 0.2em;
     padding-right: 0.2em;
-    min-width: 58.17px;
     img {
       max-width: 44px;
     }
@@ -190,6 +202,16 @@ export default {
     }
     &.ai-tagged.tagged {
       border: 2px solid $aihuman !important;
+    }
+  }
+}
+@media only screen and (max-width: 359px) {
+  .tag-buttons {
+    .btn-tag {
+      font-size: smaller;
+      img {
+        max-width: 32px;
+      }
     }
   }
 }

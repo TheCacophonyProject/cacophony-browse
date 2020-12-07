@@ -1,5 +1,5 @@
 <template>
-  <div :class="['card', trackClass()]">
+  <div :class="['card', trackClass]">
     <div class="card-header">
       <button
         v-if="index != 0"
@@ -10,7 +10,7 @@
         <font-awesome-icon icon="angle-left" />
       </button>
       <h5 class="track-title" @click="trackSelected(0)">
-        <span :style="getIconStyle()" class="track-image border" />
+        <span :style="iconStyle" class="track-image border" />
         Track {{ index + 1 }}
         <span class="out-of-tracks">/ {{ numTracks }}</span>
       </h5>
@@ -36,7 +36,21 @@
       <AIClassification
         :tags="track.TrackTags"
         :is-wallaby-project="isWallabyProject"
+        :needs-confirmation="!hasUserTags"
+        :userTags="userTags"
+        @confirm-ai-guess="({ what }) => addTag({ what, confidence: 0.85 })"
+        @reject-ai-guess="promptUserToAddTag"
       />
+      <b-alert
+        class="user-tagging-hint"
+        fade
+        :show="showUserTaggingHintCountDown"
+        variant="warning"
+        @dismissed="showUserTaggingHintCountDown = 0"
+      >
+        Click a classification button below to help teach the AI what this
+        <em>really</em> is.
+      </b-alert>
       <QuickTagTrack
         :tags="track.TrackTags"
         :is-wallaby-project="isWallabyProject"
@@ -44,7 +58,7 @@
         @deleteTag="deleteTag($event)"
       />
       <AddCustomTrackTag @addTag="addTag($event)" />
-      <div v-if="isSuperUser()">
+      <div v-if="isSuperUser">
         <TrackTags
           :items="track.TrackTags"
           @addTag="addTag($event)"
@@ -57,7 +71,6 @@
 </template>
 
 <script>
-/* global require */
 import TrackData from "./TrackData.vue";
 import QuickTagTrack from "./QuickTagTrack.vue";
 import TrackTags from "./TrackTags.vue";
@@ -108,12 +121,11 @@ export default {
       show_details: false,
       showFullAddTag: false,
       message: "",
-      tag: null
+      showUserTaggingHintCountDown: 0
     };
   },
-  computed: {},
-  methods: {
-    trackClass: function() {
+  computed: {
+    trackClass() {
       const selected = "selected-" + this.show;
       if ("tag" in this.track.data) {
         return selected;
@@ -121,29 +133,24 @@ export default {
         return selected + " ignored";
       }
     },
-    trackImage: function() {
-      // Struggling to get images to show correctly so using work-around
-      // suggested at bottom of this page.
-      // TODO implement alternative that doesn't use 'require' in this manner
-      // https://bootstrap-vue.js.org/docs/reference/images/
-      let image = null;
-      if ("tag" in this.track.data) {
-        image = this.track.data.tag + ".png";
-        try {
-          const link = require("../../assets/video/" + image);
-          return `<img class="track-image" src="${link}" />`;
-        } catch (e) {
-          return `<img class="track-image"/>`;
-        }
-      }
-      return `<img class="track-image"/>`;
-    },
-    getIconStyle() {
+    iconStyle() {
       return `background-color: ${this.colour}`;
     },
-    getBorderStyle() {
-      return `border-color: ${this.colour}`;
+    hasUserTags() {
+      return (
+        this.track.TrackTags.find(({ User }) => User !== null) !== undefined
+      );
     },
+    userTags() {
+      return this.track.TrackTags.filter(({ User }) => User !== null).map(
+        ({ what }) => what
+      );
+    },
+    isSuperUser() {
+      return this.$store.state.User.userData.isSuperUser;
+    }
+  },
+  methods: {
     addTag(tag) {
       const recordingId = this.recordingId;
       const trackId = this.track.id;
@@ -152,6 +159,9 @@ export default {
         recordingId,
         trackId
       });
+    },
+    promptUserToAddTag() {
+      this.showUserTaggingHintCountDown = 5;
     },
     deleteTag(tag) {
       const recordingId = this.recordingId;
@@ -165,12 +175,6 @@ export default {
       if (0 <= index && index < this.numTracks) {
         this.$emit("trackSelected", this.index + increment);
       }
-    },
-    headerClass() {
-      return "selected-" + this.show;
-    },
-    isSuperUser() {
-      return this.$store.state.User.userData.isSuperUser;
     }
   }
 };
@@ -238,6 +242,10 @@ export default {
 
 .delta {
   color: gray;
+}
+
+.user-tagging-hint {
+  margin: 10px auto;
 }
 
 /*.ignored {
