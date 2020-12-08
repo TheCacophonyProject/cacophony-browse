@@ -34,6 +34,6 @@ function removeUserFromDevice(username, deviceId) {
 
 function getLatestSoftwareVersion(deviceId) {
   return CacophonyApi.get(
-    `/api/v1/events?type=versionData&limit=1&deviceId=${deviceId}`
+    `/api/v1/events?type=versionData&limit=1&latest=true&deviceId=${deviceId}`
   );
 }

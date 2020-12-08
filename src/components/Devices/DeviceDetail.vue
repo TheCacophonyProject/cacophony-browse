@@ -70,24 +70,28 @@
             </template>
           </b-table>
         </div>
-        <h2>Current software</h2>
-        <div v-if="!software.result">Message: {{ software.message }}</div>
-        <div
-          v-if="
-            software.result &&
-              software.result.EventDetail &&
-              software.result.EventDetail.details
-          "
-        >
-          <div v-if="software.result.dateTime">
-            Status as at {{ dayOfSnapshot }}, {{ timeOfSnapshot }}
-          </div>
+        <hr/>
+        <div :class='"versions"'>
+          <h2>Current software versions</h2>
+          <div v-if="!software.result">Message: {{ software.message }}</div>
           <div
-            v-for="(version, component) in software.result.EventDetail.details"
-            :key="component"
+            v-if="
+              software.result &&
+                software.result.EventDetail &&
+                software.result.EventDetail.details
+            "
           >
-            <b>{{ component }}</b
-            >: {{ version }}
+            <div
+              v-for="(version, component) in software.result.EventDetail.details"
+              :key="component"
+            >
+              <b>{{ component }}</b
+              >: {{ version }}
+            </div>
+            <div v-if="software.result.dateTime">
+              <i>Recorded {{ dayOfSnapshot.toLowerCase() }} at {{ timeOfSnapshot }}</i>
+            </div>
+            <p> Current released software versions are listed <a href="https://github.com/TheCacophonyProject/saltops#branch-prod">here</a>.</p>
           </div>
         </div>
       </b-col>
@@ -181,3 +185,17 @@ export default {
   }
 };
 </script>
+<style scoped>
+.versions {
+  padding-top: 1em;
+}
+
+.versions p {
+  padding-top: 1em;
+}
+
+hr {
+  margin-top: 2em;
+  width: 60%;
+}
+</style>
