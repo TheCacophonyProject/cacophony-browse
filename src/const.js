@@ -89,7 +89,7 @@ var allLabels = {
   },
   unknown: {
     value: "unknown",
-    text: "unknown"
+    text: "not identifiable"
   },
   pest: {
     value: "pest",
