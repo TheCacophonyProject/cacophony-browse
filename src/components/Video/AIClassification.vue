@@ -35,7 +35,7 @@
             <font-awesome-icon icon="thumbs-down" />
           </b-button>
         </div>
-        <div v-else class="confirmation">
+        <div v-else-if="isSuperUser" class="confirmation">
           <div v-if="aiGuessIsSameAsSomeUser">
             <font-awesome-icon icon="check-circle" />
             <span v-if="agreeingUsersCount > 1"
@@ -92,32 +92,44 @@ export default {
     },
     aiGuessIsSameAsSomeUser() {
       return (
-        this.userTags.length !== 0 && this.userTags.includes(this.aiGuess.what)
+        this.userTags.length !== 0 &&
+        this.userTags.includes(this.mapName(this.aiGuess.what))
       );
     },
     aiGuessIsDifferentFromSomeUser() {
       return (
         this.userTags.length !== 0 &&
-        this.userTags.filter(tag => tag !== this.aiGuess.what).length > 0
+        this.userTags.filter(tag => tag !== this.mapName(this.aiGuess.what))
+          .length > 0
       );
     },
     agreeingUsersCount() {
-      return this.userTags.filter(tag => tag === this.aiGuess.what).length;
+      return this.userTags.filter(
+        tag => tag === this.mapName(this.aiGuess.what)
+      ).length;
     },
     disagreeingUsersCount() {
-      return this.userTags.filter(tag => tag !== this.aiGuess.what).length;
+      return this.userTags.filter(
+        tag => tag !== this.mapName(this.aiGuess.what)
+      ).length;
+    },
+    isSuperUser() {
+      return this.$store.state.User.userData.isSuperUser;
     }
   },
   methods: {
+    mapName(name) {
+      // Map 'unidentified' ai tag to 'unknown' user tag
+      if (name === "unidentified") {
+        return "unknown";
+      }
+      return name;
+    },
     imgSrc,
     confirm() {
-      // If we want to confirm an aiGuess of "unidentified", we need to map it to the user tag "unknown"
-      // which indicates that the user agrees that the subject is not identifiable
-      if (this.aiGuess.what === "unidentified") {
-        this.$emit("confirm-ai-guess", { what: "unknown" });
-      } else {
-        this.$emit("confirm-ai-guess", this.aiGuess);
-      }
+      this.$emit("confirm-ai-guess", {
+        what: this.mapName(this.aiGuess.what)
+      });
     },
     reject() {
       this.$emit("reject-ai-guess");

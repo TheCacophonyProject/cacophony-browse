@@ -122,7 +122,7 @@ export default {
       show_details: false,
       showFullAddTag: false,
       message: "",
-      showUserTaggingHintCountDown: 0
+      showUserTaggingHintCountDown: false
     };
   },
   computed: {
