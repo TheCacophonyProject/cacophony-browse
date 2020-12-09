@@ -70,6 +70,30 @@
             </template>
           </b-table>
         </div>
+        <hr/>
+        <div :class='"versions"'>
+          <h2>Current software versions</h2>
+          <div v-if="!software.result">Message: {{ software.message }}</div>
+          <div
+            v-if="
+              software.result &&
+                software.result.EventDetail &&
+                software.result.EventDetail.details
+            "
+          >
+            <div
+              v-for="(version, component) in software.result.EventDetail.details"
+              :key="component"
+            >
+              <b>{{ component }}</b
+              >: {{ version }}
+            </div>
+            <div v-if="software.result.dateTime">
+              <i>Recorded {{ dayOfSnapshot.toLowerCase() }} at {{ timeOfSnapshot }}</i>
+            </div>
+            <p> Current released software versions are listed <a href="https://github.com/TheCacophonyProject/saltops#branch-prod">here</a>.</p>
+          </div>
+        </div>
       </b-col>
     </b-row>
   </div>
@@ -79,6 +103,7 @@
 import { mapState } from "vuex";
 import DeviceAddUser from "./DeviceAddUser.vue";
 import Help from "../Help.vue";
+import { toStringTodayYesterdayOrDate } from "../../helpers/datetime";
 
 export default {
   name: "DeviceDetail",
@@ -89,6 +114,10 @@ export default {
       required: true
     },
     user: {
+      type: Object,
+      required: true
+    },
+    software: {
       type: Object,
       required: true
     }
@@ -124,6 +153,19 @@ export default {
         );
       }
       return false;
+    },
+    dayOfSnapshot: function() {
+      if (this.software.result.dateTime) {
+        return toStringTodayYesterdayOrDate(
+          new Date(this.software.result.dateTime)
+        );
+      }
+    },
+    timeOfSnapshot: function() {
+      if (this.software.result.dateTime) {
+        const thisDate = new Date(this.software.result.dateTime);
+        return thisDate.toLocaleTimeString();
+      }
     }
   }),
   methods: {
@@ -143,3 +185,17 @@ export default {
   }
 };
 </script>
+<style scoped>
+.versions {
+  padding-top: 1em;
+}
+
+.versions p {
+  padding-top: 1em;
+}
+
+hr {
+  margin-top: 2em;
+  width: 60%;
+}
+</style>

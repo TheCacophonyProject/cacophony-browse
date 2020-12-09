@@ -56,7 +56,7 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin(["src/assets/favicon"])
+    new CopyWebpackPlugin(["src/assets/favicon", "src/assets/video"])
   ],
   resolve: {
     alias: {

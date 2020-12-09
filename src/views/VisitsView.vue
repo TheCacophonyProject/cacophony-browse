@@ -118,7 +118,7 @@
                         </span>
                         <div class="what-image">
                           <img
-                            onerror="this.style.display='none'"
+                            onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
                             :src="imgSrc(row.item.what)"
                             class="tag-img"
                           />
@@ -505,7 +505,7 @@ export default {
 <style lang="scss">
 .b-table-details {
   background-color: white !important;
-  curosr: default;
+  cursor: default;
 }
 
 .visits-table > tbody > tr td:first-child {
@@ -543,7 +543,7 @@ $main-content-width: 640px;
   }
 
   .device-table {
-    min-wdith: 640px;
+    min-width: 640px;
   }
 
   .visits-table {
@@ -650,6 +650,7 @@ $main-content-width: 640px;
 .tag-img {
   max-width: 30px;
   max-height: 30px;
+  background: transparent;
   margin-right: 0.2rem;
 }
 

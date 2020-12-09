@@ -142,17 +142,11 @@ import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import RecordingSummary from "../components/RecordingSummary.vue";
 import api from "../api/index";
-
-const roundDate = (date, toHour = false) => {
-  const d = new Date(date.getTime());
-  d.setSeconds(0);
-  d.setMinutes(0);
-  d.setMilliseconds(0);
-  if (!toHour) {
-    d.setHours(0);
-  }
-  return d;
-};
+import {
+  toStringTodayYesterdayOrDate,
+  startOfHour,
+  toNZDateString
+} from "../helpers/datetime";
 
 export default {
   name: "RecordingsView",
@@ -253,23 +247,11 @@ export default {
     },
     relativeDay(itemDate) {
       itemDate = itemDate[0][0].dateObj;
-      const todayDate = new Date();
-      const today = roundDate(todayDate);
-      const date = roundDate(itemDate).getTime();
-      todayDate.setDate(todayDate.getDate() - 1);
-      const yesterday = roundDate(todayDate);
-      if (date === today.getTime()) {
-        return "Today";
-      } else if (date === yesterday.getTime()) {
-        return "Yesterday";
-      } else {
-        return `${itemDate.toDateString()}`;
-      }
+      return toStringTodayYesterdayOrDate(itemDate);
     },
     hour(itemDate) {
       itemDate = itemDate[0].dateObj;
-      const dateWithHours = roundDate(itemDate, true);
-      const hours = dateWithHours.getHours();
+      const hours = itemDate.getHours();
       if (hours === 0) {
         return "12am";
       }
@@ -327,8 +309,8 @@ export default {
           const thisDate = new Date(row.recordingDateTime);
           if (
             prevDate === null ||
-            roundDate(thisDate, true).getTime() !==
-              roundDate(prevDate, true).getTime()
+            startOfHour(thisDate, true).getTime() !==
+              startOfHour(prevDate, true).getTime()
           ) {
             const item = {
               kind: "dataSeparator",
@@ -346,7 +328,7 @@ export default {
             groupname: row.Group.groupname,
             location: this.parseLocation(row.location),
             dateObj: thisDate,
-            date: thisDate.toLocaleDateString("en-NZ"),
+            date: toNZDateString(thisDate),
             time: thisDate.toLocaleTimeString(),
             duration: row.duration,
             tags: this.collateTags(row.Tags, row.Tracks),

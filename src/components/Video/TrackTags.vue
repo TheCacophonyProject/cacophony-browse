@@ -26,7 +26,7 @@
         <template v-slot:cell(what)="row">
           <div class="what-image">
             <img
-              onerror="this.style.display='none'"
+              onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
               :src="imgSrc(row.item.what)"
               class="tag-img"
             />
@@ -107,7 +107,6 @@ export default {
       show_details: false
     };
   },
-  computed: {},
   methods: {
     imgSrc,
     aiName: function(trackTag) {
@@ -154,7 +153,10 @@ export default {
 .tag-img {
   max-width: 30px;
   max-height: 30px;
+  min-width: 30px;
+  min-height: 30px;
   margin-right: 0.2rem;
+  background: transparent;
 }
 </style>
 

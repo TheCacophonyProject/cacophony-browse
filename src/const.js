@@ -89,7 +89,7 @@ var allLabels = {
   },
   unknown: {
     value: "unknown",
-    text: "unknown"
+    text: "not identifiable"
   },
   pest: {
     value: "pest",
@@ -183,7 +183,8 @@ const DefaultLabels = {
     allLabels.sealion,
     allLabels.unknown,
     allLabels.pest,
-    allLabels.part
+    allLabels.part,
+    allLabels.vehicle
   ],
   tagTypes: [
     allLabels.any,

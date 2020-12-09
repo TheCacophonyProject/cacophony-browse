@@ -3,7 +3,8 @@ import CacophonyApi from "./CacophonyApi";
 export default {
   getDevices,
   addUserToDevice,
-  removeUserFromDevice
+  removeUserFromDevice,
+  getLatestSoftwareVersion
 };
 
 function getDevices() {
@@ -29,4 +30,10 @@ function removeUserFromDevice(username, deviceId) {
     username: username,
     deviceId: deviceId
   });
+}
+
+function getLatestSoftwareVersion(deviceId) {
+  return CacophonyApi.get(
+    `/api/v1/events?type=versionData&limit=1&latest=true&deviceId=${deviceId}`
+  );
 }
