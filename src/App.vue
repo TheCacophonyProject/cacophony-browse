@@ -67,4 +67,3 @@ export default {
   flex-grow: 1;
 }
 </style>
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
