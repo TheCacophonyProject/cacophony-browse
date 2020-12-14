@@ -13,6 +13,6 @@ export default {
     return {};
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
-  computed: {}
+  computed: {},
 };
 </script>

@@ -65,7 +65,7 @@ export default {
   data() {
     return {
       inputEndUserAgreement: "not-accepted",
-      errorMessage: null
+      errorMessage: null,
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -81,8 +81,8 @@ export default {
           this.$router.go("home");
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

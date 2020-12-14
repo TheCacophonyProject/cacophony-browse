@@ -26,8 +26,8 @@ export default {
   props: {
     item: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     formatDate(date: string, formatStr: string): string {
@@ -35,8 +35,8 @@ export default {
     },
     capitalizeFirst(value: string) {
       return value.charAt(0).toUpperCase() + value.substring(1);
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -57,49 +57,49 @@ export default {
     return {
       showAlert: false,
       alertMessage: "",
-      alertVariant: ""
+      alertVariant: "",
     };
   },
   computed: {
     ...mapState({
-      recording: state => state.Video.recording,
-      tracks: state => state.Video.tracks,
-      isVideo: state => state.Video.recording.type == "thermalRaw",
-      isAudio: state => state.Video.recording.type == "audio",
-      date: state => {
+      recording: (state) => state.Video.recording,
+      tracks: (state) => state.Video.tracks,
+      isVideo: (state) => state.Video.recording.type == "thermalRaw",
+      isAudio: (state) => state.Video.recording.type == "audio",
+      date: (state) => {
         if (state.Video.recording.recordingDateTime) {
           const date = new Date(state.Video.recording.recordingDateTime);
           return date.toDateString();
         }
         return "";
       },
-      time: state => {
+      time: (state) => {
         if (state.Video.recording.recordingDateTime) {
           const date = new Date(state.Video.recording.recordingDateTime);
           return date.toLocaleTimeString();
         }
         return "";
       },
-      devicename: state => {
+      devicename: (state) => {
         if (state.Video.recording.Device) {
           return state.Video.recording.Device.devicename;
         }
         return "";
       },
-      fileSource: state => {
+      fileSource: (state) => {
         return (
           (state.Video.downloadFileJWT &&
             `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`) ||
           ""
         );
       },
-      rawSource: state =>
-        `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`
-    })
+      rawSource: (state) =>
+        `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
+    }),
   },
-  created: async function() {
+  created: async function () {
     await this.$store.dispatch("Video/GET_RECORDING", this.$route.params.id);
-  }
+  },
 };
 </script>
 

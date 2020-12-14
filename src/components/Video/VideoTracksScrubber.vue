@@ -2,26 +2,24 @@
   <div
     :style="{
       height: `${heightForTracks}px`,
-      width: `${canvasWidth}px`
+      width: `${canvasWidth}px`,
     }"
     class="track-scrubber"
   >
     <div ref="scrubber">
-      <div v-if="!isLoaded" class="loading">
-        Loading track info...
-      </div>
+      <div v-if="!isLoaded" class="loading">Loading track info...</div>
       <div
         v-else
         :style="{
           height: `${heightForTracks}px`,
-          position: 'relative'
+          position: 'relative',
         }"
       >
         <div
           :style="{
             right: `${canvasWidth - playheadOffsetForCurrentTime}px`,
             pointerEvents: 'none',
-            paddingLeft: `${sidePadding}px`
+            paddingLeft: `${sidePadding}px`,
           }"
           class="playhead"
         />
@@ -34,7 +32,7 @@
             top: `${index * 13}px`,
             width: getWidthForTrack(track),
             left: getOffsetForTrack(track),
-            opacity: index === currentTrack ? 1.0 : 0.5
+            opacity: index === currentTrack ? 1.0 : 0.5,
           }"
           class="scrub-track"
         />
@@ -61,35 +59,35 @@ export default {
   props: {
     tracks: {
       type: Array,
-      required: true
+      required: true,
     },
     currentVideoTime: {
       type: Number,
       default: 0,
-      required: true
+      required: true,
     },
     duration: {
       type: Number,
       default: 0,
-      required: true
+      required: true,
     },
     currentTrack: {
       type: Number,
       default: 0,
-      required: true
+      required: true,
     },
     canvasWidth: {
       type: Number,
-      required: true
+      required: true,
     },
     sidePadding: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      colours: TagColours
+      colours: TagColours,
     };
   },
   computed: {
@@ -116,7 +114,7 @@ export default {
     },
     heightForTracks() {
       return this.numTracks === 0 ? 0 : Math.max(25, 13 * this.numTracks);
-    }
+    },
   },
   methods: {
     getWidthForTrack(track: Track): string {
@@ -125,8 +123,9 @@ export default {
       return `${ratio * this.scrubberWidth}px`;
     },
     getOffsetForTrack(track: Track): string {
-      return `${this.getOffsetForTime(track.data.start_s) +
-        this.sidePadding}px`;
+      return `${
+        this.getOffsetForTime(track.data.start_s) + this.sidePadding
+      }px`;
     },
     getOffsetForTime(time: number): number {
       const pixelsPerSecond = this.scrubberWidth / this.duration;
@@ -167,20 +166,20 @@ export default {
         window.addEventListener("mouseup", this.pointerEnd);
       } else if (event instanceof TouchEvent) {
         window.addEventListener("touchmove", this.pointerMove, {
-          passive: false
+          passive: false,
         });
         window.addEventListener("touchend", this.pointerEnd, {
-          passive: false
+          passive: false,
         });
       }
     },
     initScrubber() {
       if (this.scrubber) {
         this.scrubber.addEventListener("touchstart", this.pointerStart, {
-          passive: false
+          passive: false,
         });
         this.scrubber.addEventListener("mousedown", this.pointerStart, {
-          passive: false
+          passive: false,
         });
       }
     },
@@ -191,14 +190,14 @@ export default {
         window.removeEventListener("touchend", this.pointerEnd);
         window.removeEventListener("touchmove", this.pointerMove);
       }
-    }
+    },
   },
   mounted() {
     this.initScrubber();
   },
   beforeDestroy() {
     this.tearDownScrubber();
-  }
+  },
 };
 </script>
 

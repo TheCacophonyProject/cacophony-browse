@@ -5,7 +5,7 @@
         <b-link
           class="back-link"
           :to="{
-            name: 'groups'
+            name: 'groups',
           }"
         >
           <font-awesome-icon icon="angle-left" size="xs" />
@@ -45,29 +45,29 @@ export default {
     return {
       addGroupUserName: null,
       addGroupUserAdmin: false,
-      addUserErrorMessage: null
+      addUserErrorMessage: null,
     };
   },
   computed: mapState({
-    group: state => state.Groups.currentGroup,
-    fetched: state => state.Groups.fetched,
-    currentUser: state => state.User.userData
+    group: (state) => state.Groups.currentGroup,
+    fetched: (state) => state.Groups.fetched,
+    currentUser: (state) => state.User.userData,
   }),
   watch: {
     $route() {
       this.fetchGroup();
-    }
+    },
   },
-  created: async function() {
+  created: async function () {
     await this.fetchGroup();
   },
   methods: {
-    fetchGroup: async function() {
+    fetchGroup: async function () {
       await this.$store.dispatch(
         "Groups/GET_GROUP",
         this.$route.params.groupname
       );
-    }
-  }
+    },
+  },
 };
 </script>

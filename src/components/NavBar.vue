@@ -65,20 +65,20 @@ export default {
   data() {
     return {
       userName: this.$store.state.User.userData.username,
-      globalPermission: this.$store.state.User.userData.globalPermission
+      globalPermission: this.$store.state.User.userData.globalPermission,
     };
   },
   computed: {
     isLoggedIn() {
       return this.$store.getters["User/isLoggedIn"];
-    }
+    },
   },
   methods: {
     logout() {
       this.$store.dispatch("User/LOGOUT");
       this.$router.go("home");
-    }
-  }
+    },
+  },
 };
 </script>
 

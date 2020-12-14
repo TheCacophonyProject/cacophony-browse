@@ -1,17 +1,22 @@
 module.exports = {
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "vue"],
   root: true,
   extends: [
     "plugin:vue/essential",
-    "plugin:prettier/recommended",
+    "plugin:prettier-vue/recommended",
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
   ],
   parserOptions: {
-    ecmaVersion: 8,
+    ecmaVersion: 2018,
     sourceType: "module",
     parser: require.resolve("@typescript-eslint/parser"),
   },
+  overrides: [
+    {
+      files: ["./src/**/*.vue", "./src/**/*.ts"],
+    }
+  ],
   rules: {
     "no-prototype-builtins": "off",
     "linebreak-style": ["warn", "unix"],
@@ -24,6 +29,6 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": ["warn"],
     "brace-style": ["warn"],
     "prefer-const": ["warn"],
-    "prettier/prettier": ["warn"],
+    "prettier-vue/prettier": ["warn"],
   },
 };

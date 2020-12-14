@@ -77,8 +77,8 @@
           <div
             v-if="
               software.result &&
-                software.result.EventDetail &&
-                software.result.EventDetail.details
+              software.result.EventDetail &&
+              software.result.EventDetail.details
             "
           >
             <div
@@ -121,16 +121,16 @@ export default {
   props: {
     device: {
       type: Object,
-      required: true
+      required: true,
     },
     user: {
       type: Object,
-      required: true
+      required: true,
     },
     software: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -140,49 +140,49 @@ export default {
         {
           key: "controls",
           label: "",
-          class: "device-actions-cell"
-        }
+          class: "device-actions-cell",
+        },
       ],
       userSortBy: "username",
       usersHelpTip: {
-        title: "Only administrators can add new users."
+        title: "Only administrators can add new users.",
       },
-      showUserRemoveSelfModal: false
+      showUserRemoveSelfModal: false,
     };
   },
   computed: mapState({
-    uiUser: state => state.User.userData.username,
-    isDeviceAdmin: function() {
+    uiUser: (state) => state.User.userData.username,
+    isDeviceAdmin: function () {
       if (this.user && this.device.Users) {
         const username = this.user.username;
         return (
           this.user.isSuperUser ||
           this.device.Users.some(
-            user => user.DeviceUsers.admin && user.username === username
+            (user) => user.DeviceUsers.admin && user.username === username
           )
         );
       }
       return false;
     },
-    dayOfSnapshot: function() {
+    dayOfSnapshot: function () {
       if (this.software.result.dateTime) {
         return toStringTodayYesterdayOrDate(
           new Date(this.software.result.dateTime)
         );
       }
     },
-    timeOfSnapshot: function() {
+    timeOfSnapshot: function () {
       if (this.software.result.dateTime) {
         const thisDate = new Date(this.software.result.dateTime);
         return thisDate.toLocaleTimeString();
       }
-    }
+    },
   }),
   methods: {
     async removeUser(userName) {
       await this.$store.dispatch("Devices/REMOVE_USER", {
         userName,
-        device: this.device
+        device: this.device,
       });
     },
     async removeUserCheckIfSelf(userName, uiUser) {
@@ -191,8 +191,8 @@ export default {
       } else {
         this.removeUser(userName);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

@@ -4,7 +4,7 @@
       <div
         :class="[
           'search-filter-wrapper',
-          { 'is-collapsed': searchPanelIsCollapsed }
+          { 'is-collapsed': searchPanelIsCollapsed },
         ]"
       >
         <QueryRecordings
@@ -32,9 +32,9 @@
 
         <div class="search-results">
           <div class="results-summary">
-            <div style="display:flex;">
-              <h1 style="flex-grow: 100;">Visits</h1>
-              <div style="align-self: flex-end;">
+            <div style="display: flex">
+              <h1 style="flex-grow: 100">Visits</h1>
+              <div style="align-self: flex-end">
                 <CsvDownload :params="queryParams" :visits="true" />
                 <b-button variant="link" @click="showInfo = true">
                   <font-awesome-icon icon="question-circle" size="sm" />
@@ -49,9 +49,7 @@
               This query takes a long time to run. Please select your group and
               then press search.
             </h5>
-            <h5 v-else>
-              Loading...
-            </h5>
+            <h5 v-else>Loading...</h5>
             <p class="search-description" v-html="currentQueryDescription"></p>
             <div v-if="!queryPending && !noQueryYet" class="results">
               <h1>Visit Summary Per Device</h1>
@@ -204,14 +202,10 @@
                 </div>
               </div>
               <div class="load-more">
-                <div v-if="loadingMore">
-                  Loading...
-                </div>
+                <div v-if="loadingMore">Loading...</div>
                 <div v-else>
                   <b-button v-if="canLoadMore" @click="loadMoreVisits()">
-                    <span v-if="loadingMore">
-                      Loading...
-                    </span>
+                    <span v-if="loadingMore"> Loading... </span>
                     <span v-else>
                       {{ loadText }}
                     </span>
@@ -223,7 +217,7 @@
               <div
                 v-for="i in 10"
                 :style="{
-                  background: `rgba(240, 240, 240, ${1 / i}`
+                  background: `rgba(240, 240, 240, ${1 / i}`,
                 }"
                 :key="i"
                 class="recording-placeholder"
@@ -274,31 +268,31 @@ export default {
         { key: "what", label: "Animal" },
         { key: "start", label: "First Visit" },
         { key: "end", label: "Last Visit" },
-        { key: "visits", label: "Visits" }
+        { key: "visits", label: "Visits" },
       ],
       visitFields: [
         {
           key: "what",
-          label: ""
+          label: "",
         },
         { key: "device", label: "Device" },
         { key: "date", label: "Date" },
         { key: "start", label: "Visit Start" },
         { key: "end", label: "End" },
-        { key: "events", label: "#" }
+        { key: "events", label: "#" },
       ],
       visitEventFields: [
         { key: "recording", label: "Recording" },
         { key: "track", label: "Track" },
         { key: "start", label: "Event Start" },
         { key: "confidence", label: "Confidence" },
-        { key: "unidentified", label: "Assumed" }
+        { key: "unidentified", label: "Assumed" },
       ],
       offset: 0,
       loadText: "Load More Visits",
       canLoadMore: true,
       visitLimit: 300,
-      noQueryYet: true
+      noQueryYet: true,
     };
   },
   computed: {
@@ -315,7 +309,7 @@ export default {
         }
       }
       return visitsByDay;
-    }
+    },
   },
   mounted() {
     const query = this.getQuery();
@@ -345,7 +339,7 @@ export default {
       let recID;
 
       var audioBaitEvents = visit.audioBaitEvents.slice();
-      audioBaitEvents.sort(function(a, b) {
+      audioBaitEvents.sort(function (a, b) {
         return moment(a.dateTime) > moment(b.dateTime) ? 1 : -1;
       });
       let audioevent = audioBaitEvents.pop();
@@ -412,7 +406,7 @@ export default {
       this.getVisits(query, false);
       this.loadingMore = false;
     },
-    getVisits: async function(whereQuery: RecordingQuery, newQuery: boolean) {
+    getVisits: async function (whereQuery: RecordingQuery, newQuery: boolean) {
       // Extract query information
       this.noQueryYet = false;
       if (newQuery) {
@@ -425,7 +419,7 @@ export default {
       this.currentQueryDescription = this.nextQueryDescription;
       if (!success) {
         result.messages &&
-          result.messages.forEach(message => {
+          result.messages.forEach((message) => {
             this.$store.dispatch("Messaging/WARN", message);
           });
         return;
@@ -491,14 +485,14 @@ export default {
           }
         }
       }
-      this.visits = this.visits.sort(function(a, b) {
+      this.visits = this.visits.sort(function (a, b) {
         if (a.start == b.start) {
           return a.id - b.id;
         }
         return a.start < b.start ? 1 : -1;
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

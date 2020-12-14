@@ -74,32 +74,32 @@ export default {
     Hero,
     HomeGroups,
     HomeUser,
-    Spinner
+    Spinner,
   },
   data() {
     return {
-      hasLoaded: false
+      hasLoaded: false,
     };
   },
   computed: {
     ...mapState({
-      username: state => state.User.userData.username,
-      groups: state => state.Groups.groups
+      username: (state) => state.User.userData.username,
+      groups: (state) => state.Groups.groups,
     }),
     hasGroups() {
       return this.hasLoaded && this.groups && this.groups.length > 0;
-    }
+    },
   },
-  created: function() {
+  created: function () {
     this.fetchGroups().then(() => {
       this.hasLoaded = true;
     });
   },
   methods: {
-    fetchGroups: function() {
+    fetchGroups: function () {
       return this.$store.dispatch("Groups/GET_GROUPS");
-    }
-  }
+    },
+  },
 };
 </script>
 

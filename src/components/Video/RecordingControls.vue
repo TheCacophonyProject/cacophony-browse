@@ -121,20 +121,20 @@ export default {
   props: {
     items: {
       type: Array,
-      required: true
+      required: true,
     },
     comment: {
       type: String,
-      default: ""
+      default: "",
     },
     downloadRawUrl: {
       type: String,
-      default: ""
+      default: "",
     },
     downloadFileUrl: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   data() {
     return {
@@ -145,37 +145,37 @@ export default {
         {
           key: "deleteButton",
           label: "",
-          tdClass: "tags-table-buttons"
-        }
+          tdClass: "tags-table-buttons",
+        },
       ],
-      deleteDisabled: false
+      deleteDisabled: false,
     };
   },
   watch: {
-    items: function() {
+    items: function () {
       this.deleteDisabled = false;
-    }
+    },
   },
   methods: {
-    addMissedTrackTag: function() {
+    addMissedTrackTag: function () {
       this.addTag("missed track");
     },
-    addCoolTag: function() {
+    addCoolTag: function () {
       this.addTag("cool");
     },
-    addTrappedTag: function() {
+    addTrappedTag: function () {
       this.addTag("trapped in trap");
     },
-    addTrapInteractionTag: function() {
+    addTrapInteractionTag: function () {
       this.addTag("interaction with trap");
     },
-    addTag: function(label) {
+    addTag: function (label) {
       this.$emit("addTag", {
         detail: label,
-        confidence: 0.9
+        confidence: 0.9,
       });
     },
-    whatDetail: function(item) {
+    whatDetail: function (item) {
       return sentenceCase(item.what || item.detail || "-");
     },
     async deleteRecording() {
@@ -187,8 +187,8 @@ export default {
     },
     updateComment(event) {
       this.$emit("updateComment", event);
-    }
-  }
+    },
+  },
 };
 
 function sentenceCase(s) {

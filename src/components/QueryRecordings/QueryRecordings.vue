@@ -64,33 +64,33 @@ export default {
     SelectDevice,
     SelectTags,
     SelectDuration,
-    SelectRecordingType
+    SelectRecordingType,
   },
   props: {
     disabled: {
       type: Boolean,
-      required: true
+      required: true,
     },
     isCollapsed: {
       type: Boolean,
-      required: true
+      required: true,
     },
     path: {
       type: String,
-      required: true
+      required: true,
     },
     currentPage: {
       type: Number,
-      required: false
+      required: false,
     },
     perPage: {
       type: Number,
-      required: false
+      required: false,
     },
     onlyRecordingType: {
       type: String,
-      required: false
-    }
+      required: false,
+    },
   },
   data() {
     return {
@@ -104,16 +104,16 @@ export default {
       dateDescription: "",
       duration: {},
       recordingType: "",
-      tagData: {}
+      tagData: {},
     };
   },
   computed: {
-    isAudio: function() {
+    isAudio: function () {
       return this.recordingType === "audio";
     },
-    groups: function() {
+    groups: function () {
       return this.$store.state.Groups;
-    }
+    },
   },
   created() {
     this.resetToDefaultQuery();
@@ -133,12 +133,12 @@ export default {
       this.selectedDevices = [];
       this.selectedGroups = [];
       this.dates = {
-        days: 7
+        days: 7,
       };
       this.duration = {};
       this.recordingType = this.$store.state.User.recordingTypePref || "both";
       this.tagData = {
-        tagMode: "any"
+        tagMode: "any",
       };
     },
     saveLastQuery() {
@@ -185,7 +185,7 @@ export default {
       this.dates = {
         days: routeQuery.days,
         to: routeQuery.to,
-        from: routeQuery.from
+        from: routeQuery.from,
       };
 
       if (routeQuery.hasOwnProperty("group")) {
@@ -201,7 +201,7 @@ export default {
       if (this.isAudio) {
         this.tagData = {
           tags: [],
-          tagMode: "any"
+          tagMode: "any",
         };
       }
 
@@ -217,7 +217,7 @@ export default {
         to: this.dates.to,
         type: this.recordingType,
         device: this.selectedDevices,
-        group: this.selectedGroups
+        group: this.selectedGroups,
       };
 
       return params;
@@ -228,12 +228,12 @@ export default {
       if (this.queryHasChanged()) {
         this.$router.push({
           path: this.path,
-          query: this.serialiseQueryForRecall()
+          query: this.serialiseQueryForRecall(),
         });
       }
     },
 
-    submit: function() {
+    submit: function () {
       if (!this.onlyRecordingType) {
         this.$store.commit("User/updateRecordingTypePref", this.recordingType);
       }
@@ -245,15 +245,15 @@ export default {
       this.makeApiRequest();
     },
 
-    makeApiRequest: function(event = "submit") {
+    makeApiRequest: function (event = "submit") {
       this.saveLastQuery();
       this.toggleSearchPanel();
       this.$emit(event, this.serialiseQueryForRecall());
     },
-    toggleAdvancedSearch: function() {
+    toggleAdvancedSearch: function () {
       this.advanced = !this.advanced;
     },
-    toggleSearchPanel: function() {
+    toggleSearchPanel: function () {
       this.$emit("toggled-search-panel");
     },
     devicesDescription() {
@@ -295,8 +295,8 @@ export default {
       if (eventData.hasOwnProperty("groups")) {
         this.selectedGroups = eventData.groups;
       }
-    }
-  }
+    },
+  },
 };
 
 function setOnlyIfExists(itemName, source, destination) {

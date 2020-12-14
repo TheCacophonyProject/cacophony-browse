@@ -2,7 +2,7 @@
   <a
     :href="`/recording/${item.recID}/${item.trackID}`"
     class="event-summary row no-gutters"
-    @click="event => navigateToRecording(event, item)"
+    @click="(event) => navigateToRecording(event, item)"
   >
     <b-col class="track-title" cols="5">
       <span>Track </span>
@@ -18,9 +18,7 @@
       </div>
     </b-col>
     <b-col>
-      <span v-if="item.wasUnidentified">
-        Unidentified
-      </span>
+      <span v-if="item.wasUnidentified"> Unidentified </span>
       <span v-else>
         {{ capitalizeFirst(what) }}
       </span>
@@ -36,16 +34,16 @@ export default {
   props: {
     trackNumber: {
       type: Number,
-      required: true
+      required: true,
     },
     item: {
       type: Object,
-      required: true
+      required: true,
     },
     what: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     formatDate(date: string, formatStr: string): string {
@@ -57,11 +55,11 @@ export default {
     navigateToRecording(event, visEvent: VisitEvent) {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         this.$router.push({
-          path: `recording/${visEvent.recID}/${visEvent.trackID}`
+          path: `recording/${visEvent.recID}/${visEvent.trackID}`,
         });
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -20,7 +20,7 @@
           v-b-tooltip.hover="'Replay'"
           :icon="['fa', 'play']"
           size="2x"
-          style="cursor: pointer;"
+          style="cursor: pointer"
           @click="$emit('replay', row.item.tag.startTime)"
         />
       </template>
@@ -30,7 +30,7 @@
           v-b-tooltip.hover="'Delete tag'"
           icon="trash"
           size="2x"
-          style="cursor: pointer;"
+          style="cursor: pointer"
           @click="$emit('deleteTag', row.item.tag.id)"
         />
       </template>
@@ -44,8 +44,8 @@ export default {
   props: {
     items: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -55,11 +55,11 @@ export default {
         { key: "who", label: "By Who" },
         { key: "when", label: "When" },
         { key: "replayButton", label: "" },
-        { key: "deleteButton", label: "" }
-      ]
+        { key: "deleteButton", label: "" },
+      ],
     };
   },
-  methods: {}
+  methods: {},
 };
 </script>
 

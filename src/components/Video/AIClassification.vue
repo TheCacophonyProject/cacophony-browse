@@ -6,14 +6,14 @@
         'classification',
         { 'guess-is-good': !needsConfirmation && aiGuessIsSameAsSomeUser },
         {
-          'guess-is-bad': !needsConfirmation && aiGuessIsDifferentFromSomeUser
+          'guess-is-bad': !needsConfirmation && aiGuessIsDifferentFromSomeUser,
         },
         {
           'guess-is-contentious':
             !needsConfirmation &&
             aiGuessIsDifferentFromSomeUser &&
-            aiGuessIsSameAsSomeUser
-        }
+            aiGuessIsSameAsSomeUser,
+        },
       ]"
     >
       <div v-if="aiGuess" class="guess-row">
@@ -55,9 +55,7 @@
           </div>
         </div>
       </div>
-      <div v-else>
-        none
-      </div>
+      <div v-else>none</div>
     </div>
   </div>
 </template>
@@ -71,20 +69,20 @@ export default {
   props: {
     tags: {
       type: Array,
-      required: true
+      required: true,
     },
     isWallabyProject: {
       type: Boolean,
-      default: false
+      default: false,
     },
     needsConfirmation: {
       type: Boolean,
-      default: false
+      default: false,
     },
     userTags: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
   computed: {
     aiGuess() {
@@ -99,23 +97,23 @@ export default {
     aiGuessIsDifferentFromSomeUser() {
       return (
         this.userTags.length !== 0 &&
-        this.userTags.filter(tag => tag !== this.mapName(this.aiGuess.what))
+        this.userTags.filter((tag) => tag !== this.mapName(this.aiGuess.what))
           .length > 0
       );
     },
     agreeingUsersCount() {
       return this.userTags.filter(
-        tag => tag === this.mapName(this.aiGuess.what)
+        (tag) => tag === this.mapName(this.aiGuess.what)
       ).length;
     },
     disagreeingUsersCount() {
       return this.userTags.filter(
-        tag => tag !== this.mapName(this.aiGuess.what)
+        (tag) => tag !== this.mapName(this.aiGuess.what)
       ).length;
     },
     isSuperUser() {
       return this.$store.state.User.userData.isSuperUser;
-    }
+    },
   },
   methods: {
     mapName(name) {
@@ -128,13 +126,13 @@ export default {
     imgSrc,
     confirm() {
       this.$emit("confirm-ai-guess", {
-        what: this.mapName(this.aiGuess.what)
+        what: this.mapName(this.aiGuess.what),
       });
     },
     reject() {
       this.$emit("reject-ai-guess");
-    }
-  }
+    },
+  },
 };
 </script>
 

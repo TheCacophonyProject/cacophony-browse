@@ -30,7 +30,7 @@
             >Done</b-button
           >
         </b-col>
-        <b-col offset="9" md="3" class=" mt-3">
+        <b-col offset="9" md="3" class="mt-3">
           <b-button
             v-b-tooltip.hover.bottomleft="'Delete this recording'"
             :disabled="deleteDisabled"
@@ -72,55 +72,55 @@ export default {
   components: {
     CustomTags,
     BasicTags,
-    TagList
+    TagList,
   },
   props: {
     recording: {
       type: Object,
-      required: true
+      required: true,
     },
     audioUrl: {
       type: String,
-      required: true
+      required: true,
     },
     audioRawUrl: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
     ...mapState({
       tagItems() {
         const result = this.$store.getters["Video/getTagItems"];
         return result;
-      }
-    })
+      },
+    }),
   },
   methods: {
     async gotoNextRecording(direction) {
       if (await this.getNextRecording(direction)) {
         this.deleteDisabled = false;
         this.$router.push({
-          path: `/recording/${this.recording.id}`
+          path: `/recording/${this.recording.id}`,
         });
       }
     },
     async getNextRecording(direction, skipMessage) {
       let where = {
-        DeviceId: this.recording.Device.id
+        DeviceId: this.recording.Device.id,
       };
 
       let order;
       switch (direction) {
         case "next":
           where.recordingDateTime = {
-            $gt: this.recording.recordingDateTime
+            $gt: this.recording.recordingDateTime,
           };
           order = "ASC";
           break;
         case "previous":
           where.recordingDateTime = {
-            $lt: this.recording.recordingDateTime
+            $lt: this.recording.recordingDateTime,
           };
           order = "DESC";
           break;
@@ -139,12 +139,12 @@ export default {
         where,
         order,
         limit: 1,
-        offset: 0
+        offset: 0,
       };
 
       return await this.$store.dispatch("Video/QUERY_RECORDING", {
         params,
-        skipMessage
+        skipMessage,
       });
     },
     async deleteRecording() {
@@ -154,7 +154,7 @@ export default {
         this.gotoNextRecording("either");
       }
     },
-    addAudioTag: function(tag) {
+    addAudioTag: function (tag) {
       const id = Number(this.$route.params.id);
       if (this.$refs.player.currentTime == this.$refs.player.duration) {
         tag.startTime = 0;
@@ -210,8 +210,8 @@ export default {
     },
     volumeQuietest() {
       this.$refs.player.volume = 0.25;
-    }
-  }
+    },
+  },
 };
 </script>
 

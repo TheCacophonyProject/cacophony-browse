@@ -14,29 +14,29 @@ export default {
   props: {
     value: {
       type: [String, Number],
-      required: true
+      required: true,
     },
     allGroups: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
-    options: function() {
+    options: function () {
       const options = [
         {
           value: "all",
-          text: "All Groups"
-        }
+          text: "All Groups",
+        },
       ];
-      this.allGroups.forEach(group => {
+      this.allGroups.forEach((group) => {
         options.push({
           value: group.id,
-          text: group.name
+          text: group.name,
         });
       });
       return options;
-    }
-  }
+    },
+  },
 };
 </script>

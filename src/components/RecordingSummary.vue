@@ -3,7 +3,7 @@
     v-if="displayStyle === 'card'"
     :href="getRecordingPath(item.id)"
     class="recording-summary"
-    @click="event => navigateToRecording(event, item.id)"
+    @click="(event) => navigateToRecording(event, item.id)"
   >
     <div class="recording-type">
       <span v-if="item.type === 'audio'">
@@ -44,9 +44,10 @@
     <div v-if="item.location !== '(unknown)'" class="recording-location">
       <!-- NOTE: Temporary link to google maps while we figure out a good source for a mapping thumbnail service  -->
       <a
-        :href="
-          `https://www.google.com/maps/@${item.location.replace(' ', '')},16z`
-        "
+        :href="`https://www.google.com/maps/@${item.location.replace(
+          ' ',
+          ''
+        )},16z`"
         target="_blank"
         @click.stop.prevent="
           ({ currentTarget: { href, target } }) => window.open(href, target)
@@ -94,16 +95,16 @@ export default {
   props: {
     item: {
       type: Object,
-      required: true
+      required: true,
     },
     displayStyle: {
       type: String,
       required: true,
-      default: "cards"
+      default: "cards",
     },
     futureSearchQuery: {
-      type: Object
-    }
+      type: Object,
+    },
   },
   computed: {
     hasBattery() {
@@ -112,8 +113,8 @@ export default {
     window: {
       get() {
         return window;
-      }
-    }
+      },
+    },
   },
   methods: {
     navigateToRecording(event, recordingId) {
@@ -122,17 +123,17 @@ export default {
         event.preventDefault();
         this.$router.push({
           path: `recording/${recordingId}`,
-          query: this.futureSearchQuery
+          query: this.futureSearchQuery,
         });
       }
     },
     getRecordingPath(recordingId) {
       return this.$router.resolve({
         path: `recording/${recordingId}`,
-        query: this.futureSearchQuery
+        query: this.futureSearchQuery,
       }).href;
-    }
-  }
+    },
+  },
 };
 </script>
 

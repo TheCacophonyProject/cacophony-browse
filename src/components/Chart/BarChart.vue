@@ -13,37 +13,37 @@ export default {
   props: {
     title: {
       type: String,
-      default: "Title"
+      default: "Title",
     },
     xAxisLabel: {
       type: String,
-      default: "x Axis Label"
+      default: "x Axis Label",
     },
     yAxisLabel: {
       type: String,
-      default: "y Axis Label"
+      default: "y Axis Label",
     },
     data: {
       type: Object,
-      required: true
+      required: true,
     },
     log: {
       type: Boolean,
-      default: false
+      default: false,
     },
     message: {
       type: String,
-      default: null
-    }
+      default: null,
+    },
   },
   data() {
     return {
       id: "bar-chart",
-      chart: null
+      chart: null,
     };
   },
   computed: {
-    chartData: function(): Chart.ChartConfiguration {
+    chartData: function (): Chart.ChartConfiguration {
       return {
         type: "bar",
         data: this.data as ChartData,
@@ -68,29 +68,29 @@ export default {
                       return tick;
                     }
                   },
-                  min: 0
+                  min: 0,
                 },
                 scaleLabel: {
                   display: true,
-                  labelString: this.yAxisLabel
-                }
-              }
+                  labelString: this.yAxisLabel,
+                },
+              },
             ],
             xAxes: [
               {
                 scaleLabel: {
                   display: true,
-                  labelString: this.xAxisLabel
-                }
-              }
-            ]
+                  labelString: this.xAxisLabel,
+                },
+              },
+            ],
           },
           title: {
             text: this.title,
-            display: true
+            display: true,
           },
           legend: {
-            display: false
+            display: false,
           },
           maintainAspectRatio: false,
           onClick: (
@@ -103,7 +103,7 @@ export default {
               // Send click event if a bar is clicked on
               this.$emit(
                 "click",
-                chartItems.map(item => item._model.label)
+                chartItems.map((item) => item._model.label)
               );
             }
           },
@@ -119,15 +119,15 @@ export default {
             } else {
               (event.target as HTMLCanvasElement).style.cursor = "default";
             }
-          }
-        }
+          },
+        },
       };
-    }
+    },
   },
   mounted() {
     const ctx = document.getElementById(this.id) as HTMLCanvasElement;
     this.chart = new Chart(ctx, this.chartData);
-  }
+  },
 };
 </script>
 <style scoped>

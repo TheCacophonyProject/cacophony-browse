@@ -20,25 +20,25 @@ export default {
   props: {
     isDisabled: {
       type: Boolean,
-      required: true
+      required: true,
     },
     value: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       animalData: [],
-      tagMode: "any"
+      tagMode: "any",
     };
   },
   computed: {
     animals: {
-      get: function() {
+      get: function () {
         return this.animalData;
       },
-      set: function(value) {
+      set: function (value) {
         this.animalData = value;
         if (value.length > 0) {
           if (!this.canHaveTags) {
@@ -46,44 +46,44 @@ export default {
           }
         }
         this.updateValue();
-      }
+      },
     },
 
     mode: {
-      get: function() {
+      get: function () {
         return this.tagMode;
       },
-      set: function(value) {
+      set: function (value) {
         this.tagMode = value;
         if (!this.canHaveTags) {
           this.animals = [];
         }
         this.updateValue();
-      }
+      },
     },
 
-    canHaveTags: function() {
+    canHaveTags: function () {
       return this.canHaveSpecifiedTags(this.tagMode);
-    }
+    },
   },
-  mounted: function() {
+  mounted: function () {
     this.deserialise(this.value);
   },
   methods: {
-    updateValue: function() {
+    updateValue: function () {
       let returnVal = {};
       if (this.isDisabled) {
         returnVal = {
           tags: [],
           tagMode: "any",
-          hasData: false
+          hasData: false,
         };
       }
 
       returnVal = {
         tags: this.makeTagList(this.animalData),
         tagMode: this.tagMode,
-        description: this.makeTagDescription()
+        description: this.makeTagDescription(),
       };
       this.$emit("input", returnVal);
     },
@@ -95,13 +95,13 @@ export default {
         tagObject.hasOwnProperty("tags") &&
         !this.arraysAreEqual(this.makeTagList(this.animalData), tagObject.tags)
       ) {
-        this.animalData = tagObject.tags.map(tag =>
+        this.animalData = tagObject.tags.map((tag) =>
           DefaultLabels.searchLabels().find(({ value }) => tag === value)
         );
       }
     },
     makeTagList(tagObjects) {
-      return tagObjects.map(option =>
+      return tagObjects.map((option) =>
         option.value ? option.value : option.text
       );
     },
@@ -120,16 +120,16 @@ export default {
           return `only ${numAnimals} types of animals`;
         }
       }
-    }
+    },
   },
 
   watch: {
-    serialisedData: function(value) {
+    serialisedData: function (value) {
       this.$emit("input", value);
     },
-    value: function(val) {
+    value: function (val) {
       this.deserialise(val);
-    }
-  }
+    },
+  },
 };
 </script>

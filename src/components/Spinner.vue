@@ -10,9 +10,9 @@ export default {
   props: {
     fetching: {
       type: Boolean,
-      default: true
-    }
-  }
+      default: true,
+    },
+  },
 };
 </script>
 

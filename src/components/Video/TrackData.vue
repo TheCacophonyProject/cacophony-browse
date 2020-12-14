@@ -49,14 +49,14 @@ export default {
   props: {
     trackData: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
-      show_details: false
+      show_details: false,
     };
-  }
+  },
 };
 </script>
 

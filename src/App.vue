@@ -15,13 +15,13 @@ export default {
   name: "App",
   components: {
     NavBar,
-    GlobalMessaging
+    GlobalMessaging,
   },
   methods: {
-    isLoggedIn: function() {
+    isLoggedIn: function () {
       return store.getters["User/isLoggedIn"];
-    }
-  }
+    },
+  },
 };
 </script>
 

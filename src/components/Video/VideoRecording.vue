@@ -73,58 +73,58 @@ export default {
     RecordingControls,
     RecordingProperties,
     ThermalVideoPlayer,
-    TrackInfo
+    TrackInfo,
   },
   props: {
     trackid: {
       type: Number,
-      require: false
+      require: false,
     },
     recording: {
       type: Object,
-      required: true
+      required: true,
     },
     videoUrl: {
       type: String,
-      required: true
+      required: true,
     },
     videoRawUrl: {
       type: String,
-      required: true
+      required: true,
     },
     tracks: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       showAddObservation: false,
       selectedTrack: 0,
       startVideoTime: 0,
-      colours: TagColours
+      colours: TagColours,
     };
   },
   computed: {
     ...mapState({
       tagItems() {
         return this.$store.getters["Video/getTagItems"];
-      }
+      },
     }),
     orderedTracks() {
       return this.orderTracks();
-    }
+    },
   },
-  mounted: function() {
+  mounted: function () {
     this.selectedTrack = this.getSelectedTrack();
   },
   watch: {
-    recording: function() {
+    recording: function () {
       this.trackSelected(0);
     },
-    tracks: function() {
+    tracks: function () {
       this.selectedTrack = this.getSelectedTrack();
-    }
+    },
   },
 
   methods: {
@@ -136,7 +136,7 @@ export default {
     getSelectedTrack() {
       if (this.$route.params.trackid) {
         const index = this.orderTracks().findIndex(
-          track => track.id == this.$route.params.trackid
+          (track) => track.id == this.$route.params.trackid
         );
         if (index > -1) {
           return index;
@@ -149,7 +149,7 @@ export default {
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
         this.$router.push({
           path: `/recording/${this.recording.id}`,
-          query: searchQueryCopy
+          query: searchQueryCopy,
         });
       }
     },
@@ -189,7 +189,7 @@ export default {
 
       return await this.$store.dispatch("Video/QUERY_RECORDING", {
         params,
-        skipMessage
+        skipMessage,
       });
     },
     prevNext(event) {
@@ -218,10 +218,10 @@ export default {
       const recordingId = Number(this.$route.params.id);
       this.$store.dispatch("Video/UPDATE_COMMENT", {
         comment,
-        recordingId
+        recordingId,
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

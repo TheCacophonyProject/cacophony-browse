@@ -23,15 +23,15 @@ export default {
   props: {
     selectedDevices: {
       type: Array,
-      required: true
+      required: true,
     },
     selectedGroups: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
-    placeholder: function() {
+    placeholder: function () {
       if (!this.fetched) {
         return "loading";
       } else if (
@@ -44,35 +44,35 @@ export default {
       }
     },
     ...mapState({
-      fetched: state => state.Devices.fetched,
-      devices: state =>
-        state.Devices.devices.map(device => {
+      fetched: (state) => state.Devices.fetched,
+      devices: (state) =>
+        state.Devices.devices.map((device) => {
           return {
             id: "D" + device.id,
-            name: device.devicename
+            name: device.devicename,
           };
         }),
-      groups: state =>
-        state.Groups.groups.map(group => {
+      groups: (state) =>
+        state.Groups.groups.map((group) => {
           return {
             id: "G" + group.id,
             name: group.groupname + " (group)",
-            devices: group.Devices
+            devices: group.Devices,
           };
-        })
+        }),
     }),
-    selectedValues: function() {
-      const selectedDs = this.selectedDevices.map(deviceId =>
+    selectedValues: function () {
+      const selectedDs = this.selectedDevices.map((deviceId) =>
         this.devices.find(({ id }) => "D" + deviceId === id)
       );
-      const selectedGs = this.selectedGroups.map(groupId =>
+      const selectedGs = this.selectedGroups.map((groupId) =>
         this.groups.find(({ id }) => "G" + groupId === id)
       );
       return [...selectedDs, ...selectedGs];
     },
-    options: function() {
+    options: function () {
       return this.devices.concat(this.groups);
-    }
+    },
   },
   methods: {
     updateSelected(selectedObjects) {
@@ -80,23 +80,23 @@ export default {
       const groups = this.getIdsWithPrefix(selectedObjects, "G");
       const updatedSelection = {
         devices: devices,
-        groups: groups
+        groups: groups,
       };
       // this causes the v-model in the parent component to get updated
       this.$emit("update-device-selection", updatedSelection);
     },
 
     getIdsWithPrefix(objects, prefix) {
-      const prefixed = objects.filter(item => item.id.startsWith(prefix));
-      return prefixed.map(item =>
+      const prefixed = objects.filter((item) => item.id.startsWith(prefix));
+      return prefixed.map((item) =>
         parseInt(item.id.substring(prefix.length, item.id.length))
       );
-    }
+    },
   },
-  created: async function() {
+  created: async function () {
     await this.$store.dispatch("Devices/GET_DEVICES");
     await this.$store.dispatch("Groups/GET_GROUPS");
-  }
+  },
 };
 </script>
 

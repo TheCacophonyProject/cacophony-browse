@@ -12,9 +12,9 @@
 <script>
 export default {
   name: "CustomTag",
-  data: function() {
+  data: function () {
     return {
-      customTagValue: ""
+      customTagValue: "",
     };
   },
   methods: {
@@ -31,8 +31,8 @@ export default {
       tag.automatic = false;
       this.$emit("addAudioTag", tag);
       this.customTagValue = "";
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -15,7 +15,7 @@ export default {
   deleteTrackTag,
   replaceTrackTag,
   needsTag,
-  makeApiQuery
+  makeApiQuery,
 };
 
 export type DeviceId = number;
@@ -25,6 +25,7 @@ export type TagId = number;
 export type UserId = number;
 export type TrackTagId = number;
 export type GroupId = number;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
 export type JwtToken<T> = string;
 type UtcTimestamp = string;
 
@@ -197,8 +198,6 @@ export type TagMode =
   | "both-tagged"
   | "untagged";
 
-type JsonString = string;
-
 export interface RecordingQuery {
   tagMode?: TagMode;
   minS?: string;
@@ -319,8 +318,8 @@ function id(id: RecordingId): Promise<FetchResult<Recording>> {
 function comment(comment: string, id: RecordingId): Promise<FetchResult<any>> {
   return CacophonyApi.patch(`${apiPath}/${id}`, {
     updates: {
-      comment: comment
-    }
+      comment: comment,
+    },
   });
 }
 
@@ -342,7 +341,7 @@ function replaceTrackTag(
   const body = {
     what: tag.what,
     confidence: tag.confidence,
-    automatic: "false"
+    automatic: "false",
   };
   return CacophonyApi.post(
     `${apiPath}/${recordingId}/tracks/${trackId}/replaceTag`,
@@ -359,7 +358,7 @@ function addTrackTag(
   const body: any = {
     what: tag.what,
     confidence: tag.confidence,
-    automatic: false
+    automatic: false,
   };
   if (tagJWT !== undefined) {
     body.tagJWT = tagJWT;

@@ -5,7 +5,7 @@
         <div
           v-if="
             recording.additionalMetadata &&
-              'user-entered' in recording.additionalMetadata
+            'user-entered' in recording.additionalMetadata
           "
         >
           <h3>Properties</h3>
@@ -54,7 +54,7 @@
               <div
                 v-else-if="
                   recording.additionalMetadata &&
-                    prop.key === 'additionalMetadata'
+                  prop.key === 'additionalMetadata'
                 "
               >
                 <div
@@ -86,17 +86,17 @@ import BatteryLevel from "../BatteryLevel.vue";
 export default {
   name: "RecordingProperties",
   components: {
-    BatteryLevel
+    BatteryLevel,
   },
   props: {
     value: {
       type: String,
-      default: ""
+      default: "",
     },
     recording: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -104,46 +104,46 @@ export default {
       properties: [
         {
           key: "processingState",
-          title: "Processing State"
+          title: "Processing State",
         },
         { key: "location", title: "Location" },
         {
           key: "relativeToDusk",
-          title: "Relative to Dusk"
+          title: "Relative to Dusk",
         },
         {
           key: "relativeToDawn",
-          title: "Relative to Dawn"
+          title: "Relative to Dawn",
         },
         { key: "batteryLevel", title: "Battery Level" },
         {
           key: "batteryCharging",
-          title: "Battery Charging"
+          title: "Battery Charging",
         },
         {
           key: "airplaneModeOn",
-          title: "Airplane Mode"
+          title: "Airplane Mode",
         },
         { key: "version", title: "Version" },
         {
           key: "additionalMetadata",
-          title: "Additional Metadata"
-        }
+          title: "Additional Metadata",
+        },
       ],
       metaFields: [
         {
           key: "key",
-          label: "Additional Metadata"
+          label: "Additional Metadata",
         },
         {
           key: "data",
-          label: ""
-        }
-      ]
+          label: "",
+        },
+      ],
     };
   },
   computed: {
-    parseLocation: function() {
+    parseLocation: function () {
       if (this.recording.location.type === "Point") {
         return `Lat: ${this.recording.location.coordinates[0].toFixed(
           2
@@ -152,7 +152,7 @@ export default {
         return this.recording.location;
       }
     },
-    metaItems: function() {
+    metaItems: function () {
       const data = this.recording["additionalMetadata"];
       const items = [];
       if (!data) {
@@ -162,13 +162,13 @@ export default {
         if (key != "tracks") {
           items.push({
             key: key,
-            data: data[key]
+            data: data[key],
           });
         }
       }
       return items;
-    }
-  }
+    },
+  },
 };
 </script>
 

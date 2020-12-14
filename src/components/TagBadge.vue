@@ -30,8 +30,8 @@ export default {
   props: {
     tag: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     getTagTitle(str) {
@@ -43,8 +43,8 @@ export default {
         case "automatic human":
           return "Tagged by Cacophony AI and human";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

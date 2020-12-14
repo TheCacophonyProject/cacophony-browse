@@ -15,18 +15,18 @@ export default {
   props: {
     value: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
-  data: function() {
+  data: function () {
     return {
       types: [
         { text: "Log", value: false },
-        { text: "Log", value: true }
-      ]
+        { text: "Log", value: true },
+      ],
     };
   },
-  methods: {}
+  methods: {},
 };
 </script>
 

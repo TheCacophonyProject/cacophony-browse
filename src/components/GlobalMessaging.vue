@@ -24,9 +24,9 @@ import IconLink from "./IconLink.vue";
 export default {
   name: "GlobalMessaging",
   components: { IconLink },
-  data: function() {
+  data: function () {
     return {
-      displayLevels: ["warning", "danger"] // ['warning', 'danger', 'info', 'success']
+      displayLevels: ["warning", "danger"], // ['warning', 'danger', 'info', 'success']
     };
   },
   methods: {
@@ -41,8 +41,8 @@ export default {
     },
     acknowledgeMessages() {
       this.$store.dispatch("Messaging/ACKNOWLEDGE");
-    }
-  }
+    },
+  },
 };
 </script>
 

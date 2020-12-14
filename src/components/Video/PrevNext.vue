@@ -21,16 +21,16 @@ export default {
   props: {
     recording: {
       type: Object,
-      default: function() {
+      default: function () {
         return {};
-      }
-    }
+      },
+    },
   },
   methods: {
     gotoNextRecording(...args) {
       this.$emit("nextOrPreviousRecording", { ...args });
-    }
-  }
+    },
+  },
 };
 </script>
 
