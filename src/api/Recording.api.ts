@@ -1,7 +1,7 @@
 import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
 import { DeviceVisitMap } from "./visits";
-import moment from "moment";
+import * as moment from "moment";
 
 export default {
   query,
