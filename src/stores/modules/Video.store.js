@@ -6,7 +6,7 @@ const state = {
   downloadFileJWT: null,
   downloadRawJWT: null,
   recording: {
-    Tags: []
+    Tags: [],
   },
   tracks: [],
 
@@ -17,7 +17,7 @@ const state = {
       }
     }
     return null;
-  }
+  },
 };
 
 // getters https://vuex.vuejs.org/guide/getters.html
@@ -26,7 +26,7 @@ const getters = {
   getTagItems(state) {
     const tags = state.recording.Tags;
     const tagItems = [];
-    tags.map(tag => {
+    tags.map((tag) => {
       const tagItem = {};
       if (tag.what) {
         tagItem.what = tag.what;
@@ -52,7 +52,7 @@ const getters = {
   getAudioTagItems(state) {
     const tags = state.recording.Tags;
     const tagItems = [];
-    tags.map(tag => {
+    tags.map((tag) => {
       const tagItem = {};
       if (tag.event == "AUDIO") {
         // check for optional fields
@@ -74,7 +74,7 @@ const getters = {
       }
     });
     return tagItems;
-  }
+  },
 };
 
 const actions = {
@@ -98,7 +98,7 @@ const actions = {
     commit("receiveTracks", tracks);
     return {
       recording,
-      tracks: tracks.tracks
+      tracks: tracks.tracks,
     };
   },
 
@@ -157,7 +157,7 @@ const actions = {
     // Resync all tags for the track from the API.
     const {
       success: syncSuccess,
-      result: syncResult
+      result: syncResult,
     } = await api.recording.tracks(recordingId);
     if (!syncSuccess) {
       return;
@@ -177,7 +177,7 @@ const actions = {
     }
     commit("deleteTrackTag", tag);
     return result;
-  }
+  },
 };
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
@@ -208,7 +208,9 @@ const mutations = {
   },
 
   deleteTag(state, tagId) {
-    state.recording.Tags = state.recording.Tags.filter(tag => tag.id != tagId);
+    state.recording.Tags = state.recording.Tags.filter(
+      (tag) => tag.id != tagId
+    );
   },
 
   addTrackTag(state, tag) {
@@ -225,8 +227,8 @@ const mutations = {
 
   deleteTrackTag(state, deletedTag) {
     const track = state.findTrack(deletedTag.TrackId);
-    track.TrackTags = track.TrackTags.filter(tag => tag.id != deletedTag.id);
-  }
+    track.TrackTags = track.TrackTags.filter((tag) => tag.id != deletedTag.id);
+  },
 };
 
 export default {
@@ -234,5 +236,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 };

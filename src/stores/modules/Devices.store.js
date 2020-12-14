@@ -3,7 +3,7 @@ import api from "../../api/index";
 const state = {
   devices: [],
   currentDevice: null,
-  fetched: false
+  fetched: false,
 };
 
 const getters = {};
@@ -11,7 +11,7 @@ const getters = {};
 async function _getDevice(devicename, commit) {
   const { result } = await api.device.getDevices();
   const device = result.devices.rows.find(
-    device => device.devicename === devicename
+    (device) => device.devicename === devicename
   );
   commit("setCurrentDevice", device);
 }
@@ -55,7 +55,7 @@ const actions = {
     await api.device.removeUserFromDevice(userName, device.id);
     await _getDevice(device.devicename, commit);
     commit("fetched");
-  }
+  },
 };
 
 const mutations = {
@@ -70,7 +70,7 @@ const mutations = {
   },
   fetched(state) {
     state.fetched = true;
-  }
+  },
 };
 
 export default {
@@ -78,5 +78,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 };

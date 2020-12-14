@@ -10,15 +10,15 @@ describe("Actions", () => {
       devices: {
         rows: [
           { devicename: "a", id: 1 },
-          { devicename: "b", id: 2 }
-        ]
-      }
+          { devicename: "b", id: 2 },
+        ],
+      },
     },
     testResponse = { result: testResult, success: true },
     commit = jest.fn(),
     state = {
       currentDevice: testResult.devices[0],
-      devices: testResult.devices
+      devices: testResult.devices,
     };
 
   beforeEach(() => {

@@ -5,7 +5,7 @@ import router from "../router";
 const defaults = {
   mode: "cors",
   cache: "no-cache",
-  headers: {}
+  headers: {},
 };
 
 /**
@@ -24,8 +24,8 @@ export async function fetch(url, init, suppressGlobalMessaging = false) {
     ...init,
     headers: {
       ...init.headers,
-      Authorization: store.getters["User/getToken"]
-    }
+      Authorization: store.getters["User/getToken"],
+    },
   };
 
   const response = await crossFetch(url, init);
@@ -63,7 +63,7 @@ function handleMessages(result, status) {
     }
   }
   result.messages &&
-    result.messages.forEach(message =>
+    result.messages.forEach((message) =>
       store.dispatch(`Messaging/${level}`, message)
     );
   if (result.errorType == "client") {

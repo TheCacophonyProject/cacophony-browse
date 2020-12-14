@@ -2,7 +2,7 @@ import CacophonyApi from "./CacophonyApi";
 
 export default {
   addTag,
-  deleteTag
+  deleteTag,
 };
 
 const apiPath = "/api/v1/tags";
@@ -10,7 +10,7 @@ const apiPath = "/api/v1/tags";
 function addTag(tag, id) {
   return CacophonyApi.post(apiPath, {
     recordingId: id,
-    tag: tag
+    tag: tag,
   });
 }
 

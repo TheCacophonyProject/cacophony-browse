@@ -20,8 +20,8 @@ describe("addGroup(groupName) calls authenticatedFetch", () => {
       method: "POST",
       body: JSON.stringify({ groupname: testGroupName }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 
@@ -52,11 +52,11 @@ describe("addGroupUser(groupName, userName, isAdmin) calls authenticatedFetch", 
       body: JSON.stringify({
         group: testGroup,
         username: testUserName,
-        admin: testBoolAdmin
+        admin: testBoolAdmin,
       }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 
@@ -85,8 +85,8 @@ describe("removeGroupUser(groupName,username) calls authenticatedFetch", () => {
       method: "DELETE",
       body: JSON.stringify({ group: testGroup, username: testUserName }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 
@@ -106,7 +106,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
 
   test("with correctly formatted query string", async () => {
     const params = {
-      testGroupId: 123456
+      testGroupId: 123456,
     };
 
     await groupApi.getGroups(params);
@@ -115,7 +115,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
 
     const parsedString = querystring.parse(query);
     expect(parsedString).toMatchObject({
-      where: `{\"groupname\":${JSON.stringify(params)}}`
+      where: `{\"groupname\":${JSON.stringify(params)}}`,
     });
   });
 
@@ -124,7 +124,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
 
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
-      method: "GET"
+      method: "GET",
     });
   });
 

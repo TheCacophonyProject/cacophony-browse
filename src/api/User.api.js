@@ -8,13 +8,13 @@ export default {
   updateFields,
   persistFields,
   getEUAVersion,
-  token
+  token,
 };
 
 function login(usernameOrEmail, password) {
   return CacophonyApi.post("/authenticate_user", {
     nameOrEmail: usernameOrEmail,
-    password: password
+    password: password,
   });
 }
 
@@ -52,7 +52,7 @@ function register(username, password, email, endUserAgreement) {
     username: username,
     password: password,
     endUserAgreement: endUserAgreement,
-    email: email
+    email: email,
   });
 }
 function updateFields(fields) {

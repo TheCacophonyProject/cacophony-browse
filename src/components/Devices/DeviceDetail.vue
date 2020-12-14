@@ -70,8 +70,8 @@
             </template>
           </b-table>
         </div>
-        <hr/>
-        <div :class='"versions"'>
+        <hr />
+        <div :class="'versions'">
           <h2>Current software versions</h2>
           <div v-if="!software.result">Message: {{ software.message }}</div>
           <div
@@ -82,16 +82,26 @@
             "
           >
             <div
-              v-for="(version, component) in software.result.EventDetail.details"
+              v-for="(version, component) in software.result.EventDetail
+                .details"
               :key="component"
             >
               <b>{{ component }}</b
               >: {{ version }}
             </div>
             <div v-if="software.result.dateTime">
-              <i>Recorded {{ dayOfSnapshot.toLowerCase() }} at {{ timeOfSnapshot }}</i>
+              <i
+                >Recorded {{ dayOfSnapshot.toLowerCase() }} at
+                {{ timeOfSnapshot }}</i
+              >
             </div>
-            <p> Current released software versions are listed <a href="https://github.com/TheCacophonyProject/saltops#branch-prod">here</a>.</p>
+            <p>
+              Current released software versions are listed
+              <a
+                href="https://github.com/TheCacophonyProject/saltops#branch-prod"
+                >here</a
+              >.
+            </p>
           </div>
         </div>
       </b-col>

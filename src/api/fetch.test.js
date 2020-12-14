@@ -9,7 +9,7 @@ test("fetch(url, paramsObject) calls crossFetch with correct params", async () =
   const testURL = "testURL",
     testObject = {
       some: "thing",
-      mode: "default override"
+      mode: "default override",
     },
     testToken = "some token value";
 
@@ -17,7 +17,7 @@ test("fetch(url, paramsObject) calls crossFetch with correct params", async () =
     status: 200,
     json: () => {
       return Promise.resolve({});
-    }
+    },
   });
 
   store.getters["User/getToken"] = testToken;
@@ -29,7 +29,7 @@ test("fetch(url, paramsObject) calls crossFetch with correct params", async () =
     headers: { Authorization: testToken },
     some: "thing",
     mode: "default override",
-    cache: "no-cache"
+    cache: "no-cache",
   });
 });
 
@@ -38,18 +38,18 @@ test("fetch(url, paramsObject) handles response with general errors", async () =
     errors: {
       someErrorKey: {
         param: "someErrorParam", // TODO: Find the purpose of the param? Is it a key for local content lookup?
-        msg: "some error message"
+        msg: "some error message",
       },
       someOtherErrorKey: {
         param: "someOtherErrorKey", // TODO: Find the purpose of the param? Is it a key for local content lookup?
-        msg: "some other error message"
-      }
-    }
+        msg: "some other error message",
+      },
+    },
   };
 
   crossFetch.mockReturnValue({
     status: 400,
-    json: () => Promise.resolve(testResultObject)
+    json: () => Promise.resolve(testResultObject),
   });
 
   const { result } = await fetch("", {});
@@ -70,12 +70,12 @@ test("fetch(url, paramsObject) handles response with general errors", async () =
 
 test("fetch(url, paramsObject) handles response with authentication error", async () => {
   const testResultObject = {
-    messages: ["Failed to log in.  Please try to log out and log in again."]
+    messages: ["Failed to log in.  Please try to log out and log in again."],
   };
 
   crossFetch.mockReturnValue({
     status: 401,
-    json: () => Promise.resolve(testResultObject)
+    json: () => Promise.resolve(testResultObject),
   });
 
   const { result } = await fetch("", {});
@@ -98,7 +98,7 @@ test('fetch(url, paramsObject) handles response with "success" result', async ()
     status: 200,
     json: () => {
       return Promise.resolve(testResultObject);
-    }
+    },
   });
 
   const { result } = await fetch("", {});

@@ -12,7 +12,7 @@ import config from "./config";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 
-export default function() {
+export default function () {
   // https://bootstrap-vue.js.org/docs
   Vue.use(BootstrapVue);
 
@@ -28,7 +28,7 @@ export default function() {
     el: "#app",
     store,
     router,
-    render: h => h(App)
+    render: (h) => h(App),
   });
 
   if (config.environment !== "PRODUCTION") {

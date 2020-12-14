@@ -18,11 +18,11 @@ describe("addTag() calls fetch", () => {
       method: "POST",
       body: JSON.stringify({
         recordingId: testRecordingId,
-        tag: testTag
+        tag: testTag,
       }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 
@@ -47,8 +47,8 @@ describe("deleteTag() calls fetch", () => {
       method: "DELETE",
       body: JSON.stringify({ tagId: testTagId }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 

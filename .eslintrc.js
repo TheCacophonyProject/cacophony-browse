@@ -5,10 +5,12 @@ module.exports = {
     "plugin:vue/essential",
     "plugin:prettier/recommended",
     "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended"
+    "plugin:@typescript-eslint/eslint-recommended",
   ],
   parserOptions: {
-    parser: require.resolve("@typescript-eslint/parser")
+    ecmaVersion: 8,
+    sourceType: "module",
+    parser: require.resolve("@typescript-eslint/parser"),
   },
   rules: {
     "no-prototype-builtins": "off",
@@ -22,6 +24,6 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": ["warn"],
     "brace-style": ["warn"],
     "prefer-const": ["warn"],
-    "prettier/prettier": ["warn"]
-  }
+    "prettier/prettier": ["warn"],
+  },
 };

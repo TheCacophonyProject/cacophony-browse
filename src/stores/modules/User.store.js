@@ -10,13 +10,13 @@ const state = {
     email: localStorage.getItem("email"),
     globalPermission: getGlobalPermission(),
     isSuperUser: isSuperUser(),
-    acceptedEUA: localStorage.getItem("acceptedEUA")
+    acceptedEUA: localStorage.getItem("acceptedEUA"),
   },
   latestEUA: localStorage.getItem("latestEUA"),
   euaUpdatedAt: localStorage.getItem("euaUpdatedAt"),
   errorMessage: undefined,
   recordingTypePref: localStorage.getItem("recordingTypePref") || "both",
-  analysisDatePref: parseInt(localStorage.getItem("analysisDatePref")) || 7
+  analysisDatePref: parseInt(localStorage.getItem("analysisDatePref")) || 7,
 };
 
 function getGlobalPermission() {
@@ -33,11 +33,11 @@ function isSuperUser() {
 // getters https://vuex.vuejs.org/guide/getters.html
 
 const getters = {
-  isLoggedIn: state => !!state.JWT,
-  getToken: state => state.JWT,
-  hasEmail: state => !!state.userData.email && state.userData.email != "null",
-  acceptedEUA: state => state.userData.acceptedEUA >= state.latestEUA,
-  euaUpdatedAt: state => state.euaUpdatedAt
+  isLoggedIn: (state) => !!state.JWT,
+  getToken: (state) => state.JWT,
+  hasEmail: (state) => !!state.userData.email && state.userData.email != "null",
+  acceptedEUA: (state) => state.userData.acceptedEUA >= state.latestEUA,
+  euaUpdatedAt: (state) => state.euaUpdatedAt,
 };
 
 // actions https://vuex.vuejs.org/guide/actions.html
@@ -103,7 +103,7 @@ const actions = {
   },
   async ACCEPT_END_USER_AGREEMENT({ commit, state }) {
     const { result, success } = await api.user.updateFields({
-      endUserAgreement: state.latestEUA
+      endUserAgreement: state.latestEUA,
     });
     if (success) {
       const updateFields = { acceptedEUA: state.latestEUA };
@@ -125,7 +125,7 @@ const actions = {
       commit("rejectUpdate", result);
       return false;
     }
-  }
+  },
 };
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
@@ -164,7 +164,7 @@ const mutations = {
   updateAnalysisDatePref(state, data) {
     state.analysisDatePref = data;
     localStorage.setItem("analysisDatePref", data);
-  }
+  },
 };
 
 export default {
@@ -172,5 +172,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 };

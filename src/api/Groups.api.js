@@ -4,7 +4,7 @@ export default {
   addNewGroup,
   getGroups,
   addGroupUser,
-  removeGroupUser
+  removeGroupUser,
 };
 
 function addNewGroup(groupName) {
@@ -23,7 +23,7 @@ function addGroupUser(groupName, userName, isAdmin) {
     {
       group: groupName,
       username: userName,
-      admin: isAdmin
+      admin: isAdmin,
     },
     suppressGlobalMessaging
   );
@@ -32,7 +32,7 @@ function addGroupUser(groupName, userName, isAdmin) {
 function removeGroupUser(groupName, userName) {
   return CacophonyApi.delete("/api/v1/groups/users", {
     group: groupName,
-    username: userName
+    username: userName,
   });
 }
 

@@ -40,7 +40,7 @@ import {
   faPlus,
   faVolumeUp,
   faUserPlus,
-  faChevronRight
+  faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faCalendar,
@@ -53,7 +53,7 @@ import {
   faFileAudio,
   faFileVideo,
   faUserCircle,
-  faWindowClose
+  faWindowClose,
 } from "@fortawesome/free-regular-svg-icons";
 
 // https://www.npmjs.com/package/@fortawesome/vue-fontawesome

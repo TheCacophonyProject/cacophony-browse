@@ -2,7 +2,7 @@ export {
   toStringTodayYesterdayOrDate,
   startOfDay,
   startOfHour,
-  toNZDateString
+  toNZDateString,
 };
 
 function toStringTodayYesterdayOrDate(dateObject) {

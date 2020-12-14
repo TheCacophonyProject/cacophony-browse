@@ -25,90 +25,90 @@ function createRouter() {
     mode: "history",
     fallback: false,
     scrollBehavior: () => ({
-      y: 0
+      y: 0,
     }),
     routes: [
       {
         path: "/devices",
         name: "devices",
-        component: DevicesView
+        component: DevicesView,
       },
       {
         path: "/devices/:devicename",
         name: "device",
-        component: DeviceView
+        component: DeviceView,
       },
       {
         path: "/error",
-        component: ErrorView
+        component: ErrorView,
       },
       {
         path: "/groups",
         name: "groups",
-        component: GroupsView
+        component: GroupsView,
       },
       {
         path: "/groups/:groupname",
         name: "group",
-        component: GroupView
+        component: GroupView,
       },
       {
         path: "/",
         name: "home",
-        component: HomeView
+        component: HomeView,
       },
       {
         path: "/login",
         name: "login",
         component: LoginView,
         meta: {
-          noAuth: true
-        }
+          noAuth: true,
+        },
       },
       {
         path: "/recordings",
-        component: RecordingsView
+        component: RecordingsView,
       },
       {
         path: "/register",
         component: RegisterView,
         meta: {
-          noAuth: true
-        }
+          noAuth: true,
+        },
       },
       {
         path: "/recording/:id/:trackid?",
-        component: RecordingVue
+        component: RecordingVue,
       },
       {
         path: "/add_email",
         name: "addEmail",
         component: AddEmailView,
         meta: {
-          noEmail: true
-        }
+          noEmail: true,
+        },
       },
       {
         path: "/analysis",
         name: "analysis",
-        component: AnalysisView
+        component: AnalysisView,
       },
       {
         path: "/visits",
         name: "visits",
-        component: VisitsView
+        component: VisitsView,
       },
       {
         path: "/tagging",
         name: "tagging",
-        component: TaggingView
+        component: TaggingView,
       },
       {
         path: "/end_user_agreement",
         name: "endUserAgreement",
-        component: EndUserAgreementView
-      }
-    ]
+        component: EndUserAgreementView,
+      },
+    ],
   });
 
   router.beforeEach(async (to, from, next) => {
@@ -126,7 +126,7 @@ function createRouter() {
         ["login", "register", "addEmail", "endUserAgreement"].includes(to.name)
       ) {
         return next({
-          name: "home"
+          name: "home",
         });
       } else {
         return next();
@@ -134,7 +134,7 @@ function createRouter() {
     } else if (isLoggedIn && !hasEmail) {
       if (to.name !== "addEmail") {
         return next({
-          name: "addEmail"
+          name: "addEmail",
         });
       } else {
         return next();
@@ -144,20 +144,20 @@ function createRouter() {
         return next({
           name: "endUserAgreement",
           query: {
-            nextUrl: to.fullPath
-          }
+            nextUrl: to.fullPath,
+          },
         });
       } else {
         return next();
       }
-    } else if (to.matched.some(record => record.meta.noAuth)) {
+    } else if (to.matched.some((record) => record.meta.noAuth)) {
       return next();
     }
     next({
       path: "/login",
       query: {
-        nextUrl: to.fullPath
-      }
+        nextUrl: to.fullPath,
+      },
     });
   });
 
