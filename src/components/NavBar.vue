@@ -1,11 +1,15 @@
 <template>
   <div class="nav-bar">
-    <div v-if="isLoggedIn && isViewingAsOtherUser()" class="super-user-bar">
+    <div v-if="isViewingAsOtherUser()" class="super-user-bar">
       <font-awesome-icon icon="glasses" class="icon" />
-      <span><strong>{{ superUserName() }}</strong> viewing as <strong>{{ userName }}</strong></span>
+      <span
+        ><strong>{{ superUserName() }}</strong> viewing as
+        <strong>{{ userName }}</strong></span
+      >
       <a @click="revertViewingUser">
         <font-awesome-icon icon="reply" class="icon" />
-        Revert</a>
+        Revert</a
+      >
     </div>
     <b-navbar toggleable="lg">
       <b-navbar-brand>
@@ -53,7 +57,10 @@
                 class="icon"
               />&nbsp;{{ userName }}
             </template>
-            <b-dropdown-item v-if="isSuperUser" @click="showChangeUserViewDialog = true">
+            <b-dropdown-item
+              v-if="isSuperUser"
+              @click="showChangeUserViewDialog = true"
+            >
               <font-awesome-icon icon="glasses" class="icon" />&nbsp;View user
             </b-dropdown-item>
             <b-dropdown-item @click="logout">
@@ -63,16 +70,20 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
-    <b-modal v-model="showChangeUserViewDialog" @ok="changeViewingUser" title="View as another user">
+    <b-modal
+      v-model="showChangeUserViewDialog"
+      @ok="changeViewingUser"
+      title="View as another user"
+    >
       <b-form-group>
         <label>Select user</label>
         <multiselect
-            v-model="selectedUser"
-            :options="users"
-            placeholder="select a user"
-            :disabled="users.length === 0"
-            track-by="id"
-            label="name"
+          v-model="selectedUser"
+          :options="users"
+          :placeholder="usersListLabel"
+          :disabled="users.length === 0"
+          track-by="id"
+          label="name"
         />
       </b-form-group>
     </b-modal>
@@ -80,23 +91,20 @@
 </template>
 
 <script>
-import store from "../stores";
 import User from "../api/User.api";
 
 export default {
   name: "Navbar",
   data() {
     return {
-      showChangeUserViewDialog: false,
+      internalShowChangeUserViewDialog: false,
       users: [],
+      usersListLabel: "loading users",
       selectedUser: {
-        name:"",
+        name: "",
         id: ""
       }
-    }
-  },
-  async created() {
-      await this.initUsersList();
+    };
   },
   computed: {
     userName() {
@@ -108,18 +116,29 @@ export default {
     isSuperUser() {
       return this.globalPermission === "write";
     },
-    isLoggedIn() {
-      return store.getters["User/isLoggedIn"];
-    },
+    showChangeUserViewDialog: {
+      async set(val) {
+        this.internalShowChangeUserViewDialog = val;
+        if (this.users.length === 0) {
+          await this.initUsersList();
+          this.usersListLabel = "select a user";
+        }
+      },
+      get() {
+        return this.internalShowChangeUserViewDialog;
+      }
+    }
   },
   methods: {
     async initUsersList() {
-      if (this.isLoggedIn && this.isSuperUser) {
+      if (this.isSuperUser) {
         const usersList = await User.list();
-        this.users = usersList.result.usersList.map(({username, id}) => ({
-          name: username,
-          id
-        })).filter(({name}) => name !== this.superUserCreds()?.username);
+        this.users = usersList.result.usersList
+          .map(({ username, id }) => ({
+            name: username,
+            id
+          }))
+          .filter(({ name }) => name !== this.superUserCreds()?.username);
       }
     },
     superUserName() {
@@ -139,7 +158,10 @@ export default {
     },
     revertViewingUser() {
       const superUser = this.superUserCreds();
-      this.$store.dispatch("User/LOGIN_OTHER", {userData: {...superUser}, token: superUser.token });
+      this.$store.dispatch("User/LOGIN_OTHER", {
+        userData: { ...superUser },
+        token: superUser.token
+      });
       this.selectedUse = null;
       window.location.reload();
     },
@@ -157,11 +179,12 @@ export default {
     },
     isViewingAsOtherUser() {
       const superUserCreds = this.superUserCreds();
-      return !!(superUserCreds &&
-          superUserCreds.token &&
-          superUserCreds.token !== localStorage.getItem("JWT"));
-
-    },
+      return !!(
+        superUserCreds &&
+        superUserCreds.token &&
+        superUserCreds.token !== localStorage.getItem("JWT")
+      );
+    }
   }
 };
 </script>
@@ -198,7 +221,8 @@ export default {
   height: 34px;
   cursor: default;
   user-select: none;
-  a, a:hover {
+  a,
+  a:hover {
     float: right;
     cursor: pointer;
     color: inherit;
@@ -220,3 +244,4 @@ export default {
   }
 }
 </style>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

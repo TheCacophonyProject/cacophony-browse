@@ -1,5 +1,5 @@
 <template>
-  <div id="app" :class="{'viewing-as-admin': isViewingAsOtherUser()}">
+  <div id="app" :class="{ 'viewing-as-admin': isViewingAsOtherUser() }">
     <global-messaging />
     <nav-bar v-if="isLoggedIn" />
     <router-view class="view" />
@@ -20,7 +20,7 @@ export default {
   computed: {
     isLoggedIn() {
       return store.getters["User/isLoggedIn"];
-    },
+    }
   },
   methods: {
     superUserCreds() {
@@ -37,11 +37,12 @@ export default {
     },
     isViewingAsOtherUser() {
       const superUserCreds = this.superUserCreds();
-      return !!(superUserCreds &&
-          superUserCreds.token &&
-          superUserCreds.token !== localStorage.getItem("JWT"));
-
-    },
+      return !!(
+        superUserCreds &&
+        superUserCreds.token &&
+        superUserCreds.token !== localStorage.getItem("JWT")
+      );
+    }
   }
 };
 </script>
@@ -66,4 +67,3 @@ export default {
   flex-grow: 1;
 }
 </style>
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

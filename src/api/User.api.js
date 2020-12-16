@@ -8,7 +8,7 @@ function login(usernameOrEmail, password) {
 }
 
 function loginOther(username) {
-  return CacophonyApi.post("/authenticate_other_user_as_admin", {
+  return CacophonyApi.post("/admin_authenticate_as_other_user", {
     name: username
   });
 }
