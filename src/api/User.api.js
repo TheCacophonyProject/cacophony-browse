@@ -1,21 +1,20 @@
 import CacophonyApi from "./CacophonyApi";
 
-export default {
-  login,
-  persistUser,
-  logout,
-  register,
-  updateFields,
-  persistFields,
-  getEUAVersion,
-  token
-};
-
 function login(usernameOrEmail, password) {
   return CacophonyApi.post("/authenticate_user", {
     nameOrEmail: usernameOrEmail,
     password: password
   });
+}
+
+function loginOther(username) {
+  return CacophonyApi.post("/admin_authenticate_as_other_user", {
+    name: username
+  });
+}
+
+function list() {
+  return CacophonyApi.get("/api/v1/listUsers");
 }
 
 function persistUser(
@@ -40,12 +39,13 @@ function persistFields(data) {
   }
 }
 function logout() {
-  localStorage.setItem("username", "");
-  localStorage.setItem("userId", "");
-  localStorage.setItem("JWT", "");
-  localStorage.setItem("email", "");
-  localStorage.setItem("globalPermission", "");
-  localStorage.setItem("acceptedEUA", "");
+  localStorage.removeItem("username");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("JWT");
+  localStorage.removeItem("email");
+  localStorage.removeItem("globalPermission");
+  localStorage.removeItem("acceptedEUA");
+  localStorage.removeItem("superUserCreds");
 }
 function register(username, password, email, endUserAgreement) {
   return CacophonyApi.post("/api/v1/Users", {
@@ -71,3 +71,16 @@ async function token() {
   }
   return result.token;
 }
+
+export default {
+  login,
+  loginOther,
+  persistUser,
+  list,
+  logout,
+  register,
+  updateFields,
+  persistFields,
+  getEUAVersion,
+  token
+};

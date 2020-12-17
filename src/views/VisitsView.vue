@@ -194,6 +194,7 @@
                                 "
                                 :key="index"
                                 :what="row.item.what"
+                                :deviceId="row.item.deviceId"
                               />
                             </div>
                           </b-container>
