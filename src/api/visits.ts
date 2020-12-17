@@ -20,6 +20,7 @@ export class Visit {
   what: string;
   end: moment.Moment;
   start: moment.Moment;
+  deviceId: number;
   device: string;
   audioBaitDay: boolean;
   audioBaitEvents: Event[];
