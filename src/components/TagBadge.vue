@@ -20,7 +20,7 @@
         size="xs"
       />
     </span>
-    <span class="tag-label">{{ tag.text }}</span>
+    <span class="tag-label">{{ mapLabel(tag) }}</span>
   </span>
 </template>
 
@@ -34,6 +34,12 @@ export default {
     }
   },
   methods: {
+    mapLabel(tag) {
+      if (tag.text === "unknown" && tag.class.includes("human")) {
+        return "not identifiable";
+      }
+      return tag.text.replace(/-/g, " ");
+    },
     getTagTitle(str) {
       switch (str) {
         case "automatic":
