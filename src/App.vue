@@ -1,7 +1,7 @@
 <template>
-  <div id="app">
+  <div id="app" :class="{ 'viewing-as-admin': isViewingAsOtherUser() }">
     <global-messaging />
-    <nav-bar v-if="isLoggedIn()" />
+    <nav-bar v-if="isLoggedIn" />
     <router-view class="view" />
   </div>
 </template>
@@ -17,21 +17,45 @@ export default {
     NavBar,
     GlobalMessaging
   },
-  methods: {
-    isLoggedIn: function() {
+  computed: {
+    isLoggedIn() {
       return store.getters["User/isLoggedIn"];
+    }
+  },
+  methods: {
+    superUserCreds() {
+      let superUserCreds = localStorage.getItem("superUserCreds");
+      if (superUserCreds) {
+        try {
+          superUserCreds = JSON.parse(superUserCreds);
+          return superUserCreds;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    },
+    isViewingAsOtherUser() {
+      const superUserCreds = this.superUserCreds();
+      return !!(
+        superUserCreds &&
+        superUserCreds.token &&
+        superUserCreds.token !== localStorage.getItem("JWT")
+      );
     }
   }
 };
 </script>
 
-<style>
+<style lang="scss">
 #app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-height: 100vh;
   --navbar-height: 65px;
+  &.viewing-as-admin {
+    --navbar-height: 99px;
+  }
 
   text-rendering: optimizeLegibility;
   font-feature-settings: "kern" 1;

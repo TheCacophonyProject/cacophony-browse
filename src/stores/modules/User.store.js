@@ -55,6 +55,13 @@ const actions = {
       payload.password
     );
     if (success) {
+      if (result.userData.globalPermission === "write") {
+        // Persist super user settings so that we can switch user views.
+        localStorage.setItem(
+          "superUserCreds",
+          JSON.stringify({ ...result.userData, token: result.token })
+        );
+      }
       api.user.persistUser(
         result.userData.username,
         result.token,
@@ -65,6 +72,18 @@ const actions = {
       );
       commit("receiveLogin", result);
     }
+  },
+  async LOGIN_OTHER({ commit }, result) {
+    commit("invalidateLogin");
+    api.user.persistUser(
+      result.userData.username,
+      result.token,
+      result.userData.email,
+      result.userData.globalPermission,
+      result.userData.id,
+      result.userData.endUserAgreement
+    );
+    commit("receiveLogin", result);
   },
   LOGOUT(context) {
     context.commit("invalidateLogin");
