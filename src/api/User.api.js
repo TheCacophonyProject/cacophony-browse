@@ -3,13 +3,13 @@ import CacophonyApi from "./CacophonyApi";
 function login(usernameOrEmail, password) {
   return CacophonyApi.post("/authenticate_user", {
     nameOrEmail: usernameOrEmail,
-    password: password
+    password: password,
   });
 }
 
 function loginOther(username) {
   return CacophonyApi.post("/admin_authenticate_as_other_user", {
-    name: username
+    name: username,
   });
 }
 
@@ -52,7 +52,7 @@ function register(username, password, email, endUserAgreement) {
     username: username,
     password: password,
     endUserAgreement: endUserAgreement,
-    email: email
+    email: email,
   });
 }
 function updateFields(fields) {
@@ -82,5 +82,5 @@ export default {
   updateFields,
   persistFields,
   getEUAVersion,
-  token
+  token,
 };

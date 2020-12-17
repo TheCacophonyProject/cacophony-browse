@@ -102,8 +102,8 @@ export default {
       usersListLabel: "loading users",
       selectedUser: {
         name: "",
-        id: ""
-      }
+        id: "",
+      },
     };
   },
   computed: {
@@ -126,8 +126,8 @@ export default {
       },
       get() {
         return this.internalShowChangeUserViewDialog;
-      }
-    }
+      },
+    },
   },
   methods: {
     async initUsersList() {
@@ -136,7 +136,7 @@ export default {
         this.users = usersList.result.usersList
           .map(({ username, id }) => ({
             name: username,
-            id
+            id,
           }))
           .filter(({ name }) => name !== this.superUserCreds()?.username);
       }
@@ -160,7 +160,7 @@ export default {
       const superUser = this.superUserCreds();
       this.$store.dispatch("User/LOGIN_OTHER", {
         userData: { ...superUser },
-        token: superUser.token
+        token: superUser.token,
       });
       this.selectedUse = null;
       window.location.reload();
@@ -184,8 +184,8 @@ export default {
         superUserCreds.token &&
         superUserCreds.token !== localStorage.getItem("JWT")
       );
-    }
-  }
+    },
+  },
 };
 </script>
 
