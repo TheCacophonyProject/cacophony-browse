@@ -37,7 +37,7 @@ export default {
   data() {
     return {
       email: "",
-      errorMessage: null
+      errorMessage: null,
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -50,12 +50,12 @@ export default {
         return;
       }
       var result = await this.$store.dispatch("User/UPDATE", {
-        email: this.email
+        email: this.email,
       });
       if (result) {
         this.$router.push("/");
       }
-    }
-  }
+    },
+  },
 };
 </script>

@@ -13,22 +13,27 @@ module.exports = merge(common, {
   output: {
     path: distDir,
     publicPath: "/",
-    filename: "build.js"
+    filename: "build.js",
   },
   plugins: [
     new webpack.DefinePlugin({
       __ENV__: JSON.stringify(devConfig.environment),
-      __API__: JSON.stringify(devConfig.api)
+      __API__: JSON.stringify(devConfig.api),
     }),
     new HtmlWebpackPlugin({
       template: "index.template.ejs",
-      inject: "body"
-    })
+      inject: "body",
+    }),
   ],
   devServer: {
     contentBase: distDir,
     hot: true,
-    stats: "minimal"
+    stats: {
+      minimal: true,
+      assets: false,
+      modules: false,
+      timings: true,
+    },
   },
-  devtool: "#eval-source-map"
+  devtool: "eval-cheap-module-source-map",
 });

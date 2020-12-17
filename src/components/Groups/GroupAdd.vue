@@ -38,10 +38,10 @@ export default {
   data() {
     return {
       form: {
-        groupName: ""
+        groupName: "",
       },
       formSubmissionFailed: false,
-      formSubmissionFailedMessage: ""
+      formSubmissionFailedMessage: "",
     };
   },
   computed: {
@@ -67,21 +67,21 @@ export default {
     },
     isDisabled() {
       return this.$v.form.$invalid;
-    }
+    },
   },
   validations: {
     form: {
       groupName: {
         required,
-        minLength: minLength(groupNameMinLength)
-      }
-    }
+        minLength: minLength(groupNameMinLength),
+      },
+    },
   },
   methods: {
     resetFormSubmission() {
       this.formSubmissionFailed = false;
     },
-    addNewGroup: async function(event) {
+    addNewGroup: async function (event) {
       event.preventDefault();
 
       if (!this.$v.$invalid) {
@@ -101,10 +101,10 @@ export default {
     },
     reset() {
       this.form = {
-        groupName: null
+        groupName: null,
       };
       this.$refs["input-groupname"].focus();
-    }
-  }
+    },
+  },
 };
 </script>

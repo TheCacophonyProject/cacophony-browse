@@ -20,12 +20,12 @@ export default {
   props: {
     initialComment: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   data() {
     return {
-      comment: this.initialComment
+      comment: this.initialComment,
     };
   },
   methods: {
@@ -37,8 +37,8 @@ export default {
     },
     setFocus() {
       this.$refs["comment-input"].focus();
-    }
-  }
+    },
+  },
 };
 </script>
 

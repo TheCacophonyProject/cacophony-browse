@@ -85,44 +85,44 @@ export default {
     QuickTagTrack,
     TrackTags,
     AddCustomTrackTag,
-    AIClassification
+    AIClassification,
   },
   props: {
     track: {
       type: Object,
-      required: true
+      required: true,
     },
     recordingId: {
       type: Number,
-      required: true
+      required: true,
     },
     index: {
       type: Number,
-      required: true
+      required: true,
     },
     numTracks: {
       type: Number,
-      required: true
+      required: true,
     },
     show: {
       type: Boolean,
-      default: false
+      default: false,
     },
     colour: {
       type: String,
-      default: "yellow"
+      default: "yellow",
     },
     isWallabyProject: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
       show_details: false,
       showFullAddTag: false,
       message: "",
-      showUserTaggingHintCountDown: false
+      showUserTaggingHintCountDown: false,
     };
   },
   computed: {
@@ -149,7 +149,7 @@ export default {
     },
     isSuperUser() {
       return this.$store.state.User.userData.isSuperUser;
-    }
+    },
   },
   methods: {
     addTag(tag) {
@@ -158,7 +158,7 @@ export default {
       this.$store.dispatch("Video/ADD_TRACK_TAG", {
         tag,
         recordingId,
-        trackId
+        trackId,
       });
     },
     promptUserToAddTag() {
@@ -168,7 +168,7 @@ export default {
       const recordingId = this.recordingId;
       this.$store.dispatch("Video/DELETE_TRACK_TAG", {
         tag,
-        recordingId
+        recordingId,
       });
     },
     trackSelected(increment) {
@@ -176,8 +176,8 @@ export default {
       if (0 <= index && index < this.numTracks) {
         this.$emit("trackSelected", this.index + increment);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

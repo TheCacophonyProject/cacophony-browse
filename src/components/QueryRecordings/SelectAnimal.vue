@@ -22,24 +22,24 @@ export default {
   props: {
     value: {
       type: Array,
-      required: true
+      required: true,
     },
     disabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     canHaveSubTags: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      options: DefaultLabels.searchLabels()
+      options: DefaultLabels.searchLabels(),
     };
   },
   computed: {
-    placeholder: function() {
+    placeholder: function () {
       if (this.value.length > 0) {
         return "add more animals";
       } else if (this.canHaveSubTags) {
@@ -48,14 +48,14 @@ export default {
         return "";
       }
     },
-    tooltipTitle: function() {
+    tooltipTitle: function () {
       if (this.disabled) {
         return "Disabled when recording type includes audio";
       } else {
         return "";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -90,7 +90,7 @@
             <b-link
               :to="{
                 name: 'device',
-                params: { devicename: row.item.devicename }
+                params: { devicename: row.item.devicename },
               }"
               >{{ row.item.devicename }}</b-link
             >
@@ -112,12 +112,12 @@ export default {
   props: {
     group: {
       type: Object,
-      required: true
+      required: true,
     },
     user: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -125,54 +125,54 @@ export default {
         {
           key: "username",
           label: "Username",
-          sortable: "true"
+          sortable: "true",
         },
         { key: "admin", label: "Administrator" },
         {
           key: "controls",
           label: "",
-          class: "device-actions-cell"
-        }
+          class: "device-actions-cell",
+        },
       ],
       userSortBy: "username",
       deviceTableFields: [
         {
           key: "devicename",
           label: "Device Name",
-          sortable: "true"
-        }
+          sortable: "true",
+        },
       ],
       deviceSortBy: "devicename",
       usersHelpTip: {
-        title: "Only administrators can add new users"
+        title: "Only administrators can add new users",
       },
       devicesHelpTip: {
         title:
-          "Devices specify which group they belong to when they first register. They can't be edited here."
+          "Devices specify which group they belong to when they first register. They can't be edited here.",
       },
-      showUserRemoveSelfModal: false
+      showUserRemoveSelfModal: false,
     };
   },
   computed: mapState({
-    uiUser: state => state.User.userData.username,
-    isGroupAdmin: function() {
+    uiUser: (state) => state.User.userData.username,
+    isGroupAdmin: function () {
       if (this.user && this.group.Users) {
         const username = this.user.username;
         return (
           this.user.isSuperUser ||
           this.group.Users.some(
-            user => user.GroupUsers.admin && user.username === username
+            (user) => user.GroupUsers.admin && user.username === username
           )
         );
       }
       return false;
-    }
+    },
   }),
   methods: {
     async removeUser(userName) {
       await this.$store.dispatch("Groups/REMOVE_GROUP_USER", {
         userName,
-        groupName: this.group.groupname
+        groupName: this.group.groupname,
       });
     },
 
@@ -182,7 +182,7 @@ export default {
       } else {
         this.removeUser(userName);
       }
-    }
-  }
+    },
+  },
 };
 </script>

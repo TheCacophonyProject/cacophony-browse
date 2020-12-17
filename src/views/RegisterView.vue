@@ -114,7 +114,7 @@
 <script>
 import { minLength, required, sameAs } from "vuelidate/lib/validators";
 
-const validPattern = value =>
+const validPattern = (value) =>
   /^[a-zA-Z0-9]+(?:[_ -]?[a-zA-Z0-9])*$/.test(value);
 const usernameLength = 5;
 const passwordLength = 8;
@@ -132,9 +132,9 @@ export default {
         email: "",
         password: "",
         passwordConfirm: "",
-        endUserAgreement: "not-accepted"
+        endUserAgreement: "not-accepted",
       },
-      errorMessage: null
+      errorMessage: null,
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -159,30 +159,30 @@ export default {
         return `Must match password`;
       }
       return null;
-    }
+    },
   },
   validations: {
     form: {
       username: {
         required,
         minLength: minLength(usernameLength),
-        validPattern
+        validPattern,
       },
       email: {
-        required
+        required,
       },
       password: {
         required,
-        minLength: minLength(passwordLength)
+        minLength: minLength(passwordLength),
       },
       passwordConfirm: {
         required,
-        sameAsPassword: sameAs("password")
+        sameAsPassword: sameAs("password"),
       },
       endUserAgreement: {
-        value: value => value == "accepted"
-      }
-    }
+        value: (value) => value == "accepted",
+      },
+    },
   },
   methods: {
     async onSubmit(evt) {
@@ -192,14 +192,14 @@ export default {
         await this.$store.dispatch("User/REGISTER", {
           username: this.$v.form.username.$model,
           password: this.$v.form.password.$model,
-          email: this.$v.form.email.$model
+          email: this.$v.form.email.$model,
         });
         if (this.$store.getters["User/isLoggedIn"]) {
           this.$router.push("/");
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

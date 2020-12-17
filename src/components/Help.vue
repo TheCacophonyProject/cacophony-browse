@@ -10,16 +10,16 @@ export default {
   props: {
     helpText: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       helpTip: {
         html: true,
-        title: this.helpText.title
-      }
+        title: this.helpText.title,
+      },
     };
-  }
+  },
 };
 </script>

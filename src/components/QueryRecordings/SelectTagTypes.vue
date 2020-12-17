@@ -20,28 +20,28 @@ export default {
   props: {
     value: {
       type: String,
-      required: true
+      required: true,
     },
     disabled: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      options: DefaultLabels.searchRecordingLabels()
+      options: DefaultLabels.searchRecordingLabels(),
     };
   },
 
   computed: {
-    tooltipTitle: function() {
+    tooltipTitle: function () {
       if (this.disabled) {
         return "Disabled when recording type includes audio";
       } else {
         return "";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

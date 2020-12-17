@@ -19,14 +19,14 @@ export default {
   props: {
     value: {
       type: Number,
-      required: true
+      required: true,
     },
     vertical: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  data: function() {
+  data: function () {
     return {
       dates: [
         { text: "Last 24 Hours", value: 1 },
@@ -34,8 +34,8 @@ export default {
         { text: "Last 30 Days", value: 30 },
         { text: "Last 90 Days", value: 90 },
         { text: "Last year", value: 365 },
-        { text: "All Time", value: "all" }
-      ]
+        { text: "All Time", value: "all" },
+      ],
     };
   },
   methods: {
@@ -45,7 +45,7 @@ export default {
       } else {
         return "secondary";
       }
-    }
-  }
+    },
+  },
 };
 </script>

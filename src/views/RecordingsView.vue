@@ -4,7 +4,7 @@
       <div
         :class="[
           'search-filter-wrapper',
-          { 'is-collapsed': searchPanelIsCollapsed }
+          { 'is-collapsed': searchPanelIsCollapsed },
         ]"
       >
         <QueryRecordings
@@ -40,9 +40,7 @@
             <h2 v-if="countMessage">
               {{ countMessage }}
             </h2>
-            <h5 v-else>
-              Loading...
-            </h5>
+            <h5 v-else>Loading...</h5>
             <p class="search-description" v-html="currentQueryDescription" />
           </div>
           <div v-if="!queryPending" class="results">
@@ -101,7 +99,7 @@
             <div
               v-for="i in 10"
               :style="{
-                background: `rgba(240, 240, 240, ${1 / i}`
+                background: `rgba(240, 240, 240, ${1 / i}`,
               }"
               :key="i"
               class="recording-placeholder"
@@ -145,7 +143,7 @@ import api from "../api/index";
 import {
   toStringTodayYesterdayOrDate,
   startOfHour,
-  toNZDateString
+  toNZDateString,
 } from "../helpers/datetime";
 
 export default {
@@ -173,8 +171,8 @@ export default {
         { value: 100, text: "100 per page" },
         { value: 300, text: "300 per page" },
         { value: 500, text: "500 per page" },
-        { value: 1000, text: "1000 per page" }
-      ]
+        { value: 1000, text: "1000 per page" },
+      ],
     };
   },
   watch: {
@@ -190,7 +188,7 @@ export default {
       } else {
         this.currentPage = 1;
       }
-    }
+    },
   },
   mounted() {
     if (this.$route.query.limit) {
@@ -236,7 +234,7 @@ export default {
       delete queryCopy.offset;
 
       return queryCopy;
-    }
+    },
   },
   methods: {
     pagination(page) {
@@ -291,7 +289,7 @@ export default {
 
       if (!success) {
         result.messages &&
-          result.messages.forEach(message => {
+          result.messages.forEach((message) => {
             this.$store.dispatch("Messaging/WARN", message);
           });
       } else {
@@ -314,7 +312,7 @@ export default {
           ) {
             const item = {
               kind: "dataSeparator",
-              hour: thisDate
+              hour: thisDate,
             };
             item.date = thisDate;
             this.tableItems.push(item);
@@ -333,7 +331,7 @@ export default {
             duration: row.duration,
             tags: this.collateTags(row.Tags, row.Tracks),
             other: this.parseOther(row),
-            processing_state: this.parseProcessingState(row.processingState)
+            processing_state: this.parseProcessingState(row.processingState),
           });
         }
       }
@@ -358,7 +356,7 @@ export default {
       const string = result.toLowerCase();
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
-    collateTags: function(tags, tracks) {
+    collateTags: function (tags, tracks) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
       for (let i = 0; i < tags.length; i++) {
@@ -402,20 +400,20 @@ export default {
             text: animal,
             class: "automatic human",
             taggerIds: tagItem.taggerIds,
-            order: subOrder
+            order: subOrder,
           });
         } else if (tagItem.human) {
           result.push({
             text: animal,
             class: "human",
             taggerIds: tagItem.taggerIds,
-            order: 10 + subOrder
+            order: 10 + subOrder,
           });
         } else if (tagItem.automatic) {
           result.push({
             text: animal,
             class: "automatic",
-            order: 20 + subOrder
+            order: 20 + subOrder,
           });
         }
       }
@@ -425,7 +423,7 @@ export default {
       });
       return result;
     },
-    addToListOfTags: function(allTags, tagName, isAutomatic, taggerId) {
+    addToListOfTags: function (allTags, tagName, isAutomatic, taggerId) {
       const tag = allTags[tagName] || {};
       tag.taggerIds = tag.taggerIds || [];
       if (taggerId && tag.taggerIds.indexOf(taggerId) === -1) {
@@ -437,8 +435,8 @@ export default {
         tag.human = true;
       }
       allTags[tagName] = tag;
-    }
-  }
+    },
+  },
 };
 </script>
 

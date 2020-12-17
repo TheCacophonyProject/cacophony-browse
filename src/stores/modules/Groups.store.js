@@ -3,7 +3,7 @@ import api from "../../api/index";
 const state = {
   groups: [],
   currentGroup: null,
-  fetched: false
+  fetched: false,
 };
 
 const getters = {};
@@ -70,7 +70,7 @@ const actions = {
     await api.groups.removeGroupUser(groupName, userName);
     await _getGroup(state.currentGroup.groupname, commit);
     commit("fetched");
-  }
+  },
 };
 
 const mutations = {
@@ -85,7 +85,7 @@ const mutations = {
   },
   fetched(state) {
     state.fetched = true;
-  }
+  },
 };
 
 export default {
@@ -93,5 +93,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 };

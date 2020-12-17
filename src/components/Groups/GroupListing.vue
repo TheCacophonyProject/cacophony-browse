@@ -19,9 +19,7 @@
 
       <b-col v-if="!groups.length" class="col-12 col-lg-8">
         <b-card class="no-content-placeholder">
-          <h5>
-            You don't belong to any groups yet
-          </h5>
+          <h5>You don't belong to any groups yet</h5>
           <p>
             If you are setting up a device, create a group. All the devices you
             manage will be linked together through this group, so choose a name
@@ -55,11 +53,11 @@ export default {
   name: "GroupListing",
   components: { Spinner, GroupAdd },
   computed: mapState({
-    groups: state => state.Groups.groups,
-    fetched: state => state.Groups.fetched,
-    orderedGroups: function() {
+    groups: (state) => state.Groups.groups,
+    fetched: (state) => state.Groups.fetched,
+    orderedGroups: function () {
       return this.groups.sort((a, b) => a.groupname.localeCompare(b.groupname));
-    }
-  })
+    },
+  }),
 };
 </script>

@@ -19,34 +19,34 @@ export default {
   props: {
     group: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  data: function() {
+  data: function () {
     return {
-      count: 0
+      count: 0,
     };
   },
   computed: {
     ...mapState({
-      groups: state => state.Groups.groups
+      groups: (state) => state.Groups.groups,
     }),
     recordingsPageQuery() {
       return {
         group: this.group.id,
-        days: 30
+        days: 30,
       };
-    }
+    },
   },
   async mounted() {
     const params = {
       days: 1,
-      group: [this.group.id]
+      group: [this.group.id],
     };
 
     const { result: allData } = await recordingsApi.queryCount(params);
     this.count = allData.count;
-  }
+  },
 };
 </script>
 

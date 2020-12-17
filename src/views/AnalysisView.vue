@@ -53,7 +53,7 @@ export default {
     DateRange,
     RecordingType,
     DeviceGroups,
-    ScaleChoice
+    ScaleChoice,
   },
   props: {},
   data() {
@@ -67,7 +67,7 @@ export default {
       width: window.innerWidth,
       showGroups: "all",
       logarithmic: false,
-      introMessage: ""
+      introMessage: "",
     };
   },
   computed: {
@@ -77,7 +77,7 @@ export default {
       },
       set(value) {
         this.$store.commit("User/updateRecordingTypePref", value);
-      }
+      },
     },
     dateRange: {
       get() {
@@ -85,9 +85,9 @@ export default {
       },
       set(value) {
         this.$store.commit("User/updateAnalysisDatePref", value);
-      }
+      },
     },
-    devices: function() {
+    devices: function () {
       let devices;
       if (this.showGroups === "all") {
         devices = this.$store.state.Devices.devices;
@@ -98,46 +98,46 @@ export default {
           }
         }
       }
-      return devices.map(device => {
+      return devices.map((device) => {
         return {
           id: device.id,
-          name: device.devicename
+          name: device.devicename,
         };
       });
     },
-    allGroups: function() {
-      return this.$store.state.Groups.groups.map(group => {
+    allGroups: function () {
+      return this.$store.state.Groups.groups.map((group) => {
         return {
           id: group.id,
           name: group.groupname,
-          devices: group.Devices
+          devices: group.Devices,
         };
       });
     },
-    vertical: function() {
+    vertical: function () {
       // Change button orientation to vertical on small screen sizes
       return this.width < 576;
-    }
+    },
   },
   watch: {
-    dateRange: function() {
+    dateRange: function () {
       this.getData();
     },
-    recordingType: function() {
+    recordingType: function () {
       this.getData();
     },
-    showGroups: function() {
+    showGroups: function () {
       this.getData();
     },
-    logarithmic: function() {
+    logarithmic: function () {
       // Trigger a re-draw of the graph without fetching data again
       this.fetching = true;
       this.$nextTick(() => {
         this.fetching = false;
       });
-    }
+    },
   },
-  created: async function() {
+  created: async function () {
     await this.$store.dispatch("Devices/GET_DEVICES");
     await this.$store.dispatch("Groups/GET_GROUPS");
     await this.getData();
@@ -146,7 +146,7 @@ export default {
     });
   },
   methods: {
-    getData: async function() {
+    getData: async function () {
       // Gets data to pass into chart js:
       this.fetching = true;
       this.introMessage = null;
@@ -155,7 +155,7 @@ export default {
       const searchParams: RecordingQuery = {
         type: this.recordingType,
         days: this.dateRange,
-        limit: limit
+        limit: limit,
       };
 
       if (this.showGroups !== "all") {
@@ -171,7 +171,7 @@ export default {
         ({ result: allData } = await api.query(searchParams));
       }
       // Count the number of recordings for each device
-      this.devices.map(device => (this.deviceCount[device.id] = 0));
+      this.devices.map((device) => (this.deviceCount[device.id] = 0));
       for (const row of allData.rows) {
         this.deviceCount[row.DeviceId] += 1;
       }
@@ -184,7 +184,7 @@ export default {
           data.push({
             id: device.id,
             count: this.deviceCount[device.id],
-            devicename: device.name
+            devicename: device.name,
           });
           labels.push(device.name);
         } else {
@@ -212,12 +212,12 @@ export default {
         labels: labels,
         datasets: [
           {
-            data: data.map(item => item.count),
+            data: data.map((item) => item.count),
             backgroundColor: colors,
             borderColor: colors,
-            borderWidth: 1
-          }
-        ]
+            borderWidth: 1,
+          },
+        ],
       };
       const title = "Device Activity";
       if (this.dateRange === 0) {
@@ -237,22 +237,22 @@ export default {
     },
     gotoVisitsSearchPage(chartItems: string[]) {
       const deviceName = chartItems[0];
-      const device = this.devices.find(device => {
+      const device = this.devices.find((device) => {
         return device.name === deviceName;
       });
 
       const searchParams: RecordingQuery = {
         type: this.recordingType,
         days: this.dateRange,
-        device: [device.id]
+        device: [device.id],
       };
 
       this.$router.push({
         path: "visits",
-        query: searchParams
+        query: searchParams,
       });
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped lang="scss">

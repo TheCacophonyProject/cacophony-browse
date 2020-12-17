@@ -5,7 +5,7 @@
         <b-link
           class="back-link"
           :to="{
-            name: 'devices'
+            name: 'devices',
           }"
         >
           <font-awesome-icon icon="angle-left" size="xs" />
@@ -45,37 +45,37 @@ export default {
   name: "DeviceView",
   components: { DeviceDetail, Spinner },
   computed: mapState({
-    device: state => state.Devices.currentDevice,
-    fetched: state => state.Devices.fetched,
-    currentUser: state => state.User.userData
+    device: (state) => state.Devices.currentDevice,
+    fetched: (state) => state.Devices.fetched,
+    currentUser: (state) => state.User.userData,
   }),
   data() {
     return {
-      softwareDetails: { message: "Retreiving version information..." }
+      softwareDetails: { message: "Retreiving version information..." },
     };
   },
   watch: {
     $route() {
       this.queryDevice();
-    }
+    },
   },
   created() {
     this.queryDevice();
   },
   methods: {
-    queryDevice: async function() {
+    queryDevice: async function () {
       await this.fetchDevice();
       if (this.fetched) {
         this.getSoftwareDetails(this.device.id);
       }
     },
-    fetchDevice: async function() {
+    fetchDevice: async function () {
       await this.$store.dispatch(
         "Devices/GET_DEVICE",
         this.$route.params.devicename
       );
     },
-    getSoftwareDetails: async function(deviceId) {
+    getSoftwareDetails: async function (deviceId) {
       const results = await api.device.getLatestSoftwareVersion(deviceId);
 
       if (results.success && results.result.rows.length > 0) {
@@ -83,10 +83,10 @@ export default {
         this.softwareDetails.result = results.result.rows[0];
       } else {
         this.softwareDetails = {
-          message: "No version information is available for this device."
+          message: "No version information is available for this device.",
         };
       }
-    }
-  }
+    },
+  },
 };
 </script>

@@ -16,8 +16,8 @@ export default {
   props: {
     value: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -25,10 +25,10 @@ export default {
       options: [
         { value: "both", text: "Video and Audio" },
         { value: "audio", text: "Audio only" },
-        { value: "video", text: "Video only" }
-      ]
+        { value: "video", text: "Video only" },
+      ],
     };
-  }
+  },
 };
 </script>
 

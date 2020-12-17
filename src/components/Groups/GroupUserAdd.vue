@@ -55,20 +55,20 @@ import { required } from "vuelidate/lib/validators";
 
 const initialFormState = {
   username: null,
-  isAdmin: false
+  isAdmin: false,
 };
 export default {
   name: "GroupUserAdd",
   props: {
     group: {
       type: Object,
-      default: () => {}
-    }
+      default: () => {},
+    },
   },
   data() {
     return {
       form: { ...initialFormState },
-      formSubmissionFailed: false
+      formSubmissionFailed: false,
     };
   },
   computed: {
@@ -89,28 +89,28 @@ export default {
     },
     isDisabled() {
       return this.usernameIsEmpty;
-    }
+    },
   },
   validations: {
     form: {
       username: {
-        required
+        required,
       },
-      isAdmin: {}
-    }
+      isAdmin: {},
+    },
   },
   methods: {
     resetFormSubmission() {
       this.formSubmissionFailed = false;
     },
-    addUser: async function(event) {
+    addUser: async function (event) {
       event.preventDefault();
 
       if (!this.$v.$invalid) {
         const params = {
           userName: this.$v.form.username.$model,
           isAdmin: this.$v.form.isAdmin.$model,
-          groupName: this.group.groupname
+          groupName: this.group.groupname,
         };
 
         const result = await this.$store.dispatch(
@@ -126,7 +126,7 @@ export default {
     setFocusAndReset() {
       this.form = { ...initialFormState };
       this.$refs["input-username"].focus();
-    }
-  }
+    },
+  },
 };
 </script>

@@ -72,37 +72,37 @@ export default {
     Spinner,
     videoPlayer,
     VideoTracksScrubber,
-    MotionPathsOverlay
+    MotionPathsOverlay,
   },
   props: {
     videoUrl: {
       type: String,
-      required: true
+      required: true,
     },
     tracks: {
       type: Array,
-      required: true
+      required: true,
     },
     currentTrack: {
       type: Number,
-      default: 0
+      default: 0,
     },
     canSelectTracks: {
       type: Boolean,
-      default: true
+      default: true,
     },
     loopSelectedTrack: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showMotionPaths: {
       type: Boolean,
-      default: false
+      default: false,
     },
     showOverlaysForCurrentTrackOnly: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     // Seems like we should wait until track data and video data has loaded to play video?
@@ -118,7 +118,7 @@ export default {
         width: "800px",
         playbackRates: [0.5, 1, 2, 4, 8],
         inactivityTimeout: 0,
-        sources: []
+        sources: [],
       },
       vjsButtonWidth: 50, //button width + duration margin
       canvasWidth: 800,
@@ -129,7 +129,7 @@ export default {
       initedTrackHitRegions: false,
       ended: false,
       loading: true,
-      playerIsReady: false
+      playerIsReady: false,
     };
   },
   watch: {
@@ -142,7 +142,7 @@ export default {
     },
     tracks() {
       this.selectTrack();
-    }
+    },
   },
   computed: {
     htmlPlayer(): HTMLVideoElement {
@@ -150,7 +150,7 @@ export default {
     },
     hasTracks(): boolean {
       return this.tracks && this.tracks.length !== 0;
-    }
+    },
   },
   mounted() {
     this.setVideoUrl();
@@ -216,8 +216,8 @@ export default {
         this.$data.playerOptions.sources = [
           {
             type: "video/mp4",
-            src: this.videoUrl
-          }
+            src: this.videoUrl,
+          },
         ];
         // if tracks is loaded then select the first track
         if (this.currentTrack !== 0) {
@@ -310,20 +310,20 @@ export default {
           return null;
         };
 
-        canvas.addEventListener("click", event => {
+        canvas.addEventListener("click", (event) => {
           const canvasOffset = canvas.getBoundingClientRect();
           const x = event.x - canvasOffset.x;
           const y = event.y - canvasOffset.y;
           const hitRect = hitTestPos(x, y);
           const hitIndex = this.tracks.findIndex(
-            track => track.trackIndex === hitRect.trackIndex
+            (track) => track.trackIndex === hitRect.trackIndex
           );
           if (hitRect && this.currentTrack !== hitIndex) {
             this.$emit("trackSelected", hitIndex);
           }
         });
 
-        canvas.addEventListener("mousemove", event => {
+        canvas.addEventListener("mousemove", (event) => {
           const canvasOffset = canvas.getBoundingClientRect();
           const x = event.x - canvasOffset.x;
           const y = event.y - canvasOffset.y;
@@ -355,7 +355,7 @@ export default {
     },
     drawRectWithText(context, { trackIndex, rectWidth, rectHeight, x, y }) {
       const hitIndex = this.tracks.findIndex(
-        track => track.trackIndex === trackIndex
+        (track) => track.trackIndex === trackIndex
       );
       context.strokeStyle = this.colours[hitIndex % this.colours.length];
       const selected = this.currentTrack === hitIndex;
@@ -417,7 +417,7 @@ export default {
             rectHeight: (item[3] - item[1]) * this.scale,
             x: item[0] * this.scale,
             y: item[1] * this.scale,
-            trackIndex
+            trackIndex,
           };
         });
     },
@@ -473,8 +473,8 @@ export default {
         }
       }
       requestAnimationFrame(this.draw.bind(this));
-    }
-  }
+    },
+  },
 };
 </script>
 

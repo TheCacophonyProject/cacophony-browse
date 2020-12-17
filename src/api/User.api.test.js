@@ -28,11 +28,11 @@ describe("login(groupname) calls fetch", () => {
       method: "POST",
       body: JSON.stringify({
         nameOrEmail: testUsername,
-        password: testPassword
+        password: testPassword,
       }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 
@@ -92,11 +92,11 @@ describe("register(username,password,email) calls fetch", () => {
         username: testUsername,
         password: testPassword,
         endUserAgreement: testEndUserAgreement,
-        email: testEmail
+        email: testEmail,
       }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 });

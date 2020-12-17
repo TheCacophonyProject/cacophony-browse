@@ -1,5 +1,5 @@
 const state = {
-  messages: []
+  messages: [],
 };
 
 const getters = {};
@@ -19,7 +19,7 @@ const actions = {
   },
   ACKNOWLEDGE({ commit }) {
     commit("acknowledge");
-  }
+  },
 };
 
 const mutations = {
@@ -28,7 +28,7 @@ const mutations = {
   },
   acknowledge(state) {
     state.messages = [];
-  }
+  },
 };
 
 export default {
@@ -36,5 +36,5 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
 };

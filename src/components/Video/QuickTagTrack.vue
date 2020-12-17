@@ -28,7 +28,7 @@
           :key="otherTag.value"
           :class="[
             'btn btn-light btn-tag equal-flex other-width',
-            getClass(otherTag.value)
+            getClass(otherTag.value),
           ]"
           @click="quickTag(otherTag.value)"
         >
@@ -65,12 +65,12 @@ export default {
   props: {
     tags: {
       type: Array,
-      required: true
+      required: true,
     },
     isWallabyProject: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
     blankImage() {
@@ -86,7 +86,7 @@ export default {
     },
     userTags() {
       return this.tags.filter(
-        tag =>
+        (tag) =>
           tag.User &&
           tag.User.username === this.$store.state.User.userData.username
       );
@@ -114,11 +114,11 @@ export default {
         otherTags.unshift({ text: userTag.what, value: userTag.what });
       }
       return otherTags;
-    }
+    },
   },
   data() {
     return {
-      message: ""
+      message: "",
     };
   },
   methods: {
@@ -146,7 +146,7 @@ export default {
       return this.getUserTag(animal) !== undefined;
     },
     getUserTag(animal) {
-      return this.userTags.find(tag => tag.what === animal);
+      return this.userTags.find((tag) => tag.what === animal);
     },
     getClass(animal) {
       let buttonClass = "tag-div";
@@ -161,8 +161,8 @@ export default {
       //   buttonClass += " ai-tagged active";
       // }
       return buttonClass;
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -8,7 +8,7 @@ describe("getDevices() calls fetch", () => {
     await devicesApi.getDevices();
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
-      method: "GET"
+      method: "GET",
     });
   });
 
@@ -44,11 +44,11 @@ describe("addUserToDevice() calls fetch", () => {
       body: JSON.stringify({
         username: testUser,
         deviceId: testDeviceId,
-        admin: testIsAdmin
+        admin: testIsAdmin,
       }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 
@@ -75,11 +75,11 @@ describe("removeUserFromDevice() calls fetch", () => {
       method: "DELETE",
       body: JSON.stringify({
         username: testUser,
-        deviceId: testDeviceId
+        deviceId: testDeviceId,
       }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 

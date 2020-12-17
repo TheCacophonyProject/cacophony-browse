@@ -30,25 +30,25 @@ export default {
   props: {
     title: {
       type: String,
-      default: "Select date"
+      default: "Select date",
     },
     value: {
       type: String,
-      required: true
+      required: true,
     },
     beforeDateTime: {
       type: String,
-      default: ""
+      default: "",
     },
     afterDateTime: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   data() {
     return {
       time: "",
-      date: ""
+      date: "",
     };
   },
   methods: {
@@ -61,42 +61,42 @@ export default {
       } else {
         this.time = "12:00";
       }
-    }
+    },
   },
-  created: function() {
+  created: function () {
     this.parseDate(this.value);
   },
   computed: {
-    minDate: function() {
+    minDate: function () {
       return parseDate(this.afterDateTime);
     },
-    maxDate: function() {
+    maxDate: function () {
       return parseDate(this.beforeDateTime);
     },
-    minTime: function() {
+    minTime: function () {
       if (this.date === this.minDate) {
         return parseTime(this.afterDateTime);
       }
       return "";
     },
-    maxTime: function() {
+    maxTime: function () {
       if (this.date === this.maxDate) {
         return parseTime(this.beforeDateTime);
       }
       return "";
     },
-    timeDate: function() {
+    timeDate: function () {
       if (this.date.length > 0 && this.time.length > 0) {
         return this.date + " " + this.time + ":00";
       }
       return "";
-    }
+    },
   },
   watch: {
-    timeDate: function(value) {
+    timeDate: function (value) {
       this.$emit("input", value);
-    }
-  }
+    },
+  },
 };
 
 function parseDate(fullDateTime) {

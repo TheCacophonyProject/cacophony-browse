@@ -5,7 +5,7 @@
       Click on a group to view the last 24 hours of recordings in that group
     </p>
 
-    <div id="group-list-container" style="max-height: 50vh; overflow-y: auto;">
+    <div id="group-list-container" style="max-height: 50vh; overflow-y: auto">
       <b-list-group>
         <HomeGroupItem
           v-for="(group, index) in orderedGroups"
@@ -26,16 +26,16 @@ export default {
   components: { HomeGroupItem },
   computed: {
     ...mapState({
-      groups: state => state.Groups.groups
+      groups: (state) => state.Groups.groups,
     }),
     orderedGroups: {
       get() {
         return [...this.groups].sort((a, b) => {
           return a.groupname.toLowerCase() < b.groupname.toLowerCase() ? -1 : 1;
         });
-      }
-    }
-  }
+      },
+    },
+  },
 
   // TODO(jon): Would be better to have a single API query to load recording counts for all groups the user is
   //  is part of.

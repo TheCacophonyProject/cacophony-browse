@@ -19,20 +19,20 @@ export default {
   props: {
     value: {
       type: String,
-      required: true
+      required: true,
     },
     vertical: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  data: function() {
+  data: function () {
     return {
       types: [
         { text: "Video", value: "video" },
         { text: "Audio", value: "audio" },
-        { text: "Video & Audio", value: "both" }
-      ]
+        { text: "Video & Audio", value: "both" },
+      ],
     };
   },
   methods: {
@@ -42,7 +42,7 @@ export default {
       } else {
         return "secondary";
       }
-    }
-  }
+    },
+  },
 };
 </script>

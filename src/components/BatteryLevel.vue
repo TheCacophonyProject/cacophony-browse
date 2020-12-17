@@ -11,11 +11,11 @@ export default {
   props: {
     batteryLevel: {
       type: Number,
-      default: null
-    }
+      default: null,
+    },
   },
   computed: {
-    icon: function() {
+    icon: function () {
       if (this.batteryLevel < 10) {
         return "battery-empty";
       } else if (this.batteryLevel < 37.5) {
@@ -29,8 +29,8 @@ export default {
       } else {
         return null;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

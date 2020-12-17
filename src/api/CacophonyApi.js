@@ -12,9 +12,9 @@ async function fetchJsonWithMethod(
     {
       method: method,
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
+        "Content-Type": "application/json; charset=utf-8",
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     },
     suppressGlobalMessaging
   );
@@ -28,7 +28,7 @@ export default {
    * @param {string} endpoint - The cacophony API endpoint to target, for example `/api/v1/users`.
    * @returns {Promise<{result: *, success: boolean, status: number}>}
    */
-  get: async endpoint => fetch(`${config.api}${endpoint}`, { method: "GET" }),
+  get: async (endpoint) => fetch(`${config.api}${endpoint}`, { method: "GET" }),
 
   /**
    * Returns a promise that when resolved, returns an object with a result, success boolean, and status code.
@@ -61,5 +61,5 @@ export default {
    * @returns {Promise<{result: *, success: boolean, status: number}>}
    */
   delete: async (endpoint, body) =>
-    fetchJsonWithMethod(endpoint, "DELETE", body)
+    fetchJsonWithMethod(endpoint, "DELETE", body),
 };

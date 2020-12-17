@@ -85,8 +85,8 @@ export default {
   props: {
     items: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -94,29 +94,29 @@ export default {
         {
           key: "what",
           label: "Tag",
-          tdClass: "tag-history-table-what"
+          tdClass: "tag-history-table-what",
         },
         { key: "who", label: "User" },
         { key: "confidence", label: "Conf." },
         {
           key: "buttons",
           label: "",
-          tdClass: "tag-history-table-buttons"
-        }
+          tdClass: "tag-history-table-buttons",
+        },
       ],
-      show_details: false
+      show_details: false,
     };
   },
   methods: {
     imgSrc,
-    aiName: function(trackTag) {
+    aiName: function (trackTag) {
       if (trackTag.data && trackTag.data.name) {
         return "AI " + trackTag.data.name;
       } else {
         return "Cacophony AI";
       }
     },
-    confidence: function(confidence) {
+    confidence: function (confidence) {
       if (confidence >= 0.8) {
         return "high";
       } else if (confidence > 0.4 && confidence < 0.8) {
@@ -127,21 +127,21 @@ export default {
         return "";
       }
     },
-    userTagExists: function(what) {
+    userTagExists: function (what) {
       return this.items.find(
-        tag =>
+        (tag) =>
           tag.User &&
           tag.what == what &&
           tag.User.username == this.$store.state.User.userData.username
       );
     },
-    confirmTag: function(rowItem) {
+    confirmTag: function (rowItem) {
       const tag = {};
       tag.what = rowItem.what;
       tag.confidence = rowItem.confidence;
       this.$emit("addTag", tag);
-    }
-  }
+    },
+  },
 };
 </script>
 

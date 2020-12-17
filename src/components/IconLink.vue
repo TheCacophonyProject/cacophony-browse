@@ -4,7 +4,7 @@
       :icon="icon"
       :class="colour"
       size="2x"
-      style="cursor: pointer;"
+      style="cursor: pointer"
     />
   </b-link>
 </template>
@@ -15,21 +15,21 @@ export default {
   props: {
     icon: {
       type: Array,
-      required: true
+      required: true,
     },
     link: {
       type: Object,
-      default: null
+      default: null,
     },
     colour: {
       type: String,
-      default: "green"
+      default: "green",
     },
     position: {
       type: String,
-      default: ""
-    }
-  }
+      default: "",
+    },
+  },
 };
 </script>
 

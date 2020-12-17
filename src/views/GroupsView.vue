@@ -18,23 +18,23 @@ import { mapState } from "vuex";
 export default {
   name: "GroupsView",
   components: {
-    GroupListing
+    GroupListing,
   },
   computed: mapState({
-    groups: state => state.Groups.groups
+    groups: (state) => state.Groups.groups,
   }),
   watch: {
     $route() {
       this.fetchGroups();
-    }
+    },
   },
-  created: function() {
+  created: function () {
     this.fetchGroups();
   },
   methods: {
-    fetchGroups: function() {
+    fetchGroups: function () {
       this.$store.dispatch("Groups/GET_GROUPS");
-    }
-  }
+    },
+  },
 };
 </script>

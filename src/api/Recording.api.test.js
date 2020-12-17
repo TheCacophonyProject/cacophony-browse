@@ -11,21 +11,21 @@ describe("query() translates to api correctly", () => {
   test("with limit or offset", () => {
     const query = {
       limit: 3,
-      offset: 1
+      offset: 1,
     };
     expect(recordingApi.makeApiQuery(query)).toMatchObject(query);
   });
 
   test("with days all", () => {
     const query = {
-      days: "all"
+      days: "all",
     };
     expect(recordingApi.makeApiQuery(query)).toMatchObject({});
   });
 
   test("with date to", () => {
     const query = {
-      to: "2030-12-06"
+      to: "2030-12-06",
     };
     expect(recordingApi.makeApiQuery(query).where).toContain(
       '"recordingDateTime":{"$lt":"2030-12-06"'
@@ -35,7 +35,7 @@ describe("query() translates to api correctly", () => {
   test("with date to and date from", () => {
     const query = {
       from: "2010-01-01",
-      to: "2030-12-06"
+      to: "2030-12-06",
     };
     expect(recordingApi.makeApiQuery(query).where).toContain(
       '"recordingDateTime":{"$gt":"2010-01-01","$lt":"2030-12-06"'
@@ -45,28 +45,28 @@ describe("query() translates to api correctly", () => {
   test("with animal tag (string)", () => {
     const query = {
       tagMode: "tagged",
-      tag: "cat"
+      tag: "cat",
     };
     expect(recordingApi.makeApiQuery(query)).toMatchObject({
       tagMode: "tagged",
-      tags: '["cat"]'
+      tags: '["cat"]',
     });
   });
 
   test("with animal tag as array", () => {
     const query = {
       tagMode: "tagged",
-      tag: ["cat", "possum"]
+      tag: ["cat", "possum"],
     };
     expect(recordingApi.makeApiQuery(query)).toMatchObject({
       tagMode: "tagged",
-      tags: '["cat","possum"]'
+      tags: '["cat","possum"]',
     });
   });
 
   test("with duration start time", () => {
     const query = {
-      minS: "12"
+      minS: "12",
     };
     expect(recordingApi.makeApiQuery(query).where).toContain(
       '"duration":{"$gte":"12"'
@@ -82,7 +82,7 @@ describe("query() translates to api correctly", () => {
   test("with max duration", () => {
     const query = {
       minS: "3",
-      maxS: "55"
+      maxS: "55",
     };
     expect(recordingApi.makeApiQuery(query).where).toContain(
       '"duration":{"$gte":"3","$lte":"55"'
@@ -115,7 +115,7 @@ describe("id() calls fetch", () => {
     await recordingApi.id();
     expect(fetch.mock.calls[0]).toHaveLength(2);
     expect(fetch.mock.calls[0][1]).toMatchObject({
-      method: "GET"
+      method: "GET",
     });
   });
 
@@ -151,12 +151,12 @@ describe("comment() calls fetch", () => {
       method: "PATCH",
       body: JSON.stringify({
         updates: {
-          comment: testComment
-        }
+          comment: testComment,
+        },
       }),
       headers: {
-        "Content-Type": "application/json; charset=utf-8"
-      }
+        "Content-Type": "application/json; charset=utf-8",
+      },
     });
   });
 
@@ -179,7 +179,7 @@ describe("del() calls fetch", () => {
     await recordingApi.del(null);
     expect(fetch.mock.calls[0]).toHaveLength(3);
     expect(fetch.mock.calls[0][1]).toMatchObject({
-      method: "DELETE"
+      method: "DELETE",
     });
   });
 

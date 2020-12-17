@@ -36,8 +36,8 @@ export default {
   props: {
     value: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -47,37 +47,37 @@ export default {
       options: [
         {
           value: 1,
-          text: "Last 24 hours"
+          text: "Last 24 hours",
         },
         {
           value: 3,
-          text: "Last 3 days"
+          text: "Last 3 days",
         },
         {
           value: 7,
-          text: "Last 7 days"
+          text: "Last 7 days",
         },
         {
           value: 30,
-          text: "Last 30 days"
+          text: "Last 30 days",
         },
         {
           value: 90,
-          text: "Last 90 days"
+          text: "Last 90 days",
         },
         {
           value: 365,
-          text: "Last year"
+          text: "Last year",
         },
         {
           value: "all",
-          text: "All"
+          text: "All",
         },
         {
           value: "custom",
-          text: "Custom range"
-        }
-      ]
+          text: "Custom range",
+        },
+      ],
     };
   },
   created() {
@@ -85,7 +85,7 @@ export default {
     this.$emit("input", this.serialisedData);
   },
   computed: {
-    serialisedData: function() {
+    serialisedData: function () {
       const dateData = {};
       if (this.dateRange === "custom") {
         dateData.from = this.fromDate;
@@ -95,7 +95,7 @@ export default {
       }
       dateData.description = this.makeDateDescription();
       return dateData;
-    }
+    },
   },
   methods: {
     deserialise(dateObject) {
@@ -132,16 +132,16 @@ export default {
       } else {
         return ` in the <strong>last ${this.dateRange} days</strong>`;
       }
-    }
+    },
   },
 
   watch: {
-    serialisedData: function(value) {
+    serialisedData: function (value) {
       this.$emit("input", value);
     },
-    value: function(val) {
+    value: function (val) {
       this.deserialise(val);
-    }
-  }
+    },
+  },
 };
 </script>

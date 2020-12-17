@@ -22,12 +22,12 @@ export default {
   props: {
     params: {
       type: Object,
-      required: true
+      required: true,
     },
     visits: {
       type: Boolean,
-      required: false
-    }
+      required: false,
+    },
   },
   methods: {
     async click() {
@@ -41,7 +41,7 @@ export default {
         `${config.api}/api/v1/recordings/report?` +
         querystring.stringify(params);
       window.open(url, "_self");
-    }
-  }
+    },
+  },
 };
 </script>

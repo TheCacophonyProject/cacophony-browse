@@ -9,7 +9,7 @@
     />
     <b-form-row
       v-if="isCustom"
-      style="margin-top: 15px; margin-left: 0; margin-right: 0;"
+      style="margin-top: 15px; margin-left: 0; margin-right: 0"
     >
       <b-form-input
         :max="value.maxS"
@@ -37,51 +37,51 @@ export default {
   props: {
     value: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       options: [
         {
           value: { minS: "0", maxS: "" },
-          text: "Any duration"
+          text: "Any duration",
         },
         {
           value: { minS: "0", maxS: "20" },
-          text: "Short (<20 seconds)"
+          text: "Short (<20 seconds)",
         },
         {
           value: { minS: "20", maxS: "120" },
-          text: "Medium (20 seconds - 2 minutes)"
+          text: "Medium (20 seconds - 2 minutes)",
         },
         {
           value: { minS: "120", maxS: "" },
-          text: "Long (> 2 minutes)"
+          text: "Long (> 2 minutes)",
         },
         {
           value: {
             isCustom: true,
             minS: "0",
-            maxS: "100"
+            maxS: "100",
           },
-          text: "Custom duration"
-        }
+          text: "Custom duration",
+        },
       ],
-      isCustom: false
+      isCustom: false,
     };
   },
   computed: {
-    selectedOption: function() {
+    selectedOption: function () {
       return this.getOptionForValue(this.value);
-    }
+    },
   },
   created() {
     this.updateDurationType(this.selectedOption);
     this.isCustom = this.getOptionForValue(this.value).isCustom;
   },
   methods: {
-    getOptionForValue: function(value) {
+    getOptionForValue: function (value) {
       const minS = value.hasOwnProperty("minS") ? value.minS : "0";
       const maxS = value.hasOwnProperty("maxS") ? value.maxS : "";
       for (const option of this.options) {
@@ -92,27 +92,27 @@ export default {
       // Fallback to the custom option.
       return this.options[4].value;
     },
-    updateMaxS: function(event) {
+    updateMaxS: function (event) {
       const newValue = {
         maxS: event,
-        minS: this.value.minS
+        minS: this.value.minS,
       };
       this.emitUpdatedValue(newValue);
     },
-    updateMinS: function(event) {
+    updateMinS: function (event) {
       const newValue = {
         maxS: this.value.maxS,
-        minS: event
+        minS: event,
       };
       this.emitUpdatedValue(newValue);
     },
-    updateDurationType: function(val) {
+    updateDurationType: function (val) {
       val = val.hasOwnProperty("value") ? val.value : val;
       this.isCustom = val.isCustom;
       const { minS, maxS } = val;
       const e = {
         maxS,
-        minS
+        minS,
       };
       this.emitUpdatedValue(e);
     },
@@ -141,7 +141,7 @@ export default {
 
       duration.description = this.makeDurationDescription(duration);
       this.$emit("input", duration);
-    }
-  }
+    },
+  },
 };
 </script>

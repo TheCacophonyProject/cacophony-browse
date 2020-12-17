@@ -1,5 +1,5 @@
 function classifyTrack(tags, isWallabyProject) {
-  const aiTags = tags.filter(tag => tag.data && tag.data.name);
+  const aiTags = tags.filter((tag) => tag.data && tag.data.name);
   if (isWallabyProject) {
     return classifyTrackWallabyProject(aiTags);
   } else {
@@ -8,17 +8,19 @@ function classifyTrack(tags, isWallabyProject) {
 }
 
 function classifyTrackWallabyProject(aiTags) {
-  const values = aiTags.filter(tag =>
+  const values = aiTags.filter((tag) =>
     tag.data.name.toLowerCase().includes("wallaby")
   );
 
   // Multiple tags so choose one.
-  const movement2 = values.find(tag => tag.data.name === "Wallaby-Movement v2");
+  const movement2 = values.find(
+    (tag) => tag.data.name === "Wallaby-Movement v2"
+  );
   if (movement2) {
     return movement2;
   }
 
-  const movement1 = values.find(tag => tag.data.name === "Wallaby-Movement");
+  const movement1 = values.find((tag) => tag.data.name === "Wallaby-Movement");
   if (movement1) {
     return movement1;
   }
@@ -29,7 +31,7 @@ function classifyTrackWallabyProject(aiTags) {
 function classifyTrackBirdProject(aiTags) {
   // remove wallaby ai tags
   const tagsToUse = aiTags.filter(
-    tag => !tag.data.name.toLowerCase().includes("wallaby")
+    (tag) => !tag.data.name.toLowerCase().includes("wallaby")
   );
 
   if (tagsToUse.length == 0) {
@@ -37,7 +39,9 @@ function classifyTrackBirdProject(aiTags) {
   }
 
   // remove undefined tags
-  const classifications = tagsToUse.filter(tag => tag.what !== "unidentified");
+  const classifications = tagsToUse.filter(
+    (tag) => tag.what !== "unidentified"
+  );
   if (classifications.length == 0) {
     return tagsToUse[0];
   } else if (classifications.length == 1) {
@@ -45,12 +49,14 @@ function classifyTrackBirdProject(aiTags) {
   }
 
   // more than one ai has classified this result.   Choose one.
-  const originalTag = classifications.find(tag => tag.data.name === "Original");
+  const originalTag = classifications.find(
+    (tag) => tag.data.name === "Original"
+  );
   if (originalTag && originalTag.what === "bird") {
     return originalTag;
   }
 
-  const resNetTag = classifications.find(tag => tag.data.name === "Resnet");
+  const resNetTag = classifications.find((tag) => tag.data.name === "Resnet");
   if (resNetTag) {
     return resNetTag;
   }

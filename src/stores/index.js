@@ -13,7 +13,7 @@ const store = new Vuex.Store({
     Groups,
     Messaging,
     Video,
-    Devices
-  }
+    Devices,
+  },
 });
 export default store;

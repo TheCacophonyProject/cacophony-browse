@@ -17,20 +17,20 @@ export default {
   components: { DeviceListing },
   props: {},
   computed: mapState({
-    devices: state => state.Devices.devices
+    devices: (state) => state.Devices.devices,
   }),
   watch: {
     $route() {
       this.fetchDevices();
-    }
+    },
   },
-  created: function() {
+  created: function () {
     this.fetchDevices();
   },
   methods: {
-    fetchDevices: function() {
+    fetchDevices: function () {
       this.$store.dispatch("Devices/GET_DEVICES");
-    }
-  }
+    },
+  },
 };
 </script>

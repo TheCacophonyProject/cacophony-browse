@@ -71,7 +71,7 @@ export default {
     return {
       usernameOrEmail: "",
       password: "",
-      errorMessage: null
+      errorMessage: null,
     };
   },
   // https://vuejs.org/v2/style-guide/#Simple-computed-properties-strongly-recommended
@@ -82,7 +82,7 @@ export default {
 
       await this.$store.dispatch("User/LOGIN", {
         username: this.usernameOrEmail,
-        password: this.password
+        password: this.password,
       });
 
       if (this.$store.getters["User/isLoggedIn"]) {
@@ -92,8 +92,8 @@ export default {
           this.$router.go("home");
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

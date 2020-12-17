@@ -16,36 +16,36 @@ export default {
   props: {
     canvasWidth: {
       type: Number,
-      required: true
+      required: true,
     },
     canvasHeight: {
       type: Number,
-      required: true
+      required: true,
     },
     endedPlayback: {
       type: Boolean,
-      required: true
+      required: true,
     },
     tracks: {
       type: Array,
-      required: true
+      required: true,
     },
     scale: {
       type: Number,
-      required: true
+      required: true,
     },
     currentTrack: {
       type: Number,
-      required: true
+      required: true,
     },
     showOnlyForCurrentTrack: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      colours: TagColours
+      colours: TagColours,
     };
   },
   mounted() {
@@ -104,8 +104,8 @@ export default {
         const context = canvas.getContext("2d");
         context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

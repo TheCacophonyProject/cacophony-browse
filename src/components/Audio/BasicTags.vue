@@ -22,8 +22,8 @@ export default {
       tag.duration = 0.5;
       tag.automatic = false;
       this.$emit("addAudioTag", tag);
-    }
-  }
+    },
+  },
 };
 </script>
 

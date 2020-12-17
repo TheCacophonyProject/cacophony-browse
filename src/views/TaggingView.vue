@@ -13,9 +13,7 @@
               class="next-track-countdown"
               v-if="nextTrackOrRecordingTimeout !== 0"
             >
-              <div>
-                Next track in
-              </div>
+              <div>Next track in</div>
               <div class="countdown">{{ nextTrackOrRecordingTimeout }}</div>
             </div>
           </transition>
@@ -124,7 +122,7 @@ import {
   Track,
   TrackTag,
   User,
-  JwtToken
+  JwtToken,
 } from "../api/Recording.api";
 
 interface TaggingViewData {
@@ -154,9 +152,9 @@ export default Vue.extend({
     return {
       colours: TagColours,
       tags: [
-        ...DefaultLabels.quickTagLabels().map(x => ({ text: x, value: x })),
+        ...DefaultLabels.quickTagLabels().map((x) => ({ text: x, value: x })),
         { text: "mustelid", value: "mustelid" },
-        ...DefaultLabels.otherTagLabels()
+        ...DefaultLabels.otherTagLabels(),
       ],
       tracks: [],
       history: [],
@@ -168,7 +166,7 @@ export default Vue.extend({
       readyToPlay: false,
       nextTrackOrRecordingTimeout: 0,
       showMotionPaths: false,
-      currentTimeout: null
+      currentTimeout: null,
     };
   },
   methods: {
@@ -198,7 +196,7 @@ export default Vue.extend({
     markTrackAsSkipped() {
       const synthesisedTag = {
         TrackTagId: -1,
-        what: "skipped"
+        what: "skipped",
       };
       this.currentTrack.tags.push(synthesisedTag);
       this.currentTrack.needsTagging = false;
@@ -206,7 +204,7 @@ export default Vue.extend({
         trackIndex: this.currentTrackIndex,
         tracks: this.tracks,
         recording: this.currentRecording,
-        tag: synthesisedTag
+        tag: synthesisedTag,
       });
       this.primeNextTrack(3);
     },
@@ -269,8 +267,8 @@ export default Vue.extend({
           recording: this.currentRecording,
           tag: {
             what: tagLabel,
-            TrackTagId: result.trackTagId
-          }
+            TrackTagId: result.trackTagId,
+          },
         });
         this.primeNextTrack(3);
       }
@@ -286,20 +284,20 @@ export default Vue.extend({
           {
             id: tag.TrackTagId,
             TrackId: track.TrackId,
-            what: tag.what
+            what: tag.what,
           },
           recording.RecordingId
         );
         this.taggingPending = false;
         if (success) {
           // eslint-disable-next-line require-atomic-updates
-          track.tags = track.tags.filter(item => item !== tag.what);
+          track.tags = track.tags.filter((item) => item !== tag.what);
           // eslint-disable-next-line require-atomic-updates
           track.needsTagging = true;
         }
       } else {
         // Just remove synthetic 'skipped' tag
-        track.tags = track.tags.filter(item => item !== "skipped");
+        track.tags = track.tags.filter((item) => item !== "skipped");
         track.needsTagging = true;
       }
     },
@@ -325,7 +323,7 @@ export default Vue.extend({
         // Make sure it's not a recording we've seen before and skipped tracks from.
         if (
           this.history.find(
-            prev => prev.recording.RecordingId === recording.RecordingId
+            (prev) => prev.recording.RecordingId === recording.RecordingId
           ) !== undefined
         ) {
           return await this.getRecording();
@@ -334,7 +332,7 @@ export default Vue.extend({
         this.tracks = recording.tracks.map((track, trackIndex) => ({
           ...track,
           trackIndex,
-          tags: []
+          tags: [],
         }));
 
         // Advance to next untagged track
@@ -348,7 +346,7 @@ export default Vue.extend({
         this.currentTrackIndex = nextIndex;
       }
       return success;
-    }
+    },
   },
   computed: {
     numTagged(): number {
@@ -359,7 +357,7 @@ export default Vue.extend({
     },
     allTracksInRecordingAreTaggedByHuman(): boolean {
       return (
-        this.tracks.filter(track => track.needsTagging === false).length ===
+        this.tracks.filter((track) => track.needsTagging === false).length ===
         this.tracks.length
       );
     },
@@ -393,11 +391,11 @@ export default Vue.extend({
         }
       }
       return false;
-    }
+    },
   },
   async created() {
     await this.nextRecording();
-  }
+  },
 });
 </script>
 

@@ -21,12 +21,12 @@ import { mapState } from "vuex";
 export default {
   name: "HomeUser",
   computed: mapState({
-    user: state => state.User,
-    username: state => state.User.userData.username,
-    firstname: state => state.User.userData.firstname,
-    lastname: state => state.User.userData.lastname,
-    email: state => state.User.userData.email
-  })
+    user: (state) => state.User,
+    username: (state) => state.User.userData.username,
+    firstname: (state) => state.User.userData.firstname,
+    lastname: (state) => state.User.userData.lastname,
+    email: (state) => state.User.userData.email,
+  }),
 };
 </script>
 

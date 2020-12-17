@@ -7,13 +7,13 @@ import GroupsStore from "./Groups.store";
 
 describe("Actions", () => {
   const testResult = {
-      groups: [{ groupname: "a" }, { groupname: "b" }]
+      groups: [{ groupname: "a" }, { groupname: "b" }],
     },
     testResponse = { result: testResult, success: true },
     commit = jest.fn(),
     state = {
       currentGroup: testResult.groups[0],
-      groups: testResult.groups
+      groups: testResult.groups,
     };
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe("Actions", () => {
       testResult.groups
     );
     // FIXME This is filthy, but so is the fetching/fetched variables works atm
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       setTimeout(() => {
         resolve(expect(commit).toHaveBeenLastCalledWith("fetched"));
       }, 15);
@@ -90,7 +90,7 @@ describe("Actions", () => {
     beforeEach(async () => {
       api.addNewGroup.mockReturnValueOnce({
         result: { message: "an error" },
-        success: false
+        success: false,
       });
     });
 

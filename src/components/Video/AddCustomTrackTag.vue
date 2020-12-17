@@ -4,7 +4,7 @@
       <b-form-group label="Tag:" horizontal>
         <b-form-select v-model="whatTag" :options="whatOptions">
           <template>
-            <option :value="null" disabled>Choose a tag.. </option>
+            <option :value="null" disabled>Choose a tag..</option>
           </template>
         </b-form-select>
       </b-form-group>
@@ -27,12 +27,12 @@ export default {
   props: {
     allowConfidence: {
       type: Boolean,
-      default: true
+      default: true,
     },
     allowComment: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   data() {
     return {
@@ -42,9 +42,9 @@ export default {
       confidenceOptions: [
         { value: 0.4, text: "low" },
         { value: 0.6, text: "mid" },
-        { value: 0.8, text: "high" }
+        { value: 0.8, text: "high" },
       ],
-      comment: ""
+      comment: "",
     };
   },
   methods: {
@@ -53,7 +53,7 @@ export default {
       tag.confidence = this.confidence;
       tag.what = this.whatTag;
       this.$emit("addTag", tag);
-    }
-  }
+    },
+  },
 };
 </script>

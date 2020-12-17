@@ -15,12 +15,12 @@ export default {
   name: "App",
   components: {
     NavBar,
-    GlobalMessaging
+    GlobalMessaging,
   },
   computed: {
     isLoggedIn() {
       return store.getters["User/isLoggedIn"];
-    }
+    },
   },
   methods: {
     superUserCreds() {
@@ -42,8 +42,8 @@ export default {
         superUserCreds.token &&
         superUserCreds.token !== localStorage.getItem("JWT")
       );
-    }
-  }
+    },
+  },
 };
 </script>
 

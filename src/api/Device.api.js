@@ -4,7 +4,7 @@ export default {
   getDevices,
   addUserToDevice,
   removeUserFromDevice,
-  getLatestSoftwareVersion
+  getLatestSoftwareVersion,
 };
 
 function getDevices() {
@@ -19,7 +19,7 @@ function addUserToDevice(username, deviceId, admin) {
     {
       username: username,
       deviceId: deviceId,
-      admin: admin
+      admin: admin,
     },
     suppressGlobalMessaging
   );
@@ -28,7 +28,7 @@ function addUserToDevice(username, deviceId, admin) {
 function removeUserFromDevice(username, deviceId) {
   return CacophonyApi.delete("/api/v1/devices/users", {
     username: username,
-    deviceId: deviceId
+    deviceId: deviceId,
   });
 }
 
