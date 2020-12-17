@@ -1,6 +1,6 @@
 <template>
   <a
-    :href="`/recording/${item.recID}/${item.trackID}`"
+    :href="`/recording/${item.recID}/${item.trackID}?device=${this.deviceId}`"
     class="event-summary row no-gutters"
     @click="event => navigateToRecording(event, item)"
   >
@@ -45,6 +45,10 @@ export default {
     what: {
       type: String,
       required: true
+    },
+    deviceId: {
+      type: Number,
+      required: true
     }
   },
   methods: {
@@ -57,7 +61,7 @@ export default {
     navigateToRecording(event, visEvent: VisitEvent) {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         this.$router.push({
-          path: `recording/${visEvent.recID}/${visEvent.trackID}`
+          path: `recording/${visEvent.recID}/${visEvent.trackID}?device=${this.deviceId}`
         });
       }
     }
