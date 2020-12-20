@@ -151,9 +151,11 @@ const actions = {
 const mutations = {
   invalidateLogin(state) {
     state.JWT = "";
+    localStorage.removeItem("superUserCreds");
   },
   rejectLogin(state, data) {
     state.JWT = "";
+    localStorage.removeItem("superUserCreds");
     state.errorMessage = data.messages || data.message;
   },
   receiveLogin(state, data) {
