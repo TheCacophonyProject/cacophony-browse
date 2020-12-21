@@ -74,7 +74,6 @@ const actions = {
     }
   },
   async LOGIN_OTHER({ commit }, result) {
-    commit("invalidateLogin");
     api.user.persistUser(
       result.userData.username,
       result.token,
