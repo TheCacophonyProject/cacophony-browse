@@ -162,7 +162,7 @@ export default {
         userData: { ...superUser },
         token: superUser.token,
       });
-      this.selectedUse = null;
+      this.selectedUser = null;
       window.location.reload();
     },
     superUserCreds() {
