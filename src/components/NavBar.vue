@@ -138,11 +138,11 @@ export default {
             name: username,
             id,
           }))
-          .filter(({ name }) => name !== this.superUserCreds()?.username);
+          .filter(({ name }) => name !== this.superUserName());
       }
     },
     superUserName() {
-      return this.superUserCreds()?.username;
+      return this.superUserCreds().username;
     },
     logout() {
       this.$store.dispatch("User/LOGOUT");
