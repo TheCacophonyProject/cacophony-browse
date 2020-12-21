@@ -142,7 +142,7 @@ export default {
       }
     },
     superUserName() {
-      return this.superUserCreds().username;
+      return this.superUserCreds() && this.superUserCreds().username;
     },
     logout() {
       this.$store.dispatch("User/LOGOUT");
@@ -158,12 +158,14 @@ export default {
     },
     revertViewingUser() {
       const superUser = this.superUserCreds();
-      this.$store.dispatch("User/LOGIN_OTHER", {
-        userData: { ...superUser },
-        token: superUser.token,
-      });
-      this.selectedUser = null;
-      window.location.reload();
+      if (superUser) {
+        this.$store.dispatch("User/LOGIN_OTHER", {
+          userData: {...superUser},
+          token: superUser.token,
+        });
+        this.selectedUser = null;
+        window.location.reload();
+      }
     },
     superUserCreds() {
       let superUserCreds = localStorage.getItem("superUserCreds");
