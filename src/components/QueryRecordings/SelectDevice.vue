@@ -35,8 +35,8 @@ export default {
       if (!this.fetched) {
         return "loading";
       } else if (
-        this.selectedDevices.length == 0 &&
-        this.selectedGroups.length == 0
+        this.selectedDevices.length === 0 &&
+        this.selectedGroups.length === 0
       ) {
         return "all devices";
       } else {
@@ -61,17 +61,17 @@ export default {
           };
         }),
     }),
-    selectedValues: function () {
-      const selectedDs = this.selectedDevices.map((deviceId) =>
-        this.devices.find(({ id }) => "D" + deviceId === id)
-      );
-      const selectedGs = this.selectedGroups.map((groupId) =>
-        this.groups.find(({ id }) => "G" + groupId === id)
-      );
+    selectedValues() {
+      const selectedDs = this.selectedDevices
+        .map((deviceId) => this.devices.find(({ id }) => "D" + deviceId === id))
+        .filter((item) => item !== undefined);
+      const selectedGs = this.selectedGroups
+        .map((groupId) => this.groups.find(({ id }) => "G" + groupId === id))
+        .filter((item) => item !== undefined);
       return [...selectedDs, ...selectedGs];
     },
-    options: function () {
-      return this.devices.concat(this.groups);
+    options() {
+      return [...this.devices, ...this.groups];
     },
   },
   methods: {

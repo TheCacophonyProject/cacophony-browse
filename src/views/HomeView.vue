@@ -91,12 +91,12 @@ export default {
     },
   },
   created: function () {
-    this.fetchGroups().then(() => {
+    this.fetchGroup().then(() => {
       this.hasLoaded = true;
     });
   },
   methods: {
-    fetchGroups: function () {
+    fetchGroup: function () {
       return this.$store.dispatch("Groups/GET_GROUPS");
     },
   },

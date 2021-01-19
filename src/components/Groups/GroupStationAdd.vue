@@ -59,7 +59,7 @@ const initialFormState = {
 };
 
 export default {
-  name: "GroupUserAdd",
+  name: "GroupStationAdd",
   props: {
     group: {
       type: Object,

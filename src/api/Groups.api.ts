@@ -1,12 +1,5 @@
 import CacophonyApi from "./CacophonyApi";
 
-export default {
-  addNewGroup,
-  getGroups,
-  addGroupUser,
-  removeGroupUser,
-};
-
 function addNewGroup(groupName) {
   const suppressGlobalMessaging = true;
   return CacophonyApi.post(
@@ -16,7 +9,11 @@ function addNewGroup(groupName) {
   );
 }
 
-function addGroupUser(groupName, userName, isAdmin) {
+function addGroupUser(
+  groupName,
+  userName,
+  isAdmin
+): { success: boolean; status: number } {
   const suppressGlobalMessaging = true;
   return CacophonyApi.post(
     "/api/v1/groups/users",
@@ -36,7 +33,19 @@ function removeGroupUser(groupName, userName) {
   });
 }
 
-async function getGroups(groupname) {
-  const where = JSON.stringify({ groupname: groupname });
+function getGroups() {
+  return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent("{}")}`);
+}
+
+function getGroupByName(groupName: string) {
+  const where = JSON.stringify({ groupname: groupName });
   return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent(where)}`);
 }
+
+export default {
+  addNewGroup,
+  getGroups,
+  getGroupByName,
+  addGroupUser,
+  removeGroupUser,
+};

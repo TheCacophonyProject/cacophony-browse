@@ -142,9 +142,9 @@ import RecordingSummary from "../components/RecordingSummary.vue";
 import api from "../api/index";
 import {
   toStringTodayYesterdayOrDate,
-  startOfHour,
   toNZDateString,
-} from "../helpers/datetime";
+  startOfDay,
+} from "@/helpers/datetime";
 
 export default {
   name: "RecordingsView",
@@ -307,8 +307,8 @@ export default {
           const thisDate = new Date(row.recordingDateTime);
           if (
             prevDate === null ||
-            startOfHour(thisDate, true).getTime() !==
-              startOfHour(prevDate, true).getTime()
+            startOfDay(thisDate, true).getTime() !==
+              startOfDay(prevDate, true).getTime()
           ) {
             const item = {
               kind: "dataSeparator",
@@ -356,13 +356,13 @@ export default {
       const string = result.toLowerCase();
       return string.charAt(0).toUpperCase() + string.slice(1);
     },
-    collateTags: function (tags, tracks) {
+    collateTags(tags, tracks) {
       // Build a collection of tagItems - one per animal
       const tagItems = {};
       for (let i = 0; i < tags.length; i++) {
         const tag = tags[i];
         const tagName = tag.animal === null ? tag.event : tag.animal;
-        const taggerId = taggerId;
+        const taggerId = tag.taggerId;
 
         this.addToListOfTags(tagItems, tagName, tag.automatic, taggerId);
       }
@@ -384,13 +384,13 @@ export default {
       for (let animal of Object.keys(tagItems).sort()) {
         const tagItem = tagItems[animal];
         let subOrder = 0;
-        if (animal == "false positive") {
+        if (animal === "false positive") {
           animal = "false positive";
           subOrder = 3;
-        } else if (animal == "multiple animals") {
+        } else if (animal === "multiple animals") {
           animal = "multiple";
           subOrder = 2;
-        } else if (animal == "unidentified") {
+        } else if (animal === "unidentified") {
           animal = "?";
           subOrder = 1;
         }
