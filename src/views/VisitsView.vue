@@ -187,9 +187,10 @@
                               <EventSummary
                                 v-else
                                 :item="item"
-                                :trackNumber="visitEvents.tracks - item.trackNumber"
+                                :trackNumber="
+                                  visitEvents.tracks - item.trackNumber
+                                "
                                 :key="index"
-                                :what="row.item.what"
                                 :deviceId="row.item.deviceId"
                               />
                             </div>
@@ -348,7 +349,6 @@ export default {
       }
       let audioBaitBefore = false;
       let trackNum = 0;
-      console.log("Sorting events", visit.events);
       for (const item of visit.events) {
         audioBaitBefore = audioTime && audioTime.isAfter(moment(item.start));
         // new recording
@@ -380,7 +380,6 @@ export default {
         audioBaitEvents.push(audioevent);
       }
       recEvent.events.splice(recEvent.events.length, 0, ...audioBaitEvents);
-      console.log("Sorted", eventsByRec);
       return eventsByRec;
     },
     expandAdditionalInfo(row) {
