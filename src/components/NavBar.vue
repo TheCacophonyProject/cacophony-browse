@@ -160,7 +160,7 @@ export default {
       const superUser = this.superUserCreds();
       if (superUser) {
         this.$store.dispatch("User/LOGIN_OTHER", {
-          userData: {...superUser},
+          userData: { ...superUser },
           token: superUser.token,
         });
         this.selectedUser = null;

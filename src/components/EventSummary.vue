@@ -18,10 +18,7 @@
       </div>
     </b-col>
     <b-col>
-      <span v-if="item.wasUnidentified"> Unidentified </span>
-      <span v-else>
-        {{ capitalizeFirst(what) }}
-      </span>
+      {{ capitalizeFirst(item.what) }}
     </b-col>
   </a>
 </template>
@@ -38,10 +35,6 @@ export default {
     },
     item: {
       type: Object,
-      required: true,
-    },
-    what: {
-      type: String,
       required: true,
     },
     deviceId: {
