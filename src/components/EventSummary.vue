@@ -47,7 +47,11 @@ export default {
       return moment(date).format(formatStr);
     },
     capitalizeFirst(value: string) {
-      return value.charAt(0).toUpperCase() + value.substring(1);
+      if ( value ) {
+        return value.charAt(0).toUpperCase() + value.substring(1);
+      }else{
+        return "Nothing"
+      }
     },
     navigateToRecording(event, visEvent: VisitEvent) {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
