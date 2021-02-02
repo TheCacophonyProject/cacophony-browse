@@ -191,7 +191,6 @@
                                   visitEvents.tracks - item.trackNumber
                                 "
                                 :key="index"
-                                :what="row.item.what"
                                 :deviceId="row.item.deviceId"
                               />
                             </div>
@@ -350,7 +349,6 @@ export default {
       }
       let audioBaitBefore = false;
       let trackNum = 0;
-
       for (const item of visit.events) {
         audioBaitBefore = audioTime && audioTime.isAfter(moment(item.start));
         // new recording

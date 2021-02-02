@@ -18,10 +18,7 @@
       </div>
     </b-col>
     <b-col>
-      <span v-if="item.wasUnidentified"> Unidentified </span>
-      <span v-else>
-        {{ capitalizeFirst(what) }}
-      </span>
+      {{ capitalizeFirst(item.what) }}
     </b-col>
   </a>
 </template>
@@ -40,10 +37,6 @@ export default {
       type: Object,
       required: true,
     },
-    what: {
-      type: String,
-      required: true,
-    },
     deviceId: {
       type: Number,
       required: true,
@@ -54,7 +47,11 @@ export default {
       return moment(date).format(formatStr);
     },
     capitalizeFirst(value: string) {
-      return value.charAt(0).toUpperCase() + value.substring(1);
+      if ( value ) {
+        return value.charAt(0).toUpperCase() + value.substring(1);
+      }else{
+        return "Nothing"
+      }
     },
     navigateToRecording(event, visEvent: VisitEvent) {
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {

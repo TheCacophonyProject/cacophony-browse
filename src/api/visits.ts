@@ -1,7 +1,6 @@
 import * as moment from "moment";
 
 export class VisitEvent {
-  wasUnidentified: Boolean;
   recID: number;
   recStart: moment.Moment;
   trackID: number;
@@ -12,6 +11,8 @@ export class VisitEvent {
   audioBaitDay: boolean;
   audioBaitVisit: boolean;
   audioBaitEvents: Event[];
+  what: string;
+  assumedTag: string;
 }
 
 export class Visit {
