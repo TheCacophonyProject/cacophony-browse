@@ -54,18 +54,18 @@
             <div v-if="!queryPending && !noQueryYet" class="results">
               <h1>Visit Summary Per Device</h1>
               <div class="scrollable">
-                <div v-for="devMap in deviceVisits" :key="devMap.id">
-                  <div v-if="Object.entries(devMap.animals).length > 0">
+                <div v-for="devMap in deviceSummary" :key="devMap.id">
+                  <div v-if="Object.entries(devMap).length > 0">
                     <b-row>
                       <b-col>
                         <h2>
-                          {{ devMap.deviceName }}
+                          {{ Object.values(devMap)[0].deviceName }}
                         </h2>
                       </b-col>
                     </b-row>
                     <b-table
                       class="device-table"
-                      :items="Object.entries(devMap.animals)"
+                      :items="Object.entries(devMap)"
                       :fields="fields"
                       striped
                     >
@@ -79,7 +79,7 @@
                         {{ formatDate(row.item[1].end, tableDateTimeFormat) }}
                       </template>
                       <template v-slot:cell(visits)="row">
-                        {{ row.item[1].visits.length }}
+                        {{ row.item[1].visitCount }}
                       </template>
                     </b-table>
                   </div>
@@ -261,7 +261,7 @@ export default {
       queryPending: false,
       count: null,
       countMessage: null,
-      deviceVisits: {},
+      deviceSummary: {},
       visits: [],
       loadingMore: false,
       fields: [
@@ -427,8 +427,9 @@ export default {
       if (newQuery) {
         this.countMessage = "No Visits";
         this.visits = [];
-        this.deviceVisits = result.rows;
+        this.deviceSummary = {}
         this.offset = 0;
+        this.count = 0;
         this.canLoadMore = true;
         this.queryPending = false;
       }
@@ -439,12 +440,7 @@ export default {
         this.canLoadMore = false;
         return;
       }
-      const eventsByDevice = result.rows;
-      if (mergeResults) {
-        this.count += result.numVisits;
-      } else {
-        this.count = result.numVisits;
-      }
+      this.count += result.numVisits;
       this.offset = result.queryOffset;
       this.canLoadMore = result.hasMoreVisits;
       if (this.count > 0) {
@@ -453,37 +449,41 @@ export default {
         this.countMessage = "No visits";
       }
 
-      for (const devId of Object.keys(eventsByDevice)) {
-        let merged = false;
-        const animalMap = eventsByDevice[devId].animals;
-        if (mergeResults && !(devId in this.deviceVisits)) {
-          this.deviceVisits[devId] = eventsByDevice[devId];
-          merged = true;
+      const summary = result.summary;
+      const filtered = result.visits.filter(
+        (visit: Visit): boolean =>
+          visit.events.length > 0 &&
+          visit.what != DefaultLabels.allLabels.bird.value &&
+          visit.what != DefaultLabels.allLabels.falsePositive.value
+      );
+      this.visits.push(...filtered);
+      for (const devId of Object.keys(summary)) {
+        const newSummary = summary[devId];
+        // filter out bird and false positive
+        if (!(devId in this.deviceSummary)) {
+          this.deviceSummary[devId] = newSummary;
+          continue
         }
+        const existingSummary = this.deviceSummary[devId];
+        for(const [animal, animalSummary] of Object.entries(newSummary)){
 
-        const existingAnimalMap = this.deviceVisits[devId].animals;
-        for (const animal of Object.keys(animalMap)) {
-          const filtered = animalMap[animal].visits.filter(
-            (visit: Visit): boolean =>
-              visit.events.length > 0 &&
-              visit.what != DefaultLabels.allLabels.bird.value &&
-              visit.what != DefaultLabels.allLabels.falsePositive.value
-          );
-          this.visits.push(...filtered);
-
-          // merge new visits with old device visits
-          if (mergeResults && !merged) {
-            if (!existingAnimalMap.hasOwnProperty(animal)) {
-              existingAnimalMap[animal] = animalMap[animal];
-            } else {
-              existingAnimalMap[animal].visits.push(
-                ...animalMap[animal].visits
-              );
-              existingAnimalMap[animal].start = animalMap[animal].start;
+          if (animal in existingSummary) {
+            // merge
+            const existingAnimalSummary = existingSummary[animal];
+            existingAnimalSummary.visitCount+=animalSummary.visitCount;
+            existingAnimalSummary.eventCount += animalSummary.eventCount;
+            if(animalSummary.start < existingAnimalSummary.start){
+              existingAnimalSummary.start = animalSummary.start;
             }
+            if(animalSummary.end > existingAnimalSummary.end){
+              existingAnimalSummary.end = animalSummary.end;
+            }
+          } else {
+            existingSummary[animal] =animalSummary;
           }
         }
       }
+
       this.visits = this.visits.sort(function (a, b) {
         if (a.start == b.start) {
           return a.id - b.id;
