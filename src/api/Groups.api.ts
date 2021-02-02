@@ -48,7 +48,11 @@ function getStationsForGroup(groupName: string) {
   );
 }
 
-function addStationsToGroup(groupName: string, stations: { name: string, lat: number, lng: number }, applyFromDate: Date | null) {
+function addStationsToGroup(
+  groupName: string,
+  stations: { name: string; lat: number; lng: number },
+  applyFromDate: Date | null
+) {
   const payload: any = {
     group: groupName,
     stations: JSON.stringify(stations),

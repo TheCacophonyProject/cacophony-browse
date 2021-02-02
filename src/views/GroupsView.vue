@@ -62,7 +62,7 @@ import Spinner from "@/components/Spinner.vue";
 import GroupAdd from "@/components/Groups/GroupAdd.vue";
 
 interface GroupsViewData {
-  groups: Group[];
+  groups: any[];
   isLoading: boolean;
 }
 

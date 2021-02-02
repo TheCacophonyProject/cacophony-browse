@@ -212,7 +212,6 @@
                   layer-type="base"
                 />
 
-
                 <l-marker
                   v-for="station in stationsForMap"
                   :lat-lng="station.location"
@@ -303,11 +302,10 @@ import GroupUserAdd from "@/components/Groups/GroupUserAdd.vue";
 import * as csv from "csvtojson";
 import {
   LMap,
-  LTileLayer,
   LMarker,
   LTooltip,
   LWMSTileLayer,
-    LControlLayers
+  LControlLayers,
 } from "vue2-leaflet";
 import { latLng, latLngBounds, icon } from "leaflet";
 
@@ -491,14 +489,11 @@ export default {
     this.fetchStations();
   },
   methods: {
-    changeTab(t) {
-      console.log(t);
-    },
     dragCsvFileOver(event: DragEvent) {
       this.draggingCsvOver = true;
       event.dataTransfer.dropEffect = "none";
     },
-    dragCsvFileOut(event: DragEvent) {
+    dragCsvFileOut() {
       this.draggingCsvOver = false;
     },
     async droppedStationsCsvFile(event: DragEvent) {
