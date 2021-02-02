@@ -55,7 +55,7 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin(["src/assets/favicon", "src/assets/video"]),
+    new CopyWebpackPlugin(["src/assets/favicon", "src/assets/video", "src/assets/map"]),
     new ESLintPlugin(),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.DefinePlugin({

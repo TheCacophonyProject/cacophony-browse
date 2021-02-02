@@ -42,10 +42,32 @@ function getGroupByName(groupName: string) {
   return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent(where)}`);
 }
 
+function getStationsForGroup(groupName: string) {
+  return CacophonyApi.get(
+    `/api/v1/groups/${encodeURIComponent(groupName)}/stations`
+  );
+}
+
+function addStationsToGroup(groupName: string, stations: { name: string, lat: number, lng: number }, applyFromDate: Date | null) {
+  const payload: any = {
+    group: groupName,
+    stations: JSON.stringify(stations),
+  };
+  if (applyFromDate) {
+    payload.fromDate = applyFromDate.toISOString();
+  }
+  return CacophonyApi.post(
+    `/api/v1/groups/${encodeURIComponent(groupName)}/stations`,
+    payload
+  );
+}
+
 export default {
   addNewGroup,
   getGroups,
   getGroupByName,
+  getStationsForGroup,
+  addStationsToGroup,
   addGroupUser,
   removeGroupUser,
 };

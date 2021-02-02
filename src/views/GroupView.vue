@@ -21,6 +21,7 @@
       class="group-tabs"
       nav-class="container"
       v-model="currentTabIndex"
+      @changed="changeTab"
     >
       <b-tab title="Users">
         <template #title>
@@ -177,55 +178,115 @@
           </b-table>
         </div>
       </b-tab>
-      <b-tab title="Stations">
+      <b-tab title="Stations" lazy>
+        <template #title>
+          <span>Stations</span>
+          <b-spinner v-if="stationsLoading" type="border" small />
+          <b-badge v-else pill variant="secondary">{{
+            stations.length
+          }}</b-badge>
+        </template>
         <div class="container">
           <h2>
             Stations
             <help>Stations are named GPS locations.</help>
           </h2>
           <div>
-            <p v-if="groupHasStations">Stations for this group.</p>
-            <div v-else>
-              <div v-if="pendingStations.length === 0">
-                <p>There are currently no stations defined for this group.</p>
-                <div
-                  class="upload-region"
-                  :class="{ 'dragging-over': draggingCsvOver }"
-                  @drop.prevent="(e) => droppedStationsCsvFile(e)"
-                  @dragenter.prevent="(e) => dragCsvFileOver(e)"
-                  @dragover.prevent="() => {}"
-                  @dragleave.prevent="(e) => dragCsvFileOut(e)"
+            <div v-if="groupHasStations && pendingStations.length === 0">
+              <p>Stations that are currently associated with this group</p>
+              <l-map
+                ref="stationsMap"
+                class="stations-map"
+                style="height: 400px"
+                :bounds="mapBounds.pad(0.25)"
+              >
+                <l-control-layers />
+                <l-w-m-s-tile-layer
+                  v-for="layer in map.layers"
+                  :key="layer.name"
+                  :base-url="layer.url"
+                  :layers="layer.layers"
+                  :visible="layer.visible"
+                  :name="layer.name"
+                  :attribution="layer.attribution"
+                  layer-type="base"
+                />
+
+
+                <l-marker
+                  v-for="station in stationsForMap"
+                  :lat-lng="station.location"
+                  :key="station.name"
+                  :icon="map.icon"
                 >
-                  <div v-if="!draggingCsvOver">
-                    <p>
-                      Upload Trap.nz CSV defined stations: choose a file, or
-                      drag and drop one onto this box.
-                    </p>
-                    <div>
-                      <input
-                        accept=".csv"
-                        id="upload-csv"
-                        type="file"
-                        title="Choose CSV"
-                        @change="(e) => gotStationsCsvFile(e)"
-                        class="upload stations"
-                      />
-                    </div>
-                  </div>
-                  <div v-else class="drag-instructions">
-                    Drop your CSV here.
-                  </div>
+                  <l-tooltip>{{ station.name }}</l-tooltip>
+                </l-marker>
+              </l-map>
+              <b-table-lite :items="stationsOrderedByName" striped hover />
+              <b-btn
+                v-if="!enableEditingStations && isGroupAdmin"
+                @click="() => (enableEditingStations = true)"
+              >
+                Edit stations
+              </b-btn>
+            </div>
+            <p v-else-if="stations.length === 0">
+              You currently have no stations associated with this group.
+            </p>
+            <div
+              v-if="
+                isGroupAdmin && enableEditingStations && !pendingStations.length
+              "
+              class="upload-region"
+              :class="{ 'dragging-over': draggingCsvOver }"
+              @drop.prevent="(e) => droppedStationsCsvFile(e)"
+              @dragenter.prevent="(e) => dragCsvFileOver(e)"
+              @dragover.prevent="() => {}"
+              @dragleave.prevent="(e) => dragCsvFileOut(e)"
+            >
+              <div v-if="!draggingCsvOver">
+                <p>
+                  Upload Trap.nz CSV defined stations: choose a file, or drag
+                  and drop one onto this box.
+                </p>
+                <div>
+                  <input
+                    accept=".csv"
+                    id="upload-csv"
+                    type="file"
+                    title="Choose CSV"
+                    @change="(e) => gotStationsCsvFile(e)"
+                    class="upload stations"
+                  />
                 </div>
               </div>
-              <div v-else>
-                <p>
-                  The following stations will be added. Any existing stations
-                  will be deleted.
-                </p>
-                <b-table-lite :items="pendingStations" striped hover />
-                <b-btn>Confirm changes</b-btn>
-                <b-btn @click="pendingStations = []">Discard changes</b-btn>
+              <div v-else class="drag-instructions">Drop your CSV here.</div>
+            </div>
+            <div v-else-if="!isGroupAdmin">
+              You need to ask your group administrator to add stations
+            </div>
+            <div v-if="pendingStations.length !== 0">
+              <p>The following changes will be made</p>
+              <b-table class="station-diff-table" :items="pendingStationsDiff">
+                <template #cell(latitude)="data">
+                  <span v-html="data.value" />
+                </template>
+                <template #cell(longitude)="data">
+                  <span v-html="data.value" />
+                </template>
+              </b-table>
+              <b-checkbox class="back-date" v-model="backDateRecordings"
+                >Apply changes to recordings starting from a date</b-checkbox
+              >
+              <div v-if="backDateRecordings" class="back-date">
+                <b-form-datepicker v-model="applyStationsFromDate" />
               </div>
+              <b-btn @click="() => addNewStations()" :disabled="addingStations"
+                >Confirm changes</b-btn
+              >
+              <b-btn @click="pendingStations = []" :disabled="addingStations"
+                >Discard changes</b-btn
+              >
             </div>
           </div>
         </div>
@@ -237,34 +298,92 @@
 <script lang="ts">
 import { mapState } from "vuex";
 import api from "@/api";
-import Spinner from "@/components/Spinner.vue";
 import Help from "@/components/Help.vue";
 import GroupUserAdd from "@/components/Groups/GroupUserAdd.vue";
 import * as csv from "csvtojson";
+import {
+  LMap,
+  LTileLayer,
+  LMarker,
+  LTooltip,
+  LWMSTileLayer,
+    LControlLayers
+} from "vue2-leaflet";
+import { latLng, latLngBounds, icon } from "leaflet";
+
+const Marker = icon({
+  iconUrl: "/marker-icon.png",
+  iconRetinaUrl: "/marker-icon-2x.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 40],
+  shadowUrl: "/marker-shadow.png",
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41],
+});
 
 export default {
   name: "GroupView",
-  components: { Spinner, Help, GroupUserAdd },
+  components: {
+    Help,
+    GroupUserAdd,
+    LMap,
+    LControlLayers,
+    LMarker,
+    LTooltip,
+    LWMSTileLayer,
+  },
   data() {
     return {
+      map: {
+        layers: [
+          {
+            name: "LINZ Basemap",
+            visible: true,
+            attribution:
+              '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
+            url:
+              "https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=d01ev807hkjzw7ahpcxqtqadtmd",
+          },
+          {
+            name: "OpenStreetMap Basemap",
+            visible: false,
+            url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            attribution:
+              '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+          },
+        ],
+        center: latLng(-43.653182270005, 172.63682700001),
+        zoom: 13,
+        bounds: null,
+        icon: Marker,
+      },
       isLoading: false,
+      backDateRecordings: false,
+      applyStationsFromDate: null,
+      stationsLoading: false,
+      addingStations: false,
       group: null,
+      stations: [],
       currentTabIndex: 0,
       showUserRemoveSelfModal: false,
       isRemovingUser: false,
       pendingStations: [],
       draggingCsvOver: false,
+      enableEditingStations: true,
     };
   },
   computed: {
     ...mapState({
-      currentUser: (state) => state.User.userData,
+      currentUser: (state) => (state as any).User.userData,
     }),
     groupName() {
       return this.$route.params.groupname;
     },
     isGroupAdmin() {
-      if (this.currentUser && this.group.Users) {
+      if (
+        (this.currentUser && this.currentUser.isSuperUser) ||
+        (this.group && this.group.Users)
+      ) {
         return (
           this.currentUser.isSuperUser ||
           this.groupUsers.some(
@@ -285,31 +404,110 @@ export default {
       return this.groupDevices.length !== 0;
     },
     groupHasStations() {
-      // And this.group.GroupStations is null or whatever
-      return false; //this.pendingStations.length !== 0;
+      return this.stations.length !== 0;
     },
     groupHasUsers() {
       return this.groupUsers.length !== 0;
     },
+    stationsOrderedByName() {
+      return [...this.stations].sort((a, b) => a.name.localeCompare(b.name));
+    },
+    stationsForMap() {
+      return this.stations.map(({ name, latitude, longitude }) => ({
+        name,
+        location: latLng(latitude, longitude),
+      }));
+    },
+    mapBounds() {
+      return latLngBounds(this.stationsForMap.map(({ location }) => location));
+    },
+    pendingStationsDiff() {
+      // Show pending stations, and mark any existing stations that don't have a match in pending as
+      // "will be retired".  Any existing stations with lat/lng changes get marked as "will be updated".
+      const diff = {};
+      const existingStationsByName = {};
+      const pendingStationsByName = {};
+      for (const station of this.stations) {
+        existingStationsByName[station.name] = station;
+      }
+      for (const station of this.pendingStations) {
+        pendingStationsByName[station.name] = station;
+      }
+      for (const station of this.stations) {
+        if (!pendingStationsByName.hasOwnProperty(station.name)) {
+          diff[station.name] = {
+            ...station,
+            _rowVariant: "retire-item",
+            action: "retire",
+          };
+        } else {
+          const updatedStation = pendingStationsByName[station.name];
+          const EPSILON = 0.000000000001;
+          if (
+            Math.abs(updatedStation.latitude - station.latitude) > EPSILON ||
+            Math.abs(updatedStation.longitude - station.longitude) > EPSILON
+          ) {
+            let { latitude, longitude } = updatedStation;
+            if (Math.abs(latitude - station.latitude) > EPSILON) {
+              latitude = `<del>${station.latitude}</del> -> ${latitude}`;
+            }
+            if (Math.abs(longitude - station.longitude) > EPSILON) {
+              longitude = `<del>${station.longitude}</del> -> ${longitude}`;
+            }
+            diff[station.name] = {
+              ...updatedStation,
+              latitude,
+              longitude,
+              action: "update",
+              _rowVariant: "update-item",
+            };
+          } else {
+            diff[station.name] = {
+              ...updatedStation,
+              _rowVariant: "no-change-item",
+              action: "no change",
+            };
+          }
+        }
+      }
+      for (const station of this.pendingStations) {
+        if (!diff.hasOwnProperty(station.name)) {
+          diff[station.name] = {
+            ...station,
+            _rowVariant: "add-item",
+            action: "add",
+          };
+        }
+      }
+      return (Object.values(diff) as {
+        name: string;
+        lat: number;
+        lng: number;
+      }[]).sort((a, b) => a.name.localeCompare(b.name));
+    },
   },
   created() {
     this.fetchGroup();
+    this.fetchStations();
   },
   methods: {
-    dragCsvFileOver(event: Event) {
+    changeTab(t) {
+      console.log(t);
+    },
+    dragCsvFileOver(event: DragEvent) {
       this.draggingCsvOver = true;
       event.dataTransfer.dropEffect = "none";
     },
-    dragCsvFileOut(event: Event) {
+    dragCsvFileOut(event: DragEvent) {
       this.draggingCsvOver = false;
     },
-    async droppedStationsCsvFile(event: Event) {
+    async droppedStationsCsvFile(event: DragEvent) {
       this.draggingCsvOver = false;
       const csvText = await event.dataTransfer.files[0].text();
       await this.parseStationsCsv(csvText);
     },
     async gotStationsCsvFile(event: Event) {
-      const file: File = event.target.files[0];
+      const file: File = (event.target as HTMLInputElement).files[0];
       const csvText = await file.text();
       await this.parseStationsCsv(csvText);
     },
@@ -318,24 +516,64 @@ export default {
       this.pendingStations = monitoring
         .filter((item) => item.Type === "Camera")
         .map((item) => ({
-          Name: item["Number / Code"],
-          Latitude: item.Lat,
-          Longitude: item.Lon,
+          name: item["Number / Code"],
+          latitude: item.Lat,
+          longitude: item.Lon,
         }));
     },
     async fetchGroup() {
       this.isLoading = true;
       {
-        try {
-          // TODO(jon): This currently fetches everything to do with a group, but would probably be better separated into individual API calls.
-          const { result } = await api.groups.getGroupByName(this.groupName);
-          this.group = result.groups[0];
-        } catch (error) {
-          console.warn(error);
-          // TODO(jon): Do something with the error.
-        }
+        // TODO: This currently fetches everything to do with a group,
+        //  but would probably be better separated into individual API calls.
+        const { result } = await api.groups.getGroupByName(this.groupName);
+        this.group = result.groups[0];
       }
       this.isLoading = false;
+    },
+    async fetchStations() {
+      this.stationsLoading = true;
+      {
+        const { result } = await api.groups.getStationsForGroup(this.groupName);
+        this.stations = result.stations
+          .filter(({ retiredAt }) => retiredAt === null)
+          .map(({ name, location }) => ({
+            name,
+            latitude: location.coordinates[0],
+            longitude: location.coordinates[1],
+          }));
+
+        if (this.stations.length !== 0) {
+          this.enableEditingStations = false;
+        }
+      }
+      this.stationsLoading = false;
+    },
+    async addNewStations() {
+      this.addingStations = true;
+      {
+        let applyFromDate =
+          this.backDateRecordings && this.applyStationsFromDate;
+        if (applyFromDate) {
+          applyFromDate = new Date(Date.parse(applyFromDate));
+          applyFromDate.setHours(5);
+          applyFromDate.setMinutes(0);
+          applyFromDate.setSeconds(0);
+          applyFromDate.setMilliseconds(0);
+        }
+        await api.groups.addStationsToGroup(
+          this.groupName,
+          this.pendingStations.map(({ name, latitude, longitude }) => ({
+            name,
+            lat: Number(latitude),
+            lng: Number(longitude),
+          })),
+          applyFromDate
+        );
+        await this.fetchStations();
+        this.pendingStations = [];
+      }
+      this.addingStations = false;
     },
     async onUserAddedToGroup() {
       await this.fetchGroup();
@@ -343,16 +581,11 @@ export default {
     async removeGroupUser(userName: string) {
       this.isRemovingUser = true;
       {
-        try {
-          await api.groups.removeGroupUser(this.group.groupname, userName);
-          // Mutate our local users object, we don't need to fetch it again.
-          this.group.GroupUsers = this.groupUsers.filter(
-            (user) => user.username !== userName
-          );
-        } catch (error) {
-          console.warn(error);
-          // TODO(jon): Handle error
-        }
+        await api.groups.removeGroupUser(this.group.groupname, userName);
+        // Mutate our local users object, we don't need to fetch it again.
+        this.group.GroupUsers = this.groupUsers.filter(
+          (user) => user.username !== userName
+        );
       }
       this.isRemovingUser = false;
     },
@@ -388,6 +621,7 @@ export default {
   width: 100%;
   min-height: 200px;
   border: 5px dashed #ccc;
+  padding: 0 30px;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -399,5 +633,22 @@ export default {
   .drag-instructions {
     pointer-events: none;
   }
+}
+.station-diff-table {
+  del {
+    color: darkred;
+  }
+  .table-add-item {
+    background: #cff1d7;
+  }
+  .table-update-item {
+    background: #f6ddb9;
+  }
+  .table-retire-item {
+    background: #eecccf;
+  }
+}
+.back-date {
+  margin-bottom: 20px;
 }
 </style>

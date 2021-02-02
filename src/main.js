@@ -11,6 +11,8 @@ import "./styles/global.scss";
 import config from "./config";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
+// Leaflet CSS
+import "leaflet/dist/leaflet.css";
 
 export default function () {
   // https://bootstrap-vue.js.org/docs
