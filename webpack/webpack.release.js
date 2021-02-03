@@ -24,8 +24,7 @@ module.exports = merge(common, {
     new webpack.DefinePlugin({
       __ENV__: JSON.stringify("PRODUCTION"),
       __API__: JSON.stringify("https://api.cacophony.org.nz"),
-      // TODO(jon): Needs to come from a file outside of VCS
-      __LINZ_API_KEY__: JSON.stringify("YOUR_API_KEY_HERE"),
+      __LINZ_API_KEY__: JSON.stringify(process.env.LINZ_BASEMAP_API_KEY || ""),
       __ENV_STAGING__: JSON.stringify("STAGING"),
       __API_STAGING__: JSON.stringify("https://api-test.cacophony.org.nz"),
     }),
