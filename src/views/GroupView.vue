@@ -21,7 +21,6 @@
       class="group-tabs"
       nav-class="container"
       v-model="currentTabIndex"
-      @changed="changeTab"
     >
       <b-tab title="Users">
         <template #title>
@@ -181,9 +180,9 @@
       <b-tab title="Stations" lazy>
         <template #title>
           <span>Stations</span>
-          <b-spinner v-if="stationsLoading" type="border" small />
+          <b-spinner v-if="stations.stationsLoading" type="border" small />
           <b-badge v-else pill variant="secondary">{{
-            stations.length
+            stations.items.length
           }}</b-badge>
         </template>
         <div class="container">
@@ -192,7 +191,9 @@
             <help>Stations are named GPS locations.</help>
           </h2>
           <div>
-            <div v-if="groupHasStations && pendingStations.length === 0">
+            <div
+              v-if="groupHasStations && stations.pendingStations.length === 0"
+            >
               <p>Stations that are currently associated with this group</p>
               <l-map
                 ref="stationsMap"
@@ -202,7 +203,7 @@
               >
                 <l-control-layers />
                 <l-w-m-s-tile-layer
-                  v-for="layer in map.layers"
+                  v-for="layer in stations.map.layers"
                   :key="layer.name"
                   :base-url="layer.url"
                   :layers="layer.layers"
@@ -216,34 +217,36 @@
                   v-for="station in stationsForMap"
                   :lat-lng="station.location"
                   :key="station.name"
-                  :icon="map.icon"
+                  :icon="stations.map.icon"
                 >
                   <l-tooltip>{{ station.name }}</l-tooltip>
                 </l-marker>
               </l-map>
-              <b-table-lite :items="stationsOrderedByName" striped hover />
+              <b-table-lite :items="stations.items" striped hover />
               <b-btn
-                v-if="!enableEditingStations && isGroupAdmin"
-                @click="() => (enableEditingStations = true)"
+                v-if="!stations.enableEditingStations && isGroupAdmin"
+                @click="stations.enableEditingStations = true"
               >
                 Edit stations
               </b-btn>
             </div>
-            <p v-else-if="stations.length === 0">
+            <p v-else-if="stations.items.length === 0">
               You currently have no stations associated with this group.
             </p>
             <div
               v-if="
-                isGroupAdmin && enableEditingStations && !pendingStations.length
+                isGroupAdmin &&
+                stations.enableEditingStations &&
+                !stations.pendingStations.length
               "
               class="upload-region"
-              :class="{ 'dragging-over': draggingCsvOver }"
+              :class="{ 'dragging-over': stations.draggingCsvOver }"
               @drop.prevent="(e) => droppedStationsCsvFile(e)"
               @dragenter.prevent="(e) => dragCsvFileOver(e)"
               @dragover.prevent="() => {}"
               @dragleave.prevent="(e) => dragCsvFileOut(e)"
             >
-              <div v-if="!draggingCsvOver">
+              <div v-if="!stations.draggingCsvOver">
                 <p>
                   Upload Trap.nz CSV defined stations: choose a file, or drag
                   and drop one onto this box.
@@ -264,7 +267,7 @@
             <div v-else-if="!isGroupAdmin">
               You need to ask your group administrator to add stations
             </div>
-            <div v-if="pendingStations.length !== 0">
+            <div v-if="stations.pendingStations.length !== 0">
               <p>The following changes will be made</p>
               <b-table class="station-diff-table" :items="pendingStationsDiff">
                 <template #cell(latitude)="data">
@@ -274,16 +277,22 @@
                   <span v-html="data.value" />
                 </template>
               </b-table>
-              <b-checkbox class="back-date" v-model="backDateRecordings"
+              <b-checkbox
+                class="back-date"
+                v-model="stations.backDateRecordings"
                 >Apply changes to recordings starting from a date</b-checkbox
               >
-              <div v-if="backDateRecordings" class="back-date">
-                <b-form-datepicker v-model="applyStationsFromDate" />
+              <div v-if="stations.backDateRecordings" class="back-date">
+                <b-form-datepicker v-model="stations.applyStationsFromDate" />
               </div>
-              <b-btn @click="() => addNewStations()" :disabled="addingStations"
+              <b-btn
+                @click="() => addNewStations()"
+                :disabled="stations.addingStations"
                 >Confirm changes</b-btn
               >
-              <b-btn @click="pendingStations = []" :disabled="addingStations"
+              <b-btn
+                @click="pendingStations = []"
+                :disabled="stations.addingStations"
                 >Discard changes</b-btn
               >
             </div>
@@ -319,6 +328,12 @@ const Marker = icon({
   shadowSize: [41, 41],
 });
 
+interface StationData {
+  name: string;
+  lat: number;
+  lng: number;
+}
+
 export default {
   name: "GroupView",
   components: {
@@ -332,42 +347,42 @@ export default {
   },
   data() {
     return {
-      map: {
-        layers: [
-          {
-            name: "LINZ Basemap",
-            visible: true,
-            attribution:
-              '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
-            url:
-              "https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=d01ev807hkjzw7ahpcxqtqadtmd",
-          },
-          {
-            name: "OpenStreetMap Basemap",
-            visible: false,
-            url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            attribution:
-              '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-          },
-        ],
-        center: latLng(-43.653182270005, 172.63682700001),
-        zoom: 13,
-        bounds: null,
-        icon: Marker,
+      stations: {
+        map: {
+          layers: [
+            {
+              name: "LINZ Basemap",
+              visible: true, // Make the LINZ basemap the default one
+              attribution:
+                '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
+              url:
+                "https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=d01ev807hkjzw7ahpcxqtqadtmd",
+            },
+            {
+              name: "OpenStreetMap Basemap",
+              visible: false,
+              url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              attribution:
+                '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+            },
+          ],
+          icon: Marker,
+        },
+        // Stations state
+        backDateRecordings: false,
+        applyStationsFromDate: null,
+        stationsLoading: false,
+        addingStations: false,
+        items: [],
+        pendingStations: [],
+        draggingCsvOver: false,
+        enableEditingStations: true,
       },
-      isLoading: false,
-      backDateRecordings: false,
-      applyStationsFromDate: null,
-      stationsLoading: false,
-      addingStations: false,
+      isLoading: false, // Loading all data on page load
       group: null,
-      stations: [],
-      currentTabIndex: 0,
+      currentTabIndex: 0, // Which tab is the default one
       showUserRemoveSelfModal: false,
       isRemovingUser: false,
-      pendingStations: [],
-      draggingCsvOver: false,
-      enableEditingStations: true,
     };
   },
   computed: {
@@ -401,22 +416,21 @@ export default {
     groupHasDevices() {
       return this.groupDevices.length !== 0;
     },
-    groupHasStations() {
-      return this.stations.length !== 0;
-    },
     groupHasUsers() {
       return this.groupUsers.length !== 0;
     },
-    stationsOrderedByName() {
-      return [...this.stations].sort((a, b) => a.name.localeCompare(b.name));
+    groupHasStations() {
+      return this.stations.items.length !== 0;
     },
     stationsForMap() {
-      return this.stations.map(({ name, latitude, longitude }) => ({
+      // Stations lat/lng as leaflet lat/lng objects
+      return this.stations.items.map(({ name, latitude, longitude }) => ({
         name,
         location: latLng(latitude, longitude),
       }));
     },
     mapBounds() {
+      // Calculate the initial map bounds and zoom level from the set of lat/lng points
       return latLngBounds(this.stationsForMap.map(({ location }) => location));
     },
     pendingStationsDiff() {
@@ -425,13 +439,13 @@ export default {
       const diff = {};
       const existingStationsByName = {};
       const pendingStationsByName = {};
-      for (const station of this.stations) {
+      for (const station of this.stations.items) {
         existingStationsByName[station.name] = station;
       }
-      for (const station of this.pendingStations) {
+      for (const station of this.stations.pendingStations) {
         pendingStationsByName[station.name] = station;
       }
-      for (const station of this.stations) {
+      for (const station of this.stations.items) {
         if (!pendingStationsByName.hasOwnProperty(station.name)) {
           diff[station.name] = {
             ...station,
@@ -456,8 +470,8 @@ export default {
               ...updatedStation,
               latitude,
               longitude,
-              action: "update",
               _rowVariant: "update-item",
+              action: "update",
             };
           } else {
             diff[station.name] = {
@@ -468,7 +482,7 @@ export default {
           }
         }
       }
-      for (const station of this.pendingStations) {
+      for (const station of this.stations.pendingStations) {
         if (!diff.hasOwnProperty(station.name)) {
           diff[station.name] = {
             ...station,
@@ -477,11 +491,9 @@ export default {
           };
         }
       }
-      return (Object.values(diff) as {
-        name: string;
-        lat: number;
-        lng: number;
-      }[]).sort((a, b) => a.name.localeCompare(b.name));
+      return (Object.values(diff) as StationData[]).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
     },
   },
   created() {
@@ -489,15 +501,16 @@ export default {
     this.fetchStations();
   },
   methods: {
+    // Stations:
     dragCsvFileOver(event: DragEvent) {
-      this.draggingCsvOver = true;
+      this.stations.draggingCsvOver = true;
       event.dataTransfer.dropEffect = "none";
     },
     dragCsvFileOut() {
-      this.draggingCsvOver = false;
+      this.stations.draggingCsvOver = false;
     },
     async droppedStationsCsvFile(event: DragEvent) {
-      this.draggingCsvOver = false;
+      this.stations.draggingCsvOver = false;
       const csvText = await event.dataTransfer.files[0].text();
       await this.parseStationsCsv(csvText);
     },
@@ -508,7 +521,7 @@ export default {
     },
     async parseStationsCsv(csvText: string) {
       const monitoring = await csv().fromString(csvText);
-      this.pendingStations = monitoring
+      this.stations.pendingStations = monitoring
         .filter((item) => item.Type === "Camera")
         .map((item) => ({
           name: item["Number / Code"],
@@ -527,28 +540,30 @@ export default {
       this.isLoading = false;
     },
     async fetchStations() {
-      this.stationsLoading = true;
+      this.stations.stationsLoading = true;
       {
         const { result } = await api.groups.getStationsForGroup(this.groupName);
-        this.stations = result.stations
+        this.stations.items = result.stations
           .filter(({ retiredAt }) => retiredAt === null)
           .map(({ name, location }) => ({
             name,
             latitude: location.coordinates[0],
             longitude: location.coordinates[1],
-          }));
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name));
 
-        if (this.stations.length !== 0) {
-          this.enableEditingStations = false;
+        if (this.stations.items.length !== 0) {
+          this.stations.enableEditingStations = false;
         }
       }
-      this.stationsLoading = false;
+      this.stations.stationsLoading = false;
     },
     async addNewStations() {
-      this.addingStations = true;
+      this.stations.addingStations = true;
       {
         let applyFromDate =
-          this.backDateRecordings && this.applyStationsFromDate;
+          this.stations.backDateRecordings &&
+          this.stations.applyStationsFromDate;
         if (applyFromDate) {
           applyFromDate = new Date(Date.parse(applyFromDate));
           applyFromDate.setHours(5);
@@ -558,18 +573,22 @@ export default {
         }
         await api.groups.addStationsToGroup(
           this.groupName,
-          this.pendingStations.map(({ name, latitude, longitude }) => ({
-            name,
-            lat: Number(latitude),
-            lng: Number(longitude),
-          })),
+          this.stations.pendingStations.map(
+            ({ name, latitude, longitude }) => ({
+              name,
+              lat: Number(latitude),
+              lng: Number(longitude),
+            })
+          ),
           applyFromDate
         );
         await this.fetchStations();
-        this.pendingStations = [];
+        this.stations.pendingStations = [];
       }
-      this.addingStations = false;
+      this.stations.addingStations = false;
     },
+
+    // Users:
     async onUserAddedToGroup() {
       await this.fetchGroup();
     },
