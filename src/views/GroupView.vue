@@ -317,7 +317,7 @@ import { latLng, latLngBounds, icon } from "leaflet";
 import api from "@/api";
 import Help from "@/components/Help.vue";
 import GroupUserAdd from "@/components/Groups/GroupUserAdd.vue";
-import { linzBasemapApiKey } from "../config";
+import {linzBasemapApiKey} from "../config";
 
 const Marker = icon({
   iconUrl: "/marker-icon.png",
