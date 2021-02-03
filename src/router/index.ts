@@ -1,7 +1,5 @@
-import Vue from "vue";
 import Router from "vue-router";
 import store from "@/stores";
-
 import DevicesView from "@/views/DevicesView.vue";
 import DeviceView from "@/views/DeviceView.vue";
 import ErrorView from "@/views/ErrorView.vue";
@@ -17,8 +15,6 @@ import AnalysisView from "@/views/AnalysisView.vue";
 import VisitsView from "@/views/VisitsView.vue";
 import TaggingView from "@/views/TaggingView.vue";
 import EndUserAgreementView from "@/views/EndUserAgreementView.vue";
-
-Vue.use(Router);
 
 function createRouter() {
   const router = new Router({

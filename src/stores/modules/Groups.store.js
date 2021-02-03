@@ -9,7 +9,7 @@ const state = {
 const getters = {};
 
 async function _getGroup(groupname, commit) {
-  const { result } = await api.groups.getGroupByName(groupname);
+  const { result } = await api.groups.getGroups(groupname);
   const group = result.groups[0];
   commit("setCurrentGroup", group);
   commit("receiveGroups", result.groups);

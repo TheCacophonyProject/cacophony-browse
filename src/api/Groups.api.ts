@@ -33,12 +33,11 @@ function removeGroupUser(groupName, userName) {
   });
 }
 
-function getGroups() {
-  return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent("{}")}`);
-}
-
-function getGroupByName(groupName: string) {
-  const where = JSON.stringify({ groupname: groupName });
+function getGroups(groupName?: string) {
+  let where = "{}";
+  if (groupName !== undefined) {
+    where = JSON.stringify({ groupname: groupName });
+  }
   return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent(where)}`);
 }
 
@@ -73,7 +72,6 @@ function addStationsToGroup(
 export default {
   addNewGroup,
   getGroups,
-  getGroupByName,
   getStationsForGroup,
   addStationsToGroup,
   addGroupUser,

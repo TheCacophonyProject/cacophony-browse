@@ -1,7 +1,6 @@
 jest.mock("./fetch");
 import { fetch } from "./fetch";
 import devicesApi from "./Device.api";
-import querystring from "querystring";
 
 describe("getDevices() calls fetch", () => {
   test("with the correct request params", async () => {

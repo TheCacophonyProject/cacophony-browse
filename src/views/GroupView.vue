@@ -305,9 +305,6 @@
 
 <script lang="ts">
 import { mapState } from "vuex";
-import api from "@/api";
-import Help from "@/components/Help.vue";
-import GroupUserAdd from "@/components/Groups/GroupUserAdd.vue";
 import * as csv from "csvtojson";
 import {
   LMap,
@@ -317,6 +314,9 @@ import {
   LControlLayers,
 } from "vue2-leaflet";
 import { latLng, latLngBounds, icon } from "leaflet";
+import api from "@/api";
+import Help from "@/components/Help.vue";
+import GroupUserAdd from "@/components/Groups/GroupUserAdd.vue";
 
 const Marker = icon({
   iconUrl: "/marker-icon.png",
@@ -534,7 +534,7 @@ export default {
       {
         // TODO: This currently fetches everything to do with a group,
         //  but would probably be better separated into individual API calls.
-        const { result } = await api.groups.getGroupByName(this.groupName);
+        const { result } = await api.groups.getGroups(this.groupName);
         this.group = result.groups[0];
       }
       this.isLoading = false;
