@@ -317,6 +317,7 @@ import { latLng, latLngBounds, icon } from "leaflet";
 import api from "@/api";
 import Help from "@/components/Help.vue";
 import GroupUserAdd from "@/components/Groups/GroupUserAdd.vue";
+import { linzBasemapApiKey } from "../config";
 
 const Marker = icon({
   iconUrl: "/marker-icon.png",
@@ -356,7 +357,7 @@ export default {
               attribution:
                 '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
               url:
-                "https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=d01ev807hkjzw7ahpcxqtqadtmd",
+                `https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=${linzBasemapApiKey}`,
             },
             {
               name: "OpenStreetMap Basemap",
