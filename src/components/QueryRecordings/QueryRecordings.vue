@@ -153,8 +153,7 @@ export default {
     },
     updatePagination(perPage, page) {
       this.query.limit = perPage;
-      const newOffset = Math.max(0, (page - 1) * perPage);
-      this.query.offset = newOffset;
+      this.query.offset = Math.max(0, (page - 1) * perPage);
       this.updateRouteQuery();
       this.makeApiRequest();
     },
@@ -209,7 +208,7 @@ export default {
         };
       }
 
-      const params = {
+      return {
         tagMode: this.tagData.tagMode,
         tag: this.tagData.tags,
         minS: this.duration.minS,
@@ -223,8 +222,6 @@ export default {
         device: this.selectedDevices,
         group: this.selectedGroups,
       };
-
-      return params;
     },
 
     updateRouteQuery() {

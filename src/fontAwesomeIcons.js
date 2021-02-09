@@ -116,7 +116,7 @@ library.add(
   faUserSecret,
   faChevronRight,
   faVolumeUp,
-  faMapMarkerAlt,
+  faMapMarkerAlt
 );
 
 export default FontAwesomeIcon;
