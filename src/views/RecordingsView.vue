@@ -318,7 +318,7 @@ export default {
             this.tableItems.push(item);
             prevDate = thisDate;
           }
-          this.tableItems.push({
+          const itemData = {
             kind: "dataRow",
             id: row.id,
             type: row.type,
@@ -332,7 +332,11 @@ export default {
             tags: this.collateTags(row.Tags, row.Tracks),
             other: this.parseOther(row),
             processing_state: this.parseProcessingState(row.processingState),
-          });
+          };
+          if (row.Station) {
+            itemData.stationname = row.Station.name;
+          }
+          this.tableItems.push(itemData);
         }
       }
     },

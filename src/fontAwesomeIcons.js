@@ -22,6 +22,7 @@ import {
   faGlasses,
   faReply,
   faMicrochip,
+  faMapMarkerAlt,
   faMusic,
   faPlay,
   faPowerOff,
@@ -114,7 +115,8 @@ library.add(
   faUserPlus,
   faUserSecret,
   faChevronRight,
-  faVolumeUp
+  faVolumeUp,
+  faMapMarkerAlt,
 );
 
 export default FontAwesomeIcon;

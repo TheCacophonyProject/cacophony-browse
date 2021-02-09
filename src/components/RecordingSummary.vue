@@ -17,11 +17,15 @@
       <div class="recording-details">
         <span class="recording-group">
           <font-awesome-icon icon="users" size="xs" />
-          {{ item.groupname }}
+          <span class="label">{{ item.groupname }}</span>
         </span>
-        <span class="recording-device">
+        <span class="recording-station" v-if="item.stationname">
+          <font-awesome-icon icon="map-marker-alt" size="xs" />
+          <span class="label">{{ item.stationname }}</span>
+        </span>
+        <span class="recording-device" v-else>
           <font-awesome-icon icon="microchip" size="xs" />
-          {{ item.devicename }}
+          <span class="label">{{ item.devicename }}</span>
         </span>
       </div>
       <div v-if="item.tags.length !== 0" class="recording-tags">
@@ -30,11 +34,11 @@
       <div class="recording-time-duration">
         <div class="recording-time">
           <font-awesome-icon :icon="['far', 'calendar']" size="xs" />
-          {{ item.date }} {{ item.time }}
+          <span class="label">{{ item.date }} {{ item.time }}</span>
         </div>
         <div class="recording-duration">
           <font-awesome-icon :icon="['far', 'clock']" size="xs" />
-          {{ item.duration }} seconds
+          <span class="label">{{ item.duration }} seconds</span>
         </div>
         <div v-if="hasBattery" class="recording-battery">
           <BatteryLevel :battery-level="item.other.batteryLevel" />
@@ -220,20 +224,20 @@ $recording-side-padding: 0.9rem;
   .recording-details {
     flex: 1 1 auto;
     padding: 0.7rem $recording-side-padding;
+    .recording-station,
     .recording-group,
     .recording-device {
       // all elements that are the direct descendants of this div
       display: inline-block;
       word-break: break-word;
-      margin-right: 0.8rem;
+      margin-right: 0.5rem;
       @include media-breakpoint-down(xs) {
         display: block;
       }
     }
-    .recording-group,
-    .recording-device {
-      margin-right: 0.5rem;
-    }
+  }
+  .label {
+    vertical-align: middle;
   }
 
   .recording-tags {

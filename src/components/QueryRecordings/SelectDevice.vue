@@ -6,12 +6,50 @@
       :options="options"
       :multiple="true"
       :placeholder="placeholder"
-      :disabled="!fetched"
-      track-by="id"
+      :disabled="fetching"
+      track-by="uid"
       label="name"
       @input="updateSelected"
       data-cy="device-select"
-    />
+    >
+      <template slot="tag" slot-scope="{ option, remove }">
+        <span class="multiselect__tag">
+          <font-awesome-icon
+            v-if="option.type === 'group'"
+            icon="users"
+            size="xs"
+          />
+          <font-awesome-icon
+            v-else-if="option.type === 'device'"
+            icon="microchip"
+            size="xs"
+          />
+          <span class="tag">{{ option.name }}</span>
+          <span v-if="option.type === 'group'" class="tag">
+            ({{ option.devices.length }} devices)
+          </span>
+
+          <i
+            aria-hidden="true"
+            tabindex="1"
+            class="multiselect__tag-icon"
+            @click="(_) => remove(option)"
+            @keypress.enter.space="remove(option)"
+          ></i>
+        </span>
+      </template>
+      <template slot="option" slot-scope="{ option: { type, name } }">
+        <span>
+          <font-awesome-icon v-if="type === 'group'" icon="users" size="xs" />
+          <font-awesome-icon
+            v-else-if="type === 'device'"
+            icon="microchip"
+            size="xs"
+          />
+          <span class="option">{{ name }}</span>
+        </span>
+      </template>
+    </multiselect>
   </b-form-group>
 </template>
 
@@ -30,9 +68,14 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      fetching: false,
+    };
+  },
   computed: {
     placeholder: function () {
-      if (!this.fetched) {
+      if (this.fetching) {
         return "loading";
       } else if (
         this.selectedDevices.length === 0 &&
@@ -44,60 +87,74 @@ export default {
       }
     },
     ...mapState({
-      fetched: (state) => state.Devices.fetched,
       devices: (state) =>
-        state.Devices.devices.map((device) => {
-          return {
-            id: "D" + device.id,
-            name: device.devicename,
-          };
-        }),
+        state.Devices.devices
+          .map(({ id, devicename }) => ({
+            id: Number(id),
+            type: "device",
+            name: devicename,
+            uid: `device_${id}`,
+          }))
+          .reduce((acc, curr) => {
+            acc[curr.id] = curr;
+            return acc;
+          }, {}),
       groups: (state) =>
-        state.Groups.groups.map((group) => {
-          return {
-            id: "G" + group.id,
-            name: group.groupname + " (group)",
-            devices: group.Devices,
-          };
-        }),
+        state.Groups.groups
+          .map(({ id, groupname, Devices }) => ({
+            id: Number(id),
+            type: "group",
+            name: groupname,
+            devices: Devices,
+            uid: `group_${id}`,
+          }))
+          // NOTE: Filter out empty groups
+          .filter(({ devices }) => devices.length !== 0)
+          .reduce((acc, curr) => {
+            acc[curr.id] = curr;
+            return acc;
+          }, {}),
     }),
     selectedValues() {
       const selectedDs = this.selectedDevices
-        .map((deviceId) => this.devices.find(({ id }) => "D" + deviceId === id))
+        .map((deviceId) => this.devices[deviceId])
         .filter((item) => item !== undefined);
       const selectedGs = this.selectedGroups
-        .map((groupId) => this.groups.find(({ id }) => "G" + groupId === id))
+        .map((groupId) => this.groups[groupId])
         .filter((item) => item !== undefined);
       return [...selectedDs, ...selectedGs];
     },
     options() {
-      return [...this.devices, ...this.groups];
+      return [...Object.values(this.devices), ...Object.values(this.groups)];
     },
   },
   methods: {
     updateSelected(selectedObjects) {
-      const devices = this.getIdsWithPrefix(selectedObjects, "D");
-      const groups = this.getIdsWithPrefix(selectedObjects, "G");
       const updatedSelection = {
-        devices: devices,
-        groups: groups,
+        devices: selectedObjects
+          .filter(({ type }) => type === "device")
+          .map(({ id }) => id),
+        groups: selectedObjects
+          .filter(({ type }) => type === "group")
+          .map(({ id }) => id),
       };
       // this causes the v-model in the parent component to get updated
       this.$emit("update-device-selection", updatedSelection);
     },
-
-    getIdsWithPrefix(objects, prefix) {
-      const prefixed = objects.filter((item) => item.id.startsWith(prefix));
-      return prefixed.map((item) =>
-        parseInt(item.id.substring(prefix.length, item.id.length))
-      );
-    },
   },
-  created: async function () {
-    await this.$store.dispatch("Devices/GET_DEVICES");
-    await this.$store.dispatch("Groups/GET_GROUPS");
+  async created() {
+    this.fetching = true;
+    await Promise.all([
+      this.$store.dispatch("Devices/GET_DEVICES"),
+      this.$store.dispatch("Groups/GET_GROUPS"),
+    ]);
+    this.fetching = false;
   },
 };
 </script>
-
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style scoped>
+.tag,
+.option {
+  vertical-align: middle;
+}
+</style>

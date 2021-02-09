@@ -64,6 +64,9 @@ export interface RecordingInfo {
   Group: {
     groupname: string;
   };
+  Station?: {
+    name: string;
+  };
   Tags: Tag[];
   Tracks: Track[];
   Device: Device;

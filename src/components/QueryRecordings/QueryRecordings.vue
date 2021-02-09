@@ -158,7 +158,7 @@ export default {
       this.updateRouteQuery();
       this.makeApiRequest();
     },
-    setAdvancedInitalState() {
+    setAdvancedInitialState() {
       // If there was an advanced query, start with the advanced toggle area open.
       this.advanced =
         (this.tagData && this.tagData.tagMode !== "any") ||
@@ -189,13 +189,17 @@ export default {
       };
 
       if (routeQuery.hasOwnProperty("group")) {
-        this.selectedGroups = makeArray(routeQuery.group);
+        this.selectedGroups = makeArray(routeQuery.group).map((item) =>
+          Number(item)
+        );
       }
       if (routeQuery.hasOwnProperty("device")) {
-        this.selectedDevices = makeArray(routeQuery.device);
+        this.selectedDevices = makeArray(routeQuery.device).map((item) =>
+          Number(item)
+        );
       }
 
-      this.setAdvancedInitalState();
+      this.setAdvancedInitialState();
     },
     serialiseQueryForRecall() {
       if (this.isAudio) {
