@@ -27,6 +27,11 @@
           <font-awesome-icon icon="microchip" size="xs" />
           <span class="label">{{ item.devicename }}</span>
         </span>
+        <span class="recording-tracks">
+          <font-awesome-icon icon="stream" size="xs" />
+          <span class="label" v-if="item.trackCount !== 0">{{ item.trackCount }} track<span v-if="item.trackCount > 1">s</span></span>
+          <span class="label" v-else>No tracks</span>
+        </span>
       </div>
       <div v-if="item.tags.length !== 0" class="recording-tags">
         <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />

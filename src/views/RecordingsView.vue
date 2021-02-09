@@ -331,6 +331,7 @@ export default {
             duration: row.duration,
             tags: this.collateTags(row.Tags, row.Tracks),
             other: this.parseOther(row),
+            trackCount: row.Tracks.length,
             processing_state: this.parseProcessingState(row.processingState),
           };
           if (row.Station) {
