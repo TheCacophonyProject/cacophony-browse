@@ -95,10 +95,7 @@ export default {
             name: devicename,
             uid: `device_${id}`,
           }))
-          .reduce((acc, curr) => {
-            acc[curr.id] = curr;
-            return acc;
-          }, {}),
+          .reduce((acc, curr) => ((acc[curr.id] = curr), acc), {}),
       groups: (state) =>
         state.Groups.groups
           .map(({ id, groupname, Devices }) => ({
@@ -110,10 +107,7 @@ export default {
           }))
           // NOTE: Filter out empty groups
           .filter(({ devices }) => devices.length !== 0)
-          .reduce((acc, curr) => {
-            acc[curr.id] = curr;
-            return acc;
-          }, {}),
+          .reduce((acc, curr) => ((acc[curr.id] = curr), acc), {}),
     }),
     selectedValues() {
       const selectedDs = this.selectedDevices
