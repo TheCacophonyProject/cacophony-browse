@@ -22,7 +22,7 @@
             :num-tracks="tracks.length"
             :recording-id="getRecordingId()"
             :is-wallaby-project="isWallabyProject()"
-            :show="index === selectedTrack"
+            :show="index === selectedTrack.trackIndex"
             :colour="colours[index % colours.length]"
             @trackSelected="trackSelected"
           />
@@ -100,7 +100,7 @@ export default {
   data() {
     return {
       showAddObservation: false,
-      selectedTrack: 0,
+      selectedTrack: { trackIndex: 0 },
       startVideoTime: 0,
       colours: TagColours,
     };
@@ -116,14 +116,18 @@ export default {
     },
   },
   mounted: function () {
-    this.selectedTrack = this.getSelectedTrack();
+    this.selectedTrack = {
+      trackIndex: this.getSelectedTrack()
+    };
   },
   watch: {
     recording: function () {
       this.trackSelected(0);
     },
     tracks: function () {
-      this.selectedTrack = this.getSelectedTrack();
+      this.selectedTrack = {
+        trackIndex: this.getSelectedTrack()
+      };
     },
   },
 
@@ -212,7 +216,7 @@ export default {
       this.$store.dispatch("Video/DELETE_TAG", tagId);
     },
     trackSelected(track) {
-      this.selectedTrack = track;
+      this.selectedTrack = { trackIndex: track };
     },
     updateComment(comment) {
       const recordingId = Number(this.$route.params.id);

@@ -2,7 +2,7 @@
   <div ref="container" class="video-container">
     <MotionPathsOverlay
       v-if="showMotionPaths && hasTracks && playerIsReady"
-      :current-track="currentTrack"
+      :current-track="currentTrack.trackIndex"
       :show-only-for-current-track="showOverlaysForCurrentTrackOnly"
       :canvas-width="canvasWidth"
       :canvas-height="canvasHeight"
@@ -48,7 +48,7 @@
       :duration="duration"
       :tracks="tracks"
       :current-video-time="currentVideoTime"
-      :current-track="currentTrack"
+      :current-track="currentTrack.trackIndex"
       :canvas-width="canvasWidth"
       :side-padding="vjsButtonWidth"
       @start-scrub="startScrub"
@@ -84,8 +84,8 @@ export default {
       required: true,
     },
     currentTrack: {
-      type: Number,
-      default: 0,
+      type: Object,
+      default: () => ({ trackIndex: 0 }),
     },
     canSelectTracks: {
       type: Boolean,
@@ -220,7 +220,7 @@ export default {
           },
         ];
         // if tracks is loaded then select the first track
-        if (this.currentTrack !== 0) {
+        if (this.currentTrack.trackIndex !== 0) {
           this.$emit("trackSelected", 0);
         }
       }
@@ -230,7 +230,7 @@ export default {
       this.videoJsPlayer().currentTime(0);
       this.videoJsPlayer().trigger("loadstart");
       this.videoJsPlayer().play();
-      if (this.currentTrack !== 0) {
+      if (this.currentTrack.trackIndex !== 0) {
         this.$emit("trackSelected", 0);
       }
       this.ended = false;
@@ -253,9 +253,9 @@ export default {
     },
     selectTrack() {
       this.lastDisplayedVideoTime = -1;
-      if (this.tracks && this.currentTrack < this.tracks.length) {
+      if (this.tracks && this.currentTrack.trackIndex < this.tracks.length) {
         this.setTimeAndRedraw(
-          this.tracks[this.currentTrack].data.start_s + 0.01
+          this.tracks[this.currentTrack.trackIndex].data.start_s + 0.01
         );
       }
     },
@@ -318,7 +318,7 @@ export default {
           const hitIndex = this.tracks.findIndex(
             (track) => track.trackIndex === hitRect.trackIndex
           );
-          if (hitRect && this.currentTrack !== hitIndex) {
+          if (hitRect && this.currentTrack.trackIndex !== hitIndex) {
             this.$emit("trackSelected", hitIndex);
           }
         });
@@ -358,7 +358,7 @@ export default {
         (track) => track.trackIndex === trackIndex
       );
       context.strokeStyle = this.colours[hitIndex % this.colours.length];
-      const selected = this.currentTrack === hitIndex;
+      const selected = this.currentTrack.trackIndex === hitIndex;
       const lineWidth = selected ? 3 : 1;
       const halfLineWidth = lineWidth / 2;
       context.lineWidth = lineWidth;
@@ -397,8 +397,8 @@ export default {
       // See if tracks are in range.
       let tracks;
       if (currentTrackOnly) {
-        if (this.tracks.length && this.tracks[this.currentTrack]) {
-          tracks = [this.tracks[this.currentTrack]];
+        if (this.tracks.length && this.tracks[this.currentTrack.trackIndex]) {
+          tracks = [this.tracks[this.currentTrack.trackIndex]];
         } else {
           tracks = [];
         }
@@ -436,8 +436,8 @@ export default {
           // If we want to loop the current track, check to see if we've gone past the end of it here.
           const trackEndTime =
             (this.tracks &&
-              this.tracks[this.currentTrack] &&
-              this.tracks[this.currentTrack].data.end_s) ||
+              this.tracks[this.currentTrack.trackIndex] &&
+              this.tracks[this.currentTrack.trackIndex].data.end_s) ||
             Number.POSITIVE_INFINITY;
           if (this.currentVideoTime > trackEndTime) {
             this.selectTrack();
