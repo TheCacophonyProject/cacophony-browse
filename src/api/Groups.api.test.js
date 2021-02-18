@@ -109,6 +109,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
       testGroupId: 123456,
     };
 
+    // FIXME(jon)
     await groupApi.getGroups(params);
 
     const query = fetch.mock.calls[0][0].split("?")[1];

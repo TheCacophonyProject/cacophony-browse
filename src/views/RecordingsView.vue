@@ -144,7 +144,8 @@ import {
   toStringTodayYesterdayOrDate,
   toNZDateString,
   startOfDay,
-} from "../helpers/datetime";
+  startOfHour,
+} from "@/helpers/datetime";
 
 export default {
   name: "RecordingsView",
@@ -317,8 +318,18 @@ export default {
             item.date = thisDate;
             this.tableItems.push(item);
             prevDate = thisDate;
+          } else if (
+            startOfHour(thisDate, true).getTime() !==
+            startOfHour(prevDate, true).getTime()
+          ) {
+            const item = {
+              kind: "dataSeparator",
+              hour: thisDate,
+            };
+            this.tableItems.push(item);
+            prevDate = thisDate;
           }
-          this.tableItems.push({
+          const itemData = {
             kind: "dataRow",
             id: row.id,
             type: row.type,
@@ -331,8 +342,13 @@ export default {
             duration: row.duration,
             tags: this.collateTags(row.Tags, row.Tracks),
             other: this.parseOther(row),
+            trackCount: row.Tracks.length,
             processing_state: this.parseProcessingState(row.processingState),
-          });
+          };
+          if (row.Station) {
+            itemData.stationname = row.Station.name;
+          }
+          this.tableItems.push(itemData);
         }
       }
     },
@@ -450,7 +466,6 @@ $main-content-width: 640px;
 .search-content-wrapper {
   margin: 0 auto;
   flex-basis: $main-content-width;
-  padding: 0 1em;
   h1 {
     margin: 2rem 0 1.2rem;
   }
@@ -500,6 +515,7 @@ $main-content-width: 640px;
   .search-results {
     max-width: $main-content-width;
     margin: 0 auto;
+    padding: 0 1em;
   }
 
   &.display-rows {

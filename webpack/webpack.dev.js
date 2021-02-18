@@ -6,7 +6,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const devConfig = require("../dev-config");
 
 const distDir = path.resolve(__dirname, "../dist");
-
 module.exports = merge(common, {
   mode: "development",
   entry: { load: "./src/load.js" },
@@ -19,6 +18,7 @@ module.exports = merge(common, {
     new webpack.DefinePlugin({
       __ENV__: JSON.stringify(devConfig.environment),
       __API__: JSON.stringify(devConfig.api),
+      __LINZ_API_KEY__: JSON.stringify(devConfig.linzBasemapApiKey || "")
     }),
     new HtmlWebpackPlugin({
       template: "index.template.ejs",

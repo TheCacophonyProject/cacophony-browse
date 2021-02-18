@@ -153,12 +153,11 @@ export default {
     },
     updatePagination(perPage, page) {
       this.query.limit = perPage;
-      const newOffset = Math.max(0, (page - 1) * perPage);
-      this.query.offset = newOffset;
+      this.query.offset = Math.max(0, (page - 1) * perPage);
       this.updateRouteQuery();
       this.makeApiRequest();
     },
-    setAdvancedInitalState() {
+    setAdvancedInitialState() {
       // If there was an advanced query, start with the advanced toggle area open.
       this.advanced =
         (this.tagData && this.tagData.tagMode !== "any") ||
@@ -189,13 +188,17 @@ export default {
       };
 
       if (routeQuery.hasOwnProperty("group")) {
-        this.selectedGroups = makeArray(routeQuery.group);
+        this.selectedGroups = makeArray(routeQuery.group).map((item) =>
+          Number(item)
+        );
       }
       if (routeQuery.hasOwnProperty("device")) {
-        this.selectedDevices = makeArray(routeQuery.device);
+        this.selectedDevices = makeArray(routeQuery.device).map((item) =>
+          Number(item)
+        );
       }
 
-      this.setAdvancedInitalState();
+      this.setAdvancedInitialState();
     },
     serialiseQueryForRecall() {
       if (this.isAudio) {
@@ -205,7 +208,7 @@ export default {
         };
       }
 
-      const params = {
+      return {
         tagMode: this.tagData.tagMode,
         tag: this.tagData.tags,
         minS: this.duration.minS,
@@ -219,8 +222,6 @@ export default {
         device: this.selectedDevices,
         group: this.selectedGroups,
       };
-
-      return params;
     },
 
     updateRouteQuery() {

@@ -1,9 +1,11 @@
 // These are the values for unit tests. They are overriden at startup
 // for dev/staging/prod.
-const config = {
+const Config = {
   environment: "TEST",
   api: "http://mocked-api-path",
+  linzBasemapApiKey: "YOUR_API_KEY_HERE",
+  tagVersion: 100,
 };
 
-config.tagVersion = 100;
-export default config;
+// eslint-disable-next-line no-undef
+module.exports = Config;

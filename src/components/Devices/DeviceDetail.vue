@@ -179,17 +179,17 @@ export default {
     },
   }),
   methods: {
-    async removeUser(userName) {
+    async removeGroupUser(userName) {
       await this.$store.dispatch("Devices/REMOVE_USER", {
         userName,
         device: this.device,
       });
     },
-    async removeUserCheckIfSelf(userName, uiUser) {
+    async removeGroupUserCheckIfSelf(userName, uiUser) {
       if (userName == uiUser) {
         this.showUserRemoveSelfModal = true;
       } else {
-        this.removeUser(userName);
+        this.removeGroupUser(userName);
       }
     },
   },

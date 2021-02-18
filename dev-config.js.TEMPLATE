@@ -1,5 +1,6 @@
 module.exports = {
   'environment': 'DEVELOPMENT',
   'api': "http://127.0.0.1:1080" // local docker api server
+  'linzBasemapApiKey': "YOUR_API_KEY_HERE" // Api key for LINZ basemap service - you can get one here: https://basemaps.linz.govt.nz/
   // 'api': "https://api-test.cacophony.org.nz"  // test server
 };
