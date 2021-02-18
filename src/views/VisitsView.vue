@@ -440,14 +440,9 @@ export default {
         this.canLoadMore = false;
         return;
       }
-      this.count += result.numVisits;
       this.offset = result.queryOffset;
       this.canLoadMore = result.hasMoreVisits;
-      if (this.count > 0) {
-        this.countMessage = `${this.count} visits found (total)`;
-      } else if (this.count === 0) {
-        this.countMessage = "No visits";
-      }
+
 
       const summary = result.summary;
       const filtered = result.visits.filter(
@@ -456,9 +451,22 @@ export default {
           visit.what != DefaultLabels.allLabels.bird.value &&
           visit.what != DefaultLabels.allLabels.falsePositive.value
       );
+      this.count += filtered.length;
+      if (this.count > 0) {
+        this.countMessage = `${this.count} visits found (total)`;
+      } else if (this.count === 0) {
+        this.countMessage = "No visits";
+      }
+
       this.visits.push(...filtered);
       for (const devId of Object.keys(summary)) {
         const newSummary = summary[devId];
+        if (newSummary.hasOwnProperty(DefaultLabels.allLabels.bird.value)) {
+          delete newSummary[DefaultLabels.allLabels.bird.value]
+        }
+        if (newSummary.hasOwnProperty(DefaultLabels.allLabels.falsePositive.value)) {
+          delete newSummary[DefaultLabels.allLabels.falsePositive.value]
+        }
         // filter out bird and false positive
         if (!(devId in this.deviceSummary)) {
           this.deviceSummary[devId] = newSummary;
