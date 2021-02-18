@@ -61,8 +61,8 @@ const initialFormState = {
 export default {
   name: "GroupUserAdd",
   props: {
-    group: {
-      type: Object,
+    groupName: {
+      type: String,
       required: true,
     },
   },
@@ -108,7 +108,7 @@ export default {
       event.preventDefault();
       if (!this.$v.$invalid) {
         const result = await api.groups.addGroupUser(
-          this.group.groupname,
+          this.groupName,
           this.form.username,
           this.form.isAdmin
         );

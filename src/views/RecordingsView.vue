@@ -144,6 +144,7 @@ import {
   toStringTodayYesterdayOrDate,
   toNZDateString,
   startOfDay,
+  startOfHour,
 } from "@/helpers/datetime";
 
 export default {
@@ -317,6 +318,16 @@ export default {
             item.date = thisDate;
             this.tableItems.push(item);
             prevDate = thisDate;
+          } else if (
+            startOfHour(thisDate, true).getTime() !==
+            startOfHour(prevDate, true).getTime()
+          ) {
+            const item = {
+              kind: "dataSeparator",
+              hour: thisDate,
+            };
+            this.tableItems.push(item);
+            prevDate = thisDate;
           }
           const itemData = {
             kind: "dataRow",
@@ -455,7 +466,6 @@ $main-content-width: 640px;
 .search-content-wrapper {
   margin: 0 auto;
   flex-basis: $main-content-width;
-  padding: 0 1em;
   h1 {
     margin: 2rem 0 1.2rem;
   }
@@ -505,6 +515,7 @@ $main-content-width: 640px;
   .search-results {
     max-width: $main-content-width;
     margin: 0 auto;
+    padding: 0 1em;
   }
 
   &.display-rows {

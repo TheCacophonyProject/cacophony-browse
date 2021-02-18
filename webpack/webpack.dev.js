@@ -18,7 +18,7 @@ module.exports = merge(common, {
     new webpack.DefinePlugin({
       __ENV__: JSON.stringify(devConfig.environment),
       __API__: JSON.stringify(devConfig.api),
-      __LINZ_API_KEY__: JSON.stringify(devConfig.linzBasemapApiKey)
+      __LINZ_API_KEY__: JSON.stringify(devConfig.linzBasemapApiKey || "")
     }),
     new HtmlWebpackPlugin({
       template: "index.template.ejs",
