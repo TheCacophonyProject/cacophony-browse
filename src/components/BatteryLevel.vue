@@ -1,7 +1,7 @@
 <template>
   <span>
     <font-awesome-icon :icon="icon" />
-    {{ batteryLevel }}%
+    <span class="label">{{ batteryLevel }}%</span>
   </span>
 </template>
 
@@ -35,9 +35,7 @@ export default {
 </script>
 
 <style scoped>
-.fa-spin {
-  color: #f5f5f5;
-  margin: 1rem auto;
-  display: flex;
+.label {
+  vertical-align: middle;
 }
 </style>

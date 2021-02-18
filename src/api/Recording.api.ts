@@ -23,6 +23,7 @@ export type RecordingId = number;
 export type TrackId = number;
 export type TagId = number;
 export type UserId = number;
+export type StationId = number;
 export type TrackTagId = number;
 export type GroupId = number;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
@@ -59,8 +60,12 @@ export interface RecordingInfo {
   batteryLevel: null;
   DeviceId: DeviceId;
   GroupId: GroupId;
+  StationId: StationId | null;
   Group: {
     groupname: string;
+  };
+  Station?: {
+    name: string;
   };
   Tags: Tag[];
   Tracks: Track[];

@@ -13,23 +13,22 @@
           ref="input-username"
           id="input-username"
           @update="resetFormSubmission"
-          v-model="$v.form.username.$model"
+          v-model.trim="$v.form.username.$model"
           :state="usernameState"
           aria-describedby="username-live-help username-live-feedback"
           type="text"
           autofocus
           class="input"
           data-cy="user-name-input"
-        ></b-form-input>
+        />
 
         <b-form-invalid-feedback id="username-live-feedback">
           This username couldn't be found.
         </b-form-invalid-feedback>
 
-        <b-form-text id="username-live-help"
-          >Users can view recordings for the devices associated with this
-          group.</b-form-text
-        >
+        <b-form-text id="username-live-help">
+          Users can view recordings for the devices associated with this group.
+        </b-form-text>
       </b-form-group>
 
       <b-form-group>
@@ -52,17 +51,19 @@
 
 <script>
 import { required } from "vuelidate/lib/validators";
+import api from "@/api";
 
 const initialFormState = {
   username: null,
   isAdmin: false,
 };
+
 export default {
   name: "GroupUserAdd",
   props: {
-    group: {
-      type: Object,
-      default: () => {},
+    groupName: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -75,7 +76,7 @@ export default {
     usernameIsEmpty() {
       return (
         this.$v.form.username.$model === null ||
-        this.$v.form.username.$model === ""
+        this.$v.form.username.$model.trim() === ""
       );
     },
     usernameState() {
@@ -105,21 +106,18 @@ export default {
     },
     addUser: async function (event) {
       event.preventDefault();
-
       if (!this.$v.$invalid) {
-        const params = {
-          userName: this.$v.form.username.$model,
-          isAdmin: this.$v.form.isAdmin.$model,
-          groupName: this.group.groupname,
-        };
-
-        const result = await this.$store.dispatch(
-          "Groups/ADD_GROUP_USER",
-          params
+        const result = await api.groups.addGroupUser(
+          this.groupName,
+          this.form.username,
+          this.form.isAdmin
         );
-
-        if (result === false) {
+        if (!result.success) {
           this.formSubmissionFailed = true;
+        } else {
+          // We can emit that a user was added to the group:
+          this.$bvModal.hide("group-user-add");
+          this.$emit("user-added-to-group");
         }
       }
     },

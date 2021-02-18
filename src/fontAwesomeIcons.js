@@ -22,6 +22,7 @@ import {
   faGlasses,
   faReply,
   faMicrochip,
+  faMapMarkerAlt,
   faMusic,
   faPlay,
   faPowerOff,
@@ -29,6 +30,7 @@ import {
   faQuestionCircle,
   faSearch,
   faStar,
+  faStream,
   faTimes,
   faTimesCircle,
   faTrash,
@@ -98,6 +100,7 @@ library.add(
   faReply,
   faSearch,
   faStar,
+  faStream,
   faTimes,
   faTimesCircle,
   faThumbsUp,
@@ -114,7 +117,8 @@ library.add(
   faUserPlus,
   faUserSecret,
   faChevronRight,
-  faVolumeUp
+  faVolumeUp,
+  faMapMarkerAlt
 );
 
 export default FontAwesomeIcon;

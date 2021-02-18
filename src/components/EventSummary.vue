@@ -47,10 +47,10 @@ export default {
       return moment(date).format(formatStr);
     },
     capitalizeFirst(value: string) {
-      if ( value ) {
+      if (value) {
         return value.charAt(0).toUpperCase() + value.substring(1);
-      }else{
-        return "Nothing"
+      } else {
+        return "Nothing";
       }
     },
     navigateToRecording(event, visEvent: VisitEvent) {

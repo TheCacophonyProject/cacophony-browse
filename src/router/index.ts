@@ -1,30 +1,27 @@
-import Vue from "vue";
 import Router from "vue-router";
-import store from "../stores";
-
-import DevicesView from "../views/DevicesView.vue";
-import DeviceView from "../views/DeviceView.vue";
-import ErrorView from "../views/ErrorView.vue";
-import GroupsView from "../views/GroupsView.vue";
-import GroupView from "../views/GroupView.vue";
-import HomeView from "../views/HomeView.vue";
-import LoginView from "../views/LoginView.vue";
-import RecordingsView from "../views/RecordingsView.vue";
-import RegisterView from "../views/RegisterView.vue";
-import RecordingVue from "../views/RecordingView.vue";
-import AddEmailView from "../views/AddEmailView.vue";
-import AnalysisView from "../views/AnalysisView.vue";
-import VisitsView from "../views/VisitsView.vue";
-import TaggingView from "../views/TaggingView.vue";
-import EndUserAgreementView from "../views/EndUserAgreementView.vue";
-
-Vue.use(Router);
+import store from "@/stores";
+import DevicesView from "@/views/DevicesView.vue";
+import DeviceView from "@/views/DeviceView.vue";
+import ErrorView from "@/views/ErrorView.vue";
+import GroupsView from "@/views/GroupsView.vue";
+import GroupView from "@/views/GroupView.vue";
+import HomeView from "@/views/HomeView.vue";
+import LoginView from "@/views/LoginView.vue";
+import RecordingsView from "@/views/RecordingsView.vue";
+import RegisterView from "@/views/RegisterView.vue";
+import RecordingVue from "@/views/RecordingView.vue";
+import AddEmailView from "@/views/AddEmailView.vue";
+import AnalysisView from "@/views/AnalysisView.vue";
+import VisitsView from "@/views/VisitsView.vue";
+import TaggingView from "@/views/TaggingView.vue";
+import EndUserAgreementView from "@/views/EndUserAgreementView.vue";
 
 function createRouter() {
   const router = new Router({
     mode: "history",
     fallback: false,
     scrollBehavior: () => ({
+      x: 0,
       y: 0,
     }),
     routes: [
@@ -112,8 +109,8 @@ function createRouter() {
   });
 
   router.beforeEach(async (to, from, next) => {
-    const now = new Date();
-    const euaUpdatedAt = new Date(store.getters["User/euaUpdatedAt"]);
+    const now = new Date().getTime();
+    const euaUpdatedAt = new Date(store.getters["User/euaUpdatedAt"]).getTime();
     // Update latest User Agreement once an hour
     if (now - euaUpdatedAt > 1000 * 60 * 60) {
       await store.dispatch("User/GET_END_USER_AGREEMENT_VERSION");

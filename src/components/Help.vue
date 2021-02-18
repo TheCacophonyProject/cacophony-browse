@@ -7,17 +7,11 @@
 <script>
 export default {
   name: "Help",
-  props: {
-    helpText: {
-      type: Object,
-      required: true,
-    },
-  },
   data() {
     return {
       helpTip: {
         html: true,
-        title: this.helpText.title,
+        title: this.$slots.default[0].text,
       },
     };
   },

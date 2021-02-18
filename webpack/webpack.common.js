@@ -7,6 +7,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
+  target: "web", // NOTE: Hot module reloading via vue-loader breaks without this, even though it is supposed to be the default.
   module: {
     rules: [
       {
@@ -15,7 +16,7 @@ module.exports = {
       },
       {
         test: /\.vue$/,
-        loader: "vue-loader",
+        loader: "vue-loader"
       },
       {
         test: /\.tsx?$/,
@@ -54,7 +55,7 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin(["src/assets/favicon", "src/assets/video"]),
+    new CopyWebpackPlugin(["src/assets/favicon", "src/assets/video", "src/assets/map"]),
     new ESLintPlugin(),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.DefinePlugin({
@@ -64,6 +65,7 @@ module.exports = {
   resolve: {
     alias: {
       vue$: "vue/dist/vue.esm.js",
+      "@": path.resolve(__dirname, '../src')
     },
     extensions: ["*", ".js", ".vue", ".json", ".ts"],
   },
