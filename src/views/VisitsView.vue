@@ -42,16 +42,19 @@
                 >
               </div>
             </div>
-            <h2 v-if="countMessage">
-              {{ countMessage }}
-            </h2>
+            <h5 v-if="queryPending">Loading...</h5>
             <h5 v-else-if="noQueryYet">
               This query takes a long time to run. Please select your group and
               then press search.
             </h5>
-            <h5 v-else>Loading...</h5>
+            <h2 v-else>
+              {{ countMessage }}
+            </h2>
             <p class="search-description" v-html="currentQueryDescription"></p>
-            <div v-if="!queryPending && !noQueryYet" class="results">
+            <div
+              v-if="!queryPending && !noQueryYet && visits.length > 0"
+              class="results"
+            >
               <h1>Visit Summary Per Device</h1>
               <div class="scrollable">
                 <div v-for="devMap in deviceSummary" :key="devMap.id">
@@ -224,7 +227,10 @@
               />
             </div>
           </div>
-          <div v-if="countMessage === 'No visits'" class="no-results">
+          <div
+            v-if="!queryPending && !noQueryYet && visits.length == 0"
+            class="no-results"
+          >
             <h6 class="text-muted">No recordings found</h6>
             <p class="small text-muted">Try modifying your search criteria.</p>
           </div>
@@ -259,8 +265,6 @@ export default {
       eventMaxTimeSeconds: 60 * 10,
       searchPanelIsCollapsed: true,
       queryPending: false,
-      count: null,
-      countMessage: null,
       deviceSummary: {},
       visits: [],
       loadingMore: false,
@@ -296,6 +300,19 @@ export default {
     };
   },
   computed: {
+    countMessage() {
+      if (this.visits.length > 0) {
+        let suffix;
+        if (this.visits.length > 1) {
+          suffix = "visits";
+        } else {
+          suffix = "visit";
+        }
+        return `${this.visits.length} ${suffix} found (total)`;
+      } else {
+        return "No Visits";
+      }
+    },
     visitsByDayAndHour() {
       const visitsByDay = [];
       let currentDay = null;
@@ -425,24 +442,21 @@ export default {
       }
       this.currentQueryDescription = this.nextQueryDescription;
       if (newQuery) {
-        this.countMessage = "No Visits";
         this.visits = [];
-        this.deviceSummary = {}
+        this.deviceSummary = {};
         this.offset = 0;
-        this.count = 0;
         this.canLoadMore = true;
         this.queryPending = false;
       }
-      this.processVisits(result, !newQuery);
+      this.processVisits(result);
     },
-    processVisits(result: VisitsQueryResult, mergeResults: boolean) {
+    processVisits(result: VisitsQueryResult) {
       if (result.numRecordings == 0) {
         this.canLoadMore = false;
         return;
       }
       this.offset = result.queryOffset;
       this.canLoadMore = result.hasMoreVisits;
-
 
       const summary = result.summary;
       const filtered = result.visits.filter(
@@ -451,43 +465,38 @@ export default {
           visit.what != DefaultLabels.allLabels.bird.value &&
           visit.what != DefaultLabels.allLabels.falsePositive.value
       );
-      this.count += filtered.length;
-      if (this.count > 0) {
-        this.countMessage = `${this.count} visits found (total)`;
-      } else if (this.count === 0) {
-        this.countMessage = "No visits";
-      }
 
       this.visits.push(...filtered);
       for (const devId of Object.keys(summary)) {
         const newSummary = summary[devId];
         if (newSummary.hasOwnProperty(DefaultLabels.allLabels.bird.value)) {
-          delete newSummary[DefaultLabels.allLabels.bird.value]
+          delete newSummary[DefaultLabels.allLabels.bird.value];
         }
-        if (newSummary.hasOwnProperty(DefaultLabels.allLabels.falsePositive.value)) {
-          delete newSummary[DefaultLabels.allLabels.falsePositive.value]
+        if (
+          newSummary.hasOwnProperty(DefaultLabels.allLabels.falsePositive.value)
+        ) {
+          delete newSummary[DefaultLabels.allLabels.falsePositive.value];
         }
         // filter out bird and false positive
         if (!(devId in this.deviceSummary)) {
           this.deviceSummary[devId] = newSummary;
-          continue
+          continue;
         }
         const existingSummary = this.deviceSummary[devId];
-        for(const [animal, animalSummary] of Object.entries(newSummary)){
-
+        for (const [animal, animalSummary] of Object.entries(newSummary)) {
           if (animal in existingSummary) {
             // merge
             const existingAnimalSummary = existingSummary[animal];
-            existingAnimalSummary.visitCount+=animalSummary.visitCount;
+            existingAnimalSummary.visitCount += animalSummary.visitCount;
             existingAnimalSummary.eventCount += animalSummary.eventCount;
-            if(animalSummary.start < existingAnimalSummary.start){
+            if (animalSummary.start < existingAnimalSummary.start) {
               existingAnimalSummary.start = animalSummary.start;
             }
-            if(animalSummary.end > existingAnimalSummary.end){
+            if (animalSummary.end > existingAnimalSummary.end) {
               existingAnimalSummary.end = animalSummary.end;
             }
           } else {
-            existingSummary[animal] =animalSummary;
+            existingSummary[animal] = animalSummary;
           }
         }
       }
