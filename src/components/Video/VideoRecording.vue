@@ -117,7 +117,7 @@ export default {
   },
   mounted: function () {
     this.selectedTrack = {
-      trackIndex: this.getSelectedTrack()
+      trackIndex: this.getSelectedTrack(),
     };
   },
   watch: {
@@ -126,7 +126,7 @@ export default {
     },
     tracks: function () {
       this.selectedTrack = {
-        trackIndex: this.getSelectedTrack()
+        trackIndex: this.getSelectedTrack(),
       };
     },
   },

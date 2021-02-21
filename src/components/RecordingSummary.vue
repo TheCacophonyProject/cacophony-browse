@@ -29,7 +29,11 @@
         </span>
         <span class="recording-tracks">
           <font-awesome-icon icon="stream" size="xs" />
-          <span class="label" v-if="item.trackCount !== 0">{{ item.trackCount }} track<span v-if="item.trackCount > 1">s</span></span>
+          <span class="label" v-if="item.trackCount !== 0"
+            >{{ item.trackCount }} track<span v-if="item.trackCount > 1"
+              >s</span
+            ></span
+          >
           <span class="label" v-else>No tracks</span>
         </span>
       </div>
