@@ -132,7 +132,7 @@ export default {
       {
         await api.groups.removeGroupUser(this.groupName, userName);
         // Mutate our local users object, we don't need to fetch it again.
-        this.group.GroupUsers = this.groupUsers.filter(
+        this.users = this.users.filter(
           (user) => user.username !== userName
         );
       }
