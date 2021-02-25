@@ -99,6 +99,7 @@ import GroupUserAdd from "./GroupUserAdd.vue";
 import Help from "@/components/Help.vue";
 import api from "@/api";
 import { mapState } from "vuex";
+import Vue from "vue";
 
 export default {
   name: "UsersTab",
@@ -132,9 +133,8 @@ export default {
       {
         await api.groups.removeGroupUser(this.groupName, userName);
         // Mutate our local users object, we don't need to fetch it again.
-        this.users = this.users.filter(
-          (user) => user.username !== userName
-        );
+        const delI = this.users.findIndex((user) => user.username == userName);
+        Vue.delete(this.users, delI);
       }
       this.isRemovingUser = false;
     },
