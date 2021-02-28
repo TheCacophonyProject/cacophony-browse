@@ -18,7 +18,7 @@
       :items="devices"
       :fields="[
         {
-          key: 'devicename',
+          key: 'deviceName',
           label: 'Device Name',
           sortable: true,
         },
@@ -33,10 +33,10 @@
         <b-link
           :to="{
             name: 'device',
-            params: { devicename: row.item.devicename },
+            params: { devicename: row.item.deviceName },
           }"
         >
-          {{ row.item.devicename }}
+          {{ row.item.deviceName }}
         </b-link>
       </template>
     </b-table>

@@ -25,28 +25,29 @@
       <b-tab title="Users">
         <template #title>
           <span>Users</span>
-          <b-spinner v-if="isLoading" type="border" small />
+          <b-spinner v-if="usersLoading" type="border" small />
           <b-badge v-else pill variant="secondary">{{
-            groupUsers.length
+            users.length
           }}</b-badge>
         </template>
         <UsersTab
-          :users="groupUsers"
+          :users="users"
           :is-group-admin="isGroupAdmin"
-          :loading="isLoading"
+          :loading="usersLoading"
           :group-name="groupName"
-          @user-added="() => fetchGroup()"
+          @user-added="() => fetchUsers()"
+          @user-removed="(userName) => removedUser(userName)"
         />
       </b-tab>
       <b-tab title="Devices">
         <template #title>
           <span>Devices</span>
-          <b-spinner v-if="isLoading" type="border" small />
+          <b-spinner v-if="devicesLoading" type="border" small />
           <b-badge v-else pill variant="secondary">{{
-            groupDevices.length
+            devices.length
           }}</b-badge>
         </template>
-        <DevicesTab :devices="groupDevices" :loading="isLoading" />
+        <DevicesTab :devices="devices" :loading="devicesLoading" />
       </b-tab>
       <b-tab title="Stations" lazy>
         <template #title>
@@ -84,8 +85,10 @@ export default {
   data() {
     return {
       stationsLoading: false,
-      isLoading: false, // Loading all data on page load
-      groupUsersAndDevices: null,
+      usersLoading: false, // Loading all users on page load
+      devicesLoading: false, // Loading all users on page load
+      users: [],
+      devices: [],
       stations: [],
       currentTabIndex: 0, // Which tab is the default one
     };
@@ -98,46 +101,36 @@ export default {
       return this.$route.params.groupname;
     },
     isGroupAdmin() {
-      if (
+      return (
         (this.currentUser && this.currentUser.isSuperUser) ||
-        (this.groupUsersAndDevices && this.groupUsersAndDevices.Users)
-      ) {
-        return (
-          this.currentUser.isSuperUser ||
-          this.groupUsers.some(
-            (user) =>
-              user.username === this.currentUser.username && user.isAdmin
-          )
-        );
-      }
-      return false;
-    },
-    groupUsers() {
-      return (
-        (this.groupUsersAndDevices && this.groupUsersAndDevices.GroupUsers) ||
-        []
-      );
-    },
-    groupDevices() {
-      return (
-        (this.groupUsersAndDevices && this.groupUsersAndDevices.Devices) || []
+        this.users.some(
+          (user) =>
+            user.userName === this.currentUser.username && user.isGroupAdmin
+        )
       );
     },
   },
   created() {
-    this.fetchGroup();
+    this.fetchUsers();
+    this.fetchDevices();
     this.fetchStations();
   },
   methods: {
-    async fetchGroup() {
-      this.isLoading = true;
+    async fetchUsers() {
+      this.usersLoading = true;
       {
-        // TODO: This currently fetches everything to do with a group,
-        //  but would probably be better separated into individual API calls.
-        const { result } = await api.groups.getGroups(this.groupName);
-        this.groupUsersAndDevices = result.groups[0];
+        const { result } = await api.groups.getUsersForGroup(this.groupName);
+        this.users = result.data;
       }
-      this.isLoading = false;
+      this.usersLoading = false;
+    },
+    async fetchDevices() {
+      this.devicesLoading = true;
+      {
+        const { result } = await api.groups.getDevicesForGroup(this.groupName);
+        this.devices = result.data;
+      }
+      this.devicesLoading = false;
     },
     async fetchStations() {
       this.stationsLoading = true;
@@ -146,6 +139,9 @@ export default {
         this.stations = result.stations;
       }
       this.stationsLoading = false;
+    },
+    removedUser(userName: string) {
+      this.users = this.users.filter((user) => user.userName !== userName);
     },
   },
 };

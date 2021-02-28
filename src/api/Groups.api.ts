@@ -41,9 +41,21 @@ function getGroups(groupName?: string) {
   return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent(where)}`);
 }
 
-function getStationsForGroup(groupName: string) {
+function getUsersForGroup(groupNameOrId: string | number) {
   return CacophonyApi.get(
-    `/api/v1/groups/${encodeURIComponent(groupName)}/stations`
+    `/api/v1/groups/${encodeURIComponent(groupNameOrId)}/users`
+  );
+}
+
+function getDevicesForGroup(groupNameOrId: string | number) {
+  return CacophonyApi.get(
+    `/api/v1/groups/${encodeURIComponent(groupNameOrId)}/devices`
+  );
+}
+
+function getStationsForGroup(groupNameOrId: string) {
+  return CacophonyApi.get(
+    `/api/v1/groups/${encodeURIComponent(groupNameOrId)}/stations`
   );
 }
 
@@ -72,6 +84,8 @@ function addStationsToGroup(
 export default {
   addNewGroup,
   getGroups,
+  getUsersForGroup,
+  getDevicesForGroup,
   getStationsForGroup,
   addStationsToGroup,
   addGroupUser,
