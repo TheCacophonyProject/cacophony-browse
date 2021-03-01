@@ -54,7 +54,7 @@
           <span>Stations</span>
           <b-spinner v-if="stationsLoading" type="border" small />
           <b-badge v-else pill variant="secondary">{{
-            stations.length
+            nonRetiredStationsCount
           }}</b-badge>
         </template>
         <StationsTab
@@ -108,6 +108,10 @@ export default {
             user.userName === this.currentUser.username && user.isGroupAdmin
         )
       );
+    },
+    nonRetiredStationsCount(): number {
+      return this.stations.filter((station) => station.retiredAt === null)
+        .length;
     },
   },
   created() {
