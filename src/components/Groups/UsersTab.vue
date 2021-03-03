@@ -51,7 +51,7 @@
         :items="users"
         :fields="[
           {
-            key: 'username',
+            key: 'userName',
             label: 'Username',
             sortable: true,
           },
@@ -73,7 +73,7 @@
         data-cy="users-table"
       >
         <template v-slot:cell(admin)="data">
-          {{ data.item.isAdmin ? "Yes" : "No" }}
+          {{ data.item.isGroupAdmin ? "Yes" : "No" }}
         </template>
 
         <template v-slot:cell(controls)="data">
@@ -84,7 +84,7 @@
             title="Remove user from group"
             class="trash-button"
             variant="light"
-            @click="removeGroupUserCheckIfSelf(data.item.username)"
+            @click="removeGroupUserCheckIfSelf(data.item.userName)"
           >
             <font-awesome-icon icon="trash" size="1x" />
           </b-button>
@@ -132,9 +132,7 @@ export default {
       {
         await api.groups.removeGroupUser(this.groupName, userName);
         // Mutate our local users object, we don't need to fetch it again.
-        this.group.GroupUsers = this.groupUsers.filter(
-          (user) => user.username !== userName
-        );
+        this.$emit("user-removed", userName);
       }
       this.isRemovingUser = false;
     },
