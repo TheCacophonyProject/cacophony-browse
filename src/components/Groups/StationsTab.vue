@@ -384,7 +384,7 @@ export default {
       if (!csvCameras.length) {
         this.invalidCsvFormat = true;
         this.invalidCsvReason =
-          "Supplied CSV has no columns labeled either 'Camera' or 'Thermal Camera'";
+          "Supplied CSV has no rows where the 'type' is either 'Camera' or 'Thermal Camera'";
       }
       this.pendingStations = csvCameras;
     },
