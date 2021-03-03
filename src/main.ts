@@ -14,6 +14,21 @@ import "bootstrap-vue/dist/bootstrap-vue.css";
 // Leaflet CSS
 import "leaflet/dist/leaflet.css";
 import Router from "vue-router";
+import {User} from "@/api/Recording.api";
+
+interface GlobalUserState {
+  user: User | null;
+  locallyPersistentUIPreferences: string[];
+}
+
+// We really don't need vuex for handling global state, we always fetch data at a view level, and the only thing
+// we need globally is the user settings.
+// See https://vuejs.org/v2/guide/state-management.html#Simple-State-Management-from-Scratch
+export const LoggedInUserState: GlobalUserState = {
+  user: null,
+  locallyPersistentUIPreferences: [],
+  // TODO(jon): This state could be hidden so there are only getters?
+};
 
 export default function () {
   // https://bootstrap-vue.js.org/docs
@@ -31,6 +46,8 @@ export default function () {
 
   new Vue({
     el: "#app",
+    data: LoggedInUserState,
+    // @ts-ignore
     store,
     router,
     render: (h) => h(App),

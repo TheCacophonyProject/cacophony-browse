@@ -33,12 +33,16 @@ function removeGroupUser(groupName, userName) {
   });
 }
 
-function getGroups(groupName?: string) {
-  let where = "{}";
-  if (groupName !== undefined) {
-    where = JSON.stringify({ groupname: groupName });
-  }
-  return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent(where)}`);
+function getGroup(groupNameOrId: string) {
+  return CacophonyApi.get(
+    `/api/v1/groups/${encodeURIComponent(groupNameOrId)}`
+  );
+}
+
+function getGroups(asSuperAdminIfPossible: boolean = true) {
+  return CacophonyApi.get(
+    `/api/v1/groups${asSuperAdminIfPossible ? "" : "?view-mode=limited"}`
+  );
 }
 
 function getUsersForGroup(groupNameOrId: string | number) {
@@ -65,11 +69,9 @@ function addStationsToGroup(
   applyFromDate?: Date
 ) {
   const payload: {
-    group: string | number;
     stations: string;
     fromDate?: string;
   } = {
-    group: groupName,
     stations: JSON.stringify(stations),
   };
   if (applyFromDate) {
@@ -84,6 +86,7 @@ function addStationsToGroup(
 export default {
   addNewGroup,
   getGroups,
+  getGroup,
   getUsersForGroup,
   getDevicesForGroup,
   getStationsForGroup,

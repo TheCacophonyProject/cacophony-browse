@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import api from "@/api";
 
 export default {
   name: "SelectDevice",
@@ -71,6 +71,8 @@ export default {
   data() {
     return {
       fetching: false,
+      devices: [],
+      groups: [],
     };
   },
   computed: {
@@ -86,29 +88,6 @@ export default {
         return "add more devices";
       }
     },
-    ...mapState({
-      devices: (state) =>
-        state.Devices.devices
-          .map(({ id, devicename }) => ({
-            id: Number(id),
-            type: "device",
-            name: devicename,
-            uid: `device_${id}`,
-          }))
-          .reduce((acc, curr) => ((acc[curr.id] = curr), acc), {}),
-      groups: (state) =>
-        state.Groups.groups
-          .map(({ id, groupname, Devices }) => ({
-            id: Number(id),
-            type: "group",
-            name: groupname,
-            devices: Devices,
-            uid: `group_${id}`,
-          }))
-          // NOTE: Filter out empty groups
-          .filter(({ devices }) => devices.length !== 0)
-          .reduce((acc, curr) => ((acc[curr.id] = curr), acc), {}),
-    }),
     selectedValues() {
       const selectedDs = this.selectedDevices
         .map((deviceId) => this.devices[deviceId])
@@ -119,7 +98,10 @@ export default {
       return [...selectedDs, ...selectedGs];
     },
     options() {
-      return [...Object.values(this.devices), ...Object.values(this.groups)];
+      return [
+        ...Object.values(this.devices),
+        ...Object.values(this.groups),
+      ].sort((a, b) => a.name.localeCompare(b.name));
     },
   },
   methods: {
@@ -138,10 +120,39 @@ export default {
   },
   async created() {
     this.fetching = true;
-    await Promise.all([
-      this.$store.dispatch("Devices/GET_DEVICES"),
-      this.$store.dispatch("Groups/GET_GROUPS"),
+    const asSuperAdmin = localStorage.getItem("view-as") !== "regular";
+    const [
+      {
+        result: {
+          devices: { rows: devices },
+        },
+      },
+      {
+        result: { groups },
+      },
+    ] = await Promise.all([
+      api.device.getDevices(asSuperAdmin),
+      api.groups.getGroups(asSuperAdmin),
     ]);
+    this.devices = devices
+      .map(({ id, devicename }) => ({
+        id: Number(id),
+        type: "device",
+        name: devicename,
+        uid: `device_${id}`,
+      }))
+      .reduce((acc, curr) => ((acc[curr.id] = curr), acc), {});
+    this.groups = groups
+      .map(({ id, groupname, Devices }) => ({
+        id: Number(id),
+        type: "group",
+        name: groupname,
+        devices: Devices,
+        uid: `group_${id}`,
+      }))
+      // NOTE: Filter out empty groups
+      .filter(({ devices }) => devices.length !== 0)
+      .reduce((acc, curr) => ((acc[curr.id] = curr), acc), {});
     this.fetching = false;
   },
 };

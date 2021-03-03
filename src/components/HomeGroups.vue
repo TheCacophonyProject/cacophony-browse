@@ -24,10 +24,13 @@ import { mapState } from "vuex";
 export default {
   name: "HomeGroups",
   components: { HomeGroupItem },
+  props: {
+    groups: {
+      type: Array,
+      required: true,
+    },
+  },
   computed: {
-    ...mapState({
-      groups: (state) => state.Groups.groups,
-    }),
     orderedGroups: {
       get() {
         return [...this.groups].sort((a, b) => {

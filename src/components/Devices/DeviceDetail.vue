@@ -2,7 +2,7 @@
   <div class="container">
     <b-row>
       <b-col class="col-12 col-lg-7">
-        <h2>Users <help :help-text="usersHelpTip" /></h2>
+        <h2>Users <help>Only administrators can add new users.</help></h2>
         <div class="description-and-button-wrapper">
           <p>
             Users can view recordings for this device. Note that users that
@@ -22,7 +22,7 @@
             <span>Add user</span>
           </b-button>
         </div>
-        <div v-if="!device.Users.length">
+        <div v-if="!deviceHasUsers">
           <b-card class="no-content-placeholder">
             This device has no users associated with it.
           </b-card>
@@ -150,9 +150,11 @@ export default {
       showUserRemoveSelfModal: false,
     };
   },
-  computed: mapState({
-    uiUser: (state) => state.User.userData.username,
-    isDeviceAdmin: function () {
+  computed: {
+    ...mapState({
+      uiUser: (state) => state.User.userData.username,
+    }),
+    isDeviceAdmin() {
       if (this.user && this.device.Users) {
         const username = this.user.username;
         return (
@@ -164,20 +166,23 @@ export default {
       }
       return false;
     },
-    dayOfSnapshot: function () {
+    dayOfSnapshot() {
       if (this.software.result.dateTime) {
         return toStringTodayYesterdayOrDate(
           new Date(this.software.result.dateTime)
         );
       }
     },
-    timeOfSnapshot: function () {
+    timeOfSnapshot() {
       if (this.software.result.dateTime) {
         const thisDate = new Date(this.software.result.dateTime);
         return thisDate.toLocaleTimeString();
       }
     },
-  }),
+    deviceHasUsers() {
+      return this.device.Users && this.device.Users.length !== 0;
+    }
+  },
   methods: {
     async removeGroupUser(userName) {
       await this.$store.dispatch("Devices/REMOVE_USER", {

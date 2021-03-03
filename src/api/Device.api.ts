@@ -2,13 +2,22 @@ import CacophonyApi from "./CacophonyApi";
 
 export default {
   getDevices,
+  getDevice,
   addUserToDevice,
   removeUserFromDevice,
   getLatestSoftwareVersion,
 };
 
-function getDevices() {
-  return CacophonyApi.get("/api/v1/devices");
+function getDevices(asSuperAdminIfPossible = true) {
+  return CacophonyApi.get(
+    `/api/v1/devices${asSuperAdminIfPossible ? "" : "?view-mode=limited"}`
+  );
+}
+
+function getDevice(deviceNameOrId: string | number) {
+  return CacophonyApi.get(
+    `/api/v1/devices/${encodeURIComponent(deviceNameOrId)}`
+  );
 }
 
 function addUserToDevice(username, deviceId, admin) {

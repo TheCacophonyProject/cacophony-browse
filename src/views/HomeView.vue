@@ -19,7 +19,7 @@
 
           <b-row>
             <b-col cols="12" md="6" class="mb-3">
-              <HomeGroups v-if="hasGroups" />
+              <HomeGroups v-if="hasGroups" :groups="groups" />
               <b-card v-else title="Setting up your own device?">
                 Create a group for your devices. Groups allow you to manage
                 devices, users, and consolidate all the information about
@@ -63,10 +63,11 @@
 
 <script>
 import { mapState } from "vuex";
-import HomeGroups from "../components/HomeGroups.vue";
-import HomeUser from "../components/HomeUser.vue";
-import Hero from "../components/Hero.vue";
-import Spinner from "../components/Spinner.vue";
+import api from "@/api";
+import HomeGroups from "@/components/HomeGroups.vue";
+import HomeUser from "@/components/HomeUser.vue";
+import Hero from "@/components/Hero.vue";
+import Spinner from "@/components/Spinner.vue";
 
 export default {
   name: "HomeView",
@@ -79,25 +80,33 @@ export default {
   data() {
     return {
       hasLoaded: false,
+      groups: [],
     };
   },
   computed: {
     ...mapState({
       username: (state) => state.User.userData.username,
-      groups: (state) => state.Groups.groups,
     }),
     hasGroups() {
-      return this.hasLoaded && this.groups && this.groups.length > 0;
+      return this.groups.length !== 0;
     },
   },
-  created: function () {
-    this.fetchGroup().then(() => {
-      this.hasLoaded = true;
-    });
+  async created() {
+    await this.fetchGroups();
   },
   methods: {
-    fetchGroup: function () {
-      return this.$store.dispatch("Groups/GET_GROUPS");
+    async fetchGroups() {
+      this.hasLoaded = false;
+      console.log(localStorage.getItem("view-as"));
+      const asSuperAdmin = localStorage.getItem("view-as") !== "regular";
+      console.log("As super?", asSuperAdmin);
+      try {
+        const {result} = await api.groups.getGroups(asSuperAdmin);
+        this.groups = result.groups;
+      } catch(e) {
+        // Handle this at a component level, or boot it up to a global error.
+      }
+      this.hasLoaded = true;
     },
   },
 };

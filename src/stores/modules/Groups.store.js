@@ -8,8 +8,8 @@ const state = {
 
 const getters = {};
 
-async function _getGroup(groupname, commit) {
-  const { result } = await api.groups.getGroups(groupname);
+async function _getGroup(groupName, commit) {
+  const { result } = await api.groups.getGroup(groupName);
   const group = result.groups[0];
   commit("setCurrentGroup", group);
   commit("receiveGroups", result.groups);
