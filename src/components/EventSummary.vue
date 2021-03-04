@@ -12,7 +12,7 @@
       {{ formatDate(item.start, "LTS") }}
     </b-col>
     <b-col>
-      <div v-if="item.confidence != 0">
+      <div v-if='item.confidence != 0 && item.confidence'>
         {{ item.confidence }}
         <span> %</span>
       </div>
@@ -50,7 +50,7 @@ export default {
       if (value) {
         return value.charAt(0).toUpperCase() + value.substring(1);
       } else {
-        return "Nothing";
+        return "Probably Nothing";
       }
     },
     navigateToRecording(event, visEvent: VisitEvent) {

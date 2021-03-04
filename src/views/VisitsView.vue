@@ -73,7 +73,7 @@
                       striped
                     >
                       <template v-slot:cell(what)="row">
-                        {{ row.item[0] }}
+                        {{ summaryWhat(row.item[0]) }}
                       </template>
                       <template v-slot:cell(start)="row">
                         {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
@@ -117,13 +117,15 @@
                         <span class="audio-bait" v-if="row.item.audioBaitVisit">
                           <font-awesome-icon icon="volume-up" size="xs" />
                         </span>
-                        <div class="what-image">
+                        <div class="what-cell">
                           <img
                             onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
                             :src="imgSrc(row.item.what)"
                             class="tag-img"
                           />
-                          {{ row.item.what }}
+                          <span class="what-text">
+                          {{ visitWhat(row.item.what) }}
+                          </span>
                         </div>
                       </template>
                       <template v-slot:cell(device)="row">
@@ -337,6 +339,24 @@ export default {
   },
   methods: {
     imgSrc,
+    visitWhat(what: string): string {
+      return this.capitalizeFirst(what);
+    },
+    summaryWhat(what: string): string {
+      if (what == "null"){
+        return "Probably Nothing"
+      }else if(what == DefaultLabels.allLabels.unidentified.value){
+        return "( Unidentified ) Animal"
+      }
+      return this.capitalizeFirst(what)
+    },
+    capitalizeFirst(value: string) {
+      if (value) {
+        return value.charAt(0).toUpperCase() + value.substring(1);
+      } else {
+        return "Probably Nothing";
+      }
+    },
     formatDate(date: string, formatStr: string): string {
       return moment(date).format(formatStr);
     },
@@ -652,12 +672,12 @@ $main-content-width: 640px;
   }
 }
 
-.what-image {
-  display: inline-block;
+.what-cell {
+  display: flex;
   margin-left: 0.4rem;
 }
-
 .tag-img {
+  width:30px;
   max-width: 30px;
   max-height: 30px;
   background: transparent;
