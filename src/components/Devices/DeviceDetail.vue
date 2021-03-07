@@ -46,7 +46,7 @@
               <b-modal
                 id="device-user-remove-self"
                 title="Remove yourself from device"
-                @ok="removeUser(data.item.username)"
+                @ok="removeDeviceUser(data.item.username)"
                 ok-title="Remove"
                 ok-variant="danger"
                 v-model="showUserRemoveSelfModal"
@@ -63,7 +63,7 @@
                 title="Remove user from device"
                 class="trash-button"
                 variant="light"
-                @click="removeUserCheckIfSelf(data.item.username, uiUser)"
+                @click="removeDeviceUserCheckIfSelf(data.item.username, uiUser)"
               >
                 <font-awesome-icon icon="trash" size="1x" />
               </b-button>
@@ -179,17 +179,17 @@ export default {
     },
   }),
   methods: {
-    async removeGroupUser(userName) {
+    async removeDeviceUser(userName) {
       await this.$store.dispatch("Devices/REMOVE_USER", {
         userName,
         device: this.device,
       });
     },
-    async removeGroupUserCheckIfSelf(userName, uiUser) {
+    async removeDeviceUserCheckIfSelf(userName, uiUser) {
       if (userName == uiUser) {
         this.showUserRemoveSelfModal = true;
       } else {
-        this.removeGroupUser(userName);
+        this.removeDeviceUser(userName);
       }
     },
   },
