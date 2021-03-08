@@ -379,15 +379,34 @@ export default {
         const tag = tags[i];
         const tagName = tag.animal === null ? tag.event : tag.animal;
         const taggerId = tag.taggerId;
-
         this.addToListOfTags(tagItems, tagName, tag.automatic, taggerId);
       }
 
       if (tracks) {
         for (let j = 0; j < tracks.length; j++) {
           const track = tracks[j];
-          for (let i = 0; i < track.TrackTags.length; i++) {
-            const tag = track.TrackTags[i];
+          // For track tags, pick the best one, which is the "master AI" tag.
+          const aiTag = track.TrackTags.find((tag) => tag.data === "Master");
+          const humanTags = track.TrackTags.filter((tag) => !tag.automatic);
+          // If the same track has one or more human tags, and none of them agree with the AI just show that:
+          let humansDisagree = false;
+          if (aiTag && humanTags.length !== 0) {
+            humansDisagree =
+              humanTags.find((tag) => tag.what === aiTag.what) === undefined;
+          }
+
+          if (aiTag && !humansDisagree) {
+            const taggerId = aiTag.UserId || aiTag.taggerId;
+            this.addToListOfTags(
+              tagItems,
+              aiTag.what,
+              aiTag.automatic,
+              taggerId
+            );
+          }
+
+          // Also add human tags:
+          for (const tag of humanTags) {
             const taggerId = tag.UserId || tag.taggerId;
             this.addToListOfTags(tagItems, tag.what, tag.automatic, taggerId);
           }
@@ -442,7 +461,7 @@ export default {
     addToListOfTags: function (allTags, tagName, isAutomatic, taggerId) {
       const tag = allTags[tagName] || {};
       tag.taggerIds = tag.taggerIds || [];
-      if (taggerId && tag.taggerIds.indexOf(taggerId) === -1) {
+      if (taggerId && !tag.taggerIds.includes(taggerId)) {
         tag.taggerIds.push(taggerId);
       }
       if (isAutomatic) {
