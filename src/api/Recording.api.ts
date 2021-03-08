@@ -296,6 +296,14 @@ function makeApiQuery(query: RecordingQuery): any {
     }
     apiParams["tags"] = JSON.stringify(query.tag);
   }
+
+  // View mode for restricting global admin users to only see their own recordings.
+  const limitedView = localStorage.getItem("view-as") === "regular";
+  if (limitedView) {
+    apiParams["view-mode"] = "limited";
+  }
+
+
   return apiParams;
 }
 
