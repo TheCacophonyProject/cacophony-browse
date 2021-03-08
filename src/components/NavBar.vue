@@ -120,6 +120,7 @@
 
 <script>
 import User from "../api/User.api";
+import { shouldViewAsSuperUser } from "@/utils";
 
 export default {
   name: "Navbar",
@@ -170,7 +171,7 @@ export default {
     },
   },
   mounted() {
-    this.viewAs = localStorage.getItem("view-as") || "";
+    this.viewAs = shouldViewAsSuperUser() ? "super" : "regular";
   },
   methods: {
     async initUsersList() {

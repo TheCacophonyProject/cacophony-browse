@@ -172,16 +172,18 @@ export default {
           new Date(this.software.result.dateTime)
         );
       }
+      return "";
     },
     timeOfSnapshot() {
       if (this.software.result.dateTime) {
         const thisDate = new Date(this.software.result.dateTime);
         return thisDate.toLocaleTimeString();
       }
+      return "";
     },
     deviceHasUsers() {
       return this.device.Users && this.device.Users.length !== 0;
-    }
+    },
   },
   methods: {
     async removeGroupUser(userName) {

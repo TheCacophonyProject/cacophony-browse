@@ -85,21 +85,17 @@ export default {
   },
   methods: {
     async fetchGroups() {
-
-      // TODO(jon): This needs to be refreshed if super-admin view mode changes - maybe just use the vuex for this.
-
       this.isLoading = true;
       {
         // TODO(jon): Error handling.
         try {
-          const { result } = await api.groups.getGroups(localStorage.getItem("view-as") !== "regular");
+          const { result } = await api.groups.getGroups();
           // Groups are always ordered alphabetically.
           this.groups = result.groups.sort((a, b) =>
             a.groupname.localeCompare(b.groupname)
           );
         } catch (error) {
           // Do something with the error.
-          console.log(error);
         }
       }
       this.isLoading = false;

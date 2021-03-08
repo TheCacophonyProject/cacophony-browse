@@ -19,7 +19,6 @@
 
 <script>
 import HomeGroupItem from "./HomeGroupItem.vue";
-import { mapState } from "vuex";
 
 export default {
   name: "HomeGroups",

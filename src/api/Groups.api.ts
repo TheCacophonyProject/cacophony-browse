@@ -1,4 +1,5 @@
 import CacophonyApi from "./CacophonyApi";
+import { shouldViewAsSuperUser } from "@/utils";
 
 function addNewGroup(groupName) {
   const suppressGlobalMessaging = true;
@@ -33,15 +34,9 @@ function removeGroupUser(groupName, userName) {
   });
 }
 
-function getGroup(groupNameOrId: string) {
+function getGroups() {
   return CacophonyApi.get(
-    `/api/v1/groups/${encodeURIComponent(groupNameOrId)}`
-  );
-}
-
-function getGroups(asSuperAdminIfPossible: boolean = true) {
-  return CacophonyApi.get(
-    `/api/v1/groups${asSuperAdminIfPossible ? "" : "?view-mode=limited"}`
+    `/api/v1/groups${shouldViewAsSuperUser() ? "" : "?view-mode=limited"}`
   );
 }
 
@@ -86,7 +81,6 @@ function addStationsToGroup(
 export default {
   addNewGroup,
   getGroups,
-  getGroup,
   getUsersForGroup,
   getDevicesForGroup,
   getStationsForGroup,

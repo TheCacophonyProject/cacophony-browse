@@ -18,7 +18,9 @@
           >loading device name</span
         >
         <span v-else>
-          <span>{{ device && device.devicename || $route.params.devicename }}</span>
+          <span>{{
+            (device && device.devicename) || $route.params.devicename
+          }}</span>
         </span>
       </h1>
       <p class="lead">Manage the users associated with this device.</p>
@@ -72,18 +74,17 @@ export default {
         await this.fetchDevice();
         await this.getSoftwareDetails(this.device.id);
       } catch (e) {
-        console.log(e);
+        // TODO - we will move away from global error handling, and show any errors locally in the component
       }
       this.loadedDevice = true;
     },
     fetchDevice: async function () {
-
-        const {
-          result: {
-            devices: { rows: devices },
-          },
-        } = await api.device.getDevice(this.$route.params.devicename);
-        this.devices = devices;
+      const {
+        result: {
+          devices: { rows: devices },
+        },
+      } = await api.device.getDevice(this.$route.params.devicename);
+      this.devices = devices;
     },
     getSoftwareDetails: async function (deviceId) {
       const results = await api.device.getLatestSoftwareVersion(deviceId);

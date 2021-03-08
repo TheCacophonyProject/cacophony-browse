@@ -1,4 +1,5 @@
 import CacophonyApi from "./CacophonyApi";
+import { shouldViewAsSuperUser } from "@/utils";
 
 export default {
   getDevices,
@@ -8,9 +9,9 @@ export default {
   getLatestSoftwareVersion,
 };
 
-function getDevices(asSuperAdminIfPossible = true) {
+function getDevices() {
   return CacophonyApi.get(
-    `/api/v1/devices${asSuperAdminIfPossible ? "" : "?view-mode=limited"}`
+    `/api/v1/devices${shouldViewAsSuperUser() ? "" : "?view-mode=limited"}`
   );
 }
 

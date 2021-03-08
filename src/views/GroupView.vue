@@ -26,9 +26,7 @@
         <template #title>
           <span>Users</span>
           <b-spinner v-if="usersLoading" type="border" small />
-          <b-badge v-else pill variant="secondary">{{
-            users.length
-          }}</b-badge>
+          <b-badge v-else pill variant="secondary">{{ users.length }}</b-badge>
         </template>
         <UsersTab
           :users="users"

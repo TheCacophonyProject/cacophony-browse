@@ -247,7 +247,10 @@ export default {
       }));
     },
     updateWarningsText() {
-      return "<strong>Warnings:</strong><br>"  + this.updateWarnings.replace(/\n/g, '<br>');
+      return (
+        "<strong>Warnings:</strong><br>" +
+        this.updateWarnings.replace(/\n/g, "<br>")
+      );
     },
     mapBounds() {
       // Calculate the initial map bounds and zoom level from the set of lat/lng points

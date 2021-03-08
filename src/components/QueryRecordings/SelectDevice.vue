@@ -120,7 +120,6 @@ export default {
   },
   async created() {
     this.fetching = true;
-    const asSuperAdmin = localStorage.getItem("view-as") !== "regular";
     const [
       {
         result: {
@@ -130,10 +129,7 @@ export default {
       {
         result: { groups },
       },
-    ] = await Promise.all([
-      api.device.getDevices(asSuperAdmin),
-      api.groups.getGroups(asSuperAdmin),
-    ]);
+    ] = await Promise.all([api.device.getDevices(), api.groups.getGroups()]);
     this.devices = devices
       .map(({ id, devicename }) => ({
         id: Number(id),

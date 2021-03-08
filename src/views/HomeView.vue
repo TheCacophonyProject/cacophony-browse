@@ -97,13 +97,10 @@ export default {
   methods: {
     async fetchGroups() {
       this.hasLoaded = false;
-      console.log(localStorage.getItem("view-as"));
-      const asSuperAdmin = localStorage.getItem("view-as") !== "regular";
-      console.log("As super?", asSuperAdmin);
       try {
-        const {result} = await api.groups.getGroups(asSuperAdmin);
+        const { result } = await api.groups.getGroups();
         this.groups = result.groups;
-      } catch(e) {
+      } catch (e) {
         // Handle this at a component level, or boot it up to a global error.
       }
       this.hasLoaded = true;
