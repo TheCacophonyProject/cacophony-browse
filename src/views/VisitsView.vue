@@ -27,7 +27,26 @@
           dismissible
           @dismissed="infoDismissed"
         >
-          {{ infoMessage }}
+          <p>{{ infoMessage }}</p>
+          <table>
+            <tr>
+              <td>Summary Tag</td>
+              <td>Meaning</td>
+            </tr>
+
+            <tr>
+              <td>Uknown</td>
+              <td>Humanly confirmed as unidtifiable</td>
+            </tr>
+            <tr>
+              <td>Unidentified Animal</td>
+              <td>AI is sure there is an animal but doesn't know what it is</td>
+            </tr>
+            <tr>
+              <td>Probably not an animal</td>
+              <td>AI is not sure if this is an animal or not</td>
+            </tr>
+          </table>
         </b-alert>
 
         <div class="search-results">
@@ -73,7 +92,9 @@
                       striped
                     >
                       <template v-slot:cell(what)="row">
-                        {{ summaryWhat(row.item[0]) }}
+                        <span v-b-tooltip.hover="whatToolTip(row.item[0])">{{
+                          summaryWhat(row.item[0])
+                        }}</span>
                       </template>
                       <template v-slot:cell(start)="row">
                         {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
@@ -124,7 +145,7 @@
                             class="tag-img"
                           />
                           <span class="what-text">
-                          {{ visitWhat(row.item.what) }}
+                            {{ visitWhat(row.item.what) }}
                           </span>
                         </div>
                       </template>
@@ -259,6 +280,9 @@ export default {
       queryParams: {},
       showInfo: this.isInfoShown(),
       infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
+      unknownHelp: `Humanly confirmed as unidtifiable`,
+      nothingHelp: `AI is not sure if this is an animal or not`,
+      unidentifiedHelp: `AI is sure there is an animal but doesn't know what it is`,
       tableDateTimeFormat: "L LTS",
       tableDateFormat: "DD MMM",
       tableTimeFormat: "LTS",
@@ -342,13 +366,23 @@ export default {
     visitWhat(what: string): string {
       return this.capitalizeFirst(what);
     },
-    summaryWhat(what: string): string {
-      if (what == "null"){
-        return "Probably Nothing"
-      }else if(what == DefaultLabels.allLabels.unidentified.value){
-        return "( Unidentified ) Animal"
+    whatToolTip(what: string): string {
+      if (what == "null") {
+        return this.nothingHelp;
+      } else if (what == DefaultLabels.allLabels.unidentified.value) {
+        return this.unidentifiedHelp;
+      } else if (what == DefaultLabels.allLabels.unknown.value) {
+        return this.unknownHelp;
       }
-      return this.capitalizeFirst(what)
+      return `Track has been tagged as ${what}`;
+    },
+    summaryWhat(what: string): string {
+      if (what == "null") {
+        return "Probably not an Animal";
+      } else if (what == DefaultLabels.allLabels.unidentified.value) {
+        return "( Unidentified ) Animal";
+      }
+      return this.capitalizeFirst(what);
     },
     capitalizeFirst(value: string) {
       if (value) {
@@ -677,7 +711,7 @@ $main-content-width: 640px;
   margin-left: 0.4rem;
 }
 .tag-img {
-  width:30px;
+  width: 30px;
   max-width: 30px;
   max-height: 30px;
   background: transparent;

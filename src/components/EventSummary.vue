@@ -12,7 +12,7 @@
       {{ formatDate(item.start, "LTS") }}
     </b-col>
     <b-col>
-      <div v-if='item.confidence != 0 && item.confidence'>
+      <div v-if="item.confidence != 0 && item.confidence">
         {{ item.confidence }}
         <span> %</span>
       </div>
