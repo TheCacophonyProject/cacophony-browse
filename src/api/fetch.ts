@@ -40,10 +40,11 @@ export async function fetch(url, init, suppressGlobalMessaging = false) {
     );
     router.push("login");
   } else {
-    // if (!suppressGlobalMessaging) {
-    //   handleMessages(result, status); //TODO: don't have this on the fetch function; handle errors more explicitly (this should remove the suppressGlobalMessaging hack). Do we global error messages?
-    // }
-    throw new Error(result);
+    if (!suppressGlobalMessaging) {
+      handleMessages(result, status); //TODO: don't have this on the fetch function; handle errors more explicitly (this should remove the suppressGlobalMessaging hack). Do we global error messages?
+    }
+    //console.log(result);
+    //throw new Error(result);
   }
   return { result, status, success: response.ok };
 }

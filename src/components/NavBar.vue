@@ -213,10 +213,16 @@ export default {
     viewAsSuperUser() {
       localStorage.setItem("view-as", "super");
       this.viewAs = "super";
+      // TODO: Would be nicer to not require a reload here, but maybe doesn't matter since this is really just an
+      //  admin/debug feature
+      window.location.reload();
     },
     viewAsRegularUser() {
       localStorage.setItem("view-as", "regular");
       this.viewAs = "regular";
+      // TODO: Would be nicer to not require a reload here, but maybe doesn't matter since this is really just an
+      //  admin/debug feature
+      window.location.reload();
     },
     superUserCreds() {
       let superUserCreds = localStorage.getItem("superUserCreds");

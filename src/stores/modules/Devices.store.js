@@ -9,7 +9,8 @@ const state = {
 const getters = {};
 
 async function _getDevice(devicename, commit) {
-  const { result } = await api.device.getDevices();
+  const asSuperUser = localStorage.getItem("view-as") !== "regular";
+  const { result } = await api.device.getDevices(asSuperUser);
   const device = result.devices.rows.find(
     (device) => device.devicename === devicename
   );
@@ -19,7 +20,8 @@ async function _getDevice(devicename, commit) {
 const actions = {
   async GET_DEVICES({ commit }) {
     commit("fetching");
-    const { result } = await api.device.getDevices();
+    const asSuperUser = localStorage.getItem("view-as") !== "regular";
+    const { result } = await api.device.getDevices(asSuperUser);
     commit("receiveDevices", result.devices.rows);
     commit("fetched");
   },
