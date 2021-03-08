@@ -100,7 +100,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
   test("with the correct path (no param)", async () => {
     await groupApi.getGroups();
     expect(fetch.mock.calls[0][0]).toBe(
-      `http://mocked-api-path/api/v1/groups?where=${encodeURIComponent("{}")}`
+      `http://mocked-api-path/api/v1/groups`
     );
   });
 
@@ -109,8 +109,7 @@ describe("getGroups(groupName) calls authenticatedFetch", () => {
       testGroupId: 123456,
     };
 
-    // FIXME(jon)
-    await groupApi.getGroups(params);
+    await groupApi.getGroup(params);
 
     const query = fetch.mock.calls[0][0].split("?")[1];
 
