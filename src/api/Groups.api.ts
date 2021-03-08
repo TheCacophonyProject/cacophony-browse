@@ -1,5 +1,5 @@
 import CacophonyApi from "./CacophonyApi";
-import {shouldViewAsSuperUser} from "@/utils";
+import { shouldViewAsSuperUser } from "@/utils";
 
 function addNewGroup(groupName) {
   const suppressGlobalMessaging = true;
@@ -34,10 +34,9 @@ function removeGroupUser(groupName, userName) {
   });
 }
 
-function getGroup(groupNameOrId: string) {
-  return CacophonyApi.get(
-    `/api/v1/groups/${encodeURIComponent(groupNameOrId)}`
-  );
+function getGroup(groupName: string) {
+  const where = JSON.stringify({ groupname: groupName });
+  return CacophonyApi.get(`/api/v1/groups?where=${encodeURIComponent(where)}`);
 }
 
 function getGroups() {
