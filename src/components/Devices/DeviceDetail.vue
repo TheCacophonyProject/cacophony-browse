@@ -3,7 +3,7 @@
     <b-tabs
       card
       class="device-tabs"
-      nav-class="device-tabs-container"
+      nav-class="device-tabs-container container"
       v-model="currentTabIndex"
     >
       <b-tab title="Current Software" >
@@ -21,6 +21,9 @@
           :user="user"
         />
       </b-tab>
+      <b-tab title="All Events" >
+        <DeviceEvents :device="device"/>
+      </b-tab>
     </b-tabs>
   </b-container>
 </template>
@@ -29,12 +32,13 @@
 import { mapState } from "vuex";
 import DeviceUsers from "./DeviceUsers.vue";
 import DeviceSoftware from "./DeviceSoftware.vue";
+import DeviceEvents from "./DeviceEvents.vue";
 import TabTemplate from '@/components/TabTemplate.vue';
 import Help from "../../components/Help.vue"
 
 export default {
   name: "DeviceDetail",
-  components: { DeviceUsers, DeviceSoftware, TabTemplate, Help },
+  components: { DeviceUsers, DeviceSoftware, DeviceEvents, TabTemplate, Help },
   props: {
     device: {
       type: Object,

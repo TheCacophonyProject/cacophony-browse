@@ -1,5 +1,5 @@
 <template>
-  <div :class="'versions'">
+  <b-container class="versions">
     <h2>Current software versions</h2>
     <div v-if="!software.result">Message: {{ software.message }}</div>
     <div
@@ -31,7 +31,7 @@
         >.
       </p>
     </div>
-  </div>
+  </b-container>
 </template>
 
 <script>
