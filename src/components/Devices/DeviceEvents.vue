@@ -41,7 +41,6 @@
           <template
             v-if="data.item.EventDetail && data.item.EventDetail.details"
           >
-            `
             <div
               v-for="(value, key) in data.item.EventDetail.details"
               :key="key"
@@ -49,7 +48,6 @@
             >
               {{ key }} : {{ value }}
             </div>
-            `
           </template>
         </template>
       </b-table>
