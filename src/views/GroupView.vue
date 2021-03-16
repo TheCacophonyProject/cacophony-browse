@@ -24,10 +24,11 @@
     >
       <b-tab>
         <template #title>
-            <TabTemplate
-              title = "Users"
-              :isLoading = "usersLoading"
-              :value = "users.length"/>
+          <TabTemplate
+            title="Users"
+            :isLoading="usersLoading"
+            :value="users.length"
+          />
         </template>
         <UsersTab
           :users="users"
@@ -41,18 +42,20 @@
       <b-tab title="Devices">
         <template #title>
           <TabTemplate
-            title = "Devices"
-            :isLoading = "devicesLoading"
-            :value = "devices.length"/>
+            title="Devices"
+            :isLoading="devicesLoading"
+            :value="devices.length"
+          />
         </template>
         <DevicesTab :devices="devices" :loading="devicesLoading" />
       </b-tab>
       <b-tab lazy>
         <template #title>
           <TabTemplate
-            title = "Stations"
-            :isLoading = "stationsLoading"
-            :value = "nonRetiredStationsCount"/>
+            title="Stations"
+            :isLoading="stationsLoading"
+            :value="nonRetiredStationsCount"
+          />
         </template>
         <StationsTab
           :items="stations"
@@ -72,7 +75,7 @@ import api from "@/api";
 import StationsTab from "@/components/Groups/StationsTab.vue";
 import UsersTab from "@/components/Groups/UsersTab.vue";
 import DevicesTab from "@/components/Groups/DevicesTab.vue";
-import TabTemplate from '@/components/TabTemplate.vue';
+import TabTemplate from "@/components/TabTemplate.vue";
 
 export default {
   name: "GroupView",

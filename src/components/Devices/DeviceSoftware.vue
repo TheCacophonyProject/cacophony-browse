@@ -10,8 +10,7 @@
       "
     >
       <div
-        v-for="(version, component) in software.result.EventDetail
-          .details"
+        v-for="(version, component) in software.result.EventDetail.details"
         :key="component"
       >
         <b>{{ component }}</b
@@ -19,14 +18,12 @@
       </div>
       <div v-if="software.result.dateTime">
         <i
-          >Recorded {{ dayOfSnapshot.toLowerCase() }} at
-          {{ timeOfSnapshot }}</i
+          >Recorded {{ dayOfSnapshot.toLowerCase() }} at {{ timeOfSnapshot }}</i
         >
       </div>
       <p>
         Current released software versions are listed
-        <a
-          href="https://github.com/TheCacophonyProject/saltops#branch-prod"
+        <a href="https://github.com/TheCacophonyProject/saltops#branch-prod"
           >here</a
         >.
       </p>

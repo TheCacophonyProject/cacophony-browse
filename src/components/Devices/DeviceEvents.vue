@@ -1,6 +1,7 @@
 ~<template>
-  <b-container  class="latest-events">
-    <h2>Latest events for this device 
+  <b-container class="latest-events">
+    <h2>
+      Latest events for this device
       <b-button
         variant="link"
         class="toggle-filtered-btn"
@@ -12,43 +13,44 @@
       </b-button>
     </h2>
 
-    <b-row v-if="filtered" class=event-filters>
-      <b-col cols="3" class="col-md-1">
-        Show:
-      </b-col>
+    <b-row v-if="filtered" class="event-filters">
+      <b-col cols="3" class="col-md-1"> Show: </b-col>
       <b-col cols="8" class="col-sm-8 col-md-4 first-item">
         <multiselect
           :value="eventTypes"
           :options="allEventTypes"
           placeholder="<All events>"
           data-cy="event=type-select"
-          @input="eventTypeChanged"/>
+          @input="eventTypeChanged"
+        />
       </b-col>
       <b-col cols="0" class="col-md-1"></b-col>
-      <b-col cols="3" class="col-md-2">
-        Start from:
-      </b-col>
+      <b-col cols="3" class="col-md-2"> Start from: </b-col>
       <b-col cols="8" class="col-sm-8 col-md-4">
-        <input
-          v-model="date"
-          type="date"
-        />
+        <input v-model="date" type="date" />
       </b-col>
     </b-row>
 
     <div class="list-wrapper">
       <b-table striped hover :items="events" :fields="makeFields()">
         <template #cell(dateTime)="data">
-          {{ getTableDate(data.value) }} {{ new Date(data.value).toLocaleTimeString() }}
+          {{ getTableDate(data.value) }}
+          {{ new Date(data.value).toLocaleTimeString() }}
         </template>
-        <template #cell(EventDetail.details)="data">
-          <div v-if="data.item.EventDetail && data.item.EventDetail.details"
-            v-for="(value, key) in data.item.EventDetail
-              .details"
-            :key="key"
-            class="event-details">
-            {{ key }} : {{ value }}
-          </div>
+        <template #cell(details)="data">
+          <template
+            v-if="data.item.EventDetail && data.item.EventDetail.details"
+          >
+            `
+            <div
+              v-for="(value, key) in data.item.EventDetail.details"
+              :key="key"
+              class="event-details"
+            >
+              {{ key }} : {{ value }}
+            </div>
+            `
+          </template>
         </template>
       </b-table>
     </div>
@@ -57,7 +59,7 @@
         :total-rows="count"
         v-model="page"
         :per-page="perPage"
-        limit=5
+        limit="5"
         class="pagination-buttons"
         @change="pagination"
         v-if="count > perPage"
@@ -66,8 +68,7 @@
   </b-container>
 </template>
 
-<script>``
-import { mapState } from "vuex";
+<script>
 import api from "@/api/index";
 import { toNZDateString } from "@/helpers/datetime";
 
@@ -78,7 +79,7 @@ export default {
       type: Object,
       required: true,
     },
-  },  
+  },
   data() {
     return {
       eventsLoading: true,
@@ -90,7 +91,20 @@ export default {
       filtered: false,
       date: "",
       datePrint: "",
-      allEventTypes: ["alert", "attiny-sleep", "audioBait", "daytime-power-off", "powered-off", "power-on-test", "rpi-power-on", "salt-update", "systemError", "test", "throttle", "versionData"]
+      allEventTypes: [
+        "alert",
+        "attiny-sleep",
+        "audioBait",
+        "daytime-power-off",
+        "powered-off",
+        "power-on-test",
+        "rpi-power-on",
+        "salt-update",
+        "systemError",
+        "test",
+        "throttle",
+        "versionData",
+      ],
     };
   },
 
@@ -101,8 +115,8 @@ export default {
     async fetchEvents() {
       const params = {
         limit: this.perPage,
-        offset: (this.page > 1) ? (this.page - 1) * this.perPage : 0,
-      }
+        offset: this.page > 1 ? (this.page - 1) * this.perPage : 0,
+      };
       if (this.filtered) {
         if (this.eventTypes) {
           params.type = this.eventTypes;
@@ -116,19 +130,22 @@ export default {
 
       this.eventsLoading = true;
       {
-        const { result } = await api.device.getLatestEvents(this.device.id, params);
+        const { result } = await api.device.getLatestEvents(
+          this.device.id,
+          params
+        );
         this.events = result.rows;
         this.count = result.count;
-        this.page = result.offset + 1
+        this.page = result.offset + 1;
       }
       this.eventsLoading = false;
     },
     eventTypeChanged(newEventType) {
-      this.eventTypes=newEventType;
-      this.fetchEvents(); 
+      this.eventTypes = newEventType;
+      this.fetchEvents();
     },
     getTableDate(dateString) {
-      return toNZDateString(new Date(dateString))
+      return toNZDateString(new Date(dateString));
     },
     pagination(page) {
       this.page = page;
@@ -140,27 +157,26 @@ export default {
     },
     makeFields() {
       return [
-        { 
-          key:"dateTime",
-          label: "Time"
+        {
+          key: "dateTime",
+          label: "Time",
         },
         {
           key: "EventDetail.type",
           label: "Event type",
-          class: "event-type"
         },
         {
-          key: "EventDetail.details",
-          label: "Details"
-        }
-      ]
-    }
+          key: "details",
+          label: "Details",
+        },
+      ];
+    },
   },
   watch: {
-    date: function (value) {
+    date: function () {
       this.fetchEvents();
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped lang="scss">
@@ -168,28 +184,27 @@ export default {
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins";
 
-  .sticky-footer {
-    position: sticky;
-    bottom: 0;
-    width: 100%;
-  }
+.sticky-footer {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+}
 
-  .event-type {
-    font-weight:bold ;
-  }
+.event-type {
+  font-weight: bold;
+}
 
-  .event-filters {
-    background: $gray-100;
-    border: 1px solid $gray-200;
-    padding: 1em 0em;
-    margin: 1em 2em 1em 0em;
-  }
+.event-filters {
+  background: $gray-100;
+  border: 1px solid $gray-200;
+  padding: 1em 0em;
+  margin: 1em 2em 1em 0em;
+}
 
 @include media-breakpoint-down(sm) {
   .first-item {
     margin-bottom: 1em;
   }
-
-} 
+}
 </style>
 

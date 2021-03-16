@@ -6,39 +6,35 @@
       nav-class="device-tabs-container container"
       v-model="currentTabIndex"
     >
-      <b-tab title="Current Software" >
-        <DeviceSoftware :software="software"/>
+      <b-tab title="Current Software">
+        <DeviceSoftware :software="software" />
       </b-tab>
       <b-tab title="Users">
         <template #title>
-            <TabTemplate
-              title= "Users"
-              :isLoading="!device"
-              :value="(device && device.Users) ? device.Users.length : 0" />
+          <TabTemplate
+            title="Users"
+            :isLoading="!device"
+            :value="device && device.Users ? device.Users.length : 0"
+          />
         </template>
-        <DeviceUsers
-          :device="device"
-          :user="user"
-        />
+        <DeviceUsers :device="device" :user="user" />
       </b-tab>
-      <b-tab title="All Events" >
-        <DeviceEvents :device="device"/>
+      <b-tab title="All Events">
+        <DeviceEvents :device="device" />
       </b-tab>
     </b-tabs>
   </b-container>
 </template>
 
 <script>
-import { mapState } from "vuex";
 import DeviceUsers from "./DeviceUsers.vue";
 import DeviceSoftware from "./DeviceSoftware.vue";
 import DeviceEvents from "./DeviceEvents.vue";
-import TabTemplate from '@/components/TabTemplate.vue';
-import Help from "../../components/Help.vue"
+import TabTemplate from "@/components/TabTemplate.vue";
 
 export default {
   name: "DeviceDetail",
-  components: { DeviceUsers, DeviceSoftware, DeviceEvents, TabTemplate, Help },
+  components: { DeviceUsers, DeviceSoftware, DeviceEvents, TabTemplate },
   props: {
     device: {
       type: Object,
@@ -53,9 +49,9 @@ export default {
       required: true,
     },
   },
-  data()  { 
+  data() {
     return {
-      currentTabIndex: 0
+      currentTabIndex: 0,
     };
   },
 };

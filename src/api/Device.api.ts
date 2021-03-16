@@ -34,25 +34,24 @@ function removeUserFromDevice(username, deviceId) {
 }
 
 function getLatestSoftwareVersion(deviceId) {
-  const params : EventApiParams = {
+  const params: EventApiParams = {
     limit: 1,
-    type: "versionData"
-  }
+    type: "versionData",
+  };
   return getLatestEvents(deviceId, params);
 }
 
 export interface EventApiParams {
-  limit? : number,
-  offset? : number, 
-  type?: string,
-  endTime? : string,
+  limit?: number;
+  offset?: number;
+  type?: string;
+  endTime?: string;
 }
-
 
 function getLatestEvents(deviceId, params?: EventApiParams) {
   return CacophonyApi.get(
-    `/api/v1/events?latest=true&deviceId=${deviceId}&${querystring.stringify(params as any)}`
+    `/api/v1/events?latest=true&deviceId=${deviceId}&${querystring.stringify(
+      params as any
+    )}`
   );
 }
-
-

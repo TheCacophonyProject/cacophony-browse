@@ -1,33 +1,34 @@
 <template>
   <b-container class="users">
-    <h2>Users <help>{{ usersHelpTip }}</help></h2>
+    <h2>
+      Users <help>{{ usersHelpTip }}</help>
+    </h2>
     <div class="description-and-button-wrapper">
-        <p>
-        Users can view recordings for this device. Note that users that
-        belong to a group that contains this device can also view the
-        recordings.
-        </p>
-        <device-add-user v-if="isDeviceAdmin" :device="device" />
-        <b-button
+      <p>
+        Users can view recordings for this device. Note that users that belong
+        to a group that contains this device can also view the recordings.
+      </p>
+      <device-add-user v-if="isDeviceAdmin" :device="device" />
+      <b-button
         v-if="isDeviceAdmin"
         v-b-modal.device-add-user
         variant="primary"
         v-b-tooltip.hover
         title="Add user to device"
         class="add-button"
-        >
+      >
         <font-awesome-icon icon="user-plus" size="xs" />
         <span>Add user</span>
-        </b-button>
+      </b-button>
     </div>
     <div v-if="device && device.Users">
       <div v-if="!device.Users.length">
-          <b-card class="no-content-placeholder">
+        <b-card class="no-content-placeholder">
           This device has no users associated with it.
-          </b-card>
+        </b-card>
       </div>
       <div v-else>
-          <b-table
+        <b-table
           :items="device.Users"
           :fields="deviceUsersTableFields"
           :sort-by="userSortBy"
@@ -36,38 +37,38 @@
           outlined
           responsive
           data-cy="users-table"
-          >
+        >
           <template v-slot:cell(admin)="data">
-              {{ data.item.DeviceUsers.admin ? "Yes" : "No" }}
+            {{ data.item.DeviceUsers.admin ? "Yes" : "No" }}
           </template>
 
           <template v-slot:cell(controls)="data">
-              <b-modal
+            <b-modal
               id="device-user-remove-self"
               title="Remove yourself from device"
               @ok="removeDeviceUser(data.item.username)"
               ok-title="Remove"
               ok-variant="danger"
               v-model="showUserRemoveSelfModal"
-              >
+            >
               <p>
-                  Are you sure you want to remove yourself from this device? You
-                  will no longer be able to view recordings from this device and
-                  you will not be able to add yourself back to the device.
+                Are you sure you want to remove yourself from this device? You
+                will no longer be able to view recordings from this device and
+                you will not be able to add yourself back to the device.
               </p>
-              </b-modal>
-              <b-button
+            </b-modal>
+            <b-button
               v-b-tooltip.hover
               v-if="isDeviceAdmin"
               title="Remove user from device"
               class="trash-button"
               variant="light"
               @click="removeDeviceUserCheckIfSelf(data.item.username, uiUser)"
-              >
+            >
               <font-awesome-icon icon="trash" size="1x" />
-              </b-button>
+            </b-button>
           </template>
-          </b-table>
+        </b-table>
       </div>
     </div>
   </b-container>
@@ -139,5 +140,4 @@ export default {
   },
 };
 </script>
-<style scoped>
-</style>
+<style scoped></style>
