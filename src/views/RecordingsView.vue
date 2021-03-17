@@ -515,8 +515,13 @@ $main-content-width: 640px;
       top: 0;
       right: 0;
       text-align: right;
-      margin-top: -2.8rem;
+      margin-top: -1rem;
+      margin-bottom: 0;
       padding: 0.7rem 0;
+    }
+    .recordings-day + div .recordings-hour {
+      margin-top: -2.8rem;
+      margin-bottom: 11px;
     }
   }
 
