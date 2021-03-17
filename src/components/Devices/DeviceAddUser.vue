@@ -28,21 +28,6 @@
           >Users can view recordings for this device.</b-form-text
         >
       </b-form-group>
-
-      <b-form-group>
-        <b-form-checkbox
-          id="input-user-admin"
-          v-model="$v.form.isAdmin.$model"
-          plain
-          value="true"
-          unchecked-value="false"
-        >
-          Make this user an administrator
-        </b-form-checkbox>
-        <b-form-text id="input-user-admin-help">
-          Administrators can add and remove users from this device.
-        </b-form-text>
-      </b-form-group>
     </b-form>
   </b-modal>
 </template>
