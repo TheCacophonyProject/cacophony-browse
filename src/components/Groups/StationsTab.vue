@@ -10,6 +10,16 @@
     <div>
       <div v-if="groupHasStations && pendingStations.length === 0">
         <p>Stations that are currently associated with this group</p>
+        <p class="update-info" v-if="assignedRecordingsCount !== null">
+          Success!
+          <strong>{{ assignedRecordingsCount }} recordings</strong> were
+          assigned to stations.
+        </p>
+        <p
+          class="update-warnings"
+          v-if="updateWarnings !== null"
+          v-html="updateWarningsText"
+        />
         <l-map
           ref="stationsMap"
           class="stations-map"
@@ -27,15 +37,27 @@
             :attribution="layer.attribution"
             layer-type="base"
           />
-
-          <l-marker
+          <l-circle
+            v-for="station in stationsForMap"
+            :lat-lng="station.location"
+            :radius="60"
+            :key="`r_${station.name}`"
+            :fill-opacity="0.25"
+            :weight="1"
+            :stroke="false"
+            :interative="false"
+          />
+          <l-circle-marker
             v-for="station in stationsForMap"
             :lat-lng="station.location"
             :key="station.name"
-            :icon="icon"
+            :radius="5"
+            color="black"
+            :weight="0.5"
+            :fill-opacity="1"
           >
             <l-tooltip>{{ station.name }}</l-tooltip>
-          </l-marker>
+          </l-circle-marker>
         </l-map>
         <b-table-lite :items="stations" striped hover />
         <b-btn
@@ -95,13 +117,15 @@
           </template>
         </b-table>
         <b-checkbox class="back-date" v-model="backDateRecordings">
-          Apply changes to recordings starting from a date
+          Apply all stations to recordings starting from a date
         </b-checkbox>
         <div v-if="backDateRecordings" class="back-date">
           <b-form-datepicker v-model="applyStationsFromDate" />
         </div>
         <b-btn @click="() => addNewStations()" :disabled="addingStations">
-          Confirm changes
+          <b-spinner v-if="addingStations" type="border" small />
+          <span v-if="!addingStations">Confirm changes</span
+          ><span v-else>Processing changes</span>
         </b-btn>
         <b-btn @click="pendingStations = []" :disabled="addingStations">
           Discard changes
@@ -119,10 +143,11 @@ import * as csv from "csvtojson";
 import Help from "@/components/Help.vue";
 import {
   LMap,
-  LMarker,
   LTooltip,
   LWMSTileLayer,
   LControlLayers,
+  LCircle,
+  LCircleMarker,
 } from "vue2-leaflet";
 
 const Marker = icon({
@@ -145,8 +170,9 @@ export default {
   components: {
     LMap,
     LControlLayers,
-    LMarker,
     LTooltip,
+    LCircle,
+    LCircleMarker,
     LWMSTileLayer,
     Help,
   },
@@ -164,6 +190,8 @@ export default {
       backDateRecordings: false,
       applyStationsFromDate: null,
       addingStations: false,
+      assignedRecordingsCount: null,
+      updateWarnings: null,
       enableEditingStations: false,
       invalidCsvFormat: false,
       invalidCsvReason: "",
@@ -217,6 +245,9 @@ export default {
         name,
         location: latLng(latitude, longitude),
       }));
+    },
+    updateWarningsText() {
+      return "<strong>Warnings:</strong><br>"  + this.updateWarnings.replace(/\n/g, '<br>');
     },
     mapBounds() {
       // Calculate the initial map bounds and zoom level from the set of lat/lng points
@@ -343,16 +374,24 @@ export default {
       )
         ? "thermal camera"
         : "camera";
-      this.pendingStations = monitoring
+      const csvCameras = monitoring
         .filter((item) => item.Type === cameraKey)
         .map((item) => ({
           name: item["Number / Code"],
           latitude: item.Lat,
           longitude: item.Lon,
         }));
+      if (!csvCameras.length) {
+        this.invalidCsvFormat = true;
+        this.invalidCsvReason =
+          "Supplied CSV has no rows where the 'type' is either 'Camera' or 'Thermal Camera'";
+      }
+      this.pendingStations = csvCameras;
     },
     async addNewStations() {
       this.addingStations = true;
+      this.assignedRecordingsCount = null;
+      this.updateWarnings = null;
       {
         let applyFromDate =
           this.backDateRecordings && this.applyStationsFromDate;
@@ -363,7 +402,7 @@ export default {
           applyFromDate.setSeconds(0);
           applyFromDate.setMilliseconds(0);
         }
-        await api.groups.addStationsToGroup(
+        const { result } = await api.groups.addStationsToGroup(
           this.groupName,
           this.pendingStations.map(({ name, latitude, longitude }) => ({
             name,
@@ -374,6 +413,14 @@ export default {
         );
         this.$emit("change");
         this.pendingStations = [];
+        if (result.warnings) {
+          this.updateWarnings = result.warnings;
+        }
+        if (Object.values(result.updatedRecordingsPerStation).length !== 0) {
+          this.assignedRecordingsCount = Object.values(
+            result.updatedRecordingsPerStation
+          ).reduce((acc: number, count: number) => acc + count, 0);
+        }
         this.enableEditingStations = false;
       }
       this.addingStations = false;
@@ -410,6 +457,15 @@ export default {
   .drag-instructions {
     pointer-events: none;
   }
+}
+.update-info,
+.update-warnings {
+  background-color: #cff1d7;
+  border-radius: 5px;
+  padding: 5px 10px;
+}
+.update-warnings {
+  background-color: #f6ddb9;
 }
 .station-diff-table {
   del {

@@ -296,7 +296,6 @@ function makeApiQuery(query: RecordingQuery): any {
     }
     apiParams["tags"] = JSON.stringify(query.tag);
   }
-
   return apiParams;
 }
 
