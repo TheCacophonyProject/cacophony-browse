@@ -21,7 +21,7 @@
           <span>{{ device && device.devicename }}</span>
         </span>
       </h1>
-      <p class="lead">Manage the users associated with this device.</p>
+      <p class="lead">Manage this device.</p>
     </b-jumbotron>
 
     <spinner :fetching="!fetched" />
@@ -30,6 +30,7 @@
         :device="device"
         :user="currentUser"
         :software="softwareDetails"
+        class="dev-details"
       />
     </div>
   </b-container>
@@ -90,3 +91,13 @@ export default {
   },
 };
 </script>
+<style lang="scss">
+.admin .jumbotron {
+  margin-bottom: unset;
+}
+div .dev-details {
+  margin: 0;
+  padding: 0;
+  max-width: unset;
+}
+</style>
