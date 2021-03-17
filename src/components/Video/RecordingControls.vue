@@ -44,6 +44,12 @@
               >
                 Cool
               </b-dropdown-item>
+
+              <b-dropdown-item
+                v-b-tooltip.hover.left="'There is more than one animal in this recording'"
+                @click="addMultipleAnimalsTag">
+                Multiple animals
+              </b-dropdown-item>
             </b-dropdown>
           </b-button-group>
         </b-col>
@@ -168,6 +174,9 @@ export default {
     },
     addTrapInteractionTag: function () {
       this.addTag("interaction with trap");
+    },
+    addMultipleAnimalsTag: function () {
+      this.addTag("multiple animals");
     },
     addTag: function (label) {
       this.$emit("addTag", {
