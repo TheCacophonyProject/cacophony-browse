@@ -1,10 +1,9 @@
 <template>
   <b-container class="versions">
     <h2>Current software versions</h2>
-    <div v-if="!software.result">Message: {{ software.message }}</div>
+    <div v-if="!software.result">{{ software.message }}</div>
     <div
-      v-if="
-        software.result &&
+      v-else-if="
         software.result.EventDetail &&
         software.result.EventDetail.details
       "

@@ -19,7 +19,7 @@
         <multiselect
           :value="eventTypes"
           :options="allEventTypes"
-          placeholder="<All events>"
+          placeholder="All events"
           data-cy="event=type-select"
           @input="eventTypeChanged"
         />
@@ -70,6 +70,8 @@
 import api from "@/api/index";
 import { toNZDateString } from "@/helpers/datetime";
 
+const ALL_EVENTS = "All events"
+
 export default {
   name: "DeviceEvents",
   props: {
@@ -90,6 +92,7 @@ export default {
       date: "",
       datePrint: "",
       allEventTypes: [
+        ALL_EVENTS,
         "alert",
         "attiny-sleep",
         "audioBait",
@@ -111,6 +114,21 @@ export default {
   },
   methods: {
     async fetchEvents() {
+      const params = this.makeEventRequestParams();      
+
+      this.eventsLoading = true;
+      
+      const { result } = await api.device.getLatestEvents(
+        this.device.id,
+        params
+      );
+      this.events = result.rows;
+      this.count = result.count;
+      this.page = result.offset + 1;
+
+      this.eventsLoading = false;
+    },
+    makeEventRequestParams() {
       const params = {
         limit: this.perPage,
         offset: this.page > 1 ? (this.page - 1) * this.perPage : 0,
@@ -125,21 +143,10 @@ export default {
           params.endTime = this.datePrint;
         }
       }
-
-      this.eventsLoading = true;
-      {
-        const { result } = await api.device.getLatestEvents(
-          this.device.id,
-          params
-        );
-        this.events = result.rows;
-        this.count = result.count;
-        this.page = result.offset + 1;
-      }
-      this.eventsLoading = false;
+      return params;
     },
     eventTypeChanged(newEventType) {
-      this.eventTypes = newEventType;
+      this.eventTypes = (newEventType === ALL_EVENTS) ? "" : newEventType;
       this.fetchEvents();
     },
     getTableDate(dateString) {
