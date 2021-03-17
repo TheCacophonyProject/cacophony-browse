@@ -70,7 +70,7 @@
 import api from "@/api/index";
 import { toNZDateString } from "@/helpers/datetime";
 
-const ALL_EVENTS = "All events"
+const ALL_EVENTS = "All events";
 
 export default {
   name: "DeviceEvents",
@@ -114,10 +114,10 @@ export default {
   },
   methods: {
     async fetchEvents() {
-      const params = this.makeEventRequestParams();      
+      const params = this.makeEventRequestParams();
 
       this.eventsLoading = true;
-      
+
       const { result } = await api.device.getLatestEvents(
         this.device.id,
         params
@@ -146,7 +146,7 @@ export default {
       return params;
     },
     eventTypeChanged(newEventType) {
-      this.eventTypes = (newEventType === ALL_EVENTS) ? "" : newEventType;
+      this.eventTypes = newEventType === ALL_EVENTS ? "" : newEventType;
       this.fetchEvents();
     },
     getTableDate(dateString) {

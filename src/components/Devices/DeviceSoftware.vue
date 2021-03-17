@@ -4,8 +4,7 @@
     <div v-if="!software.result">{{ software.message }}</div>
     <div
       v-else-if="
-        software.result.EventDetail &&
-        software.result.EventDetail.details
+        software.result.EventDetail && software.result.EventDetail.details
       "
     >
       <div
