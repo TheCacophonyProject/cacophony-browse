@@ -386,7 +386,7 @@ export default {
         for (let j = 0; j < tracks.length; j++) {
           const track = tracks[j];
           // For track tags, pick the best one, which is the "master AI" tag.
-          const aiTag = track.TrackTags.find((tag) => tag.data === "Master");
+          const aiTag = track.TrackTags.find((tag) => tag.data === "Master" || tag.data.name === "Master");
           const humanTags = track.TrackTags.filter((tag) => !tag.automatic);
           // If the same track has one or more human tags, and none of them agree with the AI just show that:
           let humansDisagree = false;

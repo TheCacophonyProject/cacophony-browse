@@ -3,12 +3,21 @@
     <b-row class="no-gutters">
       <b-col cols="12" lg="8">
         <ThermalVideoPlayer
+          v-if="false"
           ref="thermalPlayer"
           :video-url="videoUrl"
           :tracks="orderedTracks"
           @trackSelected="trackSelected"
           :current-track="selectedTrack"
           @request-next-recording="nextRecording"
+        />
+        <CptvPlayer
+          v-else
+          :cptv-url="videoRawUrl"
+          :tracks="orderedTracks"
+          :recording="recording"
+          :current-track="selectedTrack"
+          @trackSelected="trackSelected"
         />
       </b-col>
 
@@ -63,8 +72,9 @@ import PrevNext from "./PrevNext.vue";
 import RecordingControls from "./RecordingControls.vue";
 import ThermalVideoPlayer from "./ThermalVideoPlayer.vue";
 import TrackInfo from "./Track.vue";
+import CptvPlayer from "@/components/Video/CptvPlayer";
 import RecordingProperties from "./RecordingProperties.vue";
-import { TagColours, WALLABY_GROUP } from "../../const";
+import { TagColours, WALLABY_GROUP } from "@/const";
 
 export default {
   name: "VideoRecording",
@@ -74,6 +84,7 @@ export default {
     RecordingProperties,
     ThermalVideoPlayer,
     TrackInfo,
+    CptvPlayer,
   },
   props: {
     trackid: {
@@ -112,7 +123,9 @@ export default {
       },
     }),
     orderedTracks() {
-      return this.orderTracks();
+      return ([...this.tracks] || []).sort(
+        (a, b) => a.data.start_s - b.data.start_s
+      );
     },
   },
   mounted: function () {
@@ -140,7 +153,7 @@ export default {
     getSelectedTrack() {
       if (this.$route.params.trackid) {
         const index = this.orderTracks().findIndex(
-          (track) => track.id == this.$route.params.trackid
+          (track) => track.id === this.$route.params.trackid
         );
         if (index > -1) {
           return index;
@@ -206,7 +219,7 @@ export default {
       return Number(this.$route.params.id);
     },
     isWallabyProject() {
-      return this.recording.GroupId == WALLABY_GROUP;
+      return this.recording.GroupId === WALLABY_GROUP;
     },
     addTag(tag) {
       const id = Number(this.$route.params.id);

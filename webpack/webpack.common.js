@@ -9,6 +9,7 @@ const webpack = require("webpack");
 module.exports = {
   target: "web", // NOTE: Hot module reloading via vue-loader breaks without this, even though it is supposed to be the default.
   module: {
+
     rules: [
       {
         test: /\.css$/,
@@ -63,6 +64,12 @@ module.exports = {
     }),
   ],
   resolve: {
+    fallback: {
+      // NOTE: These are needed for h264-mp4-encoder to package properly.
+      fs: false,
+      path: false,
+      crypto: false
+    },
     alias: {
       vue$: "vue/dist/vue.esm.js",
       "@": path.resolve(__dirname, '../src')

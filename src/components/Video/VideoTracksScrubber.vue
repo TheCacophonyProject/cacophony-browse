@@ -5,45 +5,44 @@
       width: `${canvasWidth}px`,
     }"
     class="track-scrubber"
+    ref="scrubber"
   >
-    <div ref="scrubber">
-      <div v-if="!isLoaded" class="loading">Loading track info...</div>
+    <div v-if="!isLoaded" class="loading">Loading track info...</div>
+    <div
+      v-else
+      :style="{
+        height: `${heightForTracks}px`,
+        position: 'relative',
+      }"
+    >
       <div
-        v-else
         :style="{
-          height: `${heightForTracks}px`,
-          position: 'relative',
+          right: `${canvasWidth - playheadOffsetForCurrentTime}px`,
+          pointerEvents: 'none',
+          paddingLeft: `${sidePadding}px`,
         }"
-      >
-        <div
-          :style="{
-            right: `${canvasWidth - playheadOffsetForCurrentTime}px`,
-            pointerEvents: 'none',
-            paddingLeft: `${sidePadding}px`,
-          }"
-          class="playhead"
-        />
-        <div
-          v-for="(track, index) in tracks"
-          :key="index"
-          :title="`Track ${index + 1}`"
-          :style="{
-            background: colours[index % colours.length],
-            top: `${index * 13}px`,
-            width: getWidthForTrack(track),
-            left: getOffsetForTrack(track),
-            opacity: index === currentTrack ? 1.0 : 0.5,
-          }"
-          class="scrub-track"
-        />
-      </div>
+        class="playhead"
+      />
+      <div
+        v-for="(track, index) in tracks"
+        :key="index"
+        :title="`Track ${index + 1}`"
+        :style="{
+          background: colours[index % colours.length],
+          top: `${6 + (index * 13)}px`,
+          width: getWidthForTrack(track),
+          left: getOffsetForTrack(track),
+          opacity: index === currentTrack ? 1.0 : 0.5,
+        }"
+        class="scrub-track"
+      />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Track } from "../../api/Recording.api";
-import { TagColours } from "../../const";
+import { Track } from "@/api/Recording.api";
+import { TagColours } from "@/const";
 
 const getPositionXForEvent = (event: Event): number => {
   if (event instanceof TouchEvent) {
@@ -82,7 +81,7 @@ export default {
     },
     sidePadding: {
       type: Number,
-      required: true,
+      default: 0,
     },
   },
   data() {
@@ -113,13 +112,13 @@ export default {
       return this.getPlayheadOffsetForTime(this.currentVideoTime);
     },
     heightForTracks() {
-      return this.numTracks === 0 ? 0 : Math.max(25, 13 * this.numTracks);
+      return this.numTracks === 0 ? 0 : Math.max(25, 12 + (13 * this.numTracks));
     },
   },
   methods: {
     getWidthForTrack(track: Track): string {
       const trackDuration = track.data.end_s - track.data.start_s;
-      const ratio = trackDuration / this.duration;
+      const ratio = Math.min(1, trackDuration / this.duration);
       return `${ratio * this.scrubberWidth}px`;
     },
     getOffsetForTrack(track: Track): string {
@@ -129,19 +128,25 @@ export default {
     },
     getOffsetForTime(time: number): number {
       const pixelsPerSecond = this.scrubberWidth / this.duration;
-      return pixelsPerSecond * time;
+      return Math.min(this.scrubberWidth, pixelsPerSecond * time);
     },
     getPlayheadOffsetForTime(time: number): number {
       const pixelsPerSecond = this.scrubberWidth / this.duration;
-      return this.sidePadding + pixelsPerSecond * time;
+      return Math.min(
+        this.scrubberWidth,
+        this.sidePadding + pixelsPerSecond * time
+      );
     },
     pointerMove(event: Event) {
       event.preventDefault();
-      const x = Math.max(
-        0,
-        getPositionXForEvent(event) -
-          this.scrubber.getBoundingClientRect().x -
-          this.sidePadding
+      const x = Math.min(
+        this.scrubberWidth,
+        Math.max(
+          0,
+          getPositionXForEvent(event) -
+            this.scrubber.getBoundingClientRect().x -
+            this.sidePadding
+        )
       );
       const timeOffset = x / this.scrubberWidth;
       this.$emit("set-playback-time", timeOffset * this.duration);
@@ -193,6 +198,7 @@ export default {
     },
   },
   mounted() {
+    console.log(this.canvasWidth);
     this.initScrubber();
   },
   beforeDestroy() {
@@ -201,14 +207,15 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .track-scrubber {
-  position: relative;
+  //position: relative;
   background: #2b333f;
   transition: height 0.3s;
   overflow: hidden;
   /* Above the motion paths canvas if it exists */
   z-index: 810;
+  margin-top: -6px;
 }
 .loading {
   color: #eee;
@@ -225,5 +232,7 @@ export default {
   position: absolute;
   background: rgba(0, 0, 0, 0.35);
   left: 0;
+  z-index: 1000;
+  border-right: 1px solid white;
 }
 </style>
