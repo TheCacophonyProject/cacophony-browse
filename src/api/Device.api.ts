@@ -1,4 +1,5 @@
 import CacophonyApi from "./CacophonyApi";
+import * as querystring from "querystring";
 import { shouldViewAsSuperUser } from "@/utils";
 
 export default {
@@ -7,6 +8,7 @@ export default {
   addUserToDevice,
   removeUserFromDevice,
   getLatestSoftwareVersion,
+  getLatestEvents,
 };
 
 function getDevices() {
@@ -43,7 +45,24 @@ function removeUserFromDevice(username, deviceId) {
 }
 
 function getLatestSoftwareVersion(deviceId) {
+  const params: EventApiParams = {
+    limit: 1,
+    type: "versionData",
+  };
+  return getLatestEvents(deviceId, params);
+}
+
+export interface EventApiParams {
+  limit?: number;
+  offset?: number;
+  type?: string;
+  endTime?: string;
+}
+
+function getLatestEvents(deviceId, params?: EventApiParams) {
   return CacophonyApi.get(
-    `/api/v1/events?type=versionData&limit=1&latest=true&deviceId=${deviceId}`
+    `/api/v1/events?latest=true&deviceId=${deviceId}&${querystring.stringify(
+      params as any
+    )}`
   );
 }

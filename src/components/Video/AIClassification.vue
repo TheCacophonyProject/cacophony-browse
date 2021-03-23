@@ -61,8 +61,7 @@
 </template>
 
 <script>
-import { imgSrc } from "../../const.js";
-import { classifyTrack } from "../../classification.js";
+import { imgSrc } from "@/const.js";
 
 export default {
   name: "AIClassification",
@@ -86,7 +85,9 @@ export default {
   },
   computed: {
     aiGuess() {
-      return classifyTrack(this.tags, this.isWallabyProject);
+      return this.tags.find(
+        (tag) => tag.automatic && tag.data.name === "Master"
+      );
     },
     aiGuessIsSameAsSomeUser() {
       return (

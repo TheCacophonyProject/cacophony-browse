@@ -59,7 +59,6 @@
 
 <script>
 import DefaultLabels, { imgSrc } from "../../const.js";
-import { classifyTrack } from "../../classification";
 export default {
   name: "QuickTagTrack",
   props: {
@@ -77,7 +76,9 @@ export default {
       return "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==";
     },
     aiGuess() {
-      return classifyTrack(this.tags, this.isWallabyProject);
+      return this.tags.find(
+        (tag) => tag.automatic && tag.data.name === "Master"
+      );
     },
     animals() {
       return this.isWallabyProject
