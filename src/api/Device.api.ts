@@ -1,7 +1,10 @@
 import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
+import { shouldViewAsSuperUser } from "@/utils";
+
 export default {
   getDevices,
+  getDevice,
   addUserToDevice,
   removeUserFromDevice,
   getLatestSoftwareVersion,
@@ -9,7 +12,15 @@ export default {
 };
 
 function getDevices() {
-  return CacophonyApi.get("/api/v1/devices");
+  return CacophonyApi.get(
+    `/api/v1/devices${shouldViewAsSuperUser() ? "" : "?view-mode=user"}`
+  );
+}
+
+function getDevice(deviceNameOrId: string | number) {
+  return CacophonyApi.get(
+    `/api/v1/devices/${encodeURIComponent(deviceNameOrId)}`
+  );
 }
 
 function addUserToDevice(username, deviceId, admin) {

@@ -7,17 +7,18 @@ import GroupsStore from "./Groups.store";
 
 describe("Actions", () => {
   const testResult = {
-      groups: [{ groupname: "a" }, { groupname: "b" }],
-    },
-    testResponse = { result: testResult, success: true },
-    commit = jest.fn(),
-    state = {
-      currentGroup: testResult.groups[0],
-      groups: testResult.groups,
-    };
+    groups: [{ groupname: "a" }, { groupname: "b" }],
+  },
+  testResponse = { result: testResult, success: true },
+  commit = jest.fn(),
+  state = {
+    currentGroup: testResult.groups[0],
+    groups: testResult.groups,
+  };
 
   beforeEach(() => {
     api.getGroups.mockReturnValueOnce(testResponse);
+    api.getGroup.mockReturnValueOnce(testResponse);
     api.addGroupUser.mockReturnValueOnce({ success: true });
   });
 

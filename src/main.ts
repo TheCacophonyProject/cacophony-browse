@@ -31,6 +31,7 @@ export default function () {
 
   new Vue({
     el: "#app",
+    // @ts-ignore
     store,
     router,
     render: (h) => h(App),
