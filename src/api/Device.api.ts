@@ -11,7 +11,7 @@ export default {
 
 function getDevices() {
   return CacophonyApi.get(
-    `/api/v1/devices${shouldViewAsSuperUser() ? "" : "?view-mode=limited"}`
+    `/api/v1/devices${shouldViewAsSuperUser() ? "" : "?view-mode=user"}`
   );
 }
 

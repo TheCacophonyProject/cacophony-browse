@@ -41,7 +41,7 @@ function getGroup(groupName: string) {
 
 function getGroups() {
   return CacophonyApi.get(
-    `/api/v1/groups${shouldViewAsSuperUser() ? "" : "?view-mode=limited"}`
+    `/api/v1/groups${shouldViewAsSuperUser() ? "" : "?view-mode=user"}`
   );
 }
 

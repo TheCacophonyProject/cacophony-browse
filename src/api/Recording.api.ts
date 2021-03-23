@@ -300,7 +300,7 @@ function makeApiQuery(query: RecordingQuery): any {
 
   // View mode for restricting global admin users to only see their own recordings.
   if (!shouldViewAsSuperUser()) {
-    apiParams["view-mode"] = "limited";
+    apiParams["view-mode"] = "user";
   }
   return apiParams;
 }
