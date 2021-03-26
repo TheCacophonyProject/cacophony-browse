@@ -14,6 +14,7 @@
         <CptvPlayer
           v-else
           :cptv-url="videoRawUrl"
+          :cptv-size="rawSize"
           :tracks="orderedTracks"
           :recording="recording"
           :current-track="selectedTrack"
@@ -121,6 +122,7 @@ export default {
       tagItems() {
         return this.$store.getters["Video/getTagItems"];
       },
+      rawSize: (state) => state.Video.rawSize,
     }),
     orderedTracks() {
       return ([...this.tracks] || []).sort(
@@ -128,16 +130,16 @@ export default {
       );
     },
   },
-  mounted: function () {
+  mounted() {
     this.selectedTrack = {
       trackIndex: this.getSelectedTrack(),
     };
   },
   watch: {
-    recording: function () {
+    recording() {
       this.trackSelected(0);
     },
-    tracks: function () {
+    tracks() {
       this.selectedTrack = {
         trackIndex: this.getSelectedTrack(),
       };

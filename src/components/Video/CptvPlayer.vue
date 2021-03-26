@@ -15,7 +15,6 @@
       @end-scrub="endScrub"
       @set-playback-time="setTimeAndRedraw"
     />
-    <pre v-if="header">{{ headerInfo }}</pre>
     <b-btn @click="toggleSmoothing">Smoothed</b-btn>
     <b-btn @click="setColourMap(0)">Viridis</b-btn>
     <b-btn @click="setColourMap(1)">Plasma</b-btn>
@@ -28,6 +27,8 @@
     <b-btn @click="exportMp4">Export MP4</b-btn>
     <b-btn @click="play">Play</b-btn>
     <b-btn @click="pause">Pause</b-btn>
+    <pre>{{ JSON.stringify(memory, null, "\t") }}</pre>
+    <pre v-if="header">{{ headerInfo }}</pre>
   </div>
 </template>
 
@@ -74,6 +75,8 @@ const download = (url, filename) => {
   anchor.click();
 };
 
+const mb = (size) => (size / 1024 / 1024).toFixed(2);
+
 export default {
   name: "CptvPlayer",
   components: {
@@ -82,6 +85,10 @@ export default {
   props: {
     cptvUrl: {
       type: String,
+      required: true,
+    },
+    cptvSize: {
+      type: Number,
       required: true,
     },
     tracks: {
@@ -115,7 +122,14 @@ export default {
       animationFrame: null,
       animationTick: 0,
       playing: false,
+      wasPaused: true,
+      totalFrames: false,
       colourMap: Viridis,
+      memory: {
+        jsHeapSizeLimit: mb(performance.memory.jsHeapSizeLimit),
+        totalJSHeapSize: mb(performance.memory.totalJSHeapSize),
+        usedJSHeapSize: mb(performance.memory.usedJSHeapSize),
+      },
     };
   },
   created() {
@@ -123,10 +137,23 @@ export default {
   },
   computed: {
     actualDuration() {
+      if (this.totalFrames) {
+        return this.adjustedTotalFrames / this.header.fps;
+      }
+      // Otherwise, best guess.
       return Math.max(
         ...this.tracks.map((track) => track.data.end_s),
         this.duration
       );
+    },
+    adjustedTotalFrames() {
+      if (this.totalFrames) {
+        return this.hasBackgroundFrame
+          ? this.totalFrames - 1
+          : this.totalFrames;
+      } else {
+        return this.header.fps * this.actualDuration;
+      }
     },
     hasBackgroundFrame() {
       return this.header && this.header.has_background_frame;
@@ -197,12 +224,18 @@ export default {
     const canvas = this.$refs.overlayCanvas;
     canvas.addEventListener("click", this.clickOverlayCanvas);
     canvas.addEventListener("mousemove", this.moveOverOverlayCanvas);
-    await this.player.initWithCptvUrl(this.cptvUrl);
+    await this.player.initWithCptvUrlAndSize(this.cptvUrl, this.cptvSize);
     this.header = await this.player.getHeader();
     this.$refs.canvas.width = this.header.width;
     this.$refs.canvas.height = this.header.height;
-    await this.renderFrame();
-    //await this.seekToFrame(1150);
+    await this.fetchRenderAdvanceFrame();
+    this.updateMemoryStats = setInterval(() => {
+      this.memory = {
+        jsHeapSizeLimit: mb(performance.memory.jsHeapSizeLimit),
+        totalJSHeapSize: mb(performance.memory.totalJSHeapSize),
+        usedJSHeapSize: mb(performance.memory.usedJSHeapSize),
+      };
+    }, 1000);
     //this.renderCurrentFrame();
   },
   beforeDestroy() {
@@ -210,29 +243,36 @@ export default {
     canvas.removeEventListener("click", this.clickOverlayCanvas);
     canvas.removeEventListener("mousemove", this.moveOverOverlayCanvas);
     window.removeEventListener("resize", this.onResize);
+    clearInterval(this.updateMemoryStats);
   },
   watch: {
     async cptvUrl(url) {
-      await this.player.initWithCptvUrl(url);
+
+      await this.player.initWithCptvUrlAndSize(url, this.cptvSize);
       this.header = await this.player.getHeader();
       this.$refs.canvas.width = this.header.width;
       this.$refs.canvas.height = this.header.height;
       this.frameNum = 0;
-      await this.renderFrame();
-      //await this.player.play(this.onFrame);
+      this.totalFrames = false;
+      cancelAnimationFrame(this.animationFrame);
+      this.animationTick = 0;
+      this.playing = false;
+      this.wasPaused = true;
+      await this.fetchRenderAdvanceFrame();
     },
   },
   methods: {
     async ensureEntireClipIsDecoded() {
-      while (!this.player.atEndOfVideo()) {
-        const streamLoading = await this.player.fetchRawFrame();
-        if (!streamLoading) {
-          break;
-        }
+      let frameNum = 0;
+      while (!this.totalFrames) {
+        await this.queueFrame(frameNum++);
+      }
+      if (this.totalFrames) {
+        console.log("Entire clip decoded and ready for export", this.totalFrames, this.adjustedTotalFrames);
       }
       return true;
     },
-    clickOverlayCanvas(event) {
+    async clickOverlayCanvas(event) {
       const canvas = this.$refs.overlayCanvas;
       const canvasOffset = canvas.getBoundingClientRect();
       const x = event.x - canvasOffset.x;
@@ -243,7 +283,7 @@ export default {
           (track) => track.trackIndex === hitRect.trackIndex
         );
         if (this.currentTrack.trackIndex !== hitIndex) {
-          this.renderCurrentFrame();
+          await this.renderCurrentFrame();
           this.$emit("trackSelected", hitIndex);
         }
       }
@@ -257,9 +297,18 @@ export default {
       // set cursor
       canvas.style.cursor = hitRect !== null ? "pointer" : "default";
     },
-    setColourMap(index: number) {
+    async setColourMap(index: number) {
       this.colourMap = ColourMaps[index];
-      this.renderCurrentFrame();
+      await this.renderCurrentFrame();
+    },
+    async fetchRenderAdvanceFrame() {
+      // Fetch, render, advance
+      const canAdvance = await this.renderCurrentFrame();
+      if (canAdvance) {
+        this.frameNum++;
+      } else if (this.playing) {
+        this.pause();
+      }
     },
     async exportMp4() {
       this.pause();
@@ -288,17 +337,18 @@ export default {
       videoCanvas.width = this.header.width;
       videoCanvas.height = this.header.height;
       const videoContext = videoCanvas.getContext("2d");
+
+      // Make sure everything is loaded to ensure that we have final min/max numbers for normalisation
       await this.ensureEntireClipIsDecoded();
-      await this.seekToFrame(0);
       encoder.initialize();
       let frameNum = 0;
 
       // TODO(jon): Show a popup that shows encoding progress
-      while (!this.player.atEndOfVideo()) {
-        const imgData = this.getCurrentFrameData(videoContext);
+      console.assert(this.totalFrames !== false);
+      while (frameNum < this.adjustedTotalFrames) {
+        const { frameData } = await this.queueFrame(frameNum);
+        const imgData = this.getCurrentFrameData(videoContext, frameData);
         videoContext.putImageData(imgData, 0, 0);
-        // FIXME(jon): We may be getting an additional duplicate frame at the end of the video.
-        // Maybe just have an API for getting the last frame num
         context.imageSmoothingEnabled = this.smoothed;
         if (this.smoothed) {
           context.imageSmoothingQuality = "high";
@@ -317,35 +367,28 @@ export default {
 
         // Draw the overlay
         const totalTime = this.actualDuration;
-        // TODO check whether the backend uses 8.7 or 9 as the fps when calculating duration.
-        // Does the backend take the background_frame into account when setting duration?  Seems to.
-        const totalFramesEstimate = this.actualDuration * this.header.fps;
-        // TODO adjust for background frame.
-        const timeAtFrameNum = (frameNum / totalFramesEstimate) * totalTime;
-        const frameHeader = this.player.getFrameHeader();
-        let duringFFC = false;
+        const totalFrames = this.adjustedTotalFrames;
+        const timeAtFrameNum = (frameNum / totalFrames) * totalTime;
+        const frameHeader = this.player.getFrameHeaderAtIndex(frameNum);
+        let timeSinceLastFFCSeconds = Number.MAX_SAFE_INTEGER;
         if (frameHeader.last_ffc_time) {
-          duringFFC =
-            (frameHeader.time_on - frameHeader.last_ffc_time) / 1000 < 5;
+          timeSinceLastFFCSeconds =
+            (frameHeader.time_on - frameHeader.last_ffc_time) / 1000;
         }
         this.renderOverlay(
           context,
           timeAtFrameNum,
           false,
           renderCanvas.width / videoCanvas.width,
-          duringFFC,
+          timeSinceLastFFCSeconds,
           true
         );
 
         encoder.addFrameRgba(
           context.getImageData(0, 0, encoder.width, encoder.height).data
         );
-        await this.player.seekToFrame(frameNum++);
+        frameNum++;
       }
-      // Add a single gray frame, the alpha is ignored.
-      //encoder.addFrameRgba(new Uint8Array(encoder.width * encoder.height * 4).fill(128))
-      // For canvas:
-      // encoder.addFrameRgba(ctx.getImageData(0, 0, encoder.width * encoder.height).data);
       encoder.finalize();
       const uint8Array = encoder.FS.readFile(encoder.outputFilename);
       download(
@@ -356,8 +399,8 @@ export default {
       );
       encoder.delete();
     },
-    getCurrentFrameData(context: CanvasRenderingContext2D) {
-      const { min, max, data: frameData } = this.player.getCurrentFrame();
+    getCurrentFrameData(context: CanvasRenderingContext2D, frame) {
+      const { min, max, data: frameData } = frame;
       const imgData = context.getImageData(
         0,
         0,
@@ -376,18 +419,31 @@ export default {
       }
       return imgData;
     },
-    renderCurrentFrame() {
+    renderFrame(frameData, frameNum) {
       const context = this.$refs.canvas.getContext("2d");
-      const imgData = this.getCurrentFrameData(context);
-      this.frameHeader = this.player.getFrameHeader();
+      const imgData = this.getCurrentFrameData(context, frameData);
+      this.frameHeader = this.player.getFrameHeaderAtIndex(frameNum);
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = requestAnimationFrame(() =>
         this.drawFrame(context, imgData)
       );
     },
-    async renderFrame() {
-      await this.player.advanceToNextFrame();
-      this.renderCurrentFrame();
+    async queueFrame(frameNum: number) {
+      let frameData = this.player.getFrameAtIndex(frameNum);
+      if (frameData) {
+        return { frameNum, frameData };
+      } else {
+        await this.player.seekToFrame(frameNum);
+      }
+      frameData = this.player.getFrameAtIndex(frameNum);
+      if (frameData === false) {
+        console.assert(this.player.getTotalFrames() !== false);
+        this.totalFrames = this.player.getTotalFrames();
+        frameNum = this.adjustedTotalFrames - 1;
+        frameData = this.player.getFrameAtIndex(frameNum);
+        console.assert(frameData !== false);
+      }
+      return { frameNum, frameData };
     },
     async drawFrame(context, imgData) {
       // TODO(jon): respect fps here, render only when we should.
@@ -399,19 +455,15 @@ export default {
       const shouldRedraw = Math.floor(this.animationTick % everyXTicks) === 0;
       if (shouldRedraw) {
         context.putImageData(imgData, 0, 0);
-        const atLastFrameOfVideo = this.player.atEndOfVideo();
-        if (this.playing && !atLastFrameOfVideo) {
-          this.frameNum++;
-          await this.renderFrame();
-        } else if (atLastFrameOfVideo) {
-          this.pause();
+        if (this.playing) {
+          await this.fetchRenderAdvanceFrame();
         }
         this.renderOverlay(
           this.$refs.overlayCanvas.getContext("2d"),
           this.currentTime,
           true,
           this.scale,
-          this.secondsSinceLastFFC < 5,
+          this.secondsSinceLastFFC,
           false
         );
       } else {
@@ -431,7 +483,7 @@ export default {
       atTime: number,
       clear: boolean,
       scale: number,
-      duringFFC: boolean,
+      timeSinceFFCSeconds: number,
       isExporting: boolean
     ) {
       if (clear) {
@@ -445,20 +497,19 @@ export default {
       for (const rect of data) {
         this.drawRectWithText(context, rect, isExporting);
       }
-      if (duringFFC) {
-        context.font = "12px Verdana";
-        context.fillStyle = "white";
+      if (timeSinceFFCSeconds < 10) {
+        context.font = "bold 15px Verdana";
+        let a = 1 / (10 - timeSinceFFCSeconds);
+        a = a * a;
+        const alpha = 1 - a;
+        context.fillStyle = `rgba(163, 210, 226, ${alpha})`;
+        // TODO(jon): Make opacity of text stronger when the FFC event has just happened
         const text = "Calibrating...";
         const textWidth = context.measureText(text).width;
-        const textX = context.canvas.width / 2 - textWidth;
+        const textX = (context.canvas.width / window.devicePixelRatio) / 2 - textWidth / 2;
         const textY = 20;
         context.fillText(text, textX, textY);
       }
-    },
-    async seekToFrame(frameNum) {
-      cancelAnimationFrame(this.animationFrame);
-      await this.player.seekToFrame(frameNum);
-      this.frameNum = this.player.getFrameNum();
     },
     drawRectWithText(
       context: CanvasRenderingContext2D,
@@ -500,7 +551,10 @@ export default {
         );
         let aiTag = "";
         if (track) {
-          const tag = track.TrackTags.find((tag) => tag.data === "Master" || tag.data.name === "Master");
+          const tag = track.TrackTags.find(
+            (tag) =>
+              (tag.data && tag.data === "Master") || tag.data.name === "Master"
+          );
           if (tag) {
             aiTag = tag.what;
           }
@@ -525,6 +579,19 @@ export default {
     toggleSmoothing() {
       this.smoothed = !this.smoothed;
     },
+    // totalFrames() {
+    //   let adjust = 0;
+    //   if (this.hasBackgroundFrame) {
+    //     adjust = -1;
+    //   }
+    //   let totalFrames = this.player.getTotalFrames();
+    //   if (totalFrames !== false) {
+    //     totalFrames += adjust;
+    //   } else {
+    //     totalFrames = this.actualDuration * this.header.fps;
+    //   }
+    //   return totalFrames;
+    // },
     hitTestPos(x, y) {
       const allFrameData = this.getVideoFrameDataForAllTracksAtTime(
         this.currentTime,
@@ -603,32 +670,41 @@ export default {
       context.scale(devicePixelRatio, devicePixelRatio);
     },
     async setTimeAndRedraw(time) {
-      const totalFramesEstimate = this.actualDuration * this.header.fps;
-      const frameNum = (time / this.actualDuration) * totalFramesEstimate;
-      await this.seekToFrame(frameNum);
-      this.renderCurrentFrame();
+      let totalFrames = this.totalFrames;
+      if (totalFrames === false) {
+        totalFrames = Math.floor(this.actualDuration * this.header.fps);
+      }
+      this.frameNum = Math.floor(
+        Math.min(totalFrames - 1, (time / this.actualDuration) * totalFrames)
+      );
+      await this.renderCurrentFrame();
+    },
+    async renderCurrentFrame(frameNum?: number) {
+      if (frameNum === undefined) {
+        frameNum = this.frameNum;
+      }
+      const { frameNum: actualFrameNum, frameData } = await this.queueFrame(
+        frameNum
+      );
+      this.renderFrame(frameData, actualFrameNum);
+      return frameNum === actualFrameNum;
     },
     startScrub() {
-      // this.wasPaused = this.htmlPlayer.paused;
-      // if (!this.wasPaused) {
-      //   this.videoJsPlayer().pause();
-      // }
-      console.log("Start scrub");
+      this.wasPaused = !this.playing;
+      if (!this.wasPaused) {
+        this.pause();
+      }
       this.isScrubbing = true;
     },
     endScrub() {
-      // if (!this.wasPaused) {
-      //   this.videoJsPlayer().play();
-      // }
-      console.log("End scrub");
+      if (!this.wasPaused) {
+        this.play();
+      }
       this.isScrubbing = false;
     },
     async play() {
       this.playing = true;
-      if (this.player.atEndOfVideo()) {
-        await this.seekToFrame(0);
-      }
-      this.renderCurrentFrame();
+      await this.fetchRenderAdvanceFrame();
     },
     pause() {
       this.playing = false;
@@ -643,6 +719,13 @@ export default {
   position: relative;
   width: 100%;
   padding: 0;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  overflow: hidden;
+  .track-scrubber {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
 }
 canvas {
   width: 100%;

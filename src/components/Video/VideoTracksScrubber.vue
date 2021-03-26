@@ -198,7 +198,6 @@ export default {
     },
   },
   mounted() {
-    console.log(this.canvasWidth);
     this.initScrubber();
   },
   beforeDestroy() {

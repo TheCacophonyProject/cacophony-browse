@@ -93,6 +93,10 @@ export default {
           ""
         );
       },
+
+      // TODO(jon): Api endpoint that doesn't require signedUrl etc, just uses usual auth, and we say which recording we want.
+      // Fixes issue with videos timing out on tabs that are open for a while.
+
       rawSource: (state) =>
         `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
     }),
