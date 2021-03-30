@@ -30,21 +30,23 @@
           <p>{{ infoMessage }}</p>
           <table>
             <tr>
-              <td>Summary Tag</td>
-              <td>Meaning</td>
-            </tr>
-
-            <tr>
-              <td>Uknown</td>
-              <td>Humanly confirmed as unidtifiable</td>
+              <td>Unidentifiable</td>
+              <td>Humanly confirmed as unidentifiable (Unknown)</td>
             </tr>
             <tr>
-              <td>Unidentified Animal</td>
-              <td>AI is sure there is an animal but doesn't know what it is</td>
+              <td>Unidentified</td>
+              <td>
+                AI is sure there is an animal but doesn't know what it is
+                (Unidentified)
+              </td>
             </tr>
             <tr>
-              <td>Probably not an animal</td>
-              <td>AI is not sure if this is an animal or not</td>
+              <td>Probably not an Animal</td>
+              <td>AI is not sure if this is an animal or not (No Tags)</td>
+            </tr>
+            <tr>
+              <td>Conflicting Tags</td>
+              <td>Human tags differ in tagged animal</td>
             </tr>
           </table>
         </b-alert>
@@ -280,7 +282,7 @@ export default {
       queryParams: {},
       showInfo: this.isInfoShown(),
       infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
-      unknownHelp: `Humanly confirmed as unidtifiable`,
+      unknownHelp: `Humanly confirmed as unidentifiable`,
       nothingHelp: `AI is not sure if this is an animal or not`,
       unidentifiedHelp: `AI is sure there is an animal but doesn't know what it is`,
       tableDateTimeFormat: "L LTS",

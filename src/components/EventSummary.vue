@@ -12,13 +12,15 @@
       {{ formatDate(item.start, "LTS") }}
     </b-col>
     <b-col>
-      <div v-if="item.confidence != 0 && item.confidence">
-        {{ item.confidence }}
+      <div v-if="item.trackTag">
+        {{ Math.round(item.trackTag.confidence * 100) }}
         <span> %</span>
       </div>
     </b-col>
     <b-col>
-      {{ capitalizeFirst(item.what) }}
+      <span v-if="item.trackTag">
+        {{ capitalizeFirst(item.trackTag.what) }}
+      </span>
     </b-col>
   </a>
 </template>
