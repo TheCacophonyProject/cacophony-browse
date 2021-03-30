@@ -2,6 +2,7 @@ import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
 import { DeviceVisitMap } from "./visits";
 import * as moment from "moment";
+import { shouldViewAsSuperUser } from "@/utils";
 
 export default {
   query,
@@ -295,6 +296,11 @@ function makeApiQuery(query: RecordingQuery): any {
       query.tag = [query.tag];
     }
     apiParams["tags"] = JSON.stringify(query.tag);
+  }
+
+  // View mode for restricting global admin users to only see their own recordings.
+  if (!shouldViewAsSuperUser()) {
+    apiParams["view-mode"] = "user";
   }
   return apiParams;
 }

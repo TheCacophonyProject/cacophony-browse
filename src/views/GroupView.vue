@@ -22,11 +22,13 @@
       nav-class="container"
       v-model="currentTabIndex"
     >
-      <b-tab title="Users">
+      <b-tab>
         <template #title>
-          <span>Users</span>
-          <b-spinner v-if="usersLoading" type="border" small />
-          <b-badge v-else pill variant="secondary">{{ users.length }}</b-badge>
+          <TabTemplate
+            title="Users"
+            :isLoading="usersLoading"
+            :value="users.length"
+          />
         </template>
         <UsersTab
           :users="users"
@@ -39,21 +41,21 @@
       </b-tab>
       <b-tab title="Devices">
         <template #title>
-          <span>Devices</span>
-          <b-spinner v-if="devicesLoading" type="border" small />
-          <b-badge v-else pill variant="secondary">{{
-            devices.length
-          }}</b-badge>
+          <TabTemplate
+            title="Devices"
+            :isLoading="devicesLoading"
+            :value="devices.length"
+          />
         </template>
         <DevicesTab :devices="devices" :loading="devicesLoading" />
       </b-tab>
-      <b-tab title="Stations" lazy>
+      <b-tab lazy>
         <template #title>
-          <span>Stations</span>
-          <b-spinner v-if="stationsLoading" type="border" small />
-          <b-badge v-else pill variant="secondary">{{
-            nonRetiredStationsCount
-          }}</b-badge>
+          <TabTemplate
+            title="Stations"
+            :isLoading="stationsLoading"
+            :value="nonRetiredStationsCount"
+          />
         </template>
         <StationsTab
           :items="stations"
@@ -73,12 +75,15 @@ import api from "@/api";
 import StationsTab from "@/components/Groups/StationsTab.vue";
 import UsersTab from "@/components/Groups/UsersTab.vue";
 import DevicesTab from "@/components/Groups/DevicesTab.vue";
+import TabTemplate from "@/components/TabTemplate.vue";
+
 export default {
   name: "GroupView",
   components: {
     UsersTab,
     StationsTab,
     DevicesTab,
+    TabTemplate,
   },
   data() {
     return {
@@ -122,7 +127,7 @@ export default {
       this.usersLoading = true;
       {
         const { result } = await api.groups.getUsersForGroup(this.groupName);
-        this.users = result.data;
+        this.users = result.users;
       }
       this.usersLoading = false;
     },
@@ -130,7 +135,7 @@ export default {
       this.devicesLoading = true;
       {
         const { result } = await api.groups.getDevicesForGroup(this.groupName);
-        this.devices = result.data;
+        this.devices = result.devices;
       }
       this.devicesLoading = false;
     },

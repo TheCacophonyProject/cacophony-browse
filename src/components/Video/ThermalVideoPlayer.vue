@@ -249,7 +249,11 @@ export default {
       this.playerIsReady = true;
     },
     videoError() {
-      this.requestNextVideo();
+      if (window.location.hostname !== "localhost") {
+        // When developing we don't want to automatically request the next video when loading the video fails,
+        // as usually developing locally the videos don't exist.
+        this.requestNextVideo();
+      }
     },
     selectTrack() {
       this.lastDisplayedVideoTime = -1;
