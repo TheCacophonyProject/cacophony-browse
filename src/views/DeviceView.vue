@@ -1,17 +1,6 @@
 <template>
   <b-container fluid class="admin">
     <b-jumbotron class="jumbotron" fluid>
-      <div>
-        <b-link
-          class="back-link"
-          :to="{
-            name: 'devices',
-          }"
-        >
-          <font-awesome-icon icon="angle-left" size="xs" />
-          <span>Back to devices</span>
-        </b-link>
-      </div>
       <h1>
         <font-awesome-icon icon="microchip" size="xs" />
         <span>{{ deviceName }}</span>
@@ -19,9 +8,9 @@
       <p class="lead">Manage this device.</p>
     </b-jumbotron>
 
-    <spinner :fetching="!loadedDevice" />
-    <div v-if="!loadedDevice">
-      Loading device....
+    <div v-if="!loadedDevice" class="container no-tabs">
+      Loading device...
+      <spinner :fetching="!loadedDevice" />
     </div>
     <div v-else-if="device && device.id">
       <device-detail
@@ -31,8 +20,9 @@
         class="dev-details"
       />
     </div>
-    <div v-else>
-      Sorry but we couldn't find your device
+    <div v-else class="container no-tabs">
+      Sorry but group <i> &nbsp; {{ groupName }} &nbsp; </i> does not have a
+      device called <i> &nbsp; {{ deviceName }}</i>.
     </div>
   </b-container>
 </template>
@@ -75,7 +65,7 @@ export default {
       this.deviceName = this.$route.params.devicename;
       this.groupName = this.$route.params.groupname;
       try {
-        await this.fetchDevice( );
+        await this.fetchDevice();
         if (this.device) {
           await this.getSoftwareDetails(this.device.id);
         }
@@ -85,7 +75,10 @@ export default {
       this.loadedDevice = true;
     },
     fetchDevice: async function () {
-      const results = await api.device.getDevice(this.groupName, this.deviceName);
+      const results = await api.device.getDevice(
+        this.groupName,
+        this.deviceName
+      );
       this.device = results.result.device;
     },
     getSoftwareDetails: async function (deviceId) {
@@ -110,5 +103,9 @@ div .dev-details {
   margin: 0;
   padding: 0;
   max-width: unset;
+}
+
+.no-tabs {
+  padding: 2em 0;
 }
 </style>

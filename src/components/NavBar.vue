@@ -37,12 +37,6 @@
                 class="icon"
               />&nbsp;Groups</b-dropdown-item
             >
-            <b-dropdown-item href="/devices"
-              ><font-awesome-icon
-                icon="microchip"
-                class="icon"
-              />&nbsp;Devices</b-dropdown-item
-            >
           </b-nav-item-dropdown>
           <b-nav-item-dropdown class="profile" right>
             <template slot="button-content">
