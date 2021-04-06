@@ -11,15 +11,28 @@ export default {
   getLatestEvents,
 };
 
+export interface DeviceInfo {
+  deviceName: string;
+  groupName: string;
+  id: number;
+  users?: UserDetails;
+}
+
+export interface UserDetails {
+  userName: string;
+  id: number;
+  admin: boolean;
+}
+
 function getDevices() {
   return CacophonyApi.get(
     `/api/v1/devices${shouldViewAsSuperUser() ? "" : "?view-mode=user"}`
   );
 }
 
-function getDevice(deviceNameOrId: string | number) {
+function getDevice(groupName: string, deviceName: string): Promise<DeviceInfo> {
   return CacophonyApi.get(
-    `/api/v1/devices/${encodeURIComponent(deviceNameOrId)}`
+    `/api/v1/devices/${deviceName}/in-group/${groupName}`
   );
 }
 

@@ -31,7 +31,7 @@ function createRouter() {
         component: DevicesView,
       },
       {
-        path: "/devices/:devicename",
+        path: "/groups/:groupname/:devicename",
         name: "device",
         component: DeviceView,
       },

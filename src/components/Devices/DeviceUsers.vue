@@ -4,9 +4,13 @@
       Users <help>{{ usersHelpTip }}</help>
     </h2>
     <div class="description-and-button-wrapper">
-      <p>
+      <p v-if="isDeviceAdmin">
         Users can view recordings for this device. Note that users that belong
         to a group that contains this device can also view the recordings.
+      </p>
+      <p v-else>
+        Only device administrators can view users are associaed with this
+        device.
       </p>
       <device-add-user v-if="isDeviceAdmin" :device="device" />
       <b-button
@@ -21,15 +25,15 @@
         <span>Add user</span>
       </b-button>
     </div>
-    <div v-if="device && device.Users">
-      <div v-if="!device.Users.length">
+    <div v-if="device && device.users">
+      <div v-if="!device.users.length">
         <b-card class="no-content-placeholder">
           This device has no users associated with it.
         </b-card>
       </div>
       <div v-else>
         <b-table
-          :items="device.Users"
+          :items="device.users"
           :fields="deviceUsersTableFields"
           :sort-by="userSortBy"
           striped
@@ -38,10 +42,6 @@
           responsive
           data-cy="users-table"
         >
-          <template v-slot:cell(admin)="data">
-            {{ data.item.DeviceUsers.admin ? "Yes" : "No" }}
-          </template>
-
           <template v-slot:cell(controls)="data">
             <b-modal
               id="device-user-remove-self"
@@ -95,7 +95,7 @@ export default {
   data() {
     return {
       deviceUsersTableFields: [
-        { key: "username", label: "Username" },
+        { key: "userName", label: "Username" },
         { key: "admin", label: "Administrator" },
         {
           key: "controls",
@@ -103,7 +103,7 @@ export default {
           class: "device-actions-cell",
         },
       ],
-      userSortBy: "username",
+      userSortBy: "userName",
       usersHelpTip: "Only administrators can add new users.",
       showUserRemoveSelfModal: false,
     };
@@ -111,16 +111,7 @@ export default {
   computed: mapState({
     uiUser: (state) => state.User.userData.username,
     isDeviceAdmin: function () {
-      if (this.user && this.device.Users) {
-        const username = this.user.username;
-        return (
-          this.user.isSuperUser ||
-          this.device.Users.some(
-            (user) => user.DeviceUsers.admin && user.username === username
-          )
-        );
-      }
-      return false;
+      return this.device ? this.device.userIsAdmin : false;
     },
   }),
   methods: {

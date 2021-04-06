@@ -46,8 +46,11 @@
               </b-dropdown-item>
 
               <b-dropdown-item
-                v-b-tooltip.hover.left="'There is more than one animal in this recording'"
-                @click="addMultipleAnimalsTag">
+                v-b-tooltip.hover.left="
+                  'There is more than one animal in this recording'
+                "
+                @click="addMultipleAnimalsTag"
+              >
                 Multiple animals
               </b-dropdown-item>
             </b-dropdown>
