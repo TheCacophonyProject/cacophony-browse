@@ -22,7 +22,8 @@
     </div>
     <div v-else class="container no-tabs">
       Sorry but group <i> &nbsp; {{ groupName }} &nbsp; </i> does not have a
-      device called <i> &nbsp; {{ deviceName }}</i>.
+      device called <i> &nbsp; {{ deviceName }}</i
+      >.
     </div>
   </b-container>
 </template>
