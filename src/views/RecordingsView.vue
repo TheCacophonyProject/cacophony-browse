@@ -10,12 +10,9 @@
         <QueryRecordings
           ref="queryRec"
           :disabled="queryPending"
-          :currentPage="currentPage"
-          :perPage="perPage"
-          :path="'recordings'"
           :is-collapsed="searchPanelIsCollapsed"
-          @mounted="submitNewQuery"
-          @submit="submitNewQuery"
+          @mounted="querySubmitted"
+          @submit="querySubmitted"
           @description="saveNextQueryDescription"
           @toggled-search-panel="
             searchPanelIsCollapsed = !searchPanelIsCollapsed
@@ -239,10 +236,11 @@ export default {
   },
   methods: {
     pagination(page) {
-      this.$refs.queryRec.updatePagination(this.perPage, page);
+      this.paginationHasChanged(page, this.perPage);
     },
     perPageChanged(perPage) {
-      this.$refs.queryRec.updatePagination(perPage, this.currentPage);
+      this.currentPage = 0
+      this.paginationHasChanged(this.currentPage, perPage);
     },
     relativeDay(itemDate) {
       itemDate = itemDate[0][0].dateObj;
@@ -266,14 +264,46 @@ export default {
         this.showCards ? "card" : "row"
       );
     },
-    submitNewQuery(whereQuery) {
-      this.serialisedQuery = whereQuery;
-      this.getRecording(whereQuery);
+    makePaginatedQuery(origQuery, page, perPage) {
+      const query = Object.assign({}, origQuery);
+      query.limit = perPage;
+      query.offset = Math.max(0, (page - 1) * perPage);
+      return query;
+    },
+    updateRoute(query) {
+      const queryHasChanged = JSON.stringify(query) !== JSON.stringify(this.$route.query);
+
+      if (queryHasChanged) {
+        this.$router.push({
+          path: "recordings",
+          query,
+        });
+      }
+    },
+    paginationHasChanged(page, perPage) {
+      const query = this.makePaginatedQuery(this.serialisedQuery, page, perPage);
+      this.updateRoute(query);
+      this.getRecordings(query);
+    },
+    queryRouteHasChanged(query) {
+      const fullQuery = this.makePaginatedQuery(query, this.currentPage, this.perPage);
+      this.updateRoute(fullQuery)
+    },
+    querySubmitted(query) {
+      const queryParamsHaveChanged = JSON.stringify(query) !== JSON.stringify(this.serialisedQuery);
+      if (queryParamsHaveChanged) {
+        this.currentPage = 0;
+      }
+      
+      this.serialisedQuery = query;
+      const fullQuery = this.makePaginatedQuery(query, this.currentPage, this.perPage);
+      this.updateRoute(fullQuery);
+      this.getRecordings(fullQuery);
     },
     saveNextQueryDescription(description) {
       this.nextQueryDescription = description;
     },
-    async getRecording(whereQuery) {
+    async getRecordings(whereQuery) {
       // Remove previous values
       this.countMessage = "";
       this.recordings = [];
