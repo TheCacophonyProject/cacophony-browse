@@ -30,10 +30,10 @@ function getDevices() {
   );
 }
 
-function getDevice(groupName: string, deviceName: string): Promise<DeviceInfo> {
+function getDevice(groupName: string, deviceName: string) {
   return CacophonyApi.get(
     `/api/v1/devices/${deviceName}/in-group/${groupName}`
-  );
+  );  
 }
 
 function addUserToDevice(username, deviceId, admin) {

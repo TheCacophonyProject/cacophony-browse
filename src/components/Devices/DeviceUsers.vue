@@ -9,7 +9,7 @@
         to a group that contains this device can also view the recordings.
       </p>
       <p v-else>
-        Only device administrators can view users are associaed with this
+        Only device administrators can view users that are associated with this
         device.
       </p>
       <device-add-user v-if="isDeviceAdmin" :device="device" />

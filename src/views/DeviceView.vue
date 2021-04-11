@@ -76,11 +76,11 @@ export default {
       this.loadedDevice = true;
     },
     fetchDevice: async function () {
-      const results = await api.device.getDevice(
+      const request = await api.device.getDevice(
         this.groupName,
         this.deviceName
       );
-      this.device = results.result.device;
+      this.device = request.result.device;
     },
     getSoftwareDetails: async function (deviceId) {
       const results = await api.device.getLatestSoftwareVersion(deviceId);
