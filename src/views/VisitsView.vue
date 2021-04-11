@@ -11,8 +11,8 @@
           ref="queryRec"
           :disabled="queryPending"
           :onlyRecordingType="'video'"
-          :path="'visits'"
           :is-collapsed="searchPanelIsCollapsed"
+          @mounted="querysMounted"
           @submit="submitNewQuery"
           @description="saveNextQueryDescription"
           @toggled-search-panel="
@@ -328,13 +328,6 @@ export default {
       return visitsByDay;
     },
   },
-  mounted() {
-    const query = this.getQuery();
-    if (query && query.device && query.device.length !== 0) {
-      this.searchPanelIsCollapsed = true;
-      this.submitNewQuery(query);
-    }
-  },
   methods: {
     imgSrc,
     formatDate(date: string, formatStr: string): string {
@@ -402,14 +395,26 @@ export default {
     expandAdditionalInfo(row) {
       this.$set(row, "_showDetails", !row._showDetails);
     },
-    getQuery(): RecordingQuery {
-      if (this.$refs.queryRec) {
-        return this.$refs.queryRec.serialiseQueryForRecall();
+    setQuery(query: RecordingQuery) {
+      const queryHasChanged = JSON.stringify(query) !== JSON.stringify(this.queryParams);
+      this.queryParams = query;
+
+      if (queryHasChanged) {
+        this.$router.push({
+          path: "visits",
+          query,
+        });
       }
-      return {};
+    },
+    querysMounted(query: RecordingQuery) {
+      this.setQuery(query);
+      if (query && query.device && query.device.length !== 0) {
+        this.searchPanelIsCollapsed = true;
+        this.submitNewQuery(query);
+      }
     },
     submitNewQuery(whereQuery: RecordingQuery) {
-      this.queryParams = whereQuery;
+      this.setQuery(whereQuery);
       this.getVisits(whereQuery, true);
     },
     saveNextQueryDescription(description) {
@@ -417,7 +422,7 @@ export default {
     },
     loadMoreVisits() {
       this.loadingMore = true;
-      const query: RecordingQuery = this.getQuery();
+      const query: RecordingQuery = this.queryParams;
       query.offset = this.offset;
       this.getVisits(query, false);
       this.loadingMore = false;
