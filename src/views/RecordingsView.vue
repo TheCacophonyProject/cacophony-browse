@@ -271,14 +271,11 @@ export default {
       return query;
     },
     updateRoute(query) {
-      const queryHasChanged = JSON.stringify(query) !== JSON.stringify(this.$route.query);
-
-      if (queryHasChanged) {
+        // Catch errors to avoid redundant navigation error
         this.$router.push({
           path: "recordings",
           query,
-        });
-      }
+        }).catch(() => {});
     },
     paginationHasChanged(page, perPage) {
       const query = this.makePaginatedQuery(this.serialisedQuery, page, perPage);

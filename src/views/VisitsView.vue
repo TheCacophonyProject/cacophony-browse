@@ -396,15 +396,10 @@ export default {
       this.$set(row, "_showDetails", !row._showDetails);
     },
     setQuery(query: RecordingQuery) {
-      const queryHasChanged = JSON.stringify(query) !== JSON.stringify(this.queryParams);
-      this.queryParams = query;
-
-      if (queryHasChanged) {
-        this.$router.push({
-          path: "visits",
-          query,
-        });
-      }
+      this.$router.push({
+        path: "visits",
+        query,
+      }).catch(() => {});
     },
     querysMounted(query: RecordingQuery) {
       this.setQuery(query);
