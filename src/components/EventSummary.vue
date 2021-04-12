@@ -12,13 +12,15 @@
       {{ formatDate(item.start, "LTS") }}
     </b-col>
     <b-col>
-      <div v-if="item.confidence != 0">
-        {{ item.confidence }}
+      <div v-if="item.trackTag">
+        {{ Math.round(item.trackTag.confidence * 100) }}
         <span> %</span>
       </div>
     </b-col>
     <b-col>
-      {{ capitalizeFirst(item.what) }}
+      <span v-if="item.trackTag">
+        {{ capitalizeFirst(item.trackTag.what) }}
+      </span>
     </b-col>
   </a>
 </template>
@@ -50,7 +52,7 @@ export default {
       if (value) {
         return value.charAt(0).toUpperCase() + value.substring(1);
       } else {
-        return "Nothing";
+        return "Probably Nothing";
       }
     },
     navigateToRecording(event, visEvent: VisitEvent) {
