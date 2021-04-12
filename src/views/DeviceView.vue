@@ -18,6 +18,7 @@
         :user="currentUser"
         :software="softwareDetails"
         class="dev-details"
+        @reload-device="fetchDevice"
       />
     </div>
     <div v-else class="container no-tabs">

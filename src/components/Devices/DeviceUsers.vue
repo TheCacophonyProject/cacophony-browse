@@ -12,7 +12,10 @@
         Only device administrators can view users that are associated with this
         device.
       </p>
-      <device-add-user v-if="isDeviceAdmin" :device="device" />
+      <device-add-user 
+        v-if="isDeviceAdmin" 
+        :device="device"
+        @user-added="$emit('reload-device')" />
       <b-button
         v-if="isDeviceAdmin"
         v-b-modal.device-add-user
@@ -46,7 +49,7 @@
             <b-modal
               id="device-user-remove-self"
               title="Remove yourself from device"
-              @ok="removeDeviceUser(data.item.username)"
+              @ok="removeDeviceUser(data.item.userName)"
               ok-title="Remove"
               ok-variant="danger"
               v-model="showUserRemoveSelfModal"
@@ -63,7 +66,7 @@
               title="Remove user from device"
               class="trash-button"
               variant="light"
-              @click="removeDeviceUserCheckIfSelf(data.item.username, uiUser)"
+              @click="removeDeviceUserCheckIfSelf(data.item.userName, uiUser)"
             >
               <font-awesome-icon icon="trash" size="1x" />
             </b-button>
@@ -120,6 +123,7 @@ export default {
         userName,
         device: this.device,
       });
+      this.$emit("reload-device");
     },
     async removeDeviceUserCheckIfSelf(userName, uiUser) {
       if (userName == uiUser) {
