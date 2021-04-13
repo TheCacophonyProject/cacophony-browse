@@ -47,7 +47,11 @@
             :value="devices.length"
           />
         </template>
-        <DevicesTab :devices="devices" :loading="devicesLoading" />
+        <DevicesTab
+          :devices="devices"
+          :loading="devicesLoading"
+          :group-name="groupName"
+        />
       </b-tab>
       <b-tab lazy>
         <template #title>
@@ -127,7 +131,7 @@ export default {
       this.usersLoading = true;
       {
         const { result } = await api.groups.getUsersForGroup(this.groupName);
-        this.users = result.data;
+        this.users = result.users;
       }
       this.usersLoading = false;
     },
@@ -135,7 +139,7 @@ export default {
       this.devicesLoading = true;
       {
         const { result } = await api.groups.getDevicesForGroup(this.groupName);
-        this.devices = result.data;
+        this.devices = result.devices;
       }
       this.devicesLoading = false;
     },

@@ -1,15 +1,39 @@
 import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
+import { shouldViewAsSuperUser } from "@/utils";
+
 export default {
   getDevices,
+  getDevice,
   addUserToDevice,
   removeUserFromDevice,
   getLatestSoftwareVersion,
   getLatestEvents,
 };
 
+export interface DeviceInfo {
+  deviceName: string;
+  groupName: string;
+  id: number;
+  users?: UserDetails;
+}
+
+export interface UserDetails {
+  userName: string;
+  id: number;
+  admin: boolean;
+}
+
 function getDevices() {
-  return CacophonyApi.get("/api/v1/devices");
+  return CacophonyApi.get(
+    `/api/v1/devices${shouldViewAsSuperUser() ? "" : "?view-mode=user"}`
+  );
+}
+
+function getDevice(groupName: string, deviceName: string) {
+  return CacophonyApi.get(
+    `/api/v1/devices/${deviceName}/in-group/${groupName}`
+  );  
 }
 
 function addUserToDevice(username, deviceId, admin) {

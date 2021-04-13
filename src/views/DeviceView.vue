@@ -1,37 +1,30 @@
 <template>
   <b-container fluid class="admin">
     <b-jumbotron class="jumbotron" fluid>
-      <div>
-        <b-link
-          class="back-link"
-          :to="{
-            name: 'devices',
-          }"
-        >
-          <font-awesome-icon icon="angle-left" size="xs" />
-          <span>Back to devices</span>
-        </b-link>
-      </div>
       <h1>
         <font-awesome-icon icon="microchip" size="xs" />
-        <span v-if="!fetched" class="name-placeholder"
-          >loading device name</span
-        >
-        <span v-else>
-          <span>{{ device && device.devicename }}</span>
-        </span>
+        <span>{{ deviceName }}</span>
       </h1>
       <p class="lead">Manage this device.</p>
     </b-jumbotron>
 
-    <spinner :fetching="!fetched" />
-    <div v-if="device && fetched">
+    <div v-if="!loadedDevice" class="container no-tabs">
+      Loading device...
+      <spinner :fetching="!loadedDevice" />
+    </div>
+    <div v-else-if="device && device.id">
       <device-detail
         :device="device"
         :user="currentUser"
         :software="softwareDetails"
         class="dev-details"
+        @reload-device="fetchDevice"
       />
+    </div>
+    <div v-else class="container no-tabs">
+      Sorry but group <i> &nbsp; {{ groupName }} &nbsp; </i> does not have a
+      device called <i> &nbsp; {{ deviceName }}</i
+      >.
     </div>
   </b-container>
 </template>
@@ -42,17 +35,22 @@ import DeviceDetail from "../components/Devices/DeviceDetail.vue";
 import Spinner from "../components/Spinner.vue";
 import api from "../api/index";
 
+// FIXME(jon): Should we even have this view anymore, or should all devices have to be part of a group?
+// In theory this view breaks if the user has access to multiple devices with the same name, which is allowed.
+
 export default {
   name: "DeviceView",
   components: { DeviceDetail, Spinner },
   computed: mapState({
-    device: (state) => state.Devices.currentDevice,
-    fetched: (state) => state.Devices.fetched,
     currentUser: (state) => state.User.userData,
   }),
   data() {
     return {
-      softwareDetails: { message: "Retreiving version information..." },
+      loadedDevice: false,
+      device: {},
+      deviceName: "",
+      groupName: "",
+      softwareDetails: { message: "Retrieving version information..." },
     };
   },
   watch: {
@@ -65,20 +63,28 @@ export default {
   },
   methods: {
     queryDevice: async function () {
-      await this.fetchDevice();
-      if (this.fetched) {
-        this.getSoftwareDetails(this.device.id);
+      this.loadedDevice = false;
+      this.deviceName = this.$route.params.devicename;
+      this.groupName = this.$route.params.groupname;
+      try {
+        await this.fetchDevice();
+        if (this.device) {
+          await this.getSoftwareDetails(this.device.id);
+        }
+      } catch (e) {
+        // TODO - we will move away from global error handling, and show any errors locally in the component
       }
+      this.loadedDevice = true;
     },
     fetchDevice: async function () {
-      await this.$store.dispatch(
-        "Devices/GET_DEVICE",
-        this.$route.params.devicename
+      const request = await api.device.getDevice(
+        this.groupName,
+        this.deviceName
       );
+      this.device = request.result.device;
     },
     getSoftwareDetails: async function (deviceId) {
       const results = await api.device.getLatestSoftwareVersion(deviceId);
-
       if (results.success && results.result.rows.length > 0) {
         this.softwareDetails.message = "Success";
         this.softwareDetails.result = results.result.rows[0];
@@ -99,5 +105,9 @@ div .dev-details {
   margin: 0;
   padding: 0;
   max-width: unset;
+}
+
+.no-tabs {
+  padding: 2em 0;
 }
 </style>

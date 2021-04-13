@@ -37,17 +37,11 @@
                 class="icon"
               />&nbsp;Groups</b-dropdown-item
             >
-            <b-dropdown-item href="/devices"
-              ><font-awesome-icon
-                icon="microchip"
-                class="icon"
-              />&nbsp;Devices</b-dropdown-item
-            >
           </b-nav-item-dropdown>
-          <b-nav-item-dropdown class="profile">
+          <b-nav-item-dropdown class="profile" right>
             <template slot="button-content">
               <font-awesome-icon
-                v-if="isSuperUser"
+                v-if="hasGlobalReadPermissions"
                 :icon="['fas', 'user-secret']"
                 class="icon"
               />
@@ -56,13 +50,41 @@
                 :icon="['far', 'user-circle']"
                 class="icon"
               />&nbsp;{{ userName }}
+              <span v-if="hasGlobalReadPermissions && !isViewingAsOtherUser()">
+                {{ isViewingAsSuperUser ? "(super admin)" : "(user)" }}
+              </span>
             </template>
-            <b-dropdown-item
-              v-if="isSuperUser"
-              @click="showChangeUserViewDialog = true"
-            >
-              <font-awesome-icon icon="glasses" class="icon" />&nbsp;View user
-            </b-dropdown-item>
+
+            <b-dropdown-group header="View as" v-if="hasGlobalReadPermissions">
+              <b-dropdown-item
+                :active="isViewingAsSuperUser"
+                @click="viewAsSuperUser"
+              >
+                <font-awesome-icon
+                  :icon="['fas', 'user-secret']"
+                  class="icon"
+                />&nbsp;Super admin
+              </b-dropdown-item>
+
+              <b-dropdown-item
+                :active="isViewingAsRegularUser"
+                @click="viewAsRegularUser"
+              >
+                <font-awesome-icon
+                  :icon="['far', 'user-circle']"
+                  class="icon"
+                />&nbsp;User
+              </b-dropdown-item>
+
+              <b-dropdown-item
+                @click="showChangeUserViewDialog = true"
+                :active="isViewingAsOtherUser()"
+              >
+                <font-awesome-icon icon="glasses" class="icon" />
+                &nbsp;Another user
+              </b-dropdown-item>
+            </b-dropdown-group>
+            <b-dropdown-divider></b-dropdown-divider>
             <b-dropdown-item @click="logout">
               <font-awesome-icon icon="power-off" class="icon" />&nbsp;Logout
             </b-dropdown-item>
@@ -92,6 +114,7 @@
 
 <script>
 import User from "../api/User.api";
+import { shouldViewAsSuperUser } from "@/utils";
 
 export default {
   name: "Navbar",
@@ -100,6 +123,7 @@ export default {
       internalShowChangeUserViewDialog: false,
       users: [],
       usersListLabel: "loading users",
+      viewAs: "",
       selectedUser: {
         name: "",
         id: "",
@@ -116,6 +140,11 @@ export default {
     isSuperUser() {
       return this.globalPermission === "write";
     },
+    hasGlobalReadPermissions() {
+      return (
+        this.globalPermission === "write" || this.globalPermission === "read"
+      );
+    },
     showChangeUserViewDialog: {
       async set(val) {
         this.internalShowChangeUserViewDialog = val;
@@ -128,10 +157,19 @@ export default {
         return this.internalShowChangeUserViewDialog;
       },
     },
+    isViewingAsSuperUser() {
+      return this.viewAs === "super";
+    },
+    isViewingAsRegularUser() {
+      return this.viewAs === "regular";
+    },
+  },
+  mounted() {
+    this.viewAs = shouldViewAsSuperUser() ? "super" : "regular";
   },
   methods: {
     async initUsersList() {
-      if (this.isSuperUser) {
+      if (this.hasGlobalReadPermissions) {
         const usersList = await User.list();
         this.users = usersList.result.usersList
           .map(({ username, id }) => ({
@@ -167,6 +205,20 @@ export default {
         window.location.reload();
       }
     },
+    viewAsSuperUser() {
+      localStorage.setItem("view-as", "super");
+      this.viewAs = "super";
+      // TODO: Would be nicer to not require a reload here, but maybe doesn't matter since this is really just an
+      //  admin/debug feature
+      window.location.reload();
+    },
+    viewAsRegularUser() {
+      localStorage.setItem("view-as", "regular");
+      this.viewAs = "regular";
+      // TODO: Would be nicer to not require a reload here, but maybe doesn't matter since this is really just an
+      //  admin/debug feature
+      window.location.reload();
+    },
     superUserCreds() {
       let superUserCreds = localStorage.getItem("superUserCreds");
       if (superUserCreds) {
@@ -194,8 +246,8 @@ export default {
 <style scoped lang="scss">
 .navbar {
   border-bottom: solid rgb(222, 226, 230) 1px;
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .navbar-brand {

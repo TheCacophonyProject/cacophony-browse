@@ -1,18 +1,17 @@
 import * as moment from "moment";
-
+import { TrackTag } from "./Recording.api";
 export class VisitEvent {
   recID: number;
   recStart: moment.Moment;
   trackID: number;
   trackNumber: number;
-  confidence: number;
   start: moment.Moment;
   end: moment.Moment;
   audioBaitDay: boolean;
   audioBaitVisit: boolean;
   audioBaitEvents: Event[];
-  what: string;
   assumedTag: string;
+  trackTag: TrackTag;
 }
 
 export class Visit {
