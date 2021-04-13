@@ -112,6 +112,10 @@ export default {
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins";
 
+.recording-title > svg {
+  vertical-align: baseline;
+}
+
 .recording-details {
   h4,
   h5 {

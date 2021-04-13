@@ -29,9 +29,9 @@
         :title="`Track ${index + 1}`"
         :style="{
           background: colours[index % colours.length],
-          top: `${6 + (index * 13)}px`,
+          top: getOffsetYForTrack(index),
           width: getWidthForTrack(track),
-          left: getOffsetForTrack(track),
+          left: getOffsetXForTrack(track),
           opacity: index === currentTrack ? 1.0 : 0.5,
         }"
         class="scrub-track"
@@ -83,6 +83,10 @@ export default {
       type: Number,
       default: 0,
     },
+    timeAdjustmentForBackgroundFrame: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -94,7 +98,7 @@ export default {
       return this.canvasWidth - this.sidePadding * 2;
     },
     isLoaded() {
-      return this.tracks && this.tracks.length && this.duration;
+      return true; //this.tracks && this.tracks.length && this.duration;
     },
     hasTracks() {
       return this.isLoaded && this.tracks.length !== 0;
@@ -112,23 +116,42 @@ export default {
       return this.getPlayheadOffsetForTime(this.currentVideoTime);
     },
     heightForTracks() {
-      return this.numTracks === 0 ? 0 : Math.max(25, 12 + (13 * this.numTracks));
+      return this.numTracks === 0 ? 44 : Math.max(44, 12 + 13 * this.numTracks);
     },
   },
   methods: {
     getWidthForTrack(track: Track): string {
-      const trackDuration = track.data.end_s - track.data.start_s;
+      const trackDuration =
+        track.data.end_s -
+        this.timeAdjustmentForBackgroundFrame -
+        (track.data.start_s - this.timeAdjustmentForBackgroundFrame);
+      //console.log("duration", this.duration, trackDuration, track.data.end_s, track.data.start_s);
       const ratio = Math.min(1, trackDuration / this.duration);
       return `${ratio * this.scrubberWidth}px`;
     },
-    getOffsetForTrack(track: Track): string {
-      return `${
-        this.getOffsetForTime(track.data.start_s) + this.sidePadding
-      }px`;
+    getOffsetXForTrack(track: Track): string {
+      return `${Math.max(
+        this.sidePadding,
+        this.getOffsetForTime(
+          track.data.start_s - this.timeAdjustmentForBackgroundFrame
+        ) + this.sidePadding
+      )}px`;
+    },
+    getOffsetYForTrack(trackIndex: number): string {
+      const trackHeight = 12;
+      const offset =
+        (this.heightForTracks - this.tracks.length * trackHeight) / 2 +
+        trackIndex * trackHeight +
+        trackIndex;
+      //console.log(this.heightForTracks, this.tracks.length, offset);
+      return `${offset}px`;
     },
     getOffsetForTime(time: number): number {
       const pixelsPerSecond = this.scrubberWidth / this.duration;
-      return Math.min(this.scrubberWidth, pixelsPerSecond * time);
+      return Math.min(
+        this.scrubberWidth,
+        this.sidePadding + pixelsPerSecond * time
+      );
     },
     getPlayheadOffsetForTime(time: number): number {
       const pixelsPerSecond = this.scrubberWidth / this.duration;
@@ -208,20 +231,22 @@ export default {
 
 <style scoped lang="scss">
 .track-scrubber {
-  //position: relative;
   background: #2b333f;
   transition: height 0.3s;
   overflow: hidden;
   /* Above the motion paths canvas if it exists */
   z-index: 810;
-  margin-top: -6px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  box-shadow: 0 1px 5px #000 inset;
+  margin-bottom: 5px;
 }
 .loading {
   color: #eee;
   text-align: center;
 }
 .scrub-track {
-  transition: opacity 0.3s linear;
+transition: opacity 0.3s linear;
   height: 12px;
   border-radius: 5px;
   position: absolute;
@@ -233,5 +258,6 @@ export default {
   left: 0;
   z-index: 1000;
   border-right: 1px solid white;
+  //transition: right 33ms linear;
 }
 </style>

@@ -67,6 +67,7 @@ module.exports = {
     fallback: {
       // NOTE: These are needed for h264-mp4-encoder to package properly.
       fs: false,
+      module: false,
       path: false,
       crypto: false
     },

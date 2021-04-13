@@ -1,13 +1,186 @@
 <template>
-  <div class="video-container" ref="container">
-    <canvas ref="canvas" :class="{ smoothed: smoothed }" />
-    <canvas ref="overlayCanvas" class="overlay-canvas" />
+  <div>
+    <div class="video-container" ref="container">
+      <canvas ref="canvas" :class="{ smoothed: smoothed }" />
+      <canvas ref="overlayCanvas" class="overlay-canvas" />
+      <span class="time">{{ elapsedTime }} / {{ totalTime }}</span>
+      <span
+        class="temp"
+        v-if="ambientTemperature"
+        v-html="ambientTemperature"
+      />
+      <span
+        :class="['player-messaging', { show: playerMessage !== null }]"
+        v-html="playerMessage"
+      />
+      <span v-if="showValueInfo" ref="valueTooltip" class="value-tooltip">{{
+        valueUnderCursor
+      }}</span>
+      <div class="playback-controls">
+        <button @click="togglePlayback">
+          <font-awesome-icon
+            icon="redo-alt"
+            size="6x"
+            rotation="270"
+            v-if="atEndOfPlayback && !playing && !isScrubbing"
+          />
+          <font-awesome-icon
+            icon="play"
+            size="6x"
+            v-else-if="!playing && !isScrubbing"
+          />
+          <font-awesome-icon icon="pause" size="6x" v-else />
+        </button>
+      </div>
+    </div>
+    <div class="playback-nav">
+      <button @click="togglePlayback" ref="playPauseButton">
+        <font-awesome-icon v-if="!playing" icon="play" />
+        <font-awesome-icon v-else icon="pause" />
+      </button>
+      <b-tooltip
+        v-if="$refs.playPauseButton"
+        :target="$refs.playPauseButton"
+        :title="playing ? 'Pause' : 'Play'"
+        triggers="hover"
+      />
+      <div :class="['advanced-controls', { open: showAdvancedControls }]">
+        <button
+          @click="toggleAdvancedControls"
+          class="advanced-controls-btn"
+          ref="advancedControlsButton"
+        >
+          <font-awesome-icon
+            :icon="showAdvancedControls ? 'angle-right' : 'ellipsis-v'"
+          />
+        </button>
+        <b-tooltip
+          v-if="$refs.advancedControlsButton"
+          :target="$refs.advancedControlsButton"
+          :title="showAdvancedControls ? 'Show less' : 'Show more'"
+          triggers="hover"
+        />
+        <button @click="toggleSmoothing" ref="toggleSmoothingButton">
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 512 512"
+            width="18"
+          >
+            <path
+              fill="currentColor"
+              d="M149.333 56v80c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24V56c0-13.255 10.745-24 24-24h101.333c13.255 0 24 10.745 24 24zm181.334 240v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm32-240v80c0 13.255 10.745 24 24 24H488c13.255 0 24-10.745 24-24V56c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24zm-32 80V56c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm-205.334 56H24c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24zM0 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H24c-13.255 0-24 10.745-24 24zm386.667-56H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zm0 160H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zM181.333 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24z"
+              class=""
+            ></path>
+          </svg>
+        </button>
+        <b-tooltip
+          v-if="$refs.toggleSmoothingButton"
+          :target="$refs.toggleSmoothingButton"
+          :title="smoothed ? 'Disable smoothing' : 'Enable smoothing'"
+          triggers="hover"
+        />
+        <button
+          @click="togglePicker"
+          :class="{ selected: showValueInfo }"
+          ref="toggleValuePicker"
+        >
+          <font-awesome-icon icon="eye-dropper" />
+        </button>
+        <b-tooltip
+          v-if="$refs.toggleValuePicker"
+          :target="$refs.toggleValuePicker"
+          :title="
+            showValueInfo
+              ? 'Disable picker'
+              : 'Show raw pixel values under cursor'
+          "
+          triggers="hover"
+        />
+        <button
+          v-if="hasBackgroundFrame"
+          ref="showBackgroundFrame"
+          @mousedown="toggleBackground"
+          @mouseup="toggleBackground"
+        >
+          <font-awesome-icon icon="image" />
+        </button>
+        <b-tooltip
+          v-if="hasBackgroundFrame && $refs.showBackgroundFrame"
+          :target="$refs.showBackgroundFrame"
+          title="Press to show background frame"
+          triggers="hover"
+        />
+        <button @click="incrementPalette" ref="cyclePalette">
+          <font-awesome-icon icon="palette" />
+        </button>
+        <b-tooltip
+          v-if="$refs.cyclePalette"
+          :target="$refs.cyclePalette"
+          title="Cycle false colour mapping"
+          triggers="hover"
+        />
+        <button @click="stepBackward" ref="stepBackward">
+          <font-awesome-icon icon="backward" />
+        </button>
+        <b-tooltip
+          v-if="$refs.stepBackward"
+          :target="$refs.stepBackward"
+          title="Go back one frame"
+          triggers="hover"
+        />
+        <button @click="stepForward" ref="stepForward">
+          <font-awesome-icon icon="forward" />
+        </button>
+        <b-tooltip
+          v-if="$refs.stepForward"
+          :target="$refs.stepForward"
+          title="Go forward one frame"
+          triggers="hover"
+        />
+        <button @click="exportMp4" ref="exportMp4">
+          <font-awesome-icon :icon="['far', 'file-video']" />
+        </button>
+        <b-tooltip
+          v-if="$refs.exportMp4"
+          :target="$refs.exportMp4"
+          title="Export MP4 of recording"
+          triggers="hover"
+        />
+        <button>
+          <font-awesome-icon :icon="['far', 'file']" />
+        </button>
+        <button @click="incrementSpeed" ref="cyclePlaybackSpeed">
+          <font-awesome-icon icon="tachometer-alt" />
+        </button>
+        <b-tooltip
+          v-if="$refs.cyclePlaybackSpeed"
+          :target="$refs.cyclePlaybackSpeed"
+          title="Cycle playback speed"
+          triggers="hover"
+        />
+        <button
+          @click="showHeaderInfo"
+          :class="{ selected: displayHeaderInfo }"
+          ref="showHeader"
+        >
+          <font-awesome-icon icon="info-circle" />
+        </button>
+        <b-tooltip
+          v-if="$refs.showHeader"
+          :target="$refs.showHeader"
+          title="Show recording header info"
+          triggers="hover"
+        />
+      </div>
+    </div>
     <VideoTracksScrubber
       :class="{ 'ended-playback': ended }"
       ref="scrubber"
       :duration="actualDuration"
       :tracks="tracks"
-      :current-video-time="currentTime"
+      :current-video-time="currentTime60fps"
+      :time-adjustment-for-background-frame="timeAdjustmentForBackgroundFrame"
       :current-track="currentTrack.trackIndex"
       :canvas-width="canvasWidth"
       :side-padding="1"
@@ -15,31 +188,30 @@
       @end-scrub="endScrub"
       @set-playback-time="setTimeAndRedraw"
     />
-    <b-btn @click="toggleSmoothing">Smoothed</b-btn>
-    <b-btn @click="setColourMap(0)">Viridis</b-btn>
-    <b-btn @click="setColourMap(1)">Plasma</b-btn>
-    <b-btn @click="setColourMap(2)">Inferno</b-btn>
-    <b-btn @click="setColourMap(3)">Magma</b-btn>
-    <b-btn @click="setColourMap(4)">Greyscale</b-btn>
-    <b-btn @click="setColourMap(5)">Greyscale<sup>2</sup></b-btn>
-    <b-btn v-if="hasBackgroundFrame">Show background</b-btn>
-    <b-btn @click="incrementSpeed">{{ speedMultiplier }}x</b-btn>
-    <b-btn @click="exportMp4">Export MP4</b-btn>
-    <b-btn @click="play">Play</b-btn>
-    <b-btn @click="pause">Pause</b-btn>
-    <pre>{{ JSON.stringify(memory, null, "\t") }}</pre>
-    <pre v-if="header">{{ headerInfo }}</pre>
+    <span v-if="buffering">Buffering...</span>
+    <b-modal v-model="displayHeaderInfo" title="Recording metadata" hide-footer>
+      <pre v-if="header">{{ headerInfo }}</pre>
+    </b-modal>
   </div>
 </template>
 
 <script lang="ts">
 import VideoTracksScrubber from "./VideoTracksScrubber.vue";
-import CptvPlayer from "cptv_player_rs";
+import {
+  CptvFrame,
+  CptvFrameHeader,
+  CptvHeader,
+  CptvPlayer,
+} from "cptv-player";
 import { TagColours } from "@/const";
 
+// @ts-ignore
 import viridis from "scale-color-perceptual/rgb/viridis.json";
+// @ts-ignore
 import plasma from "scale-color-perceptual/rgb/plasma.json";
+// @ts-ignore
 import magma from "scale-color-perceptual/rgb/magma.json";
+// @ts-ignore
 import inferno from "scale-color-perceptual/rgb/inferno.json";
 
 const mapRgba = ([r, g, b]) =>
@@ -59,14 +231,14 @@ for (let i = 0; i <= 1; i += inc) {
 const Greyscale = Object.freeze(greys);
 const GreyscaleSquared = Object.freeze(greysSq);
 const ColourMaps = [
-  Viridis,
-  Plasma,
-  Inferno,
-  Magma,
-  Greyscale,
-  GreyscaleSquared,
+  ["Viridis", Viridis],
+  ["Plasma", Plasma],
+  ["Inferno", Inferno],
+  ["Magma", Magma],
+  ["Greyscale", Greyscale],
+  ["Grayscale<sup>2</sup>", GreyscaleSquared],
 ];
-const PlaybackSpeeds = [0.5, 1, 2, 4, 8];
+const PlaybackSpeeds = [0.5, 1, 2, 4, 6];
 
 const download = (url, filename) => {
   const anchor = document.createElement("a");
@@ -75,7 +247,7 @@ const download = (url, filename) => {
   anchor.click();
 };
 
-const mb = (size) => (size / 1024 / 1024).toFixed(2);
+const player: CptvPlayer = new CptvPlayer();
 
 export default {
   name: "CptvPlayer",
@@ -107,7 +279,10 @@ export default {
       default: false,
     },
   },
-  data() {
+  data(): {
+    header: CptvHeader;
+    frameHeader: CptvFrameHeader;
+  } {
     return {
       colours: TagColours,
       canvasWidth: 800,
@@ -117,23 +292,25 @@ export default {
       header: null,
       frameHeader: null,
       smoothed: true,
+      showValueInfo: false,
+      isShowingBackgroundFrame: false,
       frameNum: 0,
-      speedMultiplierIndex: 1,
-      animationFrame: null,
       animationTick: 0,
+      speedMultiplierIndex: 1,
+      paletteIndex: 0,
+      animationFrame: null,
       playing: false,
       wasPaused: true,
       totalFrames: false,
       colourMap: Viridis,
-      memory: {
-        jsHeapSizeLimit: mb(performance.memory.jsHeapSizeLimit),
-        totalJSHeapSize: mb(performance.memory.totalJSHeapSize),
-        usedJSHeapSize: mb(performance.memory.usedJSHeapSize),
-      },
+      showAdvancedControls: false,
+      displayHeaderInfo: false,
+      loadProgress: 0,
+      playerMessage: null,
+      messageTimeout: null,
+      valueUnderCursor: null,
+      buffering: false,
     };
-  },
-  created() {
-    this.player = new CptvPlayer();
   },
   computed: {
     actualDuration() {
@@ -141,9 +318,14 @@ export default {
         return this.adjustedTotalFrames / this.header.fps;
       }
       // Otherwise, best guess.
-      return Math.max(
-        ...this.tracks.map((track) => track.data.end_s),
-        this.duration
+
+      // Subtract one frame, since the backend calculates the duration including the background frame,
+      // and all track boxes end up offset by one frame.
+      return (
+        Math.max(
+          ...this.tracks.map((track) => track.data.end_s),
+          this.duration
+        ) - this.timeAdjustmentForBackgroundFrame
       );
     },
     adjustedTotalFrames() {
@@ -155,29 +337,66 @@ export default {
         return this.header.fps * this.actualDuration;
       }
     },
+    timeAdjustmentForBackgroundFrame() {
+      if (this.hasBackgroundFrame) {
+        return 1 / this.header.fps;
+      }
+      return 0;
+    },
     hasBackgroundFrame() {
-      return this.header && this.header.has_background_frame;
+      return this.header && this.header.hasBackgroundFrame;
     },
     duration() {
       return (this.recording && this.recording.duration) || 0;
     },
+    currentTime60fps() {
+      if (this.header) {
+        const holdForXFrames = Math.ceil(
+          60 / (this.header.fps * this.speedMultiplier)
+        );
+        const tick = Math.max(0, this.animationTick - 1);
+        const adjustment =
+          (tick % holdForXFrames) * (1 / holdForXFrames / holdForXFrames);
+        return this.currentTime + adjustment;
+      }
+      return 0;
+    },
+    elapsedTime(): string {
+      return this.formatTime(this.currentTime);
+    },
+    totalTime(): string {
+      return this.formatTime(this.actualDuration);
+    },
     currentTime() {
       if (this.header) {
         const totalTime = this.actualDuration;
-        // TODO check whether the backend uses 8.7 or 9 as the fps when calculating duration.
+        // TODO check whether the backend uses 8.7 or 9 as the fps when calculating duration. (seems to be 9)
         // Does the backend take the background_frame into account when setting duration?  Seems to.
-        const totalFramesEstimate = this.actualDuration * this.header.fps;
+        const totalFramesEstimate = totalTime * this.header.fps;
         return (this.frameNum / totalFramesEstimate) * totalTime;
       }
       return 0;
     },
+    ambientTemperature() {
+      if (this.frameHeader && this.frameHeader.frameTempC) {
+        return `~ ${Math.round(this.frameHeader.frameTempC)}&deg;C`;
+      }
+      return false;
+    },
     secondsSinceLastFFC() {
-      if (this.frameHeader && this.frameHeader.last_ffc_time) {
+      if (this.frameHeader && this.frameHeader.lastFfcTimeMs) {
         return (
-          (this.frameHeader.time_on - this.frameHeader.last_ffc_time) / 1000
+          (this.frameHeader.timeOnMs - this.frameHeader.lastFfcTimeMs) / 1000
         );
       }
       return 1000;
+    },
+    atEndOfPlayback(): boolean {
+      return (
+        this.header &&
+        this.adjustedTotalFrames &&
+        this.frameNum === this.adjustedTotalFrames
+      );
     },
     speedMultiplier() {
       return PlaybackSpeeds[this.speedMultiplierIndex];
@@ -190,16 +409,18 @@ export default {
             dimensions: `${h.width} x ${h.height}`,
             fps: h.fps,
             time: new Date(h.timestamp / 1000).toLocaleString(),
-            "device name": h.device_name || "Unknown",
-            "device ID": h.device_id || "Unknown",
+            "device name": h.deviceName || "Unknown",
+            "device ID": h.deviceId || "Unknown",
+            "has background": h.hasBackgroundFrame,
+            "preview seconds": h.previewSecs,
             sensor: `${h.brand || "Unknown brand"} ${
               h.model || "Unknown model"
-            }, serial #${h.serial_number}, firmware ${
-              h.firmware_version || "Unknown"
             }`,
+            serial: (h.serialNumber && `#${h.serialNumber}`) || "Unknown",
+            firmware: `${h.firmwareVersion || "Unknown"}`,
             "motion config":
-              (h.motion_config &&
-                h.motion_config.split("\n").reduce((acc, item) => {
+              (h.motionConfig &&
+                h.motionConfig.split("\n").reduce((acc, item) => {
                   const parts = item.split(": ");
                   if (Number(parts[1]) == parts[1]) {
                     acc[parts[0]] = Number(parts[1]);
@@ -211,7 +432,7 @@ export default {
               "None",
           },
           null,
-          "\t"
+          "  "
         );
       } else {
         return null;
@@ -224,53 +445,69 @@ export default {
     const canvas = this.$refs.overlayCanvas;
     canvas.addEventListener("click", this.clickOverlayCanvas);
     canvas.addEventListener("mousemove", this.moveOverOverlayCanvas);
-    await this.player.initWithCptvUrlAndSize(this.cptvUrl, this.cptvSize);
-    this.header = await this.player.getHeader();
+    await player.initWithCptvUrlAndSize(this.cptvUrl, this.cptvSize);
+    this.header = await player.getHeader();
     this.$refs.canvas.width = this.header.width;
     this.$refs.canvas.height = this.header.height;
+
+    this.clearCanvas();
     await this.fetchRenderAdvanceFrame();
-    this.updateMemoryStats = setInterval(() => {
-      this.memory = {
-        jsHeapSizeLimit: mb(performance.memory.jsHeapSizeLimit),
-        totalJSHeapSize: mb(performance.memory.totalJSHeapSize),
-        usedJSHeapSize: mb(performance.memory.usedJSHeapSize),
-      };
-    }, 1000);
-    //this.renderCurrentFrame();
   },
   beforeDestroy() {
     const canvas = this.$refs.overlayCanvas;
     canvas.removeEventListener("click", this.clickOverlayCanvas);
     canvas.removeEventListener("mousemove", this.moveOverOverlayCanvas);
     window.removeEventListener("resize", this.onResize);
-    clearInterval(this.updateMemoryStats);
   },
   watch: {
     async cptvUrl(url) {
-
-      await this.player.initWithCptvUrlAndSize(url, this.cptvSize);
-      this.header = await this.player.getHeader();
+      this.clearCanvas();
+      await player.initWithCptvUrlAndSize(url, this.cptvSize);
+      this.header = await player.getHeader();
       this.$refs.canvas.width = this.header.width;
       this.$refs.canvas.height = this.header.height;
       this.frameNum = 0;
+      this.animationTick = 0;
       this.totalFrames = false;
       cancelAnimationFrame(this.animationFrame);
-      this.animationTick = 0;
       this.playing = false;
       this.wasPaused = true;
       await this.fetchRenderAdvanceFrame();
     },
   },
   methods: {
+    formatTime(time: number): string {
+      let seconds = Math.floor(time);
+      if (seconds < 60) {
+        return `0.${`${seconds}`.padStart(2, "0")}`;
+      }
+      const minutes = Math.floor(seconds / 60);
+      seconds = seconds - minutes * 60;
+      return `${minutes}.${seconds}`;
+    },
     async ensureEntireClipIsDecoded() {
       let frameNum = 0;
       while (!this.totalFrames) {
         await this.queueFrame(frameNum++);
       }
       if (this.totalFrames) {
-        console.log("Entire clip decoded and ready for export", this.totalFrames, this.adjustedTotalFrames);
+        console.log(
+          "Entire clip decoded and ready for export",
+          this.totalFrames,
+          this.adjustedTotalFrames
+        );
       }
       return true;
+    },
+    async stepForward() {
+      const canAdvance = await this.renderCurrentFrame(true, this.frameNum + 1);
+      if (canAdvance) {
+        this.frameNum++;
+      }
+    },
+    async stepBackward() {
+      this.frameNum = Math.max(0, this.frameNum - 1);
+      await this.renderCurrentFrame(true);
     },
     async clickOverlayCanvas(event) {
       const canvas = this.$refs.overlayCanvas;
@@ -288,6 +525,11 @@ export default {
         }
       }
     },
+    clearCanvas() {
+      const canvas = this.$refs.canvas as HTMLCanvasElement;
+      const context = canvas.getContext("2d");
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    },
     moveOverOverlayCanvas(event) {
       const canvas = this.$refs.overlayCanvas;
       const canvasOffset = canvas.getBoundingClientRect();
@@ -296,9 +538,19 @@ export default {
       const hitRect = this.hitTestPos(x, y);
       // set cursor
       canvas.style.cursor = hitRect !== null ? "pointer" : "default";
+      if (this.showValueInfo) {
+        canvas.style.cursor = "default";
+        // Map the x,y into canvas size
+        const pX = Math.round(x / this.scale);
+        const pY = Math.round(y / this.scale);
+        const frameData = player.getFrameAtIndex(this.frameNum - 1);
+        this.valueUnderCursor = frameData.data[pY * this.header.width + pX];
+        this.$refs.valueTooltip.style.left = `${x + 2}px`;
+        this.$refs.valueTooltip.style.top = `${y - 20}px`;
+      }
     },
     async setColourMap(index: number) {
-      this.colourMap = ColourMaps[index];
+      this.colourMap = ColourMaps[index][1];
       await this.renderCurrentFrame();
     },
     async fetchRenderAdvanceFrame() {
@@ -306,14 +558,20 @@ export default {
       const canAdvance = await this.renderCurrentFrame();
       if (canAdvance) {
         this.frameNum++;
+        return true;
       } else if (this.playing) {
         this.pause();
       }
+    },
+    toggleAdvancedControls() {
+      this.showAdvancedControls = !this.showAdvancedControls;
     },
     async exportMp4() {
       this.pause();
       // TODO(jon): Better to do this in a web-worker so that we don't block the main thread.
       // Also warn users not to navigate away from the page while it's encoding.
+
+      // @ts-ignore
       const HME = await import("h264-mp4-encoder");
       const encoder = await HME.createH264MP4Encoder();
       const renderCanvas = document.createElement("canvas");
@@ -347,7 +605,12 @@ export default {
       console.assert(this.totalFrames !== false);
       while (frameNum < this.adjustedTotalFrames) {
         const { frameData } = await this.queueFrame(frameNum);
-        const imgData = this.getCurrentFrameData(videoContext, frameData);
+        const frameHeader = player.getFrameHeaderAtIndex(frameNum);
+        const imgData = this.getCurrentFrameData(
+          videoContext,
+          frameData,
+          frameHeader
+        );
         videoContext.putImageData(imgData, 0, 0);
         context.imageSmoothingEnabled = this.smoothed;
         if (this.smoothed) {
@@ -369,15 +632,17 @@ export default {
         const totalTime = this.actualDuration;
         const totalFrames = this.adjustedTotalFrames;
         const timeAtFrameNum = (frameNum / totalFrames) * totalTime;
-        const frameHeader = this.player.getFrameHeaderAtIndex(frameNum);
         let timeSinceLastFFCSeconds = Number.MAX_SAFE_INTEGER;
-        if (frameHeader.last_ffc_time) {
+        if (frameHeader.lastFfcTimeMs) {
           timeSinceLastFFCSeconds =
-            (frameHeader.time_on - frameHeader.last_ffc_time) / 1000;
+            (frameHeader.timeOnMs - frameHeader.lastFfcTimeMs) / 1000;
         }
+        const timeAdjustment = this.hasBackgroundFrame
+          ? 1 / this.header.fps
+          : 0;
         this.renderOverlay(
           context,
-          timeAtFrameNum,
+          timeAtFrameNum + timeAdjustment,
           false,
           renderCanvas.width / videoCanvas.width,
           timeSinceLastFFCSeconds,
@@ -399,7 +664,11 @@ export default {
       );
       encoder.delete();
     },
-    getCurrentFrameData(context: CanvasRenderingContext2D, frame) {
+    getCurrentFrameData(
+      context: CanvasRenderingContext2D,
+      frame: CptvFrame,
+      frameHeader: CptvFrameHeader
+    ) {
       const { min, max, data: frameData } = frame;
       const imgData = context.getImageData(
         0,
@@ -409,64 +678,99 @@ export default {
       );
       const data = new Uint32Array(imgData.data.buffer);
       const colourMap = this.colourMap;
+      const timeSinceLastFFC =
+        (frameHeader.timeOnMs - frameHeader.lastFfcTimeMs) / 1000;
       const range = max - min;
-      for (let i = 0; i < data.length; i++) {
-        const index = ((frameData[i] - min) / range) * 255.0;
-        const indexUpper = Math.ceil(index);
-        //const indexLower = Math.floor(index);
-        // TODO(jon): Interpolate between these steps?
-        data[i] = colourMap[indexUpper];
+      if (timeSinceLastFFC < 5) {
+        // We want to remap into the known sane range of values
+        const {
+          imageData: { min: localMin, max: localMax },
+        } = frameHeader;
+        const localRange = localMax - localMin;
+        for (let i = 0; i < data.length; i++) {
+          const index = ((frameData[i] - localMin) / localRange) * 255.0;
+          const indexUpper = Math.ceil(index);
+          data[i] = colourMap[indexUpper];
+        }
+      } else {
+        for (let i = 0; i < data.length; i++) {
+          const index = ((frameData[i] - min) / range) * 255.0;
+          const indexUpper = Math.ceil(index);
+          //const indexLower = Math.floor(index);
+          // TODO(jon): Interpolate between these steps?
+          data[i] = colourMap[indexUpper];
+        }
       }
       return imgData;
     },
-    renderFrame(frameData, frameNum) {
+    renderFrame(frameData, frameNum: number | false, force: boolean = false) {
       const context = this.$refs.canvas.getContext("2d");
-      const imgData = this.getCurrentFrameData(context, frameData);
-      this.frameHeader = this.player.getFrameHeaderAtIndex(frameNum);
-      cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = requestAnimationFrame(() =>
-        this.drawFrame(context, imgData)
+      if (frameNum !== false) {
+        this.frameHeader = player.getFrameHeaderAtIndex(frameNum);
+      }
+      const imgData = this.getCurrentFrameData(
+        context,
+        frameData,
+        this.frameHeader
       );
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = requestAnimationFrame(() => {
+        this.drawFrame(context, imgData, force);
+      });
     },
     async queueFrame(frameNum: number) {
-      let frameData = this.player.getFrameAtIndex(frameNum);
+      let frameData = player.getFrameAtIndex(frameNum);
       if (frameData) {
         return { frameNum, frameData };
       } else {
-        await this.player.seekToFrame(frameNum);
+        await player.seekToFrame(frameNum);
       }
-      frameData = this.player.getFrameAtIndex(frameNum);
-      if (frameData === false) {
-        console.assert(this.player.getTotalFrames() !== false);
-        this.totalFrames = this.player.getTotalFrames();
+      frameData = player.getFrameAtIndex(frameNum);
+      if (frameData === null) {
+        console.assert(player.getTotalFrames() !== null);
+        this.totalFrames = player.getTotalFrames();
         frameNum = this.adjustedTotalFrames - 1;
-        frameData = this.player.getFrameAtIndex(frameNum);
-        console.assert(frameData !== false);
+        frameData = player.getFrameAtIndex(frameNum);
+        console.assert(frameData !== null);
       }
       return { frameNum, frameData };
     },
-    async drawFrame(context, imgData) {
-      // TODO(jon): respect fps here, render only when we should.
-      this.animationTick++;
+    async drawFrame(context, imgData, force = false) {
+      // One tick represents 1000 / fps * multiplier
+      if (this.playing) {
+        this.animationTick++;
+      }
       const everyXTicks = Math.max(
         1,
-        60 / (this.header.fps * this.speedMultiplier)
+        Math.floor(60 / (this.header.fps * this.speedMultiplier))
       );
-      const shouldRedraw = Math.floor(this.animationTick % everyXTicks) === 0;
-      if (shouldRedraw) {
+      //console.log(everyXTicks);
+      // NOTE: respect fps here, render only when we should.
+      const shouldRedraw = this.animationTick % everyXTicks === 0;
+
+      //console.log("Should redraw", this.animationTick, everyXTicks, this.animationTick % everyXTicks, shouldRedraw);
+      if (shouldRedraw || force) {
         context.putImageData(imgData, 0, 0);
+        let didAdvance = false;
         if (this.playing) {
-          await this.fetchRenderAdvanceFrame();
+          didAdvance = await this.fetchRenderAdvanceFrame();
         }
+        const timeAdjustment = this.hasBackgroundFrame
+          ? 1 / this.header.fps
+          : 0;
         this.renderOverlay(
           this.$refs.overlayCanvas.getContext("2d"),
-          this.currentTime,
+          this.currentTime + timeAdjustment,
           true,
           this.scale,
           this.secondsSinceLastFFC,
           false
         );
+        if (didAdvance) {
+          this.animationTick = 0;
+        }
       } else {
+        cancelAnimationFrame(this.animationFrame);
         this.animationFrame = requestAnimationFrame(() =>
           this.drawFrame(context, imgData)
         );
@@ -476,6 +780,37 @@ export default {
       this.speedMultiplierIndex++;
       if (this.speedMultiplierIndex === PlaybackSpeeds.length) {
         this.speedMultiplierIndex = 0;
+      }
+      this.setPlayerMessage(
+        `Speed ${PlaybackSpeeds[this.speedMultiplierIndex]}x`
+      );
+    },
+    incrementPalette() {
+      this.paletteIndex++;
+      if (this.paletteIndex === ColourMaps.length) {
+        this.paletteIndex = 0;
+      }
+      this.setPlayerMessage(ColourMaps[this.paletteIndex][0]);
+      this.setColourMap(this.paletteIndex);
+    },
+    showHeaderInfo() {
+      this.displayHeaderInfo = true;
+    },
+    setPlayerMessage(message: string) {
+      clearTimeout(this.messageTimeout);
+      if (this.messageTimeout !== null || this.playerMessage !== null) {
+        this.messageTimeout = null;
+        this.playerMessage = null;
+        cancelAnimationFrame(this.raf);
+        this.raf = requestAnimationFrame(() => {
+          this.setPlayerMessage(message);
+        });
+      } else {
+        this.playerMessage = message;
+        this.messageTimeout = setTimeout(() => {
+          this.messageTimeout = null;
+          this.playerMessage = null;
+        }, 1000);
       }
     },
     renderOverlay(
@@ -499,14 +834,17 @@ export default {
       }
       if (timeSinceFFCSeconds < 10) {
         context.font = "bold 15px Verdana";
+
+        // NOTE: Make opacity of text stronger when the FFC event has just happened, then fade out
         let a = 1 / (10 - timeSinceFFCSeconds);
         a = a * a;
         const alpha = 1 - a;
         context.fillStyle = `rgba(163, 210, 226, ${alpha})`;
-        // TODO(jon): Make opacity of text stronger when the FFC event has just happened
+
         const text = "Calibrating...";
         const textWidth = context.measureText(text).width;
-        const textX = (context.canvas.width / window.devicePixelRatio) / 2 - textWidth / 2;
+        const deviceRatio = isExporting ? 1 : window.devicePixelRatio;
+        const textX = context.canvas.width / deviceRatio / 2 - textWidth / 2;
         const textY = 20;
         context.fillText(text, textX, textY);
       }
@@ -551,18 +889,26 @@ export default {
         );
         let aiTag = "";
         if (track) {
-          const tag = track.TrackTags.find(
-            (tag) =>
-              (tag.data && tag.data === "Master") || tag.data.name === "Master"
-          );
-          if (tag) {
-            aiTag = tag.what;
+          const userTags = track.TrackTags.filter((tag) => tag.user !== null);
+          if (userTags.length) {
+            aiTag = userTags[0].what;
+          } else {
+            const tag = track.TrackTags.find(
+              (tag) =>
+                (tag.data && tag.data === "Master") ||
+                tag.data.name === "Master"
+            );
+            if (tag) {
+              aiTag = tag.what;
+            }
           }
         }
         // If exporting, show all the best guess animal tags, if not unknown
-        const text = isExporting
-          ? aiTag
-          : `Track ${hitIndex + 1}${aiTag ? `(${aiTag})` : ""}`;
+        // If there's only one track, don't annotate with "Track X (..)"
+        const text =
+          isExporting || this.tracks.length === 1
+            ? aiTag
+            : `Track ${hitIndex + 1}${aiTag ? `(${aiTag})` : ""}`;
         if (text !== "") {
           const textHeight = 12;
           const textWidth = context.measureText(text).width;
@@ -578,6 +924,48 @@ export default {
     },
     toggleSmoothing() {
       this.smoothed = !this.smoothed;
+      this.setPlayerMessage(
+        `Smoothing ${this.smoothed ? "Enabled" : "Disabled"}`
+      );
+    },
+    togglePicker() {
+      // When we move the cursor over the image, should show raw and estimated temp values of pixel under cursor.
+      this.showValueInfo = !this.showValueInfo;
+    },
+    async toggleBackground() {
+      this.wasPaused = !this.playing;
+      if (!this.isShowingBackgroundFrame) {
+        const background = player.getBackgroundFrame();
+        if (background.data.length !== 0) {
+          if (this.playing) {
+            this.pause();
+            this.wasPaused = true;
+          }
+          const context = this.$refs.canvas.getContext("2d");
+          const imgData = this.getCurrentFrameData(
+            context,
+            background,
+            this.frameHeader
+          );
+          context.putImageData(imgData, 0, 0);
+          // Clear overlay
+          const overlayContext = this.$refs.overlayCanvas.getContext("2d");
+          overlayContext.clearRect(
+            0,
+            0,
+            overlayContext.canvas.width,
+            overlayContext.canvas.height
+          );
+        }
+      } else {
+        if (!this.wasPaused) {
+          this.wasPaused = false;
+          await this.play();
+        } else {
+          await this.renderCurrentFrame(true);
+        }
+      }
+      this.isShowingBackgroundFrame = !this.isShowingBackgroundFrame;
     },
     // totalFrames() {
     //   let adjust = 0;
@@ -666,7 +1054,7 @@ export default {
       canvas.style.width = `${this.canvasWidth}px`;
       canvas.style.height = `${this.canvasHeight}px`;
       const context = canvas.getContext("2d");
-      this.$refs.container.style.minHeight = `${this.canvasHeight}px`;
+      this.$refs.container.style.maxHeight = `${this.canvasHeight}px`;
       context.scale(devicePixelRatio, devicePixelRatio);
     },
     async setTimeAndRedraw(time) {
@@ -677,16 +1065,23 @@ export default {
       this.frameNum = Math.floor(
         Math.min(totalFrames - 1, (time / this.actualDuration) * totalFrames)
       );
+      this.animationTick = 0;
       await this.renderCurrentFrame();
     },
-    async renderCurrentFrame(frameNum?: number) {
+    async renderCurrentFrame(force: boolean = false, frameNum?: number) {
+      this.loadProgress = player.getLoadProgress();
       if (frameNum === undefined) {
         frameNum = this.frameNum;
       }
+      this.buffering = true;
+
+      // TODO(jon): Ideally we want this to happen on another thread an call back to us, otherwise it locks the UI.
       const { frameNum: actualFrameNum, frameData } = await this.queueFrame(
         frameNum
       );
-      this.renderFrame(frameData, actualFrameNum);
+
+      this.buffering = false;
+      this.renderFrame(frameData, actualFrameNum, force);
       return frameNum === actualFrameNum;
     },
     startScrub() {
@@ -706,8 +1101,20 @@ export default {
       this.playing = true;
       await this.fetchRenderAdvanceFrame();
     },
+    async togglePlayback() {
+      if (!this.playing) {
+        if (this.atEndOfPlayback) {
+          this.frameNum = 0;
+          this.animationTick = 0;
+        }
+        await this.play();
+      } else {
+        this.pause();
+      }
+    },
     pause() {
       this.playing = false;
+      cancelAnimationFrame(this.animationFrame);
     },
   },
 };
@@ -739,5 +1146,189 @@ canvas {
   position: absolute;
   top: 0;
   left: 0;
+}
+.time,
+.temp,
+.value-tooltip {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  font-size: 12px;
+  line-height: 12px;
+  color: white;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 3px;
+  user-select: none;
+  pointer-events: none;
+}
+.temp {
+  //top: 7px;
+  left: 7px;
+  right: unset;
+  //bottom: unset;
+}
+.value-tooltip {
+  bottom: unset;
+  right: unset;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@-moz-keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.player-messaging {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  display: block;
+  bottom: 50px;
+  color: white;
+  font-size: 20px;
+  opacity: 0;
+  transform-origin: center;
+  &.show {
+    animation: fadeInOut 1s;
+    -webkit-animation: fadeInOut 1s;
+    -moz-animation: fadeInOut 1s;
+    -o-animation: fadeInOut 1s;
+    -ms-animation: fadeInOut 1s;
+  }
+}
+
+.playback-controls {
+  color: white;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  //background: rgba(0, 0, 0, 0.2);
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  &:hover {
+    opacity: 1;
+  }
+  > button {
+    height: 26.666%;
+    width: 20%;
+    > svg {
+      transition: opacity 0.3s;
+      opacity: 0.1;
+    }
+    &:hover {
+      > svg {
+        opacity: 0.8;
+      }
+    }
+    background: transparent;
+    &:focus,
+    &:active {
+      outline: none;
+    }
+    color: inherit;
+    border: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+}
+
+.playback-nav {
+  min-height: 44px;
+  background: #2b333f;
+  color: white;
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  //border-top: 1px solid rgb(77, 86, 97);
+  button {
+    min-width: 44px;
+    min-height: 44px;
+    background: transparent;
+    &:focus,
+    &:active {
+      outline: none;
+    }
+    &:active,
+    &.selected {
+      color: yellowgreen;
+    }
+    color: inherit;
+    border: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  .advanced-controls {
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    user-select: none;
+    transition: width 0.3s ease-in-out;
+    &.open {
+      width: 550px;
+      .advanced-controls-btn {
+        position: relative;
+        &::before {
+          position: absolute;
+          top: 11px;
+          left: 11px;
+          content: "";
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 11px;
+          width: 22px;
+          height: 22px;
+        }
+      }
+    }
+  }
 }
 </style>
