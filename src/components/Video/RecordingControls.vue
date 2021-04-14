@@ -38,11 +38,11 @@
 
               <b-dropdown-item
                 v-b-tooltip.hover.left="
-                  'Missing an earler recording that explains how the animal got to where it is now'
+                  'Missing an earlier recording that explains how the animal got to where it is now'
                 "
                 @click="addTag('missed recording')"
               >
-                Missed reccording
+                Missed recording
               </b-dropdown-item>
 
               <b-dropdown-item
