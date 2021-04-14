@@ -1,7 +1,7 @@
 <template>
   <div class="container" v-if="!loading">
     <h2>
-      Devices
+      Devices - {{ groupName }}
       <help>
         Devices specify which group they belong to when they first register.
         They can't be edited here.
@@ -33,7 +33,7 @@
         <b-link
           :to="{
             name: 'device',
-            params: { devicename: row.item.deviceName },
+            params: { devicename: row.item.deviceName, groupname: groupName },
           }"
         >
           {{ row.item.deviceName }}
@@ -55,6 +55,7 @@ export default {
     isGroupAdmin: { type: Boolean, default: false },
     devices: { type: Array, required: true },
     loading: { type: Boolean, default: false },
+    groupName: { type: String, required: true },
   },
   computed: {
     groupHasDevices() {

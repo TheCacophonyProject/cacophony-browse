@@ -28,7 +28,28 @@
           dismissible
           @dismissed="infoDismissed"
         >
-          {{ infoMessage }}
+          <p>{{ infoMessage }}</p>
+          <table>
+            <tr>
+              <td>Unidentifiable</td>
+              <td>Humanly confirmed as unidentifiable (Unknown)</td>
+            </tr>
+            <tr>
+              <td>Unidentified</td>
+              <td>
+                AI is sure there is an animal but doesn't know what it is
+                (Unidentified)
+              </td>
+            </tr>
+            <tr>
+              <td>Probably not an Animal</td>
+              <td>AI is not sure if this is an animal or not (No Tags)</td>
+            </tr>
+            <tr>
+              <td>Conflicting Tags</td>
+              <td>Human tags differ in tagged animal</td>
+            </tr>
+          </table>
         </b-alert>
 
         <div class="search-results">
@@ -74,7 +95,9 @@
                       striped
                     >
                       <template v-slot:cell(what)="row">
-                        {{ row.item[0] }}
+                        <span v-b-tooltip.hover="whatToolTip(row.item[0])">{{
+                          summaryWhat(row.item[0])
+                        }}</span>
                       </template>
                       <template v-slot:cell(start)="row">
                         {{ formatDate(row.item[1].start, tableDateTimeFormat) }}
@@ -118,13 +141,15 @@
                         <span class="audio-bait" v-if="row.item.audioBaitVisit">
                           <font-awesome-icon icon="volume-up" size="xs" />
                         </span>
-                        <div class="what-image">
+                        <div class="what-cell">
                           <img
                             onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
                             :src="imgSrc(row.item.what)"
                             class="tag-img"
                           />
-                          {{ row.item.what }}
+                          <span class="what-text">
+                            {{ visitWhat(row.item.what) }}
+                          </span>
                         </div>
                       </template>
                       <template v-slot:cell(device)="row">
@@ -258,6 +283,9 @@ export default {
       queryParams: {},
       showInfo: this.isInfoShown(),
       infoMessage: `A "visit" is multiple thermal video tracks that have been combined because they are likely to be due to the appearance of a single animal. Each visit can be expanded by clicking on it to show the tracks which it is made up from.`,
+      unknownHelp: `Humanly confirmed as unidentifiable`,
+      nothingHelp: `AI is not sure if this is an animal or not`,
+      unidentifiedHelp: `AI is sure there is an animal but doesn't know what it is`,
       tableDateTimeFormat: "L LTS",
       tableDateFormat: "DD MMM",
       tableTimeFormat: "LTS",
@@ -331,6 +359,34 @@ export default {
   },
   methods: {
     imgSrc,
+    visitWhat(what: string): string {
+      return this.capitalizeFirst(what);
+    },
+    whatToolTip(what: string): string {
+      if (what == "null") {
+        return this.nothingHelp;
+      } else if (what == DefaultLabels.allLabels.unidentified.value) {
+        return this.unidentifiedHelp;
+      } else if (what == DefaultLabels.allLabels.unknown.value) {
+        return this.unknownHelp;
+      }
+      return `Track has been tagged as ${what}`;
+    },
+    summaryWhat(what: string): string {
+      if (what == "null") {
+        return "Probably not an Animal";
+      } else if (what == DefaultLabels.allLabels.unidentified.value) {
+        return "( Unidentified ) Animal";
+      }
+      return this.capitalizeFirst(what);
+    },
+    capitalizeFirst(value: string) {
+      if (value) {
+        return value.charAt(0).toUpperCase() + value.substring(1);
+      } else {
+        return "Probably Nothing";
+      }
+    },
     formatDate(date: string, formatStr: string): string {
       return moment(date).format(formatStr);
     },
@@ -653,12 +709,12 @@ $main-content-width: 640px;
   }
 }
 
-.what-image {
-  display: inline-block;
+.what-cell {
+  display: flex;
   margin-left: 0.4rem;
 }
-
 .tag-img {
+  width: 30px;
   max-width: 30px;
   max-height: 30px;
   background: transparent;

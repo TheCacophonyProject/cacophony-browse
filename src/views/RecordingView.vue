@@ -2,14 +2,24 @@
   <b-container v-if="recording">
     <b-row>
       <b-col cols="12" lg="8" class="recording-details">
-        <h4 class="recording-title">
-          <font-awesome-icon
-            icon="microchip"
-            size="xs"
-            style="color: #666; font-size: 16px"
-          />
-          {{ devicename }}
-        </h4>
+        <router-link
+          :to="{
+            name: 'device',
+            params: {
+              devicename: devicename,
+              groupname: recording.Group.groupname,
+            },
+          }"
+        >
+          <h4 class="recording-title">
+            <font-awesome-icon
+              icon="microchip"
+              size="xs"
+              style="color: #666; font-size: 16px"
+            />
+            {{ devicename }}
+          </h4>
+        </router-link>
 
         <h5 class="text-muted">{{ date }}, {{ time }}</h5>
 

@@ -1,6 +1,7 @@
 <template>
   <b-modal
     id="device-add-user"
+    ref="add-user-dialog"
     title="Add user to device"
     @ok="addUser"
     @shown="setFocusAndReset"
@@ -100,6 +101,9 @@ export default {
 
         if (result === false) {
           this.formSubmissionFailed = true;
+        } else {
+          this.$refs["add-user-dialog"].hide();
+          this.$emit("user-added");
         }
       }
     },

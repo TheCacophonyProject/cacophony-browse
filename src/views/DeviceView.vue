@@ -1,39 +1,30 @@
 <template>
   <b-container fluid class="admin">
     <b-jumbotron class="jumbotron" fluid>
-      <div>
-        <b-link
-          class="back-link"
-          :to="{
-            name: 'devices',
-          }"
-        >
-          <font-awesome-icon icon="angle-left" size="xs" />
-          <span>Back to devices</span>
-        </b-link>
-      </div>
       <h1>
         <font-awesome-icon icon="microchip" size="xs" />
-        <span v-if="!loadedDevice" class="name-placeholder"
-          >loading device name</span
-        >
-        <span v-else>
-          <span>{{
-            (device && device.devicename) || $route.params.devicename
-          }}</span>
-        </span>
+        <span>{{ deviceName }}</span>
       </h1>
       <p class="lead">Manage this device.</p>
     </b-jumbotron>
 
-    <spinner :fetching="!loadedDevice" />
-    <div v-if="loadedDevice && device">
+    <div v-if="!loadedDevice" class="container no-tabs">
+      Loading device...
+      <spinner :fetching="!loadedDevice" />
+    </div>
+    <div v-else-if="device && device.id">
       <device-detail
         :device="device"
         :user="currentUser"
         :software="softwareDetails"
         class="dev-details"
+        @reload-device="fetchDevice"
       />
+    </div>
+    <div v-else class="container no-tabs">
+      Sorry but group <i> &nbsp; {{ groupName }} &nbsp; </i> does not have a
+      device called <i> &nbsp; {{ deviceName }}</i
+      >.
     </div>
   </b-container>
 </template>
@@ -57,6 +48,8 @@ export default {
     return {
       loadedDevice: false,
       device: {},
+      deviceName: "",
+      groupName: "",
       softwareDetails: { message: "Retrieving version information..." },
     };
   },
@@ -71,21 +64,24 @@ export default {
   methods: {
     queryDevice: async function () {
       this.loadedDevice = false;
+      this.deviceName = this.$route.params.devicename;
+      this.groupName = this.$route.params.groupname;
       try {
         await this.fetchDevice();
-        await this.getSoftwareDetails(this.device.id);
+        if (this.device) {
+          await this.getSoftwareDetails(this.device.id);
+        }
       } catch (e) {
         // TODO - we will move away from global error handling, and show any errors locally in the component
       }
       this.loadedDevice = true;
     },
     fetchDevice: async function () {
-      const {
-        result: {
-          devices: { rows: devices },
-        },
-      } = await api.device.getDevice(this.$route.params.devicename);
-      this.devices = devices;
+      const request = await api.device.getDevice(
+        this.groupName,
+        this.deviceName
+      );
+      this.device = request.result.device;
     },
     getSoftwareDetails: async function (deviceId) {
       const results = await api.device.getLatestSoftwareVersion(deviceId);
@@ -109,5 +105,9 @@ div .dev-details {
   margin: 0;
   padding: 0;
   max-width: unset;
+}
+
+.no-tabs {
+  padding: 2em 0;
 }
 </style>

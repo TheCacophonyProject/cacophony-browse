@@ -47,7 +47,11 @@
             :value="devices.length"
           />
         </template>
-        <DevicesTab :devices="devices" :loading="devicesLoading" />
+        <DevicesTab
+          :devices="devices"
+          :loading="devicesLoading"
+          :group-name="groupName"
+        />
       </b-tab>
       <b-tab lazy>
         <template #title>
