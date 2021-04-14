@@ -103,6 +103,10 @@ var allLabels = {
     value: "missed track",
     text: "Missed animal track",
   },
+  missedRecording: {
+    value: "missed recording",
+    text: "Missed recording (before this one)",
+  },
   multipleAnimals: {
     value: "multiple animals",
     text: "Multiple animals in video",
@@ -220,15 +224,16 @@ const DefaultLabels = {
   recordingLabels: function () {
     return [
       allLabels.missedTrack,
+      allLabels.missedRecording,
       allLabels.inTrap,
       allLabels.trapInteraction,
       allLabels.cool,
+      allLabels.multipleAnimals
     ];
   },
   searchRecordingLabels: function () {
     return this.recordingLabels()
       .concat(this.tagTypes)
-      .concat([allLabels.multipleAnimals]);
   },
   searchLabels: function () {
     var searchLabels = this.animals.concat([
