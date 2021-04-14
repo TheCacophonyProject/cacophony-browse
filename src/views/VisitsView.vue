@@ -12,6 +12,7 @@
           :disabled="queryPending"
           :onlyRecordingType="'video'"
           :is-collapsed="searchPanelIsCollapsed"
+          :simple-only="true"
           @mounted="querysMounted"
           @submit="submitNewQuery"
           @description="saveNextQueryDescription"

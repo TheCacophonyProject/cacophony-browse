@@ -11,6 +11,7 @@
           ref="queryRec"
           :disabled="queryPending"
           :is-collapsed="searchPanelIsCollapsed"
+          :simple-only="false"
           @mounted="querySubmitted"
           @submit="querySubmitted"
           @description="saveNextQueryDescription"

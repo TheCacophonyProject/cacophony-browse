@@ -25,7 +25,7 @@
         <SelectRecordingType v-model="recordingType" />
       </div>
       <SelectDateRange v-model="dates" />
-      <b-form-row>
+      <b-form-row v-if="!simpleOnly">
         <b-col>
           <b-button
             variant="link"
@@ -79,6 +79,10 @@ export default {
       type: String,
       required: false,
     },
+    simpleOnly: {
+      type: Boolean,
+      required: true,
+    }
   },
   data() {
     return {
@@ -127,11 +131,15 @@ export default {
       };
     },
     setAdvancedInitialState() {
-      // If there was an advanced query, start with the advanced toggle area open.
-      this.advanced =
-        (this.tagData && this.tagData.tagMode !== "any") ||
-        this.duration.hasOwnProperty("maxS") ||
-        this.duration.hasOwnProperty("minS");
+      if (this.simpleOnly) {
+        this.advanced = false;
+      } else {
+          // If there was an advanced query, start with the advanced toggle area open.
+        this.advanced = 
+          (this.tagData && this.tagData.tagMode !== "any") ||
+          this.duration.hasOwnProperty("maxS") ||
+          this.duration.hasOwnProperty("minS");
+      }
     },
     deserialiseQuery(routeQuery) {
       setOnlyIfExists("tagMode", routeQuery, this.tagData);
