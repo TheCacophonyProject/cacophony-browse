@@ -6,8 +6,8 @@
           :to="{
             name: 'device',
             params: {
-              devicename: devicename,
-              groupname: recording.Group.groupname,
+              devicename: deviceName,
+              groupname: groupName,
             },
           }"
         >
@@ -17,7 +17,7 @@
               size="xs"
               style="color: #666; font-size: 16px"
             />
-            {{ devicename }}
+            {{ deviceName }}
           </h4>
         </router-link>
 
@@ -74,8 +74,8 @@ export default {
     ...mapState({
       recording: (state) => state.Video.recording,
       tracks: (state) => state.Video.tracks,
-      isVideo: (state) => state.Video.recording.type == "thermalRaw",
-      isAudio: (state) => state.Video.recording.type == "audio",
+      isVideo: (state) => state.Video.recording.type === "thermalRaw",
+      isAudio: (state) => state.Video.recording.type === "audio",
       date: (state) => {
         if (state.Video.recording.recordingDateTime) {
           const date = new Date(state.Video.recording.recordingDateTime);
@@ -90,9 +90,15 @@ export default {
         }
         return "";
       },
-      devicename: (state) => {
+      deviceName: (state) => {
         if (state.Video.recording.Device) {
           return state.Video.recording.Device.devicename;
+        }
+        return "";
+      },
+      groupName: (state) => {
+        if (state.Video.recording.Group) {
+          return state.Video.recording.Group.groupname;
         }
         return "";
       },

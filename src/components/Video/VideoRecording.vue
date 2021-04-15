@@ -7,7 +7,7 @@
           ref="thermalPlayer"
           :video-url="videoUrl"
           :tracks="orderedTracks"
-          @trackSelected="trackSelected"
+          @track-selected="trackSelected"
           :current-track="selectedTrack"
           @request-next-recording="nextRecording"
         />
@@ -18,7 +18,9 @@
           :tracks="orderedTracks"
           :recording="recording"
           :current-track="selectedTrack"
-          @trackSelected="trackSelected"
+          :recently-added-tag="recentlyAddedTrackTag"
+          @track-selected="trackSelected"
+          @received-header="gotHeader"
         />
       </b-col>
 
@@ -34,7 +36,9 @@
             :is-wallaby-project="isWallabyProject()"
             :show="index === selectedTrack.trackIndex"
             :colour="colours[index % colours.length]"
-            @trackSelected="trackSelected"
+            :adjust-timespans="timespanAdjustment"
+            @track-selected="trackSelected"
+            @change-tag="changedTrackTag"
           />
         </div>
         <div
@@ -113,8 +117,10 @@ export default {
     return {
       showAddObservation: false,
       selectedTrack: { trackIndex: 0 },
+      recentlyAddedTrackTag: null,
       startVideoTime: 0,
       colours: TagColours,
+      header: null,
     };
   },
   computed: {
@@ -124,6 +130,14 @@ export default {
       },
       rawSize: (state) => state.Video.rawSize,
     }),
+    timespanAdjustment() {
+      if (this.header) {
+        if (this.header.hasBackgroundFrame) {
+          return 1 / this.header.fps;
+        }
+      }
+      return 0;
+    },
     orderedTracks() {
       return ([...this.tracks] || []).sort(
         (a, b) => a.data.start_s - b.data.start_s
@@ -230,8 +244,17 @@ export default {
     deleteTag(tagId) {
       this.$store.dispatch("Video/DELETE_TAG", tagId);
     },
+    changedTrackTag(trackTag) {
+      this.recentlyAddedTrackTag = trackTag;
+      setTimeout(() => {
+        this.recentlyAddedTrackTag = null;
+      }, 2000);
+    },
     trackSelected(track) {
-      this.selectedTrack = { trackIndex: track };
+      this.selectedTrack = track;
+    },
+    gotHeader(header) {
+      this.header = header;
     },
     updateComment(comment) {
       const recordingId = Number(this.$route.params.id);

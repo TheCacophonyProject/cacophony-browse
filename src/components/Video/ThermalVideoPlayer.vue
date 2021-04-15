@@ -221,7 +221,7 @@ export default {
         ];
         // if tracks is loaded then select the first track
         if (this.currentTrack.trackIndex !== 0) {
-          this.$emit("trackSelected", 0);
+          this.$emit("track-selected", 0);
         }
       }
     },
@@ -231,7 +231,7 @@ export default {
       this.videoJsPlayer().trigger("loadstart");
       this.videoJsPlayer().play();
       if (this.currentTrack.trackIndex !== 0) {
-        this.$emit("trackSelected", 0);
+        this.$emit("track-selected", 0);
       }
       this.ended = false;
     },
@@ -323,7 +323,7 @@ export default {
             (track) => track.trackIndex === hitRect.trackIndex
           );
           if (hitRect && this.currentTrack.trackIndex !== hitIndex) {
-            this.$emit("trackSelected", hitIndex);
+            this.$emit("track-selected", hitIndex);
           }
         });
 

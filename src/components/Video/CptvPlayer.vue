@@ -16,20 +16,17 @@
       <span v-if="showValueInfo" ref="valueTooltip" class="value-tooltip">{{
         valueUnderCursor
       }}</span>
-      <div class="playback-controls">
-        <button @click="togglePlayback">
+      <div
+        :class="['playback-controls', { show: buffering || atEndOfPlayback }]"
+      >
+        <spinner :fetching="buffering" v-if="buffering" />
+        <button @click="togglePlayback" v-else-if="atEndOfPlayback">
           <font-awesome-icon
             icon="redo-alt"
             size="6x"
             rotation="270"
-            v-if="atEndOfPlayback && !playing && !isScrubbing"
+            v-if="atEndOfPlayback"
           />
-          <font-awesome-icon
-            icon="play"
-            size="6x"
-            v-else-if="!playing && !isScrubbing"
-          />
-          <font-awesome-icon icon="pause" size="6x" v-else />
         </button>
       </div>
     </div>
@@ -80,6 +77,17 @@
           :title="smoothed ? 'Disable smoothing' : 'Enable smoothing'"
           triggers="hover"
         />
+
+        <button @click="toggleHistogram" ref="toggleHistogramButton">
+          <font-awesome-icon icon="chart-bar" />
+        </button>
+        <b-tooltip
+          v-if="$refs.toggleHistogramButton"
+          :target="$refs.toggleHistogramButton"
+          :title="showingHistogram ? 'Hide histogram' : 'Show histogram'"
+          triggers="hover"
+        />
+
         <button
           @click="togglePicker"
           :class="{ selected: showValueInfo }"
@@ -117,7 +125,7 @@
         <b-tooltip
           v-if="$refs.cyclePalette"
           :target="$refs.cyclePalette"
-          title="Cycle false colour mapping"
+          title="Cycle colour map"
           triggers="hover"
         />
         <button @click="stepBackward" ref="stepBackward">
@@ -188,10 +196,22 @@
       @end-scrub="endScrub"
       @set-playback-time="setTimeAndRedraw"
     />
-    <span v-if="buffering">Buffering...</span>
     <b-modal v-model="displayHeaderInfo" title="Recording metadata" hide-footer>
       <pre v-if="header">{{ headerInfo }}</pre>
     </b-modal>
+    <b-modal
+      v-model="isExporting"
+      title="Exporting video"
+      no-close-on-backdrop
+      no-close-on-esc
+      hide-footer
+      hide-header-close
+      centered
+    >
+      <b-progress :value="exportProgress * 100" max="100" />
+      <div class="progress-text">{{ Math.round(exportProgress * 100) }}%</div>
+    </b-modal>
+    <b-modal v-model="hasStreamLoadError">{{ streamLoadError }}</b-modal>
   </div>
 </template>
 
@@ -213,6 +233,7 @@ import plasma from "scale-color-perceptual/rgb/plasma.json";
 import magma from "scale-color-perceptual/rgb/magma.json";
 // @ts-ignore
 import inferno from "scale-color-perceptual/rgb/inferno.json";
+import Spinner from "@/components/Spinner.vue";
 
 const mapRgba = ([r, g, b]) =>
   (255 << 24) | ((b * 255.0) << 16) | ((g * 255.0) << 8) | (r * 255.0);
@@ -247,11 +268,39 @@ const download = (url, filename) => {
   anchor.click();
 };
 
+const yieldToUI = () => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+};
+
+const getAuthoritativeTagForTrack = (trackTags) => {
+  const userTags = trackTags.filter((tag) => tag.user !== null);
+  if (userTags.length) {
+    return userTags[0].what;
+  } else {
+    const tag = trackTags.find(
+      (tag) => (tag.data && tag.data === "Master") || tag.data.name === "Master"
+    );
+    if (tag) {
+      return tag;
+    }
+  }
+  return null;
+};
+
 const player: CptvPlayer = new CptvPlayer();
+let frameBuffer: Uint8ClampedArray;
+
+interface TrackBox {
+  what: string;
+  rect: [number, number, number, number];
+}
 
 export default {
   name: "CptvPlayer",
   components: {
+    Spinner,
     VideoTracksScrubber,
   },
   props: {
@@ -277,6 +326,10 @@ export default {
     showOverlaysForCurrentTrackOnly: {
       type: Boolean,
       default: false,
+    },
+    recentlyAddedTag: {
+      type: Object,
+      default: null,
     },
   },
   data(): {
@@ -310,22 +363,76 @@ export default {
       messageTimeout: null,
       valueUnderCursor: null,
       buffering: false,
+      isExporting: false,
+      exportProgress: 0,
+      showingHistogram: false,
+      globalClampedMin: undefined,
+      loadedStream: false,
+      streamLoadError: null,
     };
   },
   computed: {
+    hasStreamLoadError: {
+      get() {
+        return this.streamLoadError !== null;
+      },
+      set(val) {
+        if (!val) {
+          this.streamLoadError = null;
+        }
+      },
+    },
+    processedTracks(): Record<number, Record<number, TrackBox>> {
+      const timeOffset = this.timeAdjustmentForBackgroundFrame;
+
+      // Map track box position times to actual frames, easier to use than time offsets.
+      const frameAtTime = (time) => {
+        return Math.round(time / this.frameTimeSeconds);
+      };
+
+      // Add a bit of breathing room around our boxes
+      const padding = 5;
+      return this.tracks
+        .map(({ data, trackIndex, TrackTags }) => ({
+          what: getAuthoritativeTagForTrack(TrackTags),
+          start_s: Math.max(0, data.start_s - timeOffset),
+          end_s: data.end_s - timeOffset,
+          num_frames: data.num_frames + (this.hasBackgroundFrame ? -1 : 0),
+          trackIndex,
+          positions: data.positions.map(
+            ([time, [left, top, right, bottom]]) => [
+              frameAtTime(time - timeOffset),
+              time - timeOffset,
+              [
+                Math.max(0, left - padding),
+                Math.max(0, top - padding),
+                right + padding,
+                bottom + padding,
+              ],
+            ]
+          ),
+        }))
+        .reduce((acc, item, index) => {
+          for (const position of item.positions) {
+            acc[position[0]] = acc[position[0]] || {};
+            const frame = acc[position[0]];
+            frame[index] = {
+              rect: position[2],
+              what: item.what,
+            };
+          }
+          return acc;
+        }, {});
+    },
     actualDuration() {
       if (this.totalFrames) {
         return this.adjustedTotalFrames / this.header.fps;
       }
-      // Otherwise, best guess.
-
-      // Subtract one frame, since the backend calculates the duration including the background frame,
-      // and all track boxes end up offset by one frame.
-      return (
-        Math.max(
-          ...this.tracks.map((track) => track.data.end_s),
-          this.duration
-        ) - this.timeAdjustmentForBackgroundFrame
+      return Math.max(
+        ...this.tracks.map(
+          (track) => track.data.end_s - this.timeAdjustmentForBackgroundFrame
+        ),
+        this.duration - this.timeAdjustmentForBackgroundFrame
       );
     },
     adjustedTotalFrames() {
@@ -339,7 +446,7 @@ export default {
     },
     timeAdjustmentForBackgroundFrame() {
       if (this.hasBackgroundFrame) {
-        return 1 / this.header.fps;
+        return this.frameTimeSeconds;
       }
       return 0;
     },
@@ -361,6 +468,12 @@ export default {
       }
       return 0;
     },
+    frameTimeSeconds(): number {
+      if (this.header) {
+        return 1 / this.header.fps;
+      }
+      return 1 / 9;
+    },
     elapsedTime(): string {
       return this.formatTime(this.currentTime);
     },
@@ -379,7 +492,7 @@ export default {
     },
     ambientTemperature() {
       if (this.frameHeader && this.frameHeader.frameTempC) {
-        return `~ ${Math.round(this.frameHeader.frameTempC)}&deg;C`;
+        return `Around ${Math.round(this.frameHeader.frameTempC)}&deg;C`;
       }
       return false;
     },
@@ -439,43 +552,162 @@ export default {
       }
     },
   },
+  created() {
+    // Restore user preferences
+    const smoothingPreference = window.localStorage.getItem("video-smoothing");
+    if (smoothingPreference) {
+      this.smoothed = smoothingPreference === "true";
+    }
+    const palettePreference = window.localStorage.getItem("video-palette");
+    if (palettePreference) {
+      this.paletteIndex = ColourMaps.findIndex(
+        ([name]) => name === palettePreference
+      );
+      this.colourMap = ColourMaps[this.paletteIndex][1];
+    }
+    const playbackSpeed = window.localStorage.getItem("video-playback-speed");
+    if (playbackSpeed) {
+      this.speedMultiplierIndex = PlaybackSpeeds.findIndex(
+        (mul) => mul === Number(playbackSpeed)
+      );
+    }
+  },
   async mounted() {
     window.addEventListener("resize", this.onResize);
+    window
+      .matchMedia("screen and (min-resolution: 2dppx)")
+      .addEventListener("change", this.setCanvasDimensions);
+
     this.setCanvasDimensions();
     const canvas = this.$refs.overlayCanvas;
     canvas.addEventListener("click", this.clickOverlayCanvas);
     canvas.addEventListener("mousemove", this.moveOverOverlayCanvas);
-    await player.initWithCptvUrlAndSize(this.cptvUrl, this.cptvSize);
-    this.header = await player.getHeader();
-    this.$refs.canvas.width = this.header.width;
-    this.$refs.canvas.height = this.header.height;
+    this.loadedStream = await player.initWithCptvUrlAndSize(
+      this.cptvUrl,
+      this.cptvSize
+    );
+    if (this.loadedStream === "Failed to verify JWT.") {
+      window.location.reload();
+    } else if (this.loadedStream == true) {
+      this.header = await player.getHeader();
 
-    this.clearCanvas();
-    await this.fetchRenderAdvanceFrame();
+      // Let the parent know about the header, so it can inform the Track info panels
+      // about any time display offsets caused by having a background frame.
+      this.$emit("received-header", this.header);
+      frameBuffer = new Uint8ClampedArray(
+        this.header.width * this.header.height * 4
+      );
+      this.$refs.canvas.width = this.header.width;
+      this.$refs.canvas.height = this.header.height;
+      this.clearCanvas();
+      await this.fetchRenderAdvanceFrame();
+      if (this.hasBackgroundFrame) {
+        let background = player.getBackgroundFrame();
+        while (background === null) {
+          await this.fetchRenderAdvanceFrame();
+          background = player.getBackgroundFrame();
+        }
+        const { data, min, max } = background;
+        const range = max - min;
+        // Create histogram of background frame, and clamp out any outlier low values (sky etc)
+        // Bin into maybe 16 bins?
+        const numBins = 32;
+        const hist = new Array(numBins).fill(0);
+        for (let i = 0; i < numBins; i++) {
+          hist[i] = [0, min + (range / numBins) * (i + 1)];
+        }
+
+        //  Create a histogram component, and allow us to clamp the cold point
+        //  Try and be "smart" about selecting cold point when there is i.e. sky
+        for (let i = 0; i < data.length; i++) {
+          const val = data[i];
+          const bin = Math.floor((numBins * (val - min)) / range);
+          hist[bin][0]++;
+        }
+        //console.log(hist);
+        const total = this.header.width * this.header.height;
+        const threshold = total / 30;
+        let px = 0;
+        let binIndex = -1;
+        while (px < threshold) {
+          binIndex++;
+          px += hist[binIndex][0];
+        }
+        //this.globalClampedMin = hist[binIndex][1];
+        //console.log(this.globalClampedMin);
+      }
+      await this.fetchRenderAdvanceFrame();
+    } else {
+      this.streamLoadError = this.loadedStream;
+    }
   },
   beforeDestroy() {
     const canvas = this.$refs.overlayCanvas;
     canvas.removeEventListener("click", this.clickOverlayCanvas);
     canvas.removeEventListener("mousemove", this.moveOverOverlayCanvas);
     window.removeEventListener("resize", this.onResize);
+    window
+      .matchMedia("screen and (min-resolution: 2dppx)")
+      .removeEventListener("change", this.setCanvasDimensions);
   },
   watch: {
+    currentTrack() {
+      this.selectTrack();
+    },
+    recentlyAddedTag() {
+      this.renderOverlay(
+        this.$refs.overlayCanvas.getContext("2d"),
+        this.scale,
+        this.secondsSinceLastFFC,
+        false,
+        this.frameNum
+      );
+      // Redraw, and flash the box if it's showing on screen.
+    },
     async cptvUrl(url) {
+      this.loadedStream = false;
       this.clearCanvas();
-      await player.initWithCptvUrlAndSize(url, this.cptvSize);
-      this.header = await player.getHeader();
-      this.$refs.canvas.width = this.header.width;
-      this.$refs.canvas.height = this.header.height;
-      this.frameNum = 0;
-      this.animationTick = 0;
-      this.totalFrames = false;
-      cancelAnimationFrame(this.animationFrame);
-      this.playing = false;
-      this.wasPaused = true;
-      await this.fetchRenderAdvanceFrame();
+      this.loadedStream = await player.initWithCptvUrlAndSize(
+        url,
+        this.cptvSize
+      );
+      if (this.loadedStream === "Failed to verify JWT.") {
+        window.location.reload();
+      } else if (this.loadedStream === true) {
+        this.header = await player.getHeader();
+        frameBuffer = new Uint8ClampedArray(
+          this.header.width * this.header.height * 4
+        );
+        this.$refs.canvas.width = this.header.width;
+        this.$refs.canvas.height = this.header.height;
+        this.frameNum = 0;
+        this.animationTick = 0;
+        this.totalFrames = false;
+        cancelAnimationFrame(this.animationFrame);
+        this.playing = false;
+        this.wasPaused = true;
+        await this.fetchRenderAdvanceFrame();
+      } else {
+        this.streamLoadError = this.loadedStream;
+      }
     },
   },
   methods: {
+    selectTrack() {
+      if (this.currentTrack.start_s) {
+        if (
+          this.processedTracks &&
+          this.currentTrack.trackIndex <
+            Object.keys(this.processedTracks).length
+        ) {
+          cancelAnimationFrame(this.animationFrame);
+          this.setTimeAndRedraw(this.currentTrack.start_s + 0.01);
+        }
+      }
+    },
+    toggleHistogram() {
+      this.showingHistogram = !this.showingHistogram;
+    },
     formatTime(time: number): string {
       let seconds = Math.floor(time);
       if (seconds < 60) {
@@ -483,7 +715,7 @@ export default {
       }
       const minutes = Math.floor(seconds / 60);
       seconds = seconds - minutes * 60;
-      return `${minutes}.${seconds}`;
+      return `${minutes}.${seconds.toString().padStart(2, "0")}`;
     },
     async ensureEntireClipIsDecoded() {
       let frameNum = 0;
@@ -500,29 +732,29 @@ export default {
       return true;
     },
     async stepForward() {
+      this.pause();
       const canAdvance = await this.renderCurrentFrame(true, this.frameNum + 1);
       if (canAdvance) {
         this.frameNum++;
       }
     },
     async stepBackward() {
+      this.pause();
+      await this.renderCurrentFrame(true, this.frameNum - 1);
       this.frameNum = Math.max(0, this.frameNum - 1);
-      await this.renderCurrentFrame(true);
     },
     async clickOverlayCanvas(event) {
       const canvas = this.$refs.overlayCanvas;
       const canvasOffset = canvas.getBoundingClientRect();
       const x = event.x - canvasOffset.x;
       const y = event.y - canvasOffset.y;
-      const hitRect = this.hitTestPos(x, y);
-      if (hitRect) {
-        const hitIndex = this.tracks.findIndex(
-          (track) => track.trackIndex === hitRect.trackIndex
-        );
-        if (this.currentTrack.trackIndex !== hitIndex) {
-          await this.renderCurrentFrame();
-          this.$emit("trackSelected", hitIndex);
-        }
+      const hitTrackIndex = this.getTrackIndexAtPosition(x, y);
+      canvas.style.cursor = hitTrackIndex !== null ? "pointer" : "default";
+      if (hitTrackIndex !== null) {
+        await this.renderCurrentFrame();
+        this.$emit("track-selected", {
+          trackIndex: hitTrackIndex,
+        });
       }
     },
     clearCanvas() {
@@ -535,9 +767,9 @@ export default {
       const canvasOffset = canvas.getBoundingClientRect();
       const x = event.x - canvasOffset.x;
       const y = event.y - canvasOffset.y;
-      const hitRect = this.hitTestPos(x, y);
+      const hitTrackIndex = this.getTrackIndexAtPosition(x, y);
       // set cursor
-      canvas.style.cursor = hitRect !== null ? "pointer" : "default";
+      canvas.style.cursor = hitTrackIndex !== null ? "pointer" : "default";
       if (this.showValueInfo) {
         canvas.style.cursor = "default";
         // Map the x,y into canvas size
@@ -549,15 +781,10 @@ export default {
         this.$refs.valueTooltip.style.top = `${y - 20}px`;
       }
     },
-    async setColourMap(index: number) {
-      this.colourMap = ColourMaps[index][1];
-      await this.renderCurrentFrame();
-    },
     async fetchRenderAdvanceFrame() {
       // Fetch, render, advance
       const canAdvance = await this.renderCurrentFrame();
       if (canAdvance) {
-        this.frameNum++;
         return true;
       } else if (this.playing) {
         this.pause();
@@ -570,10 +797,12 @@ export default {
       this.pause();
       // TODO(jon): Better to do this in a web-worker so that we don't block the main thread.
       // Also warn users not to navigate away from the page while it's encoding.
-
+      this.isExporting = true;
+      this.exportProgress = 0;
       // @ts-ignore
       const HME = await import("h264-mp4-encoder");
       const encoder = await HME.createH264MP4Encoder();
+      await yieldToUI();
       const renderCanvas = document.createElement("canvas");
       const targetWidth = 640;
       const targetHeight = 480;
@@ -597,11 +826,14 @@ export default {
       const videoContext = videoCanvas.getContext("2d");
 
       // Make sure everything is loaded to ensure that we have final min/max numbers for normalisation
+
+      // TODO(jon): Incorporate this time into the progress bar if the video hasn't already downloaded/decoded
+      //  Either that, or we interleave the decoding with the encoding process
       await this.ensureEntireClipIsDecoded();
       encoder.initialize();
       let frameNum = 0;
 
-      // TODO(jon): Show a popup that shows encoding progress
+      await yieldToUI();
       console.assert(this.totalFrames !== false);
       while (frameNum < this.adjustedTotalFrames) {
         const { frameData } = await this.queueFrame(frameNum);
@@ -629,29 +861,24 @@ export default {
         );
 
         // Draw the overlay
-        const totalTime = this.actualDuration;
-        const totalFrames = this.adjustedTotalFrames;
-        const timeAtFrameNum = (frameNum / totalFrames) * totalTime;
         let timeSinceLastFFCSeconds = Number.MAX_SAFE_INTEGER;
         if (frameHeader.lastFfcTimeMs) {
           timeSinceLastFFCSeconds =
             (frameHeader.timeOnMs - frameHeader.lastFfcTimeMs) / 1000;
         }
-        const timeAdjustment = this.hasBackgroundFrame
-          ? 1 / this.header.fps
-          : 0;
         this.renderOverlay(
           context,
-          timeAtFrameNum + timeAdjustment,
-          false,
           renderCanvas.width / videoCanvas.width,
           timeSinceLastFFCSeconds,
-          true
+          true,
+          frameNum
         );
 
         encoder.addFrameRgba(
           context.getImageData(0, 0, encoder.width, encoder.height).data
         );
+        this.exportProgress = frameNum / this.adjustedTotalFrames;
+        await yieldToUI();
         frameNum++;
       }
       encoder.finalize();
@@ -663,6 +890,7 @@ export default {
         ).toLocaleString()}`
       );
       encoder.delete();
+      this.isExporting = false;
     },
     getCurrentFrameData(
       context: CanvasRenderingContext2D,
@@ -670,11 +898,10 @@ export default {
       frameHeader: CptvFrameHeader
     ) {
       const { min, max, data: frameData } = frame;
-      const imgData = context.getImageData(
-        0,
-        0,
-        context.canvas.width,
-        context.canvas.height
+      const imgData = new ImageData(
+        frameBuffer,
+        this.header.width,
+        this.header.height
       );
       const data = new Uint32Array(imgData.data.buffer);
       const colourMap = this.colourMap;
@@ -690,6 +917,18 @@ export default {
         for (let i = 0; i < data.length; i++) {
           const index = ((frameData[i] - localMin) / localRange) * 255.0;
           const indexUpper = Math.ceil(index);
+          data[i] = colourMap[indexUpper];
+        }
+      } else if (this.globalClampedMin !== undefined) {
+        const thisMin = Math.max(min, this.globalClampedMin);
+        console.log("Clamped min", thisMin);
+        const range = max - thisMin;
+        for (let i = 0; i < data.length; i++) {
+          const index =
+            ((Math.max(frameData[i], thisMin) - thisMin) / range) * 255.0;
+          const indexUpper = Math.ceil(index);
+          //const indexLower = Math.floor(index);
+          // TODO(jon): Interpolate between these steps?
           data[i] = colourMap[indexUpper];
         }
       } else {
@@ -715,7 +954,7 @@ export default {
       );
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = requestAnimationFrame(() => {
-        this.drawFrame(context, imgData, force);
+        this.drawFrame(context, imgData, frameNum || this.frameNum, force);
       });
     },
     async queueFrame(frameNum: number) {
@@ -723,6 +962,7 @@ export default {
       if (frameData) {
         return { frameNum, frameData };
       } else {
+        await yieldToUI();
         await player.seekToFrame(frameNum);
       }
       frameData = player.getFrameAtIndex(frameNum);
@@ -735,45 +975,44 @@ export default {
       }
       return { frameNum, frameData };
     },
-    async drawFrame(context, imgData, force = false) {
-      // One tick represents 1000 / fps * multiplier
-      if (this.playing) {
-        this.animationTick++;
-      }
-      const everyXTicks = Math.max(
-        1,
-        Math.floor(60 / (this.header.fps * this.speedMultiplier))
-      );
-      //console.log(everyXTicks);
-      // NOTE: respect fps here, render only when we should.
-      const shouldRedraw = this.animationTick % everyXTicks === 0;
-
-      //console.log("Should redraw", this.animationTick, everyXTicks, this.animationTick % everyXTicks, shouldRedraw);
-      if (shouldRedraw || force) {
-        context.putImageData(imgData, 0, 0);
-        let didAdvance = false;
+    async drawFrame(context, imgData, frameNum, force = false) {
+      if (context) {
+        // One tick represents 1000 / fps * multiplier
         if (this.playing) {
-          didAdvance = await this.fetchRenderAdvanceFrame();
+          this.animationTick++;
         }
-        const timeAdjustment = this.hasBackgroundFrame
-          ? 1 / this.header.fps
-          : 0;
-        this.renderOverlay(
-          this.$refs.overlayCanvas.getContext("2d"),
-          this.currentTime + timeAdjustment,
-          true,
-          this.scale,
-          this.secondsSinceLastFFC,
-          false
+        const everyXTicks = Math.max(
+          1,
+          Math.floor(60 / (this.header.fps * this.speedMultiplier))
         );
-        if (didAdvance) {
-          this.animationTick = 0;
+        //console.log(everyXTicks);
+        // NOTE: respect fps here, render only when we should.
+        const shouldRedraw = this.animationTick % everyXTicks === 0;
+
+        //console.log("Should redraw", this.animationTick, everyXTicks, this.animationTick % everyXTicks, shouldRedraw);
+        if (context && (shouldRedraw || force)) {
+          context.putImageData(imgData, 0, 0);
+          this.renderOverlay(
+            this.$refs.overlayCanvas.getContext("2d"),
+            this.scale,
+            this.secondsSinceLastFFC,
+            false,
+            frameNum
+          );
+          let didAdvance = false;
+          if (this.playing) {
+            didAdvance = await this.fetchRenderAdvanceFrame();
+          }
+          if (didAdvance) {
+            this.animationTick = 0;
+            this.frameNum++;
+          }
+        } else {
+          cancelAnimationFrame(this.animationFrame);
+          this.animationFrame = requestAnimationFrame(() =>
+            this.drawFrame(context, imgData, frameNum)
+          );
         }
-      } else {
-        cancelAnimationFrame(this.animationFrame);
-        this.animationFrame = requestAnimationFrame(() =>
-          this.drawFrame(context, imgData)
-        );
       }
     },
     incrementSpeed() {
@@ -784,14 +1023,21 @@ export default {
       this.setPlayerMessage(
         `Speed ${PlaybackSpeeds[this.speedMultiplierIndex]}x`
       );
+      window.localStorage.setItem(
+        "video-playback-speed",
+        PlaybackSpeeds[this.speedMultiplierIndex].toString()
+      );
     },
-    incrementPalette() {
+    async incrementPalette() {
       this.paletteIndex++;
       if (this.paletteIndex === ColourMaps.length) {
         this.paletteIndex = 0;
       }
-      this.setPlayerMessage(ColourMaps[this.paletteIndex][0]);
-      this.setColourMap(this.paletteIndex);
+      const paletteName = ColourMaps[this.paletteIndex][0];
+      this.setPlayerMessage(paletteName);
+      window.localStorage.setItem("video-palette", paletteName);
+      this.colourMap = ColourMaps[this.paletteIndex][1];
+      await this.renderCurrentFrame();
     },
     showHeaderInfo() {
       this.displayHeaderInfo = true;
@@ -815,22 +1061,41 @@ export default {
     },
     renderOverlay(
       context: CanvasRenderingContext2D,
-      atTime: number,
-      clear: boolean,
       scale: number,
       timeSinceFFCSeconds: number,
-      isExporting: boolean
+      isExporting: boolean,
+      frameNum: number
     ) {
-      if (clear) {
+      if (!isExporting) {
+        // Clear if we are drawing on the live overlay, but not if we're drawing for export
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
       }
-      const data = this.getVideoFrameDataForAllTracksAtTime(
-        atTime,
-        false,
-        scale
-      );
-      for (const rect of data) {
-        this.drawRectWithText(context, rect, isExporting);
+      const tracks =
+        this.processedTracks[frameNum] || ({} as Record<number, TrackBox>);
+      for (const [trackIndex, trackBox] of Object.entries(tracks)) {
+        if (this.currentTrack.trackIndex !== Number(trackIndex)) {
+          const box = trackBox as TrackBox;
+          this.drawRectWithText(
+            context,
+            Number(trackIndex),
+            box.rect,
+            box.what,
+            isExporting
+          );
+        }
+      }
+      // Always draw selected track last, so it sits on top of any overlapping tracks.
+      for (const [trackIndex, trackBox] of Object.entries(tracks)) {
+        if (this.currentTrack.trackIndex === Number(trackIndex)) {
+          const box = trackBox as TrackBox;
+          this.drawRectWithText(
+            context,
+            Number(trackIndex),
+            box.rect,
+            box.what,
+            isExporting
+          );
+        }
       }
       if (timeSinceFFCSeconds < 10) {
         context.font = "bold 15px Verdana";
@@ -851,79 +1116,77 @@ export default {
     },
     drawRectWithText(
       context: CanvasRenderingContext2D,
-      { trackIndex, rectWidth, rectHeight, x, y },
+      trackIndex: number,
+      dims: [number, number, number, number],
+      what: string,
       isExporting: boolean
     ) {
-      const hitIndex = this.tracks.findIndex(
-        (track) => track.trackIndex === trackIndex
-      );
-      context.strokeStyle = this.colours[hitIndex % this.colours.length];
-      const selected = this.currentTrack.trackIndex === hitIndex;
+      const selected =
+        this.currentTrack.trackIndex === trackIndex || isExporting;
       const lineWidth = selected ? 2 : 1;
-      const halfLineWidth = lineWidth / 2;
-      context.lineWidth = lineWidth;
-      //console.log(x, y);
+      const outlineWidth = lineWidth + 4;
+      const halfOutlineWidth = outlineWidth / 2;
+      const deviceRatio = isExporting ? 1 : window.devicePixelRatio;
+      const scale = context.canvas.width / this.header.width;
+      const [left, top, right, bottom] = dims.map((x) => x * scale);
+      const rectWidth = right - left;
+      const rectHeight = bottom - top;
+
+      const x =
+        Math.max(halfOutlineWidth, Math.round(left) - halfOutlineWidth) /
+        deviceRatio;
+      const y =
+        Math.max(halfOutlineWidth, Math.round(top) - halfOutlineWidth) /
+        deviceRatio;
+      const width =
+        Math.round(
+          Math.min(context.canvas.width - left, Math.round(rectWidth))
+        ) / deviceRatio;
+      const height =
+        Math.round(
+          Math.min(context.canvas.height - top, Math.round(rectHeight))
+        ) / deviceRatio;
+      context.lineJoin = "round";
+      context.lineWidth = outlineWidth;
+      context.strokeStyle = `rgba(0, 0, 0, ${selected ? 0.4 : 0.5})`;
       context.beginPath();
-      if (lineWidth === 2) {
-        context.strokeRect(
-          Math.round(x) - halfLineWidth,
-          Math.round(y) - halfLineWidth,
-          Math.round(rectWidth) + halfLineWidth,
-          Math.round(rectHeight) + halfLineWidth
-        );
-      } else {
-        context.strokeRect(
-          Math.round(x) + 0.5 - halfLineWidth,
-          Math.round(y) + 0.5 - halfLineWidth,
-          Math.round(rectWidth) - 0.5 + halfLineWidth,
-          Math.round(rectHeight) - 0.5 + halfLineWidth
-        );
-      }
-
+      context.strokeRect(x, y, width, height);
+      context.strokeStyle = this.colours[trackIndex % this.colours.length];
+      context.lineWidth = lineWidth;
+      context.beginPath();
+      context.strokeRect(x, y, width, height);
       if (selected || isExporting) {
-        context.font = "12px Verdana";
-        context.fillStyle = "white";
-
-        const track = this.tracks.find(
-          (track) => track.trackIndex === trackIndex
-        );
-        let aiTag = "";
-        if (track) {
-          const userTags = track.TrackTags.filter((tag) => tag.user !== null);
-          if (userTags.length) {
-            aiTag = userTags[0].what;
-          } else {
-            const tag = track.TrackTags.find(
-              (tag) =>
-                (tag.data && tag.data === "Master") ||
-                tag.data.name === "Master"
-            );
-            if (tag) {
-              aiTag = tag.what;
-            }
-          }
-        }
         // If exporting, show all the best guess animal tags, if not unknown
         // If there's only one track, don't annotate with "Track X (..)"
         const text =
           isExporting || this.tracks.length === 1
-            ? aiTag
-            : `Track ${hitIndex + 1}${aiTag ? `(${aiTag})` : ""}`;
+            ? what
+            : `Track ${trackIndex + 1}${what ? `(${what})` : ""}`;
         if (text !== "") {
-          const textHeight = 12;
+          const textHeight = 14;
           const textWidth = context.measureText(text).width;
 
-          // TODO Determine if the box can be shown right at the bottom of the screen
-          // if it can then we probably need to detect this and display the text above
-          // or inside the box.
-          const textX = x + (rectWidth - textWidth);
-          const textY = y + (rectHeight + textHeight);
+          let textX = x + (width - textWidth);
+          let textY = y + (height + textHeight);
+          // Make sure the text doesn't get clipped off if the box is near the frame edges
+          if (textY + textHeight > context.canvas.height / deviceRatio) {
+            textY = top - 5 * deviceRatio;
+          }
+          if (textX < 0) {
+            textX = left + 10 * deviceRatio;
+          }
+          context.font = "12px Verdana";
+          context.lineWidth = 4;
+          context.strokeStyle = "rgba(0, 0, 0, 0.5)";
+          context.strokeText(text, textX, textY);
+          context.fillStyle = "white";
           context.fillText(text, textX, textY);
         }
       }
     },
     toggleSmoothing() {
       this.smoothed = !this.smoothed;
+      window.localStorage.setItem("video-smoothing", String(this.smoothed));
       this.setPlayerMessage(
         `Smoothing ${this.smoothed ? "Enabled" : "Disabled"}`
       );
@@ -967,80 +1230,24 @@ export default {
       }
       this.isShowingBackgroundFrame = !this.isShowingBackgroundFrame;
     },
-    // totalFrames() {
-    //   let adjust = 0;
-    //   if (this.hasBackgroundFrame) {
-    //     adjust = -1;
-    //   }
-    //   let totalFrames = this.player.getTotalFrames();
-    //   if (totalFrames !== false) {
-    //     totalFrames += adjust;
-    //   } else {
-    //     totalFrames = this.actualDuration * this.header.fps;
-    //   }
-    //   return totalFrames;
-    // },
-    hitTestPos(x, y) {
-      const allFrameData = this.getVideoFrameDataForAllTracksAtTime(
-        this.currentTime,
-        this.showOverlaysForCurrentTrackOnly,
-        this.scale
-      );
-      for (const rect of allFrameData) {
-        if (
-          rect.x <= x &&
-          rect.x + rect.rectWidth > x &&
-          rect.y <= y &&
-          rect.y + rect.rectHeight > y
-        ) {
-          return rect;
+    getTrackIndexAtPosition(x: number, y: number): number | null {
+      const tracks =
+        this.processedTracks[this.frameNum] || ({} as Record<number, TrackBox>);
+      for (const [trackIndex, trackBox] of Object.entries(tracks)) {
+        const box = trackBox as TrackBox;
+        const [left, top, right, bottom] = box.rect.map((x) => x * this.scale);
+        if (left <= x && right > x && top <= y && bottom > y) {
+          // If the track is already selected, ignore it
+          if (Number(trackIndex) === this.currentTrack.trackIndex) {
+            continue;
+          }
+          return Number(trackIndex);
         }
       }
       return null;
     },
     onResize() {
       this.setCanvasDimensions();
-    },
-    getVideoFrameDataForAllTracksAtTime(
-      currentTime: number,
-      currentTrackOnly: boolean,
-      scale: number
-    ) {
-      const search = (positions, currentTime) => {
-        let i = positions.length - 1;
-        while (positions[i] && positions[i][0] > currentTime) {
-          i--;
-        }
-        i = Math.max(0, i);
-        return positions[i];
-      };
-      // First check if the last position we got is still the current position?
-      // See if tracks are in range.
-      let tracks;
-      if (currentTrackOnly) {
-        if (this.tracks.length && this.tracks[this.currentTrack.trackIndex]) {
-          tracks = [this.tracks[this.currentTrack.trackIndex]];
-        } else {
-          tracks = [];
-        }
-      } else {
-        tracks = this.tracks;
-      }
-      return tracks
-        .filter(
-          ({ data: { start_s, end_s } }) =>
-            start_s <= currentTime && end_s >= currentTime
-        )
-        .map(({ data: { positions }, trackIndex }) => {
-          const item = search(positions, currentTime)[1];
-          return {
-            rectWidth: (item[2] - item[0]) * scale,
-            rectHeight: (item[3] - item[1]) * scale,
-            x: item[0] * scale,
-            y: item[1] * scale,
-            trackIndex,
-          };
-        });
     },
     setCanvasDimensions() {
       const canvasDimensions = this.$refs.canvas.getBoundingClientRect();
@@ -1056,33 +1263,47 @@ export default {
       const context = canvas.getContext("2d");
       this.$refs.container.style.maxHeight = `${this.canvasHeight}px`;
       context.scale(devicePixelRatio, devicePixelRatio);
+      if (this.header) {
+        this.renderCurrentFrame();
+      }
     },
     async setTimeAndRedraw(time) {
       let totalFrames = this.totalFrames;
-      if (totalFrames === false) {
-        totalFrames = Math.floor(this.actualDuration * this.header.fps);
+      if (this.header) {
+        if (totalFrames === false) {
+          totalFrames = Math.floor(this.actualDuration * this.header.fps);
+        }
+        this.frameNum = Math.floor(
+          Math.min(totalFrames - 1, (time / this.actualDuration) * totalFrames)
+        );
+        this.animationTick = 0;
+        await this.renderCurrentFrame(true);
       }
-      this.frameNum = Math.floor(
-        Math.min(totalFrames - 1, (time / this.actualDuration) * totalFrames)
-      );
-      this.animationTick = 0;
-      await this.renderCurrentFrame();
     },
     async renderCurrentFrame(force: boolean = false, frameNum?: number) {
-      this.loadProgress = player.getLoadProgress();
-      if (frameNum === undefined) {
-        frameNum = this.frameNum;
+      if (this.header) {
+        this.loadProgress = player.getLoadProgress();
+        if (frameNum === undefined) {
+          frameNum = this.frameNum;
+        }
+        this.buffering = true;
+
+        performance.mark(`Start frame #${frameNum}`);
+        // TODO(jon): Ideally we want this to happen on another thread an call back to us, otherwise it locks the UI.
+        const { frameNum: actualFrameNum, frameData } = await this.queueFrame(
+          frameNum
+        );
+        performance.mark(`End frame #${frameNum}`);
+        performance.measure(
+          `Frame #${frameNum}`,
+          `Start frame #${frameNum}`,
+          `End frame #${frameNum}`
+        );
+        this.buffering = false;
+        this.renderFrame(frameData, actualFrameNum, force);
+        return frameNum === actualFrameNum;
       }
-      this.buffering = true;
-
-      // TODO(jon): Ideally we want this to happen on another thread an call back to us, otherwise it locks the UI.
-      const { frameNum: actualFrameNum, frameData } = await this.queueFrame(
-        frameNum
-      );
-
-      this.buffering = false;
-      this.renderFrame(frameData, actualFrameNum, force);
-      return frameNum === actualFrameNum;
+      return false;
     },
     startScrub() {
       this.wasPaused = !this.playing;
@@ -1126,6 +1347,7 @@ export default {
   position: relative;
   width: 100%;
   padding: 0;
+  background: black;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   overflow: hidden;
@@ -1241,25 +1463,25 @@ canvas {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-
-  //background: rgba(0, 0, 0, 0.2);
   background: radial-gradient(
     circle,
     rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.2) 60%,
-    rgba(0, 0, 0, 0.2) 100%
+    rgba(0, 0, 0, 0.5) 50%,
+    rgba(0, 0, 0, 0.2) 80%,
+    rgba(0, 0, 0, 0) 100%
   );
   opacity: 0;
   transition: opacity 0.3s;
-  &:hover {
+  &.show {
     opacity: 1;
+    pointer-events: unset;
   }
   > button {
     height: 26.666%;
     width: 20%;
     > svg {
       transition: opacity 0.3s;
-      opacity: 0.1;
+      opacity: 0.5;
     }
     &:hover {
       > svg {
@@ -1330,5 +1552,9 @@ canvas {
       }
     }
   }
+}
+.progress-text {
+  text-align: center;
+  user-select: none;
 }
 </style>

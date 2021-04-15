@@ -189,7 +189,7 @@ export default {
       } else {
         this.currentPage = 1;
       }
-    },
+    }
   },
   mounted() {
     if (this.$route.query.limit) {

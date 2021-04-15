@@ -11,6 +11,7 @@
         :message="introMessage"
         x-axis-label="Device Name"
         y-axis-label="Number of Recordings"
+        @click.ctrl="gotoVisitsSearchPage($event, true)"
         @click="gotoVisitsSearchPage($event)"
       />
     </div>
@@ -235,7 +236,7 @@ export default {
       }
       return str;
     },
-    gotoVisitsSearchPage(chartItems: string[]) {
+    gotoVisitsSearchPage(chartItems: string[], openInNewWindow: boolean = false) {
       const deviceName = chartItems[0];
       const device = this.devices.find((device) => {
         return device.name === deviceName;
@@ -247,10 +248,14 @@ export default {
         device: [device.id],
       };
 
-      this.$router.push({
-        path: "visits",
-        query: searchParams,
-      });
+      if (!openInNewWindow) {
+        this.$router.push({
+          path: "visits",
+          query: searchParams,
+        });
+      } else {
+        console.log("Open in new window");
+      }
     },
   },
 };

@@ -240,6 +240,7 @@ export default {
   border-bottom-right-radius: 5px;
   box-shadow: 0 1px 5px #000 inset;
   margin-bottom: 5px;
+  cursor: col-resize;
 }
 .loading {
   color: #eee;
