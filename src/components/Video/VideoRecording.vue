@@ -2,17 +2,7 @@
   <b-container class="video-elements-wrapper">
     <b-row class="no-gutters">
       <b-col cols="12" lg="8">
-        <ThermalVideoPlayer
-          v-if="false"
-          ref="thermalPlayer"
-          :video-url="videoUrl"
-          :tracks="orderedTracks"
-          @track-selected="trackSelected"
-          :current-track="selectedTrack"
-          @request-next-recording="nextRecording"
-        />
         <CptvPlayer
-          v-else
           :cptv-url="videoRawUrl"
           :cptv-size="rawSize"
           :tracks="orderedTracks"
@@ -21,9 +11,10 @@
           :recently-added-tag="recentlyAddedTrackTag"
           @track-selected="trackSelected"
           @received-header="gotHeader"
+          @request-next-recording="nextRecording"
+          @request-prev-recording="prevRecording"
         />
       </b-col>
-
       <b-col cols="12" lg="4">
         <div v-if="tracks && tracks.length > 0" class="accordion">
           <TrackInfo
@@ -87,7 +78,6 @@ export default {
     PrevNext,
     RecordingControls,
     RecordingProperties,
-    ThermalVideoPlayer,
     TrackInfo,
     CptvPlayer,
   },
@@ -228,8 +218,13 @@ export default {
     prevNext(event) {
       this.gotoNextRecording(event[0], event[1], event[2]);
     },
-    nextRecording() {
-      this.gotoNextRecording("next", false, false, true);
+    async nextRecording() {
+      console.log("Goto next");
+      await this.gotoNextRecording("next", false, false, true);
+    },
+    async prevRecording() {
+      console.log("Goto prev");
+      await this.gotoNextRecording("previous", false, false, true);
     },
     getRecordingId() {
       return Number(this.$route.params.id);

@@ -15,6 +15,9 @@ import "bootstrap-vue/dist/bootstrap-vue.css";
 import "leaflet/dist/leaflet.css";
 import Router from "vue-router";
 
+Vue.config.devtools = true;
+Vue.config.performance = true;
+
 export default function () {
   // https://bootstrap-vue.js.org/docs
   Vue.use(BootstrapVue);

@@ -1,36 +1,43 @@
 <template>
   <div>
-    <div class="video-container" ref="container">
-      <canvas ref="canvas" :class="{ smoothed: smoothed }" />
-      <canvas ref="overlayCanvas" class="overlay-canvas" />
-      <span class="time">{{ elapsedTime }} / {{ totalTime }}</span>
+    <div key="container" class="video-container" ref="container">
+      <canvas key="base" ref="canvas" :class="{ smoothed: smoothed }" />
+      <canvas key="overlay" ref="overlayCanvas" class="overlay-canvas" />
       <span
-        class="temp"
-        v-if="ambientTemperature"
-        v-html="ambientTemperature"
-      />
-      <span
+        key="messaging"
         :class="['player-messaging', { show: playerMessage !== null }]"
         v-html="playerMessage"
       />
-      <span v-if="showValueInfo" ref="valueTooltip" class="value-tooltip">{{
-        valueUnderCursor
-      }}</span>
+      <span
+        key="px-value"
+        v-show="showValueInfo"
+        ref="valueTooltip"
+        class="value-tooltip"
+        >{{ valueUnderCursor }}
+      </span>
       <div
-        :class="['playback-controls', { show: buffering || atEndOfPlayback }]"
+        key="playback-controls"
+        :class="['playback-controls', { show: atEndOfPlayback || buffering }]"
       >
-        <spinner :fetching="buffering" v-if="buffering" />
-        <button @click="togglePlayback" v-else-if="atEndOfPlayback">
-          <font-awesome-icon
-            icon="redo-alt"
-            size="6x"
-            rotation="270"
-            v-if="atEndOfPlayback"
-          />
+        <font-awesome-icon
+          class="fa-spin buffering"
+          icon="cog"
+          size="4x"
+          v-if="buffering && !atEndOfPlayback"
+        />
+        <button @click="$emit('request-prev-recording')" v-if="!buffering">
+          <font-awesome-icon icon="backward" class="replay" />
+        </button>
+        <button @click="togglePlayback" v-if="!buffering">
+          <font-awesome-icon icon="redo-alt" class="replay" rotation="270" />
+        </button>
+        <button @click="$emit('request-next-recording')" v-if="!buffering">
+          <font-awesome-icon icon="forward" class="replay" />
         </button>
       </div>
     </div>
-    <div class="playback-nav">
+
+    <div key="playback-nav" class="playback-nav">
       <button @click="togglePlayback" ref="playPauseButton">
         <font-awesome-icon v-if="!playing" icon="play" />
         <font-awesome-icon v-else icon="pause" />
@@ -41,123 +48,144 @@
         :title="playing ? 'Pause' : 'Play'"
         triggers="hover"
       />
-      <div :class="['advanced-controls', { open: showAdvancedControls }]">
-        <button
-          @click="toggleAdvancedControls"
-          class="advanced-controls-btn"
-          ref="advancedControlsButton"
-        >
-          <font-awesome-icon
-            :icon="showAdvancedControls ? 'angle-right' : 'ellipsis-v'"
-          />
-        </button>
-        <b-tooltip
-          v-if="$refs.advancedControlsButton"
-          :target="$refs.advancedControlsButton"
-          :title="showAdvancedControls ? 'Show less' : 'Show more'"
-          triggers="hover"
-        />
-        <button @click="toggleSmoothing" ref="toggleSmoothingButton">
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            viewBox="0 0 512 512"
-            width="18"
+      <div class="right-nav">
+        <div :class="['advanced-controls', { open: showAdvancedControls }]">
+          <button
+            @click="toggleAdvancedControls"
+            class="advanced-controls-btn"
+            ref="advancedControlsButton"
           >
-            <path
-              fill="currentColor"
-              d="M149.333 56v80c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24V56c0-13.255 10.745-24 24-24h101.333c13.255 0 24 10.745 24 24zm181.334 240v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm32-240v80c0 13.255 10.745 24 24 24H488c13.255 0 24-10.745 24-24V56c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24zm-32 80V56c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm-205.334 56H24c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24zM0 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H24c-13.255 0-24 10.745-24 24zm386.667-56H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zm0 160H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zM181.333 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24z"
-              class=""
-            ></path>
-          </svg>
-        </button>
-        <b-tooltip
-          v-if="$refs.toggleSmoothingButton"
-          :target="$refs.toggleSmoothingButton"
-          :title="smoothed ? 'Disable smoothing' : 'Enable smoothing'"
-          triggers="hover"
-        />
+            <font-awesome-icon
+              :icon="showAdvancedControls ? 'angle-right' : 'ellipsis-v'"
+            />
+          </button>
+          <b-tooltip
+            v-if="$refs.advancedControlsButton"
+            :target="$refs.advancedControlsButton"
+            :title="showAdvancedControls ? 'Show less' : 'Show more'"
+            triggers="hover"
+          />
+          <button @click="toggleSmoothing" ref="toggleSmoothingButton">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              viewBox="0 0 512 512"
+              width="18"
+            >
+              <path
+                fill="currentColor"
+                d="M149.333 56v80c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24V56c0-13.255 10.745-24 24-24h101.333c13.255 0 24 10.745 24 24zm181.334 240v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm32-240v80c0 13.255 10.745 24 24 24H488c13.255 0 24-10.745 24-24V56c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24zm-32 80V56c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.256 0 24.001-10.745 24.001-24zm-205.334 56H24c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24zM0 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H24c-13.255 0-24 10.745-24 24zm386.667-56H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zm0 160H488c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H386.667c-13.255 0-24 10.745-24 24v80c0 13.255 10.745 24 24 24zM181.333 376v80c0 13.255 10.745 24 24 24h101.333c13.255 0 24-10.745 24-24v-80c0-13.255-10.745-24-24-24H205.333c-13.255 0-24 10.745-24 24z"
+                class=""
+              ></path>
+            </svg>
+          </button>
+          <b-tooltip
+            v-if="$refs.toggleSmoothingButton"
+            :target="$refs.toggleSmoothingButton"
+            :title="smoothed ? 'Disable smoothing' : 'Enable smoothing'"
+            triggers="hover"
+          />
 
-        <button @click="toggleHistogram" ref="toggleHistogramButton">
-          <font-awesome-icon icon="chart-bar" />
-        </button>
-        <b-tooltip
-          v-if="$refs.toggleHistogramButton"
-          :target="$refs.toggleHistogramButton"
-          :title="showingHistogram ? 'Hide histogram' : 'Show histogram'"
-          triggers="hover"
-        />
+          <!--        <button @click="toggleHistogram" ref="toggleHistogramButton">-->
+          <!--          <font-awesome-icon icon="chart-bar" />-->
+          <!--        </button>-->
+          <!--        <b-tooltip-->
+          <!--          v-if="$refs.toggleHistogramButton"-->
+          <!--          :target="$refs.toggleHistogramButton"-->
+          <!--          :title="showingHistogram ? 'Hide histogram' : 'Show histogram'"-->
+          <!--          triggers="hover"-->
+          <!--        />-->
 
-        <button
-          @click="togglePicker"
-          :class="{ selected: showValueInfo }"
-          ref="toggleValuePicker"
-        >
-          <font-awesome-icon icon="eye-dropper" />
-        </button>
-        <b-tooltip
-          v-if="$refs.toggleValuePicker"
-          :target="$refs.toggleValuePicker"
-          :title="
-            showValueInfo
-              ? 'Disable picker'
-              : 'Show raw pixel values under cursor'
-          "
-          triggers="hover"
-        />
-        <button
-          v-if="hasBackgroundFrame"
-          ref="showBackgroundFrame"
-          @mousedown="toggleBackground"
-          @mouseup="toggleBackground"
-        >
-          <font-awesome-icon icon="image" />
-        </button>
-        <b-tooltip
-          v-if="hasBackgroundFrame && $refs.showBackgroundFrame"
-          :target="$refs.showBackgroundFrame"
-          title="Press to show background frame"
-          triggers="hover"
-        />
-        <button @click="incrementPalette" ref="cyclePalette">
-          <font-awesome-icon icon="palette" />
-        </button>
-        <b-tooltip
-          v-if="$refs.cyclePalette"
-          :target="$refs.cyclePalette"
-          title="Cycle colour map"
-          triggers="hover"
-        />
-        <button @click="stepBackward" ref="stepBackward">
-          <font-awesome-icon icon="backward" />
-        </button>
-        <b-tooltip
-          v-if="$refs.stepBackward"
-          :target="$refs.stepBackward"
-          title="Go back one frame"
-          triggers="hover"
-        />
-        <button @click="stepForward" ref="stepForward">
-          <font-awesome-icon icon="forward" />
-        </button>
-        <b-tooltip
-          v-if="$refs.stepForward"
-          :target="$refs.stepForward"
-          title="Go forward one frame"
-          triggers="hover"
-        />
-        <button @click="exportMp4" ref="exportMp4">
-          <font-awesome-icon :icon="['far', 'file-video']" />
-        </button>
-        <b-tooltip
-          v-if="$refs.exportMp4"
-          :target="$refs.exportMp4"
-          title="Export MP4 of recording"
-          triggers="hover"
-        />
-        <button>
-          <font-awesome-icon :icon="['far', 'file']" />
-        </button>
+          <!--        <button-->
+          <!--          @click="togglePicker"-->
+          <!--          :class="{ selected: showValueInfo }"-->
+          <!--          ref="toggleValuePicker"-->
+          <!--        >-->
+          <!--          <font-awesome-icon icon="eye-dropper" />-->
+          <!--        </button>-->
+          <!--        <b-tooltip-->
+          <!--          v-if="$refs.toggleValuePicker"-->
+          <!--          :target="$refs.toggleValuePicker"-->
+          <!--          :title="-->
+          <!--            showValueInfo-->
+          <!--              ? 'Disable picker'-->
+          <!--              : 'Show raw pixel values under cursor'-->
+          <!--          "-->
+          <!--          triggers="hover"-->
+          <!--        />-->
+
+          <!--        <button-->
+          <!--          v-if="hasBackgroundFrame"-->
+          <!--          ref="showBackgroundFrame"-->
+          <!--          @mousedown="toggleBackground"-->
+          <!--          @mouseup="toggleBackground"-->
+          <!--        >-->
+          <!--          <font-awesome-icon icon="image" />-->
+          <!--        </button>-->
+          <!--        <b-tooltip-->
+          <!--          v-if="hasBackgroundFrame && $refs.showBackgroundFrame"-->
+          <!--          :target="$refs.showBackgroundFrame"-->
+          <!--          title="Press to show background frame"-->
+          <!--          triggers="hover"-->
+          <!--        />-->
+
+          <button @click="incrementPalette" ref="cyclePalette">
+            <font-awesome-icon icon="palette" />
+          </button>
+          <b-tooltip
+            v-if="$refs.cyclePalette"
+            :target="$refs.cyclePalette"
+            title="Cycle colour map"
+            triggers="hover"
+          />
+
+          <!--        <button @click="stepBackward" ref="stepBackward">-->
+          <!--          <font-awesome-icon icon="step-backward" />-->
+          <!--        </button>-->
+          <!--        <b-tooltip-->
+          <!--          v-if="$refs.stepBackward"-->
+          <!--          :target="$refs.stepBackward"-->
+          <!--          title="Go back one frame"-->
+          <!--          triggers="hover"-->
+          <!--        />-->
+          <!--        <button @click="stepForward" ref="stepForward">-->
+          <!--          <font-awesome-icon icon="step-forward" />-->
+          <!--        </button>-->
+          <!--        <b-tooltip-->
+          <!--          v-if="$refs.stepForward"-->
+          <!--          :target="$refs.stepForward"-->
+          <!--          title="Go forward one frame"-->
+          <!--          triggers="hover"-->
+          <!--        />-->
+
+          <button @click="exportMp4" ref="exportMp4">
+            <font-awesome-icon :icon="['far', 'file-video']" />
+          </button>
+          <b-tooltip
+            v-if="$refs.exportMp4"
+            :target="$refs.exportMp4"
+            title="Export MP4 of recording"
+            triggers="hover"
+          />
+
+          <!--        <button>-->
+          <!--          <font-awesome-icon :icon="['far', 'file']" />-->
+          <!--        </button>-->
+
+          <button
+            @click="showHeaderInfo"
+            :class="{ selected: displayHeaderInfo }"
+            ref="showHeader"
+          >
+            <font-awesome-icon icon="info-circle" />
+          </button>
+          <b-tooltip
+            v-if="$refs.showHeader"
+            :target="$refs.showHeader"
+            title="Show recording header info"
+            triggers="hover"
+          />
+        </div>
         <button @click="incrementSpeed" ref="cyclePlaybackSpeed">
           <font-awesome-icon icon="tachometer-alt" />
         </button>
@@ -167,35 +195,31 @@
           title="Cycle playback speed"
           triggers="hover"
         />
-        <button
-          @click="showHeaderInfo"
-          :class="{ selected: displayHeaderInfo }"
-          ref="showHeader"
-        >
-          <font-awesome-icon icon="info-circle" />
-        </button>
-        <b-tooltip
-          v-if="$refs.showHeader"
-          :target="$refs.showHeader"
-          title="Show recording header info"
-          triggers="hover"
-        />
       </div>
     </div>
-    <VideoTracksScrubber
-      :class="{ 'ended-playback': ended }"
-      ref="scrubber"
-      :duration="actualDuration"
-      :tracks="tracks"
-      :current-video-time="currentTime60fps"
-      :time-adjustment-for-background-frame="timeAdjustmentForBackgroundFrame"
-      :current-track="currentTrack.trackIndex"
-      :canvas-width="canvasWidth"
-      :side-padding="1"
-      @start-scrub="startScrub"
-      @end-scrub="endScrub"
-      @set-playback-time="setTimeAndRedraw"
-    />
+    <div class="tracks-container">
+      <VideoTracksScrubber
+        :class="{ 'ended-playback': ended }"
+        ref="scrubber"
+        key="scrubber"
+        :duration="actualDuration"
+        :tracks="tracks"
+        :time-adjustment-for-background-frame="timeAdjustmentForBackgroundFrame"
+        :current-track="currentTrack.trackIndex"
+        :canvas-width="canvasWidth"
+        :side-padding="scrubberSidePadding"
+        @start-scrub="startScrub"
+        @end-scrub="endScrub"
+        @set-playback-time="setTimeAndRedraw"
+      />
+      <canvas
+        key="playhead"
+        ref="playhead"
+        class="playhead"
+        :width="canvasWidth * devicePixelRatio"
+        height="1"
+      />
+    </div>
     <b-modal v-model="displayHeaderInfo" title="Recording metadata" hide-footer>
       <pre v-if="header">{{ headerInfo }}</pre>
     </b-modal>
@@ -251,15 +275,15 @@ for (let i = 0; i <= 1; i += inc) {
 }
 const Greyscale = Object.freeze(greys);
 const GreyscaleSquared = Object.freeze(greysSq);
-const ColourMaps = [
+const ColourMaps = Object.freeze([
   ["Viridis", Viridis],
   ["Plasma", Plasma],
   ["Inferno", Inferno],
   ["Magma", Magma],
   ["Greyscale", Greyscale],
   ["Grayscale<sup>2</sup>", GreyscaleSquared],
-];
-const PlaybackSpeeds = [0.5, 1, 2, 4, 6];
+]);
+const PlaybackSpeeds = Object.freeze([0.5, 1, 2, 4, 6]);
 
 const download = (url, filename) => {
   const anchor = document.createElement("a");
@@ -337,6 +361,7 @@ export default {
     frameHeader: CptvFrameHeader;
   } {
     return {
+      atEndOfPlayback: false, //this.header && this.totalFrames && this.frameNum === this.totalFrames
       colours: TagColours,
       canvasWidth: 800,
       canvasHeight: 600,
@@ -369,9 +394,23 @@ export default {
       globalClampedMin: undefined,
       loadedStream: false,
       streamLoadError: null,
+      scrubberSidePadding: 1,
+      devicePixelRatio: 1,
+      windowWidth: window.innerWidth,
+      lastCptvUrl: null,
     };
   },
   computed: {
+    scrubberWidth() {
+      return this.canvasWidth - this.scrubberSidePadding * 2;
+    },
+    playheadOffsetForCurrentTime() {
+      const pixelsPerSecond = this.scrubberWidth / this.actualDuration;
+      return (
+        this.scrubberSidePadding +
+        Math.min(this.scrubberWidth, pixelsPerSecond * this.currentTime60fps)
+      );
+    },
     hasStreamLoadError: {
       get() {
         return this.streamLoadError !== null;
@@ -426,7 +465,7 @@ export default {
     },
     actualDuration() {
       if (this.totalFrames) {
-        return this.adjustedTotalFrames / this.header.fps;
+        return this.totalFrames / this.header.fps;
       }
       return Math.max(
         ...this.tracks.map(
@@ -434,15 +473,6 @@ export default {
         ),
         this.duration - this.timeAdjustmentForBackgroundFrame
       );
-    },
-    adjustedTotalFrames() {
-      if (this.totalFrames) {
-        return this.hasBackgroundFrame
-          ? this.totalFrames - 1
-          : this.totalFrames;
-      } else {
-        return this.header.fps * this.actualDuration;
-      }
     },
     timeAdjustmentForBackgroundFrame() {
       if (this.hasBackgroundFrame) {
@@ -492,7 +522,7 @@ export default {
     },
     ambientTemperature() {
       if (this.frameHeader && this.frameHeader.frameTempC) {
-        return `Around ${Math.round(this.frameHeader.frameTempC)}&deg;C`;
+        return `About ${Math.round(this.frameHeader.frameTempC)}ºC`;
       }
       return false;
     },
@@ -503,13 +533,6 @@ export default {
         );
       }
       return 1000;
-    },
-    atEndOfPlayback(): boolean {
-      return (
-        this.header &&
-        this.adjustedTotalFrames &&
-        this.frameNum === this.adjustedTotalFrames
-      );
     },
     speedMultiplier() {
       return PlaybackSpeeds[this.speedMultiplierIndex];
@@ -553,6 +576,7 @@ export default {
     },
   },
   created() {
+    //console.log("created", this.cptvUrl);
     // Restore user preferences
     const smoothingPreference = window.localStorage.getItem("video-smoothing");
     if (smoothingPreference) {
@@ -572,7 +596,10 @@ export default {
       );
     }
   },
+
   async mounted() {
+    this.$refs.canvas.width = 160;
+    this.$refs.canvas.height = 120;
     window.addEventListener("resize", this.onResize);
     window
       .matchMedia("screen and (min-resolution: 2dppx)")
@@ -582,66 +609,17 @@ export default {
     const canvas = this.$refs.overlayCanvas;
     canvas.addEventListener("click", this.clickOverlayCanvas);
     canvas.addEventListener("mousemove", this.moveOverOverlayCanvas);
-    this.loadedStream = await player.initWithCptvUrlAndSize(
-      this.cptvUrl,
-      this.cptvSize
-    );
-    if (this.loadedStream === "Failed to verify JWT.") {
-      window.location.reload();
-    } else if (this.loadedStream == true) {
-      this.header = await player.getHeader();
-
-      // Let the parent know about the header, so it can inform the Track info panels
-      // about any time display offsets caused by having a background frame.
-      this.$emit("received-header", this.header);
-      frameBuffer = new Uint8ClampedArray(
-        this.header.width * this.header.height * 4
-      );
-      this.$refs.canvas.width = this.header.width;
-      this.$refs.canvas.height = this.header.height;
-      this.clearCanvas();
-      await this.fetchRenderAdvanceFrame();
-      if (this.hasBackgroundFrame) {
-        let background = player.getBackgroundFrame();
-        while (background === null) {
-          await this.fetchRenderAdvanceFrame();
-          background = player.getBackgroundFrame();
-        }
-        const { data, min, max } = background;
-        const range = max - min;
-        // Create histogram of background frame, and clamp out any outlier low values (sky etc)
-        // Bin into maybe 16 bins?
-        const numBins = 32;
-        const hist = new Array(numBins).fill(0);
-        for (let i = 0; i < numBins; i++) {
-          hist[i] = [0, min + (range / numBins) * (i + 1)];
-        }
-
-        //  Create a histogram component, and allow us to clamp the cold point
-        //  Try and be "smart" about selecting cold point when there is i.e. sky
-        for (let i = 0; i < data.length; i++) {
-          const val = data[i];
-          const bin = Math.floor((numBins * (val - min)) / range);
-          hist[bin][0]++;
-        }
-        //console.log(hist);
-        const total = this.header.width * this.header.height;
-        const threshold = total / 30;
-        let px = 0;
-        let binIndex = -1;
-        while (px < threshold) {
-          binIndex++;
-          px += hist[binIndex][0];
-        }
-        //this.globalClampedMin = hist[binIndex][1];
-        //console.log(this.globalClampedMin);
-      }
-      await this.fetchRenderAdvanceFrame();
+    console.log(this.lastCptvUrl);
+    console.log(this.cptvUrl);
+    if (!this.lastCptvUrl) {
+      await this.initPlayer();
     } else {
-      this.streamLoadError = this.loadedStream;
+      this.clearCanvas();
     }
   },
   beforeDestroy() {
+    this.loadedStream = false;
+    this.clearCanvas();
     const canvas = this.$refs.overlayCanvas;
     canvas.removeEventListener("click", this.clickOverlayCanvas);
     canvas.removeEventListener("mousemove", this.moveOverOverlayCanvas);
@@ -664,35 +642,43 @@ export default {
       );
       // Redraw, and flash the box if it's showing on screen.
     },
-    async cptvUrl(url) {
+    cptvUrl() {
+      this.initPlayer();
+    },
+  },
+  methods: {
+    async initPlayer() {
       this.loadedStream = false;
+      this.streamLoadError = null;
       this.clearCanvas();
+      this.atEndOfPlayback = false;
+      this.frameNum = 0;
+      this.animationTick = 0;
+      this.totalFrames = false;
+      this.playing = true;
+      this.wasPaused = true;
+      this.$refs.canvas.width = 160;
+      this.$refs.canvas.height = 120;
+      cancelAnimationFrame(this.animationFrame);
       this.loadedStream = await player.initWithCptvUrlAndSize(
-        url,
+        this.cptvUrl,
         this.cptvSize
       );
       if (this.loadedStream === "Failed to verify JWT.") {
         window.location.reload();
       } else if (this.loadedStream === true) {
-        this.header = await player.getHeader();
+        this.header = Object.freeze(await player.getHeader());
         frameBuffer = new Uint8ClampedArray(
           this.header.width * this.header.height * 4
         );
         this.$refs.canvas.width = this.header.width;
         this.$refs.canvas.height = this.header.height;
-        this.frameNum = 0;
-        this.animationTick = 0;
-        this.totalFrames = false;
         cancelAnimationFrame(this.animationFrame);
-        this.playing = false;
-        this.wasPaused = true;
         await this.fetchRenderAdvanceFrame();
       } else {
         this.streamLoadError = this.loadedStream;
       }
     },
-  },
-  methods: {
     selectTrack() {
       if (this.currentTrack.start_s) {
         if (
@@ -722,17 +708,11 @@ export default {
       while (!this.totalFrames) {
         await this.queueFrame(frameNum++);
       }
-      if (this.totalFrames) {
-        console.log(
-          "Entire clip decoded and ready for export",
-          this.totalFrames,
-          this.adjustedTotalFrames
-        );
-      }
       return true;
     },
     async stepForward() {
       this.pause();
+      this.animationTick = 0;
       const canAdvance = await this.renderCurrentFrame(true, this.frameNum + 1);
       if (canAdvance) {
         this.frameNum++;
@@ -740,6 +720,7 @@ export default {
     },
     async stepBackward() {
       this.pause();
+      this.animationTick = 0;
       await this.renderCurrentFrame(true, this.frameNum - 1);
       this.frameNum = Math.max(0, this.frameNum - 1);
     },
@@ -834,8 +815,8 @@ export default {
       let frameNum = 0;
 
       await yieldToUI();
-      console.assert(this.totalFrames !== false);
-      while (frameNum < this.adjustedTotalFrames) {
+      console.assert(this.totalFrames !== null);
+      while (frameNum < this.totalFrames) {
         const { frameData } = await this.queueFrame(frameNum);
         const frameHeader = player.getFrameHeaderAtIndex(frameNum);
         const imgData = this.getCurrentFrameData(
@@ -877,7 +858,7 @@ export default {
         encoder.addFrameRgba(
           context.getImageData(0, 0, encoder.width, encoder.height).data
         );
-        this.exportProgress = frameNum / this.adjustedTotalFrames;
+        this.exportProgress = frameNum / this.totalFrames;
         await yieldToUI();
         frameNum++;
       }
@@ -945,7 +926,9 @@ export default {
     renderFrame(frameData, frameNum: number | false, force: boolean = false) {
       const context = this.$refs.canvas.getContext("2d");
       if (frameNum !== false) {
-        this.frameHeader = player.getFrameHeaderAtIndex(frameNum);
+        this.frameHeader = Object.freeze(
+          player.getFrameHeaderAtIndex(frameNum)
+        );
       }
       const imgData = this.getCurrentFrameData(
         context,
@@ -958,18 +941,20 @@ export default {
       });
     },
     async queueFrame(frameNum: number) {
-      let frameData = player.getFrameAtIndex(frameNum);
-      if (frameData) {
-        return { frameNum, frameData };
-      } else {
+      const availableFrames = player.getLoadedFrames() || 0;
+      if (frameNum + 1 > availableFrames + this.header.fps) {
+        this.buffering = true;
         await yieldToUI();
         await player.seekToFrame(frameNum);
+        this.buffering = false;
+      } else if (frameNum + 1 > availableFrames) {
+        await player.seekToFrame(frameNum);
       }
-      frameData = player.getFrameAtIndex(frameNum);
+      let frameData = player.getFrameAtIndex(frameNum);
       if (frameData === null) {
         console.assert(player.getTotalFrames() !== null);
         this.totalFrames = player.getTotalFrames();
-        frameNum = this.adjustedTotalFrames - 1;
+        frameNum = this.totalFrames - 1;
         frameData = player.getFrameAtIndex(frameNum);
         console.assert(frameData !== null);
       }
@@ -977,28 +962,70 @@ export default {
     },
     async drawFrame(context, imgData, frameNum, force = false) {
       if (context) {
+        //this.buffering = false;
         // One tick represents 1000 / fps * multiplier
-        if (this.playing) {
-          this.animationTick++;
-        }
         const everyXTicks = Math.max(
           1,
           Math.floor(60 / (this.header.fps * this.speedMultiplier))
         );
-        //console.log(everyXTicks);
         // NOTE: respect fps here, render only when we should.
-        const shouldRedraw = this.animationTick % everyXTicks === 0;
+        const shouldRedraw =
+          (this.animationTick + (this.playing ? 1 : 0)) % everyXTicks === 0;
 
         //console.log("Should redraw", this.animationTick, everyXTicks, this.animationTick % everyXTicks, shouldRedraw);
         if (context && (shouldRedraw || force)) {
           context.putImageData(imgData, 0, 0);
-          this.renderOverlay(
-            this.$refs.overlayCanvas.getContext("2d"),
-            this.scale,
-            this.secondsSinceLastFFC,
-            false,
-            frameNum
-          );
+          if (this.$refs.overlayCanvas) {
+            const overlayContext = this.$refs.overlayCanvas.getContext("2d");
+            this.renderOverlay(
+              overlayContext,
+              this.scale,
+              this.secondsSinceLastFFC,
+              false,
+              frameNum
+            );
+
+            {
+              overlayContext.font = "13px sans-serif";
+              overlayContext.lineWidth = 4;
+              overlayContext.strokeStyle = "rgba(0, 0, 0, 0.5)";
+              overlayContext.fillStyle = "white";
+              const time = `${this.elapsedTime} / ${this.totalTime}`;
+              overlayContext.font;
+              const timeWidth =
+                overlayContext.measureText(time).width * this.devicePixelRatio;
+              overlayContext.strokeText(
+                time,
+                (overlayContext.canvas.width -
+                  (timeWidth + 10 * this.devicePixelRatio)) /
+                  this.devicePixelRatio,
+                (overlayContext.canvas.height - 20) / this.devicePixelRatio
+              );
+              overlayContext.fillText(
+                time,
+                (overlayContext.canvas.width -
+                  (timeWidth + 10 * this.devicePixelRatio)) /
+                  this.devicePixelRatio,
+                (overlayContext.canvas.height - 20) / this.devicePixelRatio
+              );
+
+              const ambientTemp = this.ambientTemperature;
+              if (ambientTemp) {
+                overlayContext.strokeText(
+                  ambientTemp,
+                  10,
+                  (overlayContext.canvas.height - 20) / this.devicePixelRatio
+                );
+                overlayContext.fillText(
+                  ambientTemp,
+                  10,
+                  (overlayContext.canvas.height - 20) / this.devicePixelRatio
+                );
+              }
+            }
+            // Draw time and temperature in
+            //overlayContext.
+          }
           let didAdvance = false;
           if (this.playing) {
             didAdvance = await this.fetchRenderAdvanceFrame();
@@ -1006,13 +1033,40 @@ export default {
           if (didAdvance) {
             this.animationTick = 0;
             this.frameNum++;
+          } else {
+            this.animationTick++;
           }
-        } else {
+          // Check if we're at the end:
+          if (
+            this.header &&
+            this.totalFrames &&
+            this.frameNum === this.totalFrames
+          ) {
+            this.atEndOfPlayback = true;
+          }
+        } else if (context) {
+          this.animationTick++;
           cancelAnimationFrame(this.animationFrame);
           this.animationFrame = requestAnimationFrame(() =>
             this.drawFrame(context, imgData, frameNum)
           );
         }
+
+        // Update playhead:
+        const playhead = this.$refs.playhead;
+        const playheadContext = playhead.getContext("2d");
+        playheadContext.fillStyle = "rgba(0, 0, 0, 0.35)";
+        playheadContext.clearRect(0, 0, playhead.width, playhead.height);
+        const playheadX =
+          this.playheadOffsetForCurrentTime * this.devicePixelRatio;
+        //console.log(playheadX, this.currentTime60fps, this.currentTime, this.animationTick);
+        playheadContext.fillRect(0, 0, playheadX, playhead.height);
+        playheadContext.lineWidth = this.devicePixelRatio;
+        playheadContext.strokeStyle = "white";
+        playheadContext.beginPath();
+        playheadContext.moveTo(playheadX, 0);
+        playheadContext.lineTo(playheadX, playhead.height);
+        playheadContext.stroke();
       }
     },
     incrementSpeed() {
@@ -1072,7 +1126,18 @@ export default {
       }
       const tracks =
         this.processedTracks[frameNum] || ({} as Record<number, TrackBox>);
-      for (const [trackIndex, trackBox] of Object.entries(tracks)) {
+      const frameTracks = Object.entries(tracks);
+      if (frameTracks.length === 1) {
+        const trackIndex = Number(frameTracks[0][0]);
+        // If the track is the only track at this time offset, make it the selected track.
+        if (this.currentTrack.trackIndex !== trackIndex) {
+          this.$emit("track-selected", {
+            trackIndex,
+          });
+        }
+      }
+
+      for (const [trackIndex, trackBox] of frameTracks) {
         if (this.currentTrack.trackIndex !== Number(trackIndex)) {
           const box = trackBox as TrackBox;
           this.drawRectWithText(
@@ -1085,7 +1150,7 @@ export default {
         }
       }
       // Always draw selected track last, so it sits on top of any overlapping tracks.
-      for (const [trackIndex, trackBox] of Object.entries(tracks)) {
+      for (const [trackIndex, trackBox] of frameTracks) {
         if (this.currentTrack.trackIndex === Number(trackIndex)) {
           const box = trackBox as TrackBox;
           this.drawRectWithText(
@@ -1157,31 +1222,27 @@ export default {
       context.strokeRect(x, y, width, height);
       if (selected || isExporting) {
         // If exporting, show all the best guess animal tags, if not unknown
-        // If there's only one track, don't annotate with "Track X (..)"
-        const text =
-          isExporting || this.tracks.length === 1
-            ? what
-            : `Track ${trackIndex + 1}${what ? `(${what})` : ""}`;
-        if (text !== "") {
-          const textHeight = 14;
-          const textWidth = context.measureText(text).width;
-
-          let textX = x + (width - textWidth);
-          let textY = y + (height + textHeight);
-          // Make sure the text doesn't get clipped off if the box is near the frame edges
-          if (textY + textHeight > context.canvas.height / deviceRatio) {
-            textY = top - 5 * deviceRatio;
-          }
-          if (textX < 0) {
-            textX = left + 10 * deviceRatio;
-          }
-          context.font = "12px Verdana";
-          context.lineWidth = 4;
-          context.strokeStyle = "rgba(0, 0, 0, 0.5)";
-          context.strokeText(text, textX, textY);
-          context.fillStyle = "white";
-          context.fillText(text, textX, textY);
+        const text = what;
+        const textHeight = 9 * deviceRatio;
+        const textWidth = context.measureText(text).width * deviceRatio;
+        const marginX = 2 * deviceRatio;
+        const marginTop = 2 * deviceRatio;
+        let textX =
+          Math.min(context.canvas.width, right) - (textWidth + marginX);
+        let textY = bottom + textHeight + marginTop;
+        // Make sure the text doesn't get clipped off if the box is near the frame edges
+        if (textY + textHeight > context.canvas.height) {
+          textY = top - textHeight;
         }
+        if (textX < 0) {
+          textX = left + marginX;
+        }
+        context.font = "13px sans-serif";
+        context.lineWidth = 4;
+        context.strokeStyle = "rgba(0, 0, 0, 0.5)";
+        context.strokeText(text, textX / deviceRatio, textY / deviceRatio);
+        context.fillStyle = "white";
+        context.fillText(text, textX / deviceRatio, textY / deviceRatio);
       }
     },
     toggleSmoothing() {
@@ -1247,22 +1308,27 @@ export default {
       return null;
     },
     onResize() {
-      this.setCanvasDimensions();
+      // Only trigger if width has changed, since scrolling on mobile will hide the browser chrome at top
+      // and trigger a resize
+      if (window.innerWidth !== this.windowWidth) {
+        this.windowWidth = window.innerWidth;
+        this.setCanvasDimensions();
+      }
     },
     setCanvasDimensions() {
       const canvasDimensions = this.$refs.canvas.getBoundingClientRect();
       this.canvasWidth = canvasDimensions.width;
       this.scale = this.canvasWidth / 160;
       this.canvasHeight = canvasDimensions.width * 0.75;
-      const devicePixelRatio = window.devicePixelRatio;
+      this.devicePixelRatio = window.devicePixelRatio;
       const canvas = this.$refs.overlayCanvas;
-      canvas.width = this.canvasWidth * devicePixelRatio;
-      canvas.height = this.canvasHeight * devicePixelRatio;
+      canvas.width = this.canvasWidth * this.devicePixelRatio;
+      canvas.height = this.canvasHeight * this.devicePixelRatio;
       canvas.style.width = `${this.canvasWidth}px`;
       canvas.style.height = `${this.canvasHeight}px`;
       const context = canvas.getContext("2d");
       this.$refs.container.style.maxHeight = `${this.canvasHeight}px`;
-      context.scale(devicePixelRatio, devicePixelRatio);
+      context.scale(this.devicePixelRatio, this.devicePixelRatio);
       if (this.header) {
         this.renderCurrentFrame();
       }
@@ -1273,10 +1339,13 @@ export default {
         if (totalFrames === false) {
           totalFrames = Math.floor(this.actualDuration * this.header.fps);
         }
-        this.frameNum = Math.floor(
-          Math.min(totalFrames - 1, (time / this.actualDuration) * totalFrames)
-        );
         this.animationTick = 0;
+        this.frameNum = Math.floor(
+          Math.min(totalFrames, (time / this.actualDuration) * totalFrames)
+        );
+        if (this.atEndOfPlayback) {
+          this.atEndOfPlayback = this.frameNum === totalFrames;
+        }
         await this.renderCurrentFrame(true);
       }
     },
@@ -1286,7 +1355,6 @@ export default {
         if (frameNum === undefined) {
           frameNum = this.frameNum;
         }
-        this.buffering = true;
 
         performance.mark(`Start frame #${frameNum}`);
         // TODO(jon): Ideally we want this to happen on another thread an call back to us, otherwise it locks the UI.
@@ -1299,7 +1367,6 @@ export default {
           `Start frame #${frameNum}`,
           `End frame #${frameNum}`
         );
-        this.buffering = false;
         this.renderFrame(frameData, actualFrameNum, force);
         return frameNum === actualFrameNum;
       }
@@ -1327,6 +1394,7 @@ export default {
         if (this.atEndOfPlayback) {
           this.frameNum = 0;
           this.animationTick = 0;
+          this.atEndOfPlayback = false;
         }
         await this.play();
       } else {
@@ -1461,7 +1529,7 @@ canvas {
   bottom: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   pointer-events: none;
   background: radial-gradient(
     circle,
@@ -1477,8 +1545,8 @@ canvas {
     pointer-events: unset;
   }
   > button {
-    height: 26.666%;
-    width: 20%;
+    min-width: 44px;
+    min-height: 44px;
     > svg {
       transition: opacity 0.3s;
       opacity: 0.5;
@@ -1499,6 +1567,12 @@ canvas {
     -webkit-appearance: none;
     -moz-appearance: none;
   }
+}
+
+.replay,
+.buffering {
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .playback-nav {
@@ -1536,7 +1610,7 @@ canvas {
     user-select: none;
     transition: width 0.3s ease-in-out;
     &.open {
-      width: 550px;
+      width: 240px;
       .advanced-controls-btn {
         position: relative;
         &::before {
@@ -1553,8 +1627,26 @@ canvas {
     }
   }
 }
+.right-nav {
+  display: flex;
+}
 .progress-text {
   text-align: center;
   user-select: none;
+}
+.tracks-container {
+  position: relative;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.playhead {
+  height: 100%;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.35);
+  left: 0;
+  top: 0;
+  pointer-events: none;
 }
 </style>

@@ -5,38 +5,20 @@
       width: `${canvasWidth}px`,
     }"
     class="track-scrubber"
+    key="track-scrubber"
     ref="scrubber"
   >
-    <div v-if="!isLoaded" class="loading">Loading track info...</div>
     <div
-      v-else
+      v-for="index in tracks.length"
+      :key="index - 1"
+      :title="`Track ${index}`"
       :style="{
-        height: `${heightForTracks}px`,
-        position: 'relative',
+        background: colours[(index - 1) % colours.length],
+        opacity: index - 1 === currentTrack ? 1.0 : 0.5,
+        ...trackDimensions[index - 1],
       }"
-    >
-      <div
-        :style="{
-          right: `${canvasWidth - playheadOffsetForCurrentTime}px`,
-          pointerEvents: 'none',
-          paddingLeft: `${sidePadding}px`,
-        }"
-        class="playhead"
-      />
-      <div
-        v-for="(track, index) in tracks"
-        :key="index"
-        :title="`Track ${index + 1}`"
-        :style="{
-          background: colours[index % colours.length],
-          top: getOffsetYForTrack(index),
-          width: getWidthForTrack(track),
-          left: getOffsetXForTrack(track),
-          opacity: index === currentTrack ? 1.0 : 0.5,
-        }"
-        class="scrub-track"
-      />
-    </div>
+      class="scrub-track"
+    />
   </div>
 </template>
 
@@ -45,11 +27,12 @@ import { Track } from "@/api/Recording.api";
 import { TagColours } from "@/const";
 
 const getPositionXForEvent = (event: Event): number => {
-  if (event instanceof TouchEvent) {
-    const touch: Touch = event.targetTouches[0];
-    return (touch && touch.clientX) || 0;
-  } else {
+  if (event instanceof MouseEvent) {
     return (event as MouseEvent).x;
+  } else if (event instanceof TouchEvent) {
+    const touch: Touch = (event as TouchEvent).targetTouches[0];
+    //console.log(touch);
+    return (touch && touch.clientX) || 0;
   }
 };
 
@@ -58,11 +41,6 @@ export default {
   props: {
     tracks: {
       type: Array,
-      required: true,
-    },
-    currentVideoTime: {
-      type: Number,
-      default: 0,
       required: true,
     },
     duration: {
@@ -91,11 +69,12 @@ export default {
   data() {
     return {
       colours: TagColours,
+      trackDimensions: [],
     };
   },
   computed: {
     scrubberWidth() {
-      return this.canvasWidth - this.sidePadding * 2;
+      return this.canvasWidth - (this.sidePadding * 2);
     },
     isLoaded() {
       return true; //this.tracks && this.tracks.length && this.duration;
@@ -109,12 +88,6 @@ export default {
     scrubber() {
       return this.$refs.scrubber;
     },
-    offsetForCurrentTime() {
-      return this.getOffsetForTime(this.currentVideoTime);
-    },
-    playheadOffsetForCurrentTime() {
-      return this.getPlayheadOffsetForTime(this.currentVideoTime);
-    },
     heightForTracks() {
       return this.numTracks === 0 ? 44 : Math.max(44, 12 + 13 * this.numTracks);
     },
@@ -125,7 +98,6 @@ export default {
         track.data.end_s -
         this.timeAdjustmentForBackgroundFrame -
         (track.data.start_s - this.timeAdjustmentForBackgroundFrame);
-      //console.log("duration", this.duration, trackDuration, track.data.end_s, track.data.start_s);
       const ratio = Math.min(1, trackDuration / this.duration);
       return `${ratio * this.scrubberWidth}px`;
     },
@@ -143,7 +115,6 @@ export default {
         (this.heightForTracks - this.tracks.length * trackHeight) / 2 +
         trackIndex * trackHeight +
         trackIndex;
-      //console.log(this.heightForTracks, this.tracks.length, offset);
       return `${offset}px`;
     },
     getOffsetForTime(time: number): number {
@@ -153,25 +124,14 @@ export default {
         this.sidePadding + pixelsPerSecond * time
       );
     },
-    getPlayheadOffsetForTime(time: number): number {
-      const pixelsPerSecond = this.scrubberWidth / this.duration;
-      return Math.min(
-        this.scrubberWidth,
-        this.sidePadding + pixelsPerSecond * time
-      );
-    },
     pointerMove(event: Event) {
       event.preventDefault();
+      const bounds = this.scrubber.getBoundingClientRect();
       const x = Math.min(
-        this.scrubberWidth,
-        Math.max(
-          0,
-          getPositionXForEvent(event) -
-            this.scrubber.getBoundingClientRect().x -
-            this.sidePadding
-        )
+        bounds.width,
+        Math.max(0, getPositionXForEvent(event) - bounds.x)
       );
-      const timeOffset = x / this.scrubberWidth;
+      const timeOffset = x / bounds.width;
       this.$emit("set-playback-time", timeOffset * this.duration);
     },
     pointerEnd(event: Event) {
@@ -186,6 +146,7 @@ export default {
       }
     },
     pointerStart(event: Event) {
+      this.pointerMove(event);
       event.preventDefault();
       this.$emit("start-scrub");
       this.pointerMove(event);
@@ -219,6 +180,28 @@ export default {
         window.removeEventListener("touchmove", this.pointerMove);
       }
     },
+    initTrackDimensions() {
+      // Init track dimensions
+      this.trackDimensions = [];
+      for (let i = 0; i < this.tracks.length; i++) {
+        this.trackDimensions.push({
+          top: this.getOffsetYForTrack(i),
+          width: this.getWidthForTrack(this.tracks[i]),
+          left: this.getOffsetXForTrack(this.tracks[i]),
+        });
+      }
+    },
+  },
+  created() {
+    this.initTrackDimensions();
+  },
+  watch: {
+    duration() {
+      this.initTrackDimensions();
+    },
+    tracks() {
+      this.initTrackDimensions();
+    },
   },
   mounted() {
     this.initScrubber();
@@ -233,32 +216,15 @@ export default {
 .track-scrubber {
   background: #2b333f;
   transition: height 0.3s;
-  overflow: hidden;
   /* Above the motion paths canvas if it exists */
   z-index: 810;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
   box-shadow: 0 1px 5px #000 inset;
-  margin-bottom: 5px;
   cursor: col-resize;
 }
-.loading {
-  color: #eee;
-  text-align: center;
-}
 .scrub-track {
-transition: opacity 0.3s linear;
+  transition: opacity 0.3s linear;
   height: 12px;
   border-radius: 5px;
   position: absolute;
-}
-.playhead {
-  height: 100%;
-  position: absolute;
-  background: rgba(0, 0, 0, 0.35);
-  left: 0;
-  z-index: 1000;
-  border-right: 1px solid white;
-  //transition: right 33ms linear;
 }
 </style>
