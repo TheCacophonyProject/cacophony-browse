@@ -1,7 +1,11 @@
 <template>
-  <div>
+  <div :class="{ standAlone: 'stand-alone' }">
     <div key="container" class="video-container" ref="container">
-      <canvas key="base" ref="canvas" :class="{ smoothed: smoothed }" />
+      <canvas
+        key="base"
+        ref="canvas"
+        :class="['video-canvas', { smoothed: smoothed }]"
+      />
       <canvas key="overlay" ref="overlayCanvas" class="overlay-canvas" />
       <span
         key="messaging"
@@ -16,22 +20,30 @@
         >{{ valueUnderCursor }}
       </span>
       <div
-        key="playback-controls"
-        :class="['playback-controls', { show: atEndOfPlayback || buffering }]"
+        key="buffering"
+        :class="['playback-controls', { show: isBuffering }]"
       >
-        <font-awesome-icon
-          class="fa-spin buffering"
-          icon="cog"
-          size="4x"
-          v-if="buffering && !atEndOfPlayback"
-        />
-        <button @click="$emit('request-prev-recording')" v-if="!buffering">
+        <font-awesome-icon class="fa-spin buffering" icon="spinner" size="4x" />
+      </div>
+      <div
+        key="playback-controls"
+        :class="['playback-controls', { show: atEndOfPlayback && !extLoading }]"
+      >
+        <button
+          @click="requestPrevRecording"
+          :disabled="!canGoBackwards || standAlone"
+          :class="{ hide: standAlone }"
+        >
           <font-awesome-icon icon="backward" class="replay" />
         </button>
-        <button @click="togglePlayback" v-if="!buffering">
+        <button @click="togglePlayback">
           <font-awesome-icon icon="redo-alt" class="replay" rotation="270" />
         </button>
-        <button @click="$emit('request-next-recording')" v-if="!buffering">
+        <button
+          @click="requestNextRecording"
+          :disabled="!canGoForwards || standAlone"
+          :class="{ hide: standAlone }"
+        >
           <font-awesome-icon icon="forward" class="replay" />
         </button>
       </div>
@@ -49,14 +61,18 @@
         triggers="hover"
       />
       <div class="right-nav">
-        <div :class="['advanced-controls', { open: showAdvancedControls }]">
+        <div
+          :class="['advanced-controls', { open: showAdvancedControls }]"
+          v-if="!standAlone"
+        >
           <button
             @click="toggleAdvancedControls"
             class="advanced-controls-btn"
             ref="advancedControlsButton"
           >
             <font-awesome-icon
-              :icon="showAdvancedControls ? 'angle-right' : 'ellipsis-v'"
+              icon="angle-right"
+              :rotation="showAdvancedControls ? null : 180"
             />
           </button>
           <b-tooltip
@@ -158,16 +174,6 @@
           <!--          triggers="hover"-->
           <!--        />-->
 
-          <button @click="exportMp4" ref="exportMp4">
-            <font-awesome-icon :icon="['far', 'file-video']" />
-          </button>
-          <b-tooltip
-            v-if="$refs.exportMp4"
-            :target="$refs.exportMp4"
-            title="Export MP4 of recording"
-            triggers="hover"
-          />
-
           <!--        <button>-->
           <!--          <font-awesome-icon :icon="['far', 'file']" />-->
           <!--        </button>-->
@@ -186,8 +192,12 @@
             triggers="hover"
           />
         </div>
-        <button @click="incrementSpeed" ref="cyclePlaybackSpeed">
-          <font-awesome-icon icon="tachometer-alt" />
+        <button
+          @click="incrementSpeed"
+          ref="cyclePlaybackSpeed"
+          class="playback-speed"
+        >
+          <span>{{ speedMultiplier }}x</span>
         </button>
         <b-tooltip
           v-if="$refs.cyclePlaybackSpeed"
@@ -235,6 +245,29 @@
       <b-progress :value="exportProgress * 100" max="100" />
       <div class="progress-text">{{ Math.round(exportProgress * 100) }}%</div>
     </b-modal>
+    <b-modal
+      title="Export options"
+      v-model="showAdvancedExportOptions"
+      ok-title="Export"
+      @ok="exportMp4(trackExportOptions)"
+    >
+      <b-form-group label="Include tracks in exported timespan">
+        <b-form-checkbox
+          v-for="(track, index) in trackExportOptions"
+          :key="index"
+          v-model="track.includeInExportTime"
+          >Track {{ track.trackIndex + 1 }}</b-form-checkbox
+        >
+      </b-form-group>
+      <b-form-group label="Display track boxes in export">
+        <b-form-checkbox
+          v-for="(track, index) in trackExportOptions"
+          :key="index"
+          v-model="track.displayInExport"
+          >Track {{ track.trackIndex + 1 }}</b-form-checkbox
+        >
+      </b-form-group>
+    </b-modal>
     <b-modal v-model="hasStreamLoadError">{{ streamLoadError }}</b-modal>
   </div>
 </template>
@@ -245,7 +278,9 @@ import {
   CptvFrame,
   CptvFrameHeader,
   CptvHeader,
-  CptvPlayer,
+  CptvPlayerInstance as CptvPlayer,
+  ensureEntireClipIsDecoded,
+  queueFrame,
 } from "cptv-player";
 import { TagColours } from "@/const";
 
@@ -257,7 +292,8 @@ import plasma from "scale-color-perceptual/rgb/plasma.json";
 import magma from "scale-color-perceptual/rgb/magma.json";
 // @ts-ignore
 import inferno from "scale-color-perceptual/rgb/inferno.json";
-import Spinner from "@/components/Spinner.vue";
+
+import defaultColormap from "./DefaultColourmap";
 
 const mapRgba = ([r, g, b]) =>
   (255 << 24) | ((b * 255.0) << 16) | ((g * 255.0) << 8) | (r * 255.0);
@@ -266,6 +302,9 @@ const Viridis = Object.freeze(viridis.map(mapRgba));
 const Plasma = Object.freeze(plasma.map(mapRgba));
 const Inferno = Object.freeze(inferno.map(mapRgba));
 const Magma = Object.freeze(magma.map(mapRgba));
+const Default = Object.freeze(
+  defaultColormap.map(([r, g, b]) => (255 << 24) | (b << 16) | (g << 8) | r)
+);
 const greysSq = [];
 const greys = [];
 const inc = 1 / 255;
@@ -273,9 +312,11 @@ for (let i = 0; i <= 1; i += inc) {
   greysSq.push(mapRgba([i * i, i * i, i * i]));
   greys.push(mapRgba([i, i, i]));
 }
+
 const Greyscale = Object.freeze(greys);
 const GreyscaleSquared = Object.freeze(greysSq);
 const ColourMaps = Object.freeze([
+  ["Default", Default],
   ["Viridis", Viridis],
   ["Plasma", Plasma],
   ["Inferno", Inferno],
@@ -283,6 +324,7 @@ const ColourMaps = Object.freeze([
   ["Greyscale", Greyscale],
   ["Grayscale<sup>2</sup>", GreyscaleSquared],
 ]);
+
 const PlaybackSpeeds = Object.freeze([0.5, 1, 2, 4, 6]);
 
 const download = (url, filename) => {
@@ -299,7 +341,11 @@ const yieldToUI = () => {
 };
 
 const getAuthoritativeTagForTrack = (trackTags) => {
-  const userTags = trackTags.filter((tag) => tag.user !== null);
+  const userTags = trackTags.filter(
+    (tag) =>
+      (tag.user !== undefined && tag.user !== null) ||
+      (tag.User !== undefined && tag.User !== null)
+  );
   if (userTags.length) {
     return userTags[0].what;
   } else {
@@ -307,14 +353,72 @@ const getAuthoritativeTagForTrack = (trackTags) => {
       (tag) => (tag.data && tag.data === "Master") || tag.data.name === "Master"
     );
     if (tag) {
-      return tag;
+      return tag.what;
     }
   }
   return null;
 };
 
-const player: CptvPlayer = new CptvPlayer();
+let lastCptvUrl = null;
 let frameBuffer: Uint8ClampedArray;
+
+const formatHeaderInfo = (header): string | null => {
+  if (header) {
+    const {
+      width,
+      height,
+      fps,
+      deviceName,
+      deviceId,
+      previewSecs,
+      brand,
+      model,
+      serialNumber,
+      firmwareVersion,
+      motionConfig,
+      timestamp,
+      hasBackgroundFrame,
+    } = header;
+    const headerInfo = {
+      dimensions: `${width} x ${height}`,
+      fps,
+      time: new Date(timestamp / 1000).toLocaleString(),
+      "has background": hasBackgroundFrame,
+      "preview seconds": previewSecs,
+    };
+    if (deviceName) {
+      headerInfo["device name"] = deviceName;
+    }
+    if (deviceId) {
+      headerInfo["device ID"] = deviceId;
+    }
+    if (brand && model) {
+      headerInfo["sensor"] = `${brand} ${model}`;
+    }
+    if (serialNumber) {
+      headerInfo["serial"] = `#${serialNumber}`;
+    }
+    if (firmwareVersion) {
+      headerInfo["firmware"] = firmwareVersion;
+    }
+    if (motionConfig) {
+      headerInfo["motion config"] = motionConfig
+        .split("\n")
+        .reduce((acc, item) => {
+          const parts = item.split(": ");
+          if (Number(parts[1]) == parts[1]) {
+            acc[parts[0]] = Number(parts[1]);
+          } else {
+            acc[parts[0]] = parts[1];
+          }
+          return acc;
+        }, {});
+    }
+    return JSON.stringify(headerInfo, null, "  ");
+  } else {
+    return null;
+  }
+};
 
 interface TrackBox {
   what: string;
@@ -324,10 +428,13 @@ interface TrackBox {
 export default {
   name: "CptvPlayer",
   components: {
-    Spinner,
     VideoTracksScrubber,
   },
   props: {
+    extLoading: {
+      type: Boolean,
+      default: false,
+    },
     cptvUrl: {
       type: String,
       required: true,
@@ -335,6 +442,19 @@ export default {
     cptvSize: {
       type: Number,
       required: true,
+    },
+    canSelectTracks: {
+      type: Boolean,
+      default: true,
+    },
+    showOverlaysForCurrentTrackOnly: {
+      type: Boolean,
+      default: false,
+    },
+    standAlone: {
+      // For embedding in bulk tagger, where there is no prev/next context
+      type: Boolean,
+      default: false,
     },
     tracks: {
       type: Array,
@@ -347,13 +467,21 @@ export default {
       type: Object,
       required: true,
     },
-    showOverlaysForCurrentTrackOnly: {
-      type: Boolean,
-      default: false,
-    },
     recentlyAddedTag: {
       type: Object,
       default: null,
+    },
+    canGoBackwards: {
+      type: Boolean,
+      default: false,
+    },
+    canGoForwards: {
+      type: Boolean,
+      default: false,
+    },
+    exportRequested: {
+      type: [Boolean, String],
+      default: false,
     },
   },
   data(): {
@@ -380,7 +508,7 @@ export default {
       playing: false,
       wasPaused: true,
       totalFrames: false,
-      colourMap: Viridis,
+      colourMap: Default,
       showAdvancedControls: false,
       displayHeaderInfo: false,
       loadProgress: 0,
@@ -397,10 +525,14 @@ export default {
       scrubberSidePadding: 1,
       devicePixelRatio: 1,
       windowWidth: window.innerWidth,
-      lastCptvUrl: null,
+      showAdvancedExportOptions: false,
+      trackExportOptions: [],
     };
   },
   computed: {
+    isBuffering() {
+      return this.extLoading || this.buffering;
+    },
     scrubberWidth() {
       return this.canvasWidth - this.scrubberSidePadding * 2;
     },
@@ -433,7 +565,7 @@ export default {
       const padding = 5;
       return this.tracks
         .map(({ data, trackIndex, TrackTags }) => ({
-          what: getAuthoritativeTagForTrack(TrackTags),
+          what: (TrackTags && getAuthoritativeTagForTrack(TrackTags)) || null,
           start_s: Math.max(0, data.start_s - timeOffset),
           end_s: data.end_s - timeOffset,
           num_frames: data.num_frames + (this.hasBackgroundFrame ? -1 : 0),
@@ -538,45 +670,10 @@ export default {
       return PlaybackSpeeds[this.speedMultiplierIndex];
     },
     headerInfo() {
-      const h = this.header;
-      if (h) {
-        return JSON.stringify(
-          {
-            dimensions: `${h.width} x ${h.height}`,
-            fps: h.fps,
-            time: new Date(h.timestamp / 1000).toLocaleString(),
-            "device name": h.deviceName || "Unknown",
-            "device ID": h.deviceId || "Unknown",
-            "has background": h.hasBackgroundFrame,
-            "preview seconds": h.previewSecs,
-            sensor: `${h.brand || "Unknown brand"} ${
-              h.model || "Unknown model"
-            }`,
-            serial: (h.serialNumber && `#${h.serialNumber}`) || "Unknown",
-            firmware: `${h.firmwareVersion || "Unknown"}`,
-            "motion config":
-              (h.motionConfig &&
-                h.motionConfig.split("\n").reduce((acc, item) => {
-                  const parts = item.split(": ");
-                  if (Number(parts[1]) == parts[1]) {
-                    acc[parts[0]] = Number(parts[1]);
-                  } else {
-                    acc[parts[0]] = parts[1];
-                  }
-                  return acc;
-                }, {})) ||
-              "None",
-          },
-          null,
-          "  "
-        );
-      } else {
-        return null;
-      }
+      return formatHeaderInfo(this.header);
     },
   },
   created() {
-    //console.log("created", this.cptvUrl);
     // Restore user preferences
     const smoothingPreference = window.localStorage.getItem("video-smoothing");
     if (smoothingPreference) {
@@ -606,33 +703,64 @@ export default {
       .addEventListener("change", this.setCanvasDimensions);
 
     this.setCanvasDimensions();
-    const canvas = this.$refs.overlayCanvas;
-    canvas.addEventListener("click", this.clickOverlayCanvas);
-    canvas.addEventListener("mousemove", this.moveOverOverlayCanvas);
-    console.log(this.lastCptvUrl);
-    console.log(this.cptvUrl);
-    if (!this.lastCptvUrl) {
+    this.buffering = true;
+    if (this.canSelectTracks) {
+      const canvas = this.$refs.overlayCanvas;
+      canvas.addEventListener("click", this.clickOverlayCanvas);
+      canvas.addEventListener("mousemove", this.moveOverOverlayCanvas);
+    }
+    if (lastCptvUrl !== this.cptvUrl) {
       await this.initPlayer();
     } else {
       this.clearCanvas();
     }
+
+    this.initTrackExportOptions();
   },
   beforeDestroy() {
     this.loadedStream = false;
     this.clearCanvas();
-    const canvas = this.$refs.overlayCanvas;
-    canvas.removeEventListener("click", this.clickOverlayCanvas);
-    canvas.removeEventListener("mousemove", this.moveOverOverlayCanvas);
+    if (this.canSelectTracks) {
+      const canvas = this.$refs.overlayCanvas;
+      canvas.removeEventListener("click", this.clickOverlayCanvas);
+      canvas.removeEventListener("mousemove", this.moveOverOverlayCanvas);
+    }
     window.removeEventListener("resize", this.onResize);
     window
       .matchMedia("screen and (min-resolution: 2dppx)")
       .removeEventListener("change", this.setCanvasDimensions);
   },
   watch: {
+    async exportRequested() {
+      if (this.exportRequested) {
+        if (this.exportRequested === "advanced") {
+          this.showAdvancedExportOptions = true;
+          this.initTrackExportOptions();
+        } else {
+          await this.exportMp4();
+          this.$emit("export-complete");
+        }
+      }
+    },
     currentTrack() {
-      this.selectTrack();
+      if (this.playing) {
+        this.selectTrack(true);
+      } else {
+        this.selectTrack(true, true);
+        if (this.processedTracks && this.processedTracks.length) {
+          this.frameNum = this.firstFrameForTrack(this.currentTrack.trackIndex);
+        }
+        this.renderOverlay(
+          this.$refs.overlayCanvas.getContext("2d"),
+          this.scale,
+          this.secondsSinceLastFFC,
+          false,
+          this.frameNum
+        );
+      }
     },
     recentlyAddedTag() {
+      // Update the box label for a recently added tag
       this.renderOverlay(
         this.$refs.overlayCanvas.getContext("2d"),
         this.scale,
@@ -640,13 +768,33 @@ export default {
         false,
         this.frameNum
       );
-      // Redraw, and flash the box if it's showing on screen.
     },
     cptvUrl() {
-      this.initPlayer();
+      if (this.cptvUrl !== lastCptvUrl) {
+        this.initPlayer();
+      }
+    },
+    tracks() {
+      this.trackExportOptions = this.tracks.map((track) => ({
+        includeInExportTime: true,
+        displayInExport: true,
+        trackIndex: track.trackIndex,
+      }));
     },
   },
   methods: {
+    initTrackExportOptions() {
+      this.trackExportOptions = this.tracks.map((track) => ({
+        includeInExportTime: true,
+        displayInExport: true,
+        trackIndex: track.trackIndex,
+      }));
+    },
+    firstFrameForTrack(trackIndex: number): number {
+      return this.processedTracks.findIndex((tracks) =>
+        Object.keys(tracks).map(Number).includes(trackIndex)
+      );
+    },
     async initPlayer() {
       this.loadedStream = false;
       this.streamLoadError = null;
@@ -660,14 +808,16 @@ export default {
       this.$refs.canvas.width = 160;
       this.$refs.canvas.height = 120;
       cancelAnimationFrame(this.animationFrame);
-      this.loadedStream = await player.initWithCptvUrlAndSize(
+      this.loadedStream = await CptvPlayer.initWithCptvUrlAndSize(
         this.cptvUrl,
         this.cptvSize
       );
       if (this.loadedStream === "Failed to verify JWT.") {
         window.location.reload();
       } else if (this.loadedStream === true) {
-        this.header = Object.freeze(await player.getHeader());
+        lastCptvUrl = this.cptvUrl;
+        this.header = Object.freeze(await CptvPlayer.getHeader());
+        this.$emit("ready-to-play");
         frameBuffer = new Uint8ClampedArray(
           this.header.width * this.header.height * 4
         );
@@ -675,19 +825,25 @@ export default {
         this.$refs.canvas.height = this.header.height;
         cancelAnimationFrame(this.animationFrame);
         await this.fetchRenderAdvanceFrame();
+        this.buffering = false;
       } else {
         this.streamLoadError = this.loadedStream;
       }
     },
-    selectTrack() {
-      if (this.currentTrack.start_s) {
-        if (
-          this.processedTracks &&
-          this.currentTrack.trackIndex <
-            Object.keys(this.processedTracks).length
-        ) {
-          cancelAnimationFrame(this.animationFrame);
-          this.setTimeAndRedraw(this.currentTrack.start_s + 0.01);
+    selectTrack(force: boolean = false, shouldPlay: boolean = false) {
+      if (!this.playing || force) {
+        if (this.currentTrack.start_s !== undefined) {
+          if (
+            this.processedTracks &&
+            this.currentTrack.trackIndex <
+              Object.keys(this.processedTracks).length
+          ) {
+            cancelAnimationFrame(this.animationFrame);
+            this.setTimeAndRedraw(this.currentTrack.start_s + 0.01);
+            if (shouldPlay) {
+              this.play();
+            }
+          }
         }
       }
     },
@@ -702,13 +858,6 @@ export default {
       const minutes = Math.floor(seconds / 60);
       seconds = seconds - minutes * 60;
       return `${minutes}.${seconds.toString().padStart(2, "0")}`;
-    },
-    async ensureEntireClipIsDecoded() {
-      let frameNum = 0;
-      while (!this.totalFrames) {
-        await this.queueFrame(frameNum++);
-      }
-      return true;
     },
     async stepForward() {
       this.pause();
@@ -756,7 +905,7 @@ export default {
         // Map the x,y into canvas size
         const pX = Math.round(x / this.scale);
         const pY = Math.round(y / this.scale);
-        const frameData = player.getFrameAtIndex(this.frameNum - 1);
+        const frameData = CptvPlayer.getFrameAtIndex(this.frameNum - 1);
         this.valueUnderCursor = frameData.data[pY * this.header.width + pX];
         this.$refs.valueTooltip.style.left = `${x + 2}px`;
         this.$refs.valueTooltip.style.top = `${y - 20}px`;
@@ -774,7 +923,13 @@ export default {
     toggleAdvancedControls() {
       this.showAdvancedControls = !this.showAdvancedControls;
     },
-    async exportMp4() {
+    async exportMp4(
+      trackExportOptions?: {
+        includeInExportTime: boolean;
+        displayInExport: boolean;
+        trackIndex: number;
+      }[]
+    ) {
       this.pause();
       // TODO(jon): Better to do this in a web-worker so that we don't block the main thread.
       // Also warn users not to navigate away from the page while it's encoding.
@@ -810,15 +965,40 @@ export default {
 
       // TODO(jon): Incorporate this time into the progress bar if the video hasn't already downloaded/decoded
       //  Either that, or we interleave the decoding with the encoding process
-      await this.ensureEntireClipIsDecoded();
+      this.totalFrames = await ensureEntireClipIsDecoded();
+
+      let startFrame = 0;
+      let onePastLastFrame = this.totalFrames;
+      if (
+        trackExportOptions &&
+        trackExportOptions.filter((track) => track.includeInExportTime)
+          .length !== 0
+      ) {
+        startFrame = this.totalFrames;
+        onePastLastFrame = 0;
+        for (const { includeInExportTime, trackIndex } of trackExportOptions) {
+          if (includeInExportTime) {
+            const track = this.tracks[trackIndex];
+            startFrame = Math.min(
+              startFrame,
+              this.getFrameAtTime(track.data.start_s - 1)
+            );
+            onePastLastFrame = Math.max(
+              onePastLastFrame,
+              this.getFrameAtTime(track.data.end_s + 1)
+            );
+          }
+        }
+      }
+
       encoder.initialize();
-      let frameNum = 0;
+      let frameNum = startFrame;
 
       await yieldToUI();
       console.assert(this.totalFrames !== null);
-      while (frameNum < this.totalFrames) {
-        const { frameData } = await this.queueFrame(frameNum);
-        const frameHeader = player.getFrameHeaderAtIndex(frameNum);
+      while (frameNum < onePastLastFrame) {
+        const frameData = CptvPlayer.getFrameAtIndex(frameNum);
+        const frameHeader = CptvPlayer.getFrameHeaderAtIndex(frameNum);
         const imgData = this.getCurrentFrameData(
           videoContext,
           frameData,
@@ -852,17 +1032,23 @@ export default {
           renderCanvas.width / videoCanvas.width,
           timeSinceLastFFCSeconds,
           true,
-          frameNum
+          frameNum,
+          trackExportOptions
         );
 
         encoder.addFrameRgba(
           context.getImageData(0, 0, encoder.width, encoder.height).data
         );
-        this.exportProgress = frameNum / this.totalFrames;
+        this.exportProgress =
+          (frameNum - startFrame) / (onePastLastFrame - startFrame);
         await yieldToUI();
         frameNum++;
       }
       encoder.finalize();
+
+      // Reset any export options
+      this.initTrackExportOptions();
+
       const uint8Array = encoder.FS.readFile(encoder.outputFilename);
       download(
         URL.createObjectURL(new Blob([uint8Array], { type: "video/mp4" })),
@@ -924,45 +1110,26 @@ export default {
       return imgData;
     },
     renderFrame(frameData, frameNum: number | false, force: boolean = false) {
-      const context = this.$refs.canvas.getContext("2d");
-      if (frameNum !== false) {
-        this.frameHeader = Object.freeze(
-          player.getFrameHeaderAtIndex(frameNum)
+      if (this.$refs.canvas) {
+        const context = this.$refs.canvas.getContext("2d");
+        if (frameNum !== false) {
+          this.frameHeader = Object.freeze(
+            CptvPlayer.getFrameHeaderAtIndex(frameNum)
+          );
+        }
+        const imgData = this.getCurrentFrameData(
+          context,
+          frameData,
+          this.frameHeader
         );
+        cancelAnimationFrame(this.animationFrame);
+        this.animationFrame = requestAnimationFrame(() => {
+          this.drawFrame(context, imgData, frameNum || this.frameNum, force);
+        });
       }
-      const imgData = this.getCurrentFrameData(
-        context,
-        frameData,
-        this.frameHeader
-      );
-      cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = requestAnimationFrame(() => {
-        this.drawFrame(context, imgData, frameNum || this.frameNum, force);
-      });
-    },
-    async queueFrame(frameNum: number) {
-      const availableFrames = player.getLoadedFrames() || 0;
-      if (frameNum + 1 > availableFrames + this.header.fps) {
-        this.buffering = true;
-        await yieldToUI();
-        await player.seekToFrame(frameNum);
-        this.buffering = false;
-      } else if (frameNum + 1 > availableFrames) {
-        await player.seekToFrame(frameNum);
-      }
-      let frameData = player.getFrameAtIndex(frameNum);
-      if (frameData === null) {
-        console.assert(player.getTotalFrames() !== null);
-        this.totalFrames = player.getTotalFrames();
-        frameNum = this.totalFrames - 1;
-        frameData = player.getFrameAtIndex(frameNum);
-        console.assert(frameData !== null);
-      }
-      return { frameNum, frameData };
     },
     async drawFrame(context, imgData, frameNum, force = false) {
       if (context) {
-        //this.buffering = false;
         // One tick represents 1000 / fps * multiplier
         const everyXTicks = Math.max(
           1,
@@ -971,8 +1138,6 @@ export default {
         // NOTE: respect fps here, render only when we should.
         const shouldRedraw =
           (this.animationTick + (this.playing ? 1 : 0)) % everyXTicks === 0;
-
-        //console.log("Should redraw", this.animationTick, everyXTicks, this.animationTick % everyXTicks, shouldRedraw);
         if (context && (shouldRedraw || force)) {
           context.putImageData(imgData, 0, 0);
           if (this.$refs.overlayCanvas) {
@@ -990,7 +1155,7 @@ export default {
               overlayContext.lineWidth = 4;
               overlayContext.strokeStyle = "rgba(0, 0, 0, 0.5)";
               overlayContext.fillStyle = "white";
-              const time = `${this.elapsedTime} / ${this.totalTime}`;
+              const time = `${this.elapsedTime} / ${Math.max(this.elapsedTime, this.totalTime)}`;
               overlayContext.font;
               const timeWidth =
                 overlayContext.measureText(time).width * this.devicePixelRatio;
@@ -1054,19 +1219,20 @@ export default {
 
         // Update playhead:
         const playhead = this.$refs.playhead;
-        const playheadContext = playhead.getContext("2d");
-        playheadContext.fillStyle = "rgba(0, 0, 0, 0.35)";
-        playheadContext.clearRect(0, 0, playhead.width, playhead.height);
-        const playheadX =
-          this.playheadOffsetForCurrentTime * this.devicePixelRatio;
-        //console.log(playheadX, this.currentTime60fps, this.currentTime, this.animationTick);
-        playheadContext.fillRect(0, 0, playheadX, playhead.height);
-        playheadContext.lineWidth = this.devicePixelRatio;
-        playheadContext.strokeStyle = "white";
-        playheadContext.beginPath();
-        playheadContext.moveTo(playheadX, 0);
-        playheadContext.lineTo(playheadX, playhead.height);
-        playheadContext.stroke();
+        if (playhead) {
+          const playheadContext = playhead.getContext("2d");
+          playheadContext.fillStyle = "rgba(0, 0, 0, 0.35)";
+          playheadContext.clearRect(0, 0, playhead.width, playhead.height);
+          const playheadX =
+            this.playheadOffsetForCurrentTime * this.devicePixelRatio;
+          playheadContext.fillRect(0, 0, playheadX, playhead.height);
+          playheadContext.lineWidth = this.devicePixelRatio;
+          playheadContext.strokeStyle = "white";
+          playheadContext.beginPath();
+          playheadContext.moveTo(playheadX, 0);
+          playheadContext.lineTo(playheadX, playhead.height);
+          playheadContext.stroke();
+        }
       }
     },
     incrementSpeed() {
@@ -1118,7 +1284,8 @@ export default {
       scale: number,
       timeSinceFFCSeconds: number,
       isExporting: boolean,
-      frameNum: number
+      frameNum: number,
+      trackExportOptions?
     ) {
       if (!isExporting) {
         // Clear if we are drawing on the live overlay, but not if we're drawing for export
@@ -1127,7 +1294,7 @@ export default {
       const tracks =
         this.processedTracks[frameNum] || ({} as Record<number, TrackBox>);
       const frameTracks = Object.entries(tracks);
-      if (frameTracks.length === 1) {
+      if (!isExporting && this.canSelectTracks && frameTracks.length === 1) {
         const trackIndex = Number(frameTracks[0][0]);
         // If the track is the only track at this time offset, make it the selected track.
         if (this.currentTrack.trackIndex !== trackIndex) {
@@ -1137,29 +1304,41 @@ export default {
         }
       }
 
-      for (const [trackIndex, trackBox] of frameTracks) {
-        if (this.currentTrack.trackIndex !== Number(trackIndex)) {
-          const box = trackBox as TrackBox;
-          this.drawRectWithText(
-            context,
-            Number(trackIndex),
-            box.rect,
-            box.what,
-            isExporting
-          );
+      if (!this.showOverlaysForCurrentTrackOnly || isExporting) {
+        for (const [trackIndex, trackBox] of frameTracks) {
+          if (this.currentTrack.trackIndex !== Number(trackIndex)) {
+            if (
+              !trackExportOptions ||
+              trackExportOptions[Number(trackIndex)].displayInExport
+            ) {
+              const box = trackBox as TrackBox;
+              this.drawRectWithText(
+                context,
+                Number(trackIndex),
+                box.rect,
+                box.what,
+                isExporting
+              );
+            }
+          }
         }
       }
       // Always draw selected track last, so it sits on top of any overlapping tracks.
       for (const [trackIndex, trackBox] of frameTracks) {
         if (this.currentTrack.trackIndex === Number(trackIndex)) {
-          const box = trackBox as TrackBox;
-          this.drawRectWithText(
-            context,
-            Number(trackIndex),
-            box.rect,
-            box.what,
-            isExporting
-          );
+          if (
+            !trackExportOptions ||
+            trackExportOptions[Number(trackIndex)].displayInExport
+          ) {
+            const box = trackBox as TrackBox;
+            this.drawRectWithText(
+              context,
+              Number(trackIndex),
+              box.rect,
+              box.what,
+              isExporting
+            );
+          }
         }
       }
       if (timeSinceFFCSeconds < 10) {
@@ -1183,7 +1362,7 @@ export default {
       context: CanvasRenderingContext2D,
       trackIndex: number,
       dims: [number, number, number, number],
-      what: string,
+      what: string | null,
       isExporting: boolean
     ) {
       const selected =
@@ -1222,27 +1401,29 @@ export default {
       context.strokeRect(x, y, width, height);
       if (selected || isExporting) {
         // If exporting, show all the best guess animal tags, if not unknown
-        const text = what;
-        const textHeight = 9 * deviceRatio;
-        const textWidth = context.measureText(text).width * deviceRatio;
-        const marginX = 2 * deviceRatio;
-        const marginTop = 2 * deviceRatio;
-        let textX =
-          Math.min(context.canvas.width, right) - (textWidth + marginX);
-        let textY = bottom + textHeight + marginTop;
-        // Make sure the text doesn't get clipped off if the box is near the frame edges
-        if (textY + textHeight > context.canvas.height) {
-          textY = top - textHeight;
+        if (what !== null) {
+          const text = what;
+          const textHeight = 9 * deviceRatio;
+          const textWidth = context.measureText(text).width * deviceRatio;
+          const marginX = 2 * deviceRatio;
+          const marginTop = 2 * deviceRatio;
+          let textX =
+            Math.min(context.canvas.width, right) - (textWidth + marginX);
+          let textY = bottom + textHeight + marginTop;
+          // Make sure the text doesn't get clipped off if the box is near the frame edges
+          if (textY + textHeight > context.canvas.height) {
+            textY = top - textHeight;
+          }
+          if (textX < 0) {
+            textX = left + marginX;
+          }
+          context.font = "13px sans-serif";
+          context.lineWidth = 4;
+          context.strokeStyle = "rgba(0, 0, 0, 0.5)";
+          context.strokeText(text, textX / deviceRatio, textY / deviceRatio);
+          context.fillStyle = "white";
+          context.fillText(text, textX / deviceRatio, textY / deviceRatio);
         }
-        if (textX < 0) {
-          textX = left + marginX;
-        }
-        context.font = "13px sans-serif";
-        context.lineWidth = 4;
-        context.strokeStyle = "rgba(0, 0, 0, 0.5)";
-        context.strokeText(text, textX / deviceRatio, textY / deviceRatio);
-        context.fillStyle = "white";
-        context.fillText(text, textX / deviceRatio, textY / deviceRatio);
       }
     },
     toggleSmoothing() {
@@ -1259,7 +1440,7 @@ export default {
     async toggleBackground() {
       this.wasPaused = !this.playing;
       if (!this.isShowingBackgroundFrame) {
-        const background = player.getBackgroundFrame();
+        const background = CptvPlayer.getBackgroundFrame();
         if (background.data.length !== 0) {
           if (this.playing) {
             this.pause();
@@ -1312,6 +1493,7 @@ export default {
       // and trigger a resize
       if (window.innerWidth !== this.windowWidth) {
         this.windowWidth = window.innerWidth;
+        this.animationTick = 0;
         this.setCanvasDimensions();
       }
     },
@@ -1333,6 +1515,19 @@ export default {
         this.renderCurrentFrame();
       }
     },
+    getFrameAtTime(time: number): number {
+      let totalFrames = this.totalFrames;
+      time = Math.max(0, Math.min(this.actualDuration, time));
+      if (this.header) {
+        if (totalFrames === false) {
+          totalFrames = Math.floor(this.actualDuration * this.header.fps);
+        }
+        return Math.floor(
+          Math.min(totalFrames, (time / this.actualDuration) * totalFrames)
+        );
+      }
+      return 0;
+    },
     async setTimeAndRedraw(time) {
       let totalFrames = this.totalFrames;
       if (this.header) {
@@ -1351,22 +1546,22 @@ export default {
     },
     async renderCurrentFrame(force: boolean = false, frameNum?: number) {
       if (this.header) {
-        this.loadProgress = player.getLoadProgress();
+        this.loadProgress = CptvPlayer.getLoadProgress();
         if (frameNum === undefined) {
           frameNum = this.frameNum;
         }
-
-        performance.mark(`Start frame #${frameNum}`);
         // TODO(jon): Ideally we want this to happen on another thread an call back to us, otherwise it locks the UI.
-        const { frameNum: actualFrameNum, frameData } = await this.queueFrame(
-          frameNum
+        const {
+          frameNum: actualFrameNum,
+          frameData,
+          totalFrames,
+        } = await queueFrame(
+          frameNum,
+          (buffering) => (this.buffering = buffering)
         );
-        performance.mark(`End frame #${frameNum}`);
-        performance.measure(
-          `Frame #${frameNum}`,
-          `Start frame #${frameNum}`,
-          `End frame #${frameNum}`
-        );
+        if (totalFrames !== null && !this.totalFrames) {
+          this.totalFrames = totalFrames;
+        }
         this.renderFrame(frameData, actualFrameNum, force);
         return frameNum === actualFrameNum;
       }
@@ -1401,6 +1596,18 @@ export default {
         this.pause();
       }
     },
+    requestPrevRecording() {
+      this.frameNum = 0;
+      this.buffering = true;
+      this.atEndOfPlayback = false;
+      this.$emit("request-prev-recording");
+    },
+    requestNextRecording() {
+      this.frameNum = 0;
+      this.atEndOfPlayback = false;
+      this.buffering = true;
+      this.$emit("request-next-recording");
+    },
     pause() {
       this.playing = false;
       cancelAnimationFrame(this.animationFrame);
@@ -1424,7 +1631,7 @@ export default {
     border-bottom-right-radius: 5px;
   }
 }
-canvas {
+.video-canvas {
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
@@ -1547,13 +1754,21 @@ canvas {
   > button {
     min-width: 44px;
     min-height: 44px;
+    &.hide {
+      opacity: 0;
+    }
     > svg {
       transition: opacity 0.3s;
       opacity: 0.5;
     }
-    &:hover {
+    &:hover:not(:disabled) {
       > svg {
         opacity: 0.8;
+      }
+    }
+    &:disabled {
+      > svg {
+        opacity: 0.1;
       }
     }
     background: transparent;
@@ -1643,10 +1858,14 @@ canvas {
 }
 .playhead {
   height: 100%;
+  width: 100%;
   position: absolute;
-  background: rgba(0, 0, 0, 0.35);
   left: 0;
   top: 0;
   pointer-events: none;
+}
+.playback-speed {
+  font-weight: bold;
+  font-size: 90%;
 }
 </style>

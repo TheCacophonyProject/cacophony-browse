@@ -117,7 +117,7 @@ export default {
         `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
     }),
   },
-  created: async function () {
+  mounted: async function () {
     await this.$store.dispatch("Video/GET_RECORDING", this.$route.params.id);
   },
 };

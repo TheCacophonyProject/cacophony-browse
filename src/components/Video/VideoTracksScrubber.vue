@@ -202,6 +202,9 @@ export default {
     tracks() {
       this.initTrackDimensions();
     },
+    canvasWidth() {
+      this.initTrackDimensions();
+    },
   },
   mounted() {
     this.initScrubber();

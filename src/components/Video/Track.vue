@@ -185,11 +185,15 @@ export default {
         });
     },
     trackSelected(increment) {
-      const index = this.index + increment;
+      const index = Math.min(
+        this.numTracks - 1,
+        Math.max(0, this.index + increment)
+      );
+
       if (0 <= index && index < this.numTracks) {
         this.$emit("track-selected", {
-          trackIndex: this.index + increment,
-          start_s: this.track.data.start_s - this.adjustTimespans,
+          trackIndex: index,
+          gotoStart: true,
         });
       }
     },
@@ -231,6 +235,7 @@ export default {
   margin-bottom: 0;
   margin-top: 0.1em;
   flex: 1 1 auto;
+  line-height: unset;
   cursor: pointer;
   user-select: none;
 }
@@ -248,7 +253,7 @@ export default {
 
 .track-image {
   display: inline-block;
-  vertical-align: bottom;
+  vertical-align: text-bottom;
   width: 20px;
   height: 20px;
 }
