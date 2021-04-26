@@ -5,6 +5,9 @@ node_js:
 env:
   - IS_CI_ENV=true
 
+before_install:
+- npm i
+
 script:
 - npm run lint && npm test
 
