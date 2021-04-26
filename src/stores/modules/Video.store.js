@@ -5,6 +5,8 @@ import store from "../index";
 const state = {
   downloadFileJWT: null,
   downloadRawJWT: null,
+  fileSize: null,
+  rawSize: null,
   recording: {
     Tags: [],
   },
@@ -92,8 +94,10 @@ const actions = {
   async GET_RECORDING({ commit }, recordingId) {
     const tracksPromise = api.recording.tracks(recordingId);
     const recordingPromise = api.recording.id(recordingId);
-    const { result: recording } = await recordingPromise;
-    const { result: tracks } = await tracksPromise;
+    const [{ result: recording }, { result: tracks }] = await Promise.all([
+      recordingPromise,
+      tracksPromise,
+    ]);
     commit("receiveRecording", recording);
     commit("receiveTracks", tracks);
     return {
@@ -182,10 +186,15 @@ const actions = {
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
-  receiveRecording(state, { recording, downloadFileJWT, downloadRawJWT }) {
+  receiveRecording(
+    state,
+    { recording, downloadFileJWT, downloadRawJWT, fileSize, rawSize }
+  ) {
     state.recording = recording;
     state.downloadFileJWT = downloadFileJWT;
     state.downloadRawJWT = downloadRawJWT;
+    state.fileSize = fileSize;
+    state.rawSize = rawSize;
   },
 
   receiveTracks(state, { tracks }) {

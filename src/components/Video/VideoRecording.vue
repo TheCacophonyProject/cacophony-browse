@@ -2,16 +2,23 @@
   <b-container class="video-elements-wrapper">
     <b-row class="no-gutters">
       <b-col cols="12" lg="8">
-        <ThermalVideoPlayer
-          ref="thermalPlayer"
-          :video-url="videoUrl"
+        <CptvPlayer
+          :cptv-url="videoRawUrl"
+          :cptv-size="rawSize"
           :tracks="orderedTracks"
-          @trackSelected="trackSelected"
+          :recording="recording"
           :current-track="selectedTrack"
+          :recently-added-tag="recentlyAddedTrackTag"
+          :can-go-backwards="canGoBackwardInSearch"
+          :can-go-forwards="canGoForwardInSearch"
+          :export-requested="requestedExport"
+          @track-selected="trackSelected"
+          @received-header="gotHeader"
           @request-next-recording="nextRecording"
+          @request-prev-recording="prevRecording"
+          @export-complete="requestedExport = false"
         />
       </b-col>
-
       <b-col cols="12" lg="4">
         <div v-if="tracks && tracks.length > 0" class="accordion">
           <TrackInfo
@@ -24,7 +31,9 @@
             :is-wallaby-project="isWallabyProject()"
             :show="index === selectedTrack.trackIndex"
             :colour="colours[index % colours.length]"
-            @trackSelected="trackSelected"
+            :adjust-timespans="timespanAdjustment"
+            @track-selected="trackSelected"
+            @change-tag="changedTrackTag"
           />
         </div>
         <div
@@ -37,16 +46,22 @@
     </b-row>
     <b-row>
       <b-col cols="12" lg="8">
-        <PrevNext :recording="recording" @nextOrPreviousRecording="prevNext" />
+        <PrevNext
+          :recording="recording"
+          :can-go-backwards="canGoBackwardInSearch"
+          :can-go-forwards="canGoForwardInSearch"
+          @nextOrPreviousRecording="prevNext"
+        />
         <RecordingControls
           :items="tagItems"
           :comment="recording.comment"
           :download-raw-url="videoRawUrl"
-          :download-file-url="videoUrl"
+          :download-file-url="''"
           @deleteTag="deleteTag($event)"
           @addTag="addTag($event)"
           @updateComment="updateComment($event)"
           @nextOrPreviousRecording="gotoNextRecording('either', 'any')"
+          @requested-export="requestedMp4Export"
         />
       </b-col>
       <b-col cols="12" lg="4">
@@ -56,15 +71,16 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
 /* eslint-disable no-console */
 import { mapState } from "vuex";
 import PrevNext from "./PrevNext.vue";
 import RecordingControls from "./RecordingControls.vue";
-import ThermalVideoPlayer from "./ThermalVideoPlayer.vue";
 import TrackInfo from "./Track.vue";
+import CptvPlayer from "@/components/Video/CptvPlayer.vue";
 import RecordingProperties from "./RecordingProperties.vue";
-import { TagColours, WALLABY_GROUP } from "../../const";
+import { TagColours, WALLABY_GROUP } from "@/const";
+import api from "@/api";
 
 export default {
   name: "VideoRecording",
@@ -72,8 +88,8 @@ export default {
     PrevNext,
     RecordingControls,
     RecordingProperties,
-    ThermalVideoPlayer,
     TrackInfo,
+    CptvPlayer,
   },
   props: {
     trackid: {
@@ -82,10 +98,6 @@ export default {
     },
     recording: {
       type: Object,
-      required: true,
-    },
-    videoUrl: {
-      type: String,
       required: true,
     },
     videoRawUrl: {
@@ -101,8 +113,13 @@ export default {
     return {
       showAddObservation: false,
       selectedTrack: { trackIndex: 0 },
+      recentlyAddedTrackTag: null,
       startVideoTime: 0,
       colours: TagColours,
+      header: null,
+      canGoForwardInSearch: false,
+      canGoBackwardInSearch: false,
+      requestedExport: false,
     };
   },
   computed: {
@@ -110,21 +127,33 @@ export default {
       tagItems() {
         return this.$store.getters["Video/getTagItems"];
       },
+      rawSize: (state) => state.Video.rawSize,
     }),
+    timespanAdjustment() {
+      if (this.header) {
+        if (this.header.hasBackgroundFrame) {
+          return 1 / this.header.fps;
+        }
+      }
+      return 0;
+    },
     orderedTracks() {
-      return this.orderTracks();
+      return ([...this.tracks] || []).sort(
+        (a, b) => a.data.start_s - b.data.start_s
+      );
     },
   },
-  mounted: function () {
+  async mounted() {
     this.selectedTrack = {
       trackIndex: this.getSelectedTrack(),
     };
+    await this.checkPreviousAndNextRecordings();
   },
   watch: {
-    recording: function () {
+    async recording() {
       this.trackSelected(0);
     },
-    tracks: function () {
+    tracks() {
       this.selectedTrack = {
         trackIndex: this.getSelectedTrack(),
       };
@@ -132,15 +161,31 @@ export default {
   },
 
   methods: {
-    orderTracks() {
-      return ([...this.tracks] || []).sort(
-        (a, b) => a.data.start_s - b.data.start_s
+    requestedMp4Export(advanced?: boolean) {
+      if (advanced === true) {
+        this.requestedExport = "advanced";
+      } else {
+        this.requestedExport = true;
+      }
+    },
+    async checkPreviousAndNextRecordings() {
+      this.canGoForwardInSearch = await this.hasNextRecording(
+        "next",
+        "any",
+        false,
+        true
+      );
+      this.canGoBackwardInSearch = await this.hasNextRecording(
+        "previous",
+        "any",
+        false,
+        true
       );
     },
     getSelectedTrack() {
       if (this.$route.params.trackid) {
-        const index = this.orderTracks().findIndex(
-          (track) => track.id == this.$route.params.trackid
+        const index = this.orderedTracks.findIndex(
+          (track) => track.id === this.$route.params.trackid
         );
         if (index > -1) {
           return index;
@@ -151,13 +196,47 @@ export default {
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
       const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
-        this.$router.push({
+        await this.$router.push({
           path: `/recording/${this.recording.id}`,
           query: searchQueryCopy,
         });
+        if (direction === "next") {
+          this.canGoBackwardInSearch = true;
+          this.canGoForwardInSearch = await this.hasNextRecording(
+            "next",
+            tagMode,
+            tags,
+            true
+          );
+        } else if (direction === "previous") {
+          this.canGoForwardInSearch = true;
+          this.canGoBackwardInSearch = await this.hasNextRecording(
+            "previous",
+            tagMode,
+            tags,
+            true
+          );
+        }
       }
     },
-    async getNextRecording(direction, tagMode, tags, skipMessage) {
+    async hasNextRecording(direction, tagMode, tags, skipMessage) {
+      return (
+        (await this.getNextRecording(
+          direction,
+          tagMode,
+          tags,
+          skipMessage,
+          true
+        )) === true
+      );
+    },
+    async getNextRecording(
+      direction: "next" | "previous" | "either",
+      tagMode: string | false,
+      tags: string[] | false,
+      skipMessage: boolean = false,
+      noNavigate: boolean = false
+    ): Promise<boolean | any> {
       const params = JSON.parse(JSON.stringify(this.$route.query));
 
       let order;
@@ -191,22 +270,31 @@ export default {
       params.type = "video";
       delete params.offset;
 
-      return await this.$store.dispatch("Video/QUERY_RECORDING", {
-        params,
-        skipMessage,
-      });
+      if (!noNavigate) {
+        return await this.$store.dispatch("Video/QUERY_RECORDING", {
+          params,
+          skipMessage,
+        });
+      } else {
+        // Just return whether or not there is a next/prev recording.
+        const { result, success } = await api.recording.query(params);
+        return success && result.rows.length !== 0;
+      }
     },
     prevNext(event) {
       this.gotoNextRecording(event[0], event[1], event[2]);
     },
-    nextRecording() {
-      this.gotoNextRecording("next", false, false, true);
+    async nextRecording() {
+      await this.gotoNextRecording("next", false, false, true);
+    },
+    async prevRecording() {
+      await this.gotoNextRecording("previous", false, false, true);
     },
     getRecordingId() {
       return Number(this.$route.params.id);
     },
     isWallabyProject() {
-      return this.recording.GroupId == WALLABY_GROUP;
+      return this.recording.GroupId === WALLABY_GROUP;
     },
     addTag(tag) {
       const id = Number(this.$route.params.id);
@@ -215,8 +303,26 @@ export default {
     deleteTag(tagId) {
       this.$store.dispatch("Video/DELETE_TAG", tagId);
     },
+    changedTrackTag(trackTag) {
+      this.recentlyAddedTrackTag = trackTag;
+      setTimeout(() => {
+        this.recentlyAddedTrackTag = null;
+      }, 2000);
+    },
     trackSelected(track) {
-      this.selectedTrack = { trackIndex: track };
+      if (track.gotoStart) {
+        this.selectedTrack = {
+          trackIndex: track.trackIndex,
+          start_s:
+            this.orderedTracks[track.trackIndex].data.start_s -
+            this.timespanAdjustment,
+        };
+      } else {
+        this.selectedTrack = track;
+      }
+    },
+    gotHeader(header) {
+      this.header = header;
     },
     updateComment(comment) {
       const recordingId = Number(this.$route.params.id);

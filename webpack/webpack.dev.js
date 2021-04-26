@@ -28,6 +28,8 @@ module.exports = merge(common, {
   devServer: {
     contentBase: distDir,
     hot: true,
+    host: '0.0.0.0',
+    disableHostCheck: true,
     stats: {
       minimal: true,
       assets: false,
