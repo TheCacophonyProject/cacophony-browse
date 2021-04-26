@@ -17,10 +17,11 @@
             :value="device && device.Users ? device.Users.length : 0"
           />
         </template>
-        <DeviceUsers 
-          :device="device" 
+        <DeviceUsers
+          :device="device"
           :user="user"
-          @reload-device="$emit('reload-device')"/>
+          @reload-device="$emit('reload-device')"
+        />
       </b-tab>
       <b-tab title="All Events">
         <DeviceEvents :device="device" />

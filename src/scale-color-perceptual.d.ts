@@ -1,1 +1,1 @@
-declare namespace "scale-color-perceptual";
+declare module "scale-color-perceptual";

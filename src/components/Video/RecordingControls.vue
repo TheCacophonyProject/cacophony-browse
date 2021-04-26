@@ -70,9 +70,7 @@
                 <font-awesome-icon :icon="['far', 'file-video']" />
                 Export Video
               </b-dropdown-item>
-              <b-dropdown-item
-                @click="$emit('requested-export', true)"
-              >
+              <b-dropdown-item @click="$emit('requested-export', true)">
                 <font-awesome-icon :icon="['far', 'file-video']" />
                 Export Video (Advanced)
               </b-dropdown-item>

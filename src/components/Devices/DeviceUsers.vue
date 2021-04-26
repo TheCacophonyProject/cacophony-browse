@@ -12,10 +12,11 @@
         Only device administrators can view users that are associated with this
         device.
       </p>
-      <device-add-user 
-        v-if="isDeviceAdmin" 
+      <device-add-user
+        v-if="isDeviceAdmin"
         :device="device"
-        @user-added="$emit('reload-device')" />
+        @user-added="$emit('reload-device')"
+      />
       <b-button
         v-if="isDeviceAdmin"
         v-b-modal.device-add-user

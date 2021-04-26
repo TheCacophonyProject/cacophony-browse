@@ -74,7 +74,7 @@ export default {
   },
   computed: {
     scrubberWidth() {
-      return this.canvasWidth - (this.sidePadding * 2);
+      return this.canvasWidth - this.sidePadding * 2;
     },
     isLoaded() {
       return true; //this.tracks && this.tracks.length && this.duration;

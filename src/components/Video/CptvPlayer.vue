@@ -995,7 +995,7 @@ export default {
       let frameNum = startFrame;
 
       await yieldToUI();
-      console.assert(this.totalFrames !== null);
+      // console.assert(this.totalFrames !== null);
       while (frameNum < onePastLastFrame) {
         const frameData = CptvPlayer.getFrameAtIndex(frameNum);
         const frameHeader = CptvPlayer.getFrameHeaderAtIndex(frameNum);
@@ -1088,7 +1088,7 @@ export default {
         }
       } else if (this.globalClampedMin !== undefined) {
         const thisMin = Math.max(min, this.globalClampedMin);
-        console.log("Clamped min", thisMin);
+        // console.log("Clamped min", thisMin);
         const range = max - thisMin;
         for (let i = 0; i < data.length; i++) {
           const index =
@@ -1155,7 +1155,10 @@ export default {
               overlayContext.lineWidth = 4;
               overlayContext.strokeStyle = "rgba(0, 0, 0, 0.5)";
               overlayContext.fillStyle = "white";
-              const time = `${this.elapsedTime} / ${Math.max(this.elapsedTime, this.totalTime)}`;
+              const time = `${this.elapsedTime} / ${Math.max(
+                this.elapsedTime,
+                this.totalTime
+              )}`;
               overlayContext.font;
               const timeWidth =
                 overlayContext.measureText(time).width * this.devicePixelRatio;

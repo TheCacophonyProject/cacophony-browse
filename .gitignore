@@ -5,3 +5,4 @@ launch.json
 node_modules/
 dev-config.js
 dist/
+package-lock.json

@@ -127,7 +127,6 @@ import {
   User,
   JwtToken,
 } from "@/api/Recording.api";
-import { mapState } from "vuex";
 
 interface TaggingViewData {
   colours: string[];
