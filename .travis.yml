@@ -6,7 +6,7 @@ env:
   - IS_CI_ENV=true
 
 script:
-- npm run lint && npm test
+- npm run lint
 
 # Update files which need the right version number, build the packed
 # release, install the nfpm tool and build the release deb package.
