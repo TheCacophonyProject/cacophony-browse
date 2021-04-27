@@ -388,11 +388,11 @@ const yieldToUI = () => {
 const formatTime = (time: number): string => {
   let seconds = Math.floor(time);
   if (seconds < 60) {
-    return `0.${`${seconds}`.padStart(2, "0")}`;
+    return `0:${`${seconds}`.padStart(2, "0")}`;
   }
   const minutes = Math.floor(seconds / 60);
   seconds = seconds - minutes * 60;
-  return `${minutes}.${seconds.toString().padStart(2, "0").padEnd(2, "0")}`;
+  return `${minutes}:${seconds.toString().padStart(2, "0").padEnd(2, "0")}`;
 };
 
 const getAuthoritativeTagForTrack = (trackTags) => {
@@ -1939,5 +1939,6 @@ export default {
 .playback-speed {
   font-weight: bold;
   font-size: 90%;
+  user-select: none;
 }
 </style>

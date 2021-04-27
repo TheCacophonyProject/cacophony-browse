@@ -25,7 +25,8 @@
               id="input-username-or-email"
               v-model="usernameOrEmail"
               placeholder="Username or Email Address"
-              type="email"
+              type="text"
+              autocapitalize="none"
             />
           </b-form-group>
 
