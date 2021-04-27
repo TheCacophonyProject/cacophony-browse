@@ -27,7 +27,13 @@
       </div>
       <div
         key="playback-controls"
-        :class="['playback-controls', { show: atEndOfPlayback && !extLoading }]"
+        :class="[
+          'playback-controls',
+          {
+            show: atEndOfPlayback && !extLoading,
+            //mini: afterAnyTracks,
+          },
+        ]"
       >
         <button
           @click="requestPrevRecording"
@@ -90,7 +96,7 @@
               width="16"
               height="20"
             >
-              <g transform="matrix(1,0,0,1,0,-249)" style="fill: white">
+              <g transform="matrix(1,0,0,1,0,-249)" fill="currentColor">
                 <path
                   d="M5.25,248.969L5.25,251.781C5.25,252.247 4.872,252.625 4.406,252.625L0.844,252.625C0.378,252.625 0,252.247 0,251.781L0,248.969C0,248.503 0.378,248.125 0.844,248.125L4.406,248.125C4.872,248.125 5.25,248.503 5.25,248.969Z"
                   style="fill-opacity: 0.25"
@@ -127,7 +133,7 @@
             </svg>
 
             <svg v-else width="16" height="18" viewBox="0 0 18 18">
-              <g transform="matrix(1,0,0,1,0,-2)" style="fill: white">
+              <g transform="matrix(1,0,0,1,0,-2)" fill="currentColor">
                 <path
                   d="M1.294,16.976L18.709,17.063L18.853,0.932C9.155,0.932 1.294,7.279 1.294,16.976Z"
                 />
@@ -459,6 +465,8 @@ const formatHeaderInfo = (header): string | null => {
   }
 };
 
+const empty = () => {};
+
 interface TrackBox {
   what: string;
   rect: [number, number, number, number];
@@ -574,6 +582,9 @@ export default {
     },
     scrubberWidth() {
       return this.canvasWidth - this.scrubberSidePadding * 2;
+    },
+    afterAnyTracks() {
+      return !this.atEndOfPlayback;
     },
     playheadOffsetForCurrentTime() {
       const pixelsPerSecond = this.scrubberWidth / this.actualDuration;
@@ -743,6 +754,9 @@ export default {
   },
 
   async mounted() {
+    // This makes button active styles work in safari iOS.
+    document.addEventListener("touchstart", empty, false);
+
     this.$refs.canvas.width = 160;
     this.$refs.canvas.height = 120;
     window.addEventListener("resize", this.onResize);
@@ -766,6 +780,7 @@ export default {
     this.initTrackExportOptions();
   },
   beforeDestroy() {
+    document.removeEventListener("touchstart", empty, false);
     this.loadedStream = false;
     this.clearCanvas();
     if (this.canSelectTracks) {
@@ -1781,18 +1796,28 @@ export default {
   align-items: center;
   justify-content: space-evenly;
   pointer-events: none;
-  background: radial-gradient(
-    circle,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.5) 50%,
-    rgba(0, 0, 0, 0.2) 80%,
-    rgba(0, 0, 0, 0) 100%
-  );
+  background: transparent;
+  &:not(.mini) {
+    background: radial-gradient(
+      circle,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.5) 50%,
+      rgba(0, 0, 0, 0.2) 80%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  }
   opacity: 0;
   transition: opacity 0.3s;
   &.show {
     opacity: 1;
     pointer-events: unset;
+    &.mini {
+      bottom: 0;
+      height: 20%;
+      top: unset;
+      right: 0;
+      left: 0;
+    }
   }
   > button {
     min-width: 44px;
@@ -1804,7 +1829,8 @@ export default {
       transition: opacity 0.3s;
       opacity: 0.5;
     }
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
       > svg {
         opacity: 0.8;
       }
@@ -1868,7 +1894,7 @@ export default {
     user-select: none;
     transition: width 0.3s ease-in-out;
     &.open {
-      width: 190px;
+      width: 201px;
       .advanced-controls-btn {
         position: relative;
         &::before {
