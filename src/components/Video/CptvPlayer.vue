@@ -385,6 +385,16 @@ const yieldToUI = () => {
   });
 };
 
+const formatTime = (time: number): string => {
+  let seconds = Math.floor(time);
+  if (seconds < 60) {
+    return `0.${`${seconds}`.padStart(2, "0")}`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  seconds = seconds - minutes * 60;
+  return `${minutes}.${seconds.toString().padStart(2, "0").padEnd(2, "0")}`;
+};
+
 const getAuthoritativeTagForTrack = (trackTags) => {
   const userTags = trackTags.filter(
     (tag) =>
@@ -687,10 +697,7 @@ export default {
       return 1 / 9;
     },
     elapsedTime(): string {
-      return this.formatTime(this.currentTime);
-    },
-    totalTime(): string {
-      return this.formatTime(this.actualDuration);
+      return formatTime(this.currentTime);
     },
     currentTime() {
       if (this.header) {
@@ -760,9 +767,13 @@ export default {
     this.$refs.canvas.width = 160;
     this.$refs.canvas.height = 120;
     window.addEventListener("resize", this.onResize);
-    window
-      .matchMedia("screen and (min-resolution: 2dppx)")
-      .addEventListener("change", this.setCanvasDimensions);
+    if (window.matchMedia) {
+      // NOTE This is only needed for multi-monitor setups where the DPI can change if the window is moved
+      //  between screens of differing DPIs.  iOS 12 and lower don't support this.
+      const match = window.matchMedia("screen and (min-resolution: 2dppx)");
+      match.addEventListener &&
+        match.addEventListener("change", this.setCanvasDimensions);
+    }
 
     this.setCanvasDimensions();
     this.buffering = true;
@@ -789,9 +800,11 @@ export default {
       canvas.removeEventListener("mousemove", this.moveOverOverlayCanvas);
     }
     window.removeEventListener("resize", this.onResize);
-    window
-      .matchMedia("screen and (min-resolution: 2dppx)")
-      .removeEventListener("change", this.setCanvasDimensions);
+    if (window.matchMedia) {
+      const match = window.matchMedia("screen and (min-resolution: 2dppx)");
+      match.removeEventListener &&
+        match.removeEventListener("change", this.setCanvasDimensions);
+    }
   },
   watch: {
     async exportRequested() {
@@ -904,15 +917,6 @@ export default {
     },
     toggleHistogram() {
       this.showingHistogram = !this.showingHistogram;
-    },
-    formatTime(time: number): string {
-      let seconds = Math.floor(time);
-      if (seconds < 60) {
-        return `0.${`${seconds}`.padStart(2, "0")}`;
-      }
-      const minutes = Math.floor(seconds / 60);
-      seconds = seconds - minutes * 60;
-      return `${minutes}.${seconds.toString().padStart(2, "0")}`;
     },
     async stepForward() {
       this.pause();
@@ -1210,9 +1214,8 @@ export default {
               overlayContext.lineWidth = 4;
               overlayContext.strokeStyle = "rgba(0, 0, 0, 0.5)";
               overlayContext.fillStyle = "white";
-              const time = `${this.elapsedTime} / ${Math.max(
-                this.elapsedTime,
-                this.totalTime
+              const time = `${this.elapsedTime} / ${formatTime(
+                Math.max(this.currentTime, this.actualDuration)
               )}`;
               overlayContext.font;
               const timeWidth =
