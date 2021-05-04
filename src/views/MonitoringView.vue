@@ -79,12 +79,6 @@ import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import VisitList from "../components/Monitoring/VisitList.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import api from "../api/index";
-import {
-  toStringTodayYesterdayOrDate,
-  toNZDateString,
-  startOfDay,
-  startOfHour,
-} from "@/helpers/datetime";
 
 export default {
   name: "MonitoringView",
