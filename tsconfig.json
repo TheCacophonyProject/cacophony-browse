@@ -4,6 +4,8 @@
         "sourceMap": true,
         "module": "es2015",
         "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
         "allowSyntheticDefaultImports": true,
         "baseUrl": ".",
         "paths": {

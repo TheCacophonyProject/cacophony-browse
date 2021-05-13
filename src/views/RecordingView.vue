@@ -2,26 +2,26 @@
   <b-container v-if="recording">
     <b-row>
       <b-col cols="12" lg="8" class="recording-details">
-        <router-link
-          :to="{
-            name: 'device',
-            params: {
-              devicename: deviceName,
-              groupname: groupName,
-            },
-          }"
-        >
-          <h4 class="recording-title">
+        <h4 class="recording-title">
+          <router-link
+            :to="{
+              name: 'device',
+              params: {
+                devicename: deviceName,
+                groupname: groupName,
+              },
+            }"
+          >
             <font-awesome-icon
               icon="microchip"
               size="xs"
               style="color: #666; font-size: 16px"
             />
             {{ deviceName }}
-          </h4>
-        </router-link>
+          </router-link>
+        </h4>
 
-        <h5 class="text-muted">{{ date }}, {{ time }}</h5>
+        <h5 class="text-muted">{{ dateString }}, {{ timeString }}</h5>
 
         <b-alert
           :show="showAlert"
@@ -32,37 +32,36 @@
         >
       </b-col>
     </b-row>
-
-    <template v-if="isAudio">
-      <AudioRecording
-        :recording="recording"
-        :audio-url="fileSource"
-        :audio-raw-url="rawSource"
-      />
-    </template>
-
-    <template v-if="isVideo">
-      <VideoRecording
-        :recording="recording"
-        :tracks="tracks"
-        :video-url="fileSource"
-        :video-raw-url="rawSource"
-      />
-    </template>
+    <AudioRecording
+      v-if="isAudio"
+      :recording="recording"
+      :audio-url="fileSource"
+      :audio-raw-url="rawSource"
+    />
+    <VideoRecording
+      v-else-if="isVideo"
+      :recording="recording"
+      :tracks="tracks"
+      :video-url="fileSource"
+      :video-raw-url="rawSource"
+    />
   </b-container>
   <b-container v-else>Loading...</b-container>
 </template>
 
-<script>
+<script lang="ts">
 import config from "../config";
 import { mapState } from "vuex";
-import VideoRecording from "../components/Video/VideoRecording.vue";
-import AudioRecording from "../components/Video/AudioRecording.vue";
+import * as SunCalc from "suncalc";
+import { RecordingInfo } from "@/api/Recording.api";
 
 export default {
   name: "RecordingView",
-  components: { VideoRecording, AudioRecording },
-  props: {},
+  components: {
+    // We only ever want one of these at a time, so lazy load the required component
+    VideoRecording: () => import("@/components/Video/VideoRecording.vue"),
+    AudioRecording: () => import("@/components/Video/AudioRecording.vue"),
+  },
   data() {
     return {
       showAlert: false,
@@ -72,36 +71,8 @@ export default {
   },
   computed: {
     ...mapState({
-      recording: (state) => state.Video.recording,
+      recording: (state): RecordingInfo => state.Video.recording,
       tracks: (state) => state.Video.tracks,
-      isVideo: (state) => state.Video.recording.type === "thermalRaw",
-      isAudio: (state) => state.Video.recording.type === "audio",
-      date: (state) => {
-        if (state.Video.recording.recordingDateTime) {
-          const date = new Date(state.Video.recording.recordingDateTime);
-          return date.toDateString();
-        }
-        return "";
-      },
-      time: (state) => {
-        if (state.Video.recording.recordingDateTime) {
-          const date = new Date(state.Video.recording.recordingDateTime);
-          return date.toLocaleTimeString();
-        }
-        return "";
-      },
-      deviceName: (state) => {
-        if (state.Video.recording.Device) {
-          return state.Video.recording.Device.devicename;
-        }
-        return "";
-      },
-      groupName: (state) => {
-        if (state.Video.recording.Group) {
-          return state.Video.recording.Group.groupname;
-        }
-        return "";
-      },
       fileSource: (state) => {
         return (
           (state.Video.downloadFileJWT &&
@@ -109,13 +80,68 @@ export default {
           ""
         );
       },
-
       // TODO(jon): Api endpoint that doesn't require signedUrl etc, just uses usual auth, and we say which recording we want.
       // Fixes issue with videos timing out on tabs that are open for a while.
-
       rawSource: (state) =>
         `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
     }),
+    timeString(): string {
+      if (this.date) {
+        return this.date.toLocaleTimeString();
+      }
+      return "";
+    },
+    dateString(): string {
+      if (this.date) {
+        return this.date.toDateString();
+      }
+      return "";
+    },
+    moonPhase() {
+      return SunCalc.getMoonIllumination(
+        this.date,
+        this.recording.location.coordinates[0],
+        this.recording.location.coordinates[1]
+      );
+    },
+    sunTimes() {
+      return SunCalc.getTimes(
+        this.date,
+        this.recording.location.coordinates[0],
+        this.recording.location.coordinates[1]
+      );
+    },
+    timeUntilDawn(): string {
+      // TODO: Let's show some UI around time relative to sunset, sunrise etc.
+
+      // Maybe this is only interesting if we're close to dawn or dusk, or if the moon is up, and full?
+      // useful for audio recordings/birds too.
+      const hoursUntilDawn = (this.date - this.sunTimes.dawn) / 1000 / 60 / 60;
+      if (hoursUntilDawn < 0) {
+        return `${-hoursUntilDawn.toFixed(1)} hours before dawn`;
+      } else {
+        return `${hoursUntilDawn} hours after dawn`;
+      }
+    },
+    isVideo(): boolean {
+      return this.recording.type === "thermalRaw";
+    },
+    isAudio(): boolean {
+      return this.recording.type === "audio";
+    },
+    date(): Date | null {
+      return (
+        (this.recording.recordingDateTime &&
+          new Date(this.recording.recordingDateTime)) ||
+        null
+      );
+    },
+    deviceName(): string {
+      return (this.recording.Device && this.recording.Device.devicename) || "";
+    },
+    groupName(): string {
+      return (this.recording.Group && this.recording.Group.groupname) || "";
+    },
   },
   mounted: async function () {
     await this.$store.dispatch("Video/GET_RECORDING", this.$route.params.id);
@@ -129,7 +155,7 @@ export default {
 @import "~bootstrap/scss/mixins";
 
 .recording-title > svg {
-  vertical-align: baseline;
+  vertical-align: text-bottom;
 }
 
 .recording-details {
@@ -149,6 +175,29 @@ export default {
   }
 }
 
+@include media-breakpoint-down(sm) {
+  .recording-details {
+    h4 {
+      font-size: 110%;
+    }
+    h5 {
+      font-size: 90%;
+    }
+  }
+}
+
+@media only screen and (max-width: 321px) {
+  .recording-details {
+    h4 {
+      font-size: 85%;
+    }
+    h5 {
+      font-size: 65%;
+      margin-bottom: 0;
+    }
+  }
+}
+
 @include media-breakpoint-up(md) {
   .recording-details {
     padding-top: 1rem;
@@ -158,5 +207,15 @@ export default {
       display: inline-block;
     }
   }
+}
+
+.ambience {
+  background: #2b333f;
+  color: whitesmoke;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding: 0 5px;
+  border-bottom: 1px solid darken(#2b333f, 10%);
+  height: 20px;
 }
 </style>

@@ -6,8 +6,10 @@
           :cptv-url="videoRawUrl"
           :cptv-size="rawSize"
           :tracks="orderedTracks"
-          :recording="recording"
+          :recording-id="recording.id"
+          :known-duration="recording.duration"
           :current-track="selectedTrack"
+          :colours="colours"
           :recently-added-tag="recentlyAddedTrackTag"
           :can-go-backwards="canGoBackwardInSearch"
           :can-go-forwards="canGoForwardInSearch"
@@ -77,7 +79,7 @@ import { mapState } from "vuex";
 import PrevNext from "./PrevNext.vue";
 import RecordingControls from "./RecordingControls.vue";
 import TrackInfo from "./Track.vue";
-import CptvPlayer from "@/components/Video/CptvPlayer.vue";
+import CptvPlayer from "cptv-player-vue/src/CptvPlayer.vue";
 import RecordingProperties from "./RecordingProperties.vue";
 import { TagColours, WALLABY_GROUP } from "@/const";
 import api from "@/api";
@@ -94,7 +96,7 @@ export default {
   props: {
     trackid: {
       type: Number,
-      require: false,
+      required: false,
     },
     recording: {
       type: Object,
@@ -144,9 +146,10 @@ export default {
     },
   },
   async mounted() {
-    this.selectedTrack = {
-      trackIndex: this.getSelectedTrack(),
-    };
+    const selectedTrackIndex = this.getSelectedTrack();
+    if (selectedTrackIndex !== -1) {
+      this.trackSelected({ trackIndex: selectedTrackIndex, gotoStart: true });
+    }
     await this.checkPreviousAndNextRecordings();
   },
   watch: {
@@ -154,9 +157,13 @@ export default {
       this.trackSelected(0);
     },
     tracks() {
-      this.selectedTrack = {
-        trackIndex: this.getSelectedTrack(),
-      };
+      const selectedTrackIndex = this.getSelectedTrack();
+      if (selectedTrackIndex !== -1) {
+        this.trackSelected({
+          trackIndex: selectedTrackIndex,
+          gotoStart: true,
+        });
+      }
     },
   },
 
@@ -183,15 +190,13 @@ export default {
       );
     },
     getSelectedTrack() {
+      console.log(this.$route.params);
       if (this.$route.params.trackid) {
-        const index = this.orderedTracks.findIndex(
+        return this.orderedTracks.findIndex(
           (track) => track.id === this.$route.params.trackid
         );
-        if (index > -1) {
-          return index;
-        }
       }
-      return 0;
+      return -1;
     },
     async gotoNextRecording(direction, tagMode, tags, skipMessage) {
       const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
@@ -310,16 +315,20 @@ export default {
       }, 2000);
     },
     trackSelected(track) {
+      const selectedTrack = {
+        ...track,
+      };
       if (track.gotoStart) {
-        this.selectedTrack = {
-          trackIndex: track.trackIndex,
-          start_s:
-            this.orderedTracks[track.trackIndex].data.start_s -
-            this.timespanAdjustment,
-        };
-      } else {
-        this.selectedTrack = track;
+        selectedTrack.start_s =
+          this.orderedTracks[track.trackIndex].data.start_s -
+          this.timespanAdjustment;
       }
+      if (track.playToEnd) {
+        selectedTrack.end_s =
+          this.orderedTracks[track.trackIndex].data.end_s -
+          this.timespanAdjustment;
+      }
+      this.selectedTrack = selectedTrack;
     },
     gotHeader(header) {
       this.header = header;

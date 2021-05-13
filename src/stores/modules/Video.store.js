@@ -7,9 +7,7 @@ const state = {
   downloadRawJWT: null,
   fileSize: null,
   rawSize: null,
-  recording: {
-    Tags: [],
-  },
+  recording: null,
   tracks: [],
 
   findTrack(trackId) {
@@ -26,7 +24,7 @@ const state = {
 
 const getters = {
   getTagItems(state) {
-    const tags = state.recording.Tags;
+    const tags = (state.recording && state.recording.Tags) || [];
     const tagItems = [];
     tags.map((tag) => {
       const tagItem = {};
@@ -52,7 +50,7 @@ const getters = {
     return tagItems;
   },
   getAudioTagItems(state) {
-    const tags = state.recording.Tags;
+    const tags = (state.recording && state.recording.Tags) || [];
     const tagItems = [];
     tags.map((tag) => {
       const tagItem = {};

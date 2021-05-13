@@ -36,6 +36,9 @@ const getPositionXForEvent = (event: Event): number => {
   }
 };
 
+const minScrubberHeight = 44;
+const trackHeight = 12;
+
 export default {
   name: "VideoTracksScrubber",
   props: {
@@ -76,46 +79,63 @@ export default {
     scrubberWidth() {
       return this.canvasWidth - this.sidePadding * 2;
     },
-    isLoaded() {
-      return true; //this.tracks && this.tracks.length && this.duration;
-    },
-    hasTracks() {
-      return this.isLoaded && this.tracks.length !== 0;
-    },
-    numTracks() {
-      return this.hasTracks ? this.tracks.length : 0;
-    },
     scrubber() {
       return this.$refs.scrubber;
     },
     heightForTracks() {
-      return this.numTracks === 0 ? 44 : Math.max(44, 12 + 13 * this.numTracks);
+      if (this.tracks.length === 0) {
+        return minScrubberHeight;
+      }
+      const paddingY = minScrubberHeight / 2 - trackHeight;
+      const maxTrackTop = Math.max(
+        ...this.trackDimensions.map(({ top }) => Number(top.replace("px", "")))
+      );
+      return Math.max(44, maxTrackTop + trackHeight + paddingY);
     },
   },
   methods: {
-    getWidthForTrack(track: Track): string {
+    getWidthForTrack(track: Track): number {
       const trackDuration =
         track.data.end_s -
         this.timeAdjustmentForBackgroundFrame -
         (track.data.start_s - this.timeAdjustmentForBackgroundFrame);
       const ratio = Math.min(1, trackDuration / this.duration);
-      return `${ratio * this.scrubberWidth}px`;
+      return ratio * this.scrubberWidth;
     },
-    getOffsetXForTrack(track: Track): string {
-      return `${Math.max(
+    getOffsetXForTrack(track: Track): number {
+      return Math.max(
         this.sidePadding,
         this.getOffsetForTime(
           track.data.start_s - this.timeAdjustmentForBackgroundFrame
         ) + this.sidePadding
-      )}px`;
+      );
     },
-    getOffsetYForTrack(trackIndex: number): string {
-      const trackHeight = 12;
-      const offset =
-        (this.heightForTracks - this.tracks.length * trackHeight) / 2 +
-        trackIndex * trackHeight +
-        trackIndex;
-      return `${offset}px`;
+    getOffsetYForTrack(trackIndex: number): number {
+      // See if there are any gaps to move this up to.
+      let topOffset = minScrubberHeight / 2 - trackHeight;
+      if (this.tracks.length === 1) {
+        return minScrubberHeight / 2 - trackHeight / 2;
+      }
+      if (trackIndex !== 0) {
+        const thisLeft = this.getOffsetXForTrack(this.tracks[trackIndex]);
+        const thisRight =
+          thisLeft + this.getWidthForTrack(this.tracks[trackIndex]);
+        // Go backwards to find the earliest track that has a right <= our left
+        while (Math.max(0, trackIndex) !== 0) {
+          const lastTrackDims = this.trackDimensions[trackIndex - 1];
+          const prevLeft = Number(lastTrackDims.left.replace("px", ""));
+          const prevRight =
+            prevLeft + Number(lastTrackDims.width.replace("px", ""));
+          topOffset = Number(lastTrackDims.top.replace("px", ""));
+          const overlapsPrev = prevRight > thisRight || thisLeft < prevRight;
+          if (overlapsPrev) {
+            topOffset += trackHeight + 1;
+            break;
+          }
+          trackIndex--;
+        }
+      }
+      return topOffset;
     },
     getOffsetForTime(time: number): number {
       const pixelsPerSecond = this.scrubberWidth / this.duration;
@@ -185,9 +205,9 @@ export default {
       this.trackDimensions = [];
       for (let i = 0; i < this.tracks.length; i++) {
         this.trackDimensions.push({
-          top: this.getOffsetYForTrack(i),
-          width: this.getWidthForTrack(this.tracks[i]),
-          left: this.getOffsetXForTrack(this.tracks[i]),
+          top: `${this.getOffsetYForTrack(i)}px`,
+          width: `${this.getWidthForTrack(this.tracks[i])}px`,
+          left: `${this.getOffsetXForTrack(this.tracks[i])}px`,
         });
       }
     },

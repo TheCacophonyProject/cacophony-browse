@@ -24,7 +24,9 @@
             :cptv-url="fileSource"
             :cptv-size="fileSize"
             :tracks="orderedTracks"
-            :recording="currentRecording"
+            :colours="colours"
+            :known-duration="currentRecording.duration"
+            :recording-id="currentRecording.id"
             :current-track="cTrack"
             :can-select-tracks="false"
             :show-overlays-for-current-track-only="true"
@@ -111,7 +113,7 @@
 
 <script lang="ts">
 import config from "@/config";
-import CptvPlayer from "@/components/Video/CptvPlayer.vue";
+import CptvPlayer from "cptv-player-vue/src/CptvPlayer.vue";
 import AddCustomTrackTag from "../components/Video/AddCustomTrackTag.vue";
 import api from "@/api";
 import DefaultLabels, { TagColours } from "@/const";
@@ -130,7 +132,7 @@ import {
 
 interface TaggingViewData {
   colours: string[];
-  tags: { text: string; value: string }[];
+  tags: { text: string; valuec: string }[];
   currentTrackIndex: number;
   currentRecording: TagLimitedRecording | null;
   loading: boolean;

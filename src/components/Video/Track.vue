@@ -194,6 +194,7 @@ export default {
         this.$emit("track-selected", {
           trackIndex: index,
           gotoStart: true,
+          playToEnd: true,
         });
       }
     },
