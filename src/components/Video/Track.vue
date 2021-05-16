@@ -93,6 +93,10 @@ export default {
       type: Object,
       required: true,
     },
+    tracks: {
+      type: Array,
+      required: true,
+    },
     recordingId: {
       type: Number,
       required: true,
@@ -189,10 +193,10 @@ export default {
         this.numTracks - 1,
         Math.max(0, this.index + increment)
       );
-
       if (0 <= index && index < this.numTracks) {
         this.$emit("track-selected", {
-          trackIndex: index,
+          trackIndex: this.tracks[index].trackIndex,
+          trackId: this.tracks[index].id,
           gotoStart: true,
           playToEnd: true,
         });
