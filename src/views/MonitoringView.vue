@@ -22,53 +22,50 @@
       </div>
       <div :class="'search-content-wrapper'">
         <div class="search-results">
-            <h1>Animal activity</h1>
-            <h2 v-if="countMessage">
-              {{ countMessage }}
-            </h2>
-            <h5 v-else>Loading...</h5>
-            <p class="search-description" v-html="currentQueryDescription" />
-          </div>
-          <div v-if="!queryPending" class="results">
-            <VisitList
-              :visits="visits"
-            />
-          </div>
-          <div v-else class="results loading">
-            <div
-              v-for="i in 10"
-              :style="{
-                background: `rgba(240, 240, 240, ${1 / i}`,
-              }"
-              :key="i"
-              class="recording-placeholder"
-            />
-          </div>
-          <div v-if="countMessage === 'No matches'" class="no-results">
-            <h6 class="text-muted">No visits found</h6>
-            <p class="small text-muted">Please check your search criteria.</p>
-          </div>
+          <h1>Animal activity</h1>
+          <h2 v-if="countMessage">
+            {{ countMessage }}
+          </h2>
+          <h5 v-else>Loading...</h5>
+          <p class="search-description" v-html="currentQueryDescription" />
         </div>
+        <div v-if="!queryPending" class="results">
+          <VisitList :visits="visits" />
+        </div>
+        <div v-else class="results loading">
+          <div
+            v-for="i in 10"
+            :style="{
+              background: `rgba(240, 240, 240, ${1 / i}`,
+            }"
+            :key="i"
+            class="recording-placeholder"
+          />
+        </div>
+        <div v-if="countMessage === 'No matches'" class="no-results">
+          <h6 class="text-muted">No visits found</h6>
+          <p class="small text-muted">Please check your search criteria.</p>
+        </div>
+      </div>
 
-        <div class="sticky-footer">
-          <div class="pagination-per-page">
-            <b-form-select
-              id="recordsPerPage"
-              v-model="perPage"
-              :options="perPageOptions"
-              class="results-per-page"
-              @change="perPageChanged"
-            />
-            <b-pagination
-              :total-rows="count"
-              v-model="currentPage"
-              :per-page="perPage"
-              :limit="limitPaginationButtons"
-              class="pagination-buttons"
-              @change="pagination"
-              v-if="count > perPage"
-            />
-          </div>
+      <div class="sticky-footer">
+        <div class="pagination-per-page">
+          <b-form-select
+            id="recordsPerPage"
+            v-model="perPage"
+            :options="perPageOptions"
+            class="results-per-page"
+            @change="perPageChanged"
+          />
+          <b-pagination
+            :total-rows="count"
+            v-model="currentPage"
+            :per-page="perPage"
+            :limit="limitPaginationButtons"
+            class="pagination-buttons"
+            @change="pagination"
+            v-if="count > perPage"
+          />
         </div>
       </div>
     </b-row>
@@ -77,12 +74,11 @@
 <script>
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import VisitList from "../components/Monitoring/VisitList.vue";
-import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import api from "../api/index";
 
 export default {
   name: "MonitoringView",
-  components: {VisitList, QueryRecordings, CsvDownload },
+  components: { VisitList, QueryRecordings },
   props: {},
   data() {
     return {
@@ -119,51 +115,66 @@ export default {
     },
   },
   created() {
-      if (this.$route.query.perPage) {
-        this.perPage = Number(this.$route.query.perPage);
-      }
-      if (this.$route.query.page) {
-        this.currentPage = Number(this.$route.query.page);
-      } 
+    if (this.$route.query.perPage) {
+      this.perPage = Number(this.$route.query.perPage);
+    }
+    if (this.$route.query.page) {
+      this.currentPage = Number(this.$route.query.page);
+    }
   },
   methods: {
     pagination(page) {
       this.paginationHasChanged(page, this.perPage);
     },
     perPageChanged(perPage) {
-      this.currentPage = 1
+      this.currentPage = 1;
       this.paginationHasChanged(this.currentPage, perPage);
     },
     makePaginatedQuery(origQuery, page, perPage) {
       const query = Object.assign({}, origQuery);
-        query.perPage = perPage;
-        query.page = page;
+      query.perPage = perPage;
+      query.page = page;
       return query;
     },
     updateRoute(query) {
-        // Catch errors to avoid redundant navigation error
-        this.$router.push({
+      // Catch errors to avoid redundant navigation error
+      this.$router
+        .push({
           path: "monitoring",
           query,
-        }).catch(() => {});
+        })
+        .catch(() => {});
     },
     paginationHasChanged(page, perPage) {
-      const query = this.makePaginatedQuery(this.serialisedQuery, page, perPage);
+      const query = this.makePaginatedQuery(
+        this.serialisedQuery,
+        page,
+        perPage
+      );
       this.updateRoute(query);
       this.getVisits(query);
     },
     queryRouteHasChanged(query) {
-      const fullQuery = this.makePaginatedQuery(query, this.currentPage, this.perPage);
-      this.updateRoute(fullQuery)
+      const fullQuery = this.makePaginatedQuery(
+        query,
+        this.currentPage,
+        this.perPage
+      );
+      this.updateRoute(fullQuery);
     },
     querySubmitted(query) {
-      const queryParamsHaveChanged = JSON.stringify(query) !== JSON.stringify(this.serialisedQuery);
+      const queryParamsHaveChanged =
+        JSON.stringify(query) !== JSON.stringify(this.serialisedQuery);
       if (queryParamsHaveChanged) {
         this.currentPage = 1;
       }
       this.serialisedQuery = query;
-      
-      const fullQuery = this.makePaginatedQuery(query, this.currentPage, this.perPage);
+
+      const fullQuery = this.makePaginatedQuery(
+        query,
+        this.currentPage,
+        this.perPage
+      );
       this.updateRoute(fullQuery);
       this.getVisits(fullQuery);
     },
@@ -193,14 +204,14 @@ export default {
       } else {
         this.visits = results.result.visits;
         const params = results.result.params;
-        this.count = params.estimatedCount;
+        this.count = params.pagesEstimate * this.perPage;
         this.currentPage = params.page;
-        if (this.count > 0) {
-          this.countMessage = `Page ${params.page} of ${params.estimatedPages}`
+        if (this.visits.length > 0) {
+          this.countMessage = `Page ${params.page} of ${params.pagesEstimate}`;
         } else {
-           this.countMessage = "No matches";
+          this.countMessage = "No matches";
         }
-      //   this.currentQueryDescription = this.nextQueryDescription;
+        //   this.currentQueryDescription = this.nextQueryDescription;
       }
     },
   },
@@ -225,7 +236,6 @@ $main-content-width: 640px;
     margin-bottom: 0.8rem;
     color: $gray-700;
   }
-
 
   .search-results {
     max-width: $main-content-width;

@@ -3,7 +3,6 @@ import * as querystring from "querystring";
 import { DeviceVisitMap } from "./visits";
 import * as moment from "moment";
 import { shouldViewAsSuperUser } from "@/utils";
-import { format } from "prettier";
 
 export default {
   query,
@@ -398,7 +397,7 @@ function needsTag(biasToDeviceId?: DeviceId): Promise<RecordingToTag> {
   return CacophonyApi.get(requestUri);
 }
 
-export function calculateFromTime(query: RecordingQuery) : string{
+export function calculateFromTime(query: RecordingQuery): string {
   if (query.hasOwnProperty["from"] && query.from.length > 0) {
     return query.from;
   }

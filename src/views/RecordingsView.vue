@@ -240,7 +240,7 @@ export default {
       this.paginationHasChanged(page, this.perPage);
     },
     perPageChanged(perPage) {
-      this.currentPage = 0
+      this.currentPage = 0;
       this.paginationHasChanged(this.currentPage, perPage);
     },
     relativeDay(itemDate) {
@@ -272,29 +272,44 @@ export default {
       return query;
     },
     updateRoute(query) {
-        // Catch errors to avoid redundant navigation error
-        this.$router.push({
+      // Catch errors to avoid redundant navigation error
+      this.$router
+        .push({
           path: "recordings",
           query,
-        }).catch(() => {});
+        })
+        .catch(() => {});
     },
     paginationHasChanged(page, perPage) {
-      const query = this.makePaginatedQuery(this.serialisedQuery, page, perPage);
+      const query = this.makePaginatedQuery(
+        this.serialisedQuery,
+        page,
+        perPage
+      );
       this.updateRoute(query);
       this.getRecordings(query);
     },
     queryRouteHasChanged(query) {
-      const fullQuery = this.makePaginatedQuery(query, this.currentPage, this.perPage);
-      this.updateRoute(fullQuery)
+      const fullQuery = this.makePaginatedQuery(
+        query,
+        this.currentPage,
+        this.perPage
+      );
+      this.updateRoute(fullQuery);
     },
     querySubmitted(query) {
-      const queryParamsHaveChanged = JSON.stringify(query) !== JSON.stringify(this.serialisedQuery);
+      const queryParamsHaveChanged =
+        JSON.stringify(query) !== JSON.stringify(this.serialisedQuery);
       if (queryParamsHaveChanged) {
         this.currentPage = 0;
       }
-      
+
       this.serialisedQuery = query;
-      const fullQuery = this.makePaginatedQuery(query, this.currentPage, this.perPage);
+      const fullQuery = this.makePaginatedQuery(
+        query,
+        this.currentPage,
+        this.perPage
+      );
       this.updateRoute(fullQuery);
       this.getRecordings(fullQuery);
     },

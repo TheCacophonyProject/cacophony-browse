@@ -453,10 +453,12 @@ export default {
       this.$set(row, "_showDetails", !row._showDetails);
     },
     setQuery(query: RecordingQuery) {
-      this.$router.push({
-        path: "visits",
-        query,
-      }).catch(() => {});
+      this.$router
+        .push({
+          path: "visits",
+          query,
+        })
+        .catch(() => {});
     },
     querysMounted(query: RecordingQuery) {
       this.setQuery(query);

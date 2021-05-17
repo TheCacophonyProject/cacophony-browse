@@ -55,7 +55,6 @@ import SelectTags from "./SelectTags.vue";
 import SelectDuration from "./SelectDuration.vue";
 import SelectRecordingType from "./SelectRecordingType.vue";
 import SelectDateRange from "./SelectDateRange.vue";
-import Vue from "vue";
 
 export default {
   name: "QueryRecordings",
@@ -82,7 +81,7 @@ export default {
     simpleOnly: {
       type: Boolean,
       required: true,
-    }
+    },
   },
   data() {
     return {
@@ -134,8 +133,8 @@ export default {
       if (this.simpleOnly) {
         this.advanced = false;
       } else {
-          // If there was an advanced query, start with the advanced toggle area open.
-        this.advanced = 
+        // If there was an advanced query, start with the advanced toggle area open.
+        this.advanced =
           (this.tagData && this.tagData.tagMode !== "any") ||
           this.duration.hasOwnProperty("maxS") ||
           this.duration.hasOwnProperty("minS");

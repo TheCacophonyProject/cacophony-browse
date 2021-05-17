@@ -17,8 +17,16 @@
           <font-awesome-icon icon="thumbs-down" size="xs" />
         </span>
         &nbsp;
-      </span>
       {{ data.item.classificationAi }}
+      </span>
+    </template>
+   
+    <template #cell(timeStart)="data">
+      {{ formatDate(data.value) }}
+    </template>
+
+    <template #cell(timeEnd)="data">
+      {{ formatDate(data.value) }}
     </template>
 
     <template #cell(recordings)="data">
@@ -28,18 +36,34 @@
 </template>
 
 <script>
+import {
+  toNZDateString,
+} from "@/helpers/datetime";
+
 export default {
   name: "VisitList",
   props: {
     visits: {
-      type:Array,
+      type: Array,
       required: true,
     },
   },
   methods: {
     makeFields() {
-      return ["device", "station", "classification", "classificationAi", "timeStart", "timeEnd", "recordings"];
+      return [
+        "device",
+        "station",
+        { key: "classification", label: "Class"},
+        { key: "classificationAi", label: "AI Class"},
+        "timeStart",
+        "timeEnd",
+        "recordings",
+      ];
     },
+    formatDate(value) {
+      const date = new Date(value);
+      return `${toNZDateString(date)} ${date.toTimeString().substring(0, 5)}`;
+    }
   },
 };
 </script>
