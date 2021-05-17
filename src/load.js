@@ -12,7 +12,7 @@ config.revisionInfo = {
   // eslint-disable-next-line no-undef
   time: __LAST_COMMIT_DATETIME__,
   // eslint-disable-next-line no-undef
-  env: __FULL_ENV__,
+  env: __FULL_ENV__ || "",
 };
 // eslint-disable-next-line no-undef
 if (window.__TRAVIS_TAG__ !== undefined) {
