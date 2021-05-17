@@ -5,6 +5,8 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const webpack = require("webpack");
+const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
+const gitRevisionPlugin = new GitRevisionPlugin({branch: true});
 
 module.exports = {
   target: "web", // NOTE: Hot module reloading via vue-loader breaks without this, even though it is supposed to be the default.
@@ -62,7 +64,7 @@ module.exports = {
     new ESLintPlugin(),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.DefinePlugin({
-      "process.env.BUILD": JSON.stringify("web"),
+      "process.env.BUILD": JSON.stringify("web")
     }),
   ],
   resolve: {

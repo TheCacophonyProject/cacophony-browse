@@ -4,6 +4,8 @@ const common = require("./webpack.common");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
+const gitRevisionPlugin = new GitRevisionPlugin({branch: true});
 
 module.exports = merge(common, {
   mode: "production",
@@ -27,6 +29,10 @@ module.exports = merge(common, {
       __LINZ_API_KEY__: JSON.stringify(process.env.LINZ_BASEMAP_API_KEY || ""),
       __ENV_STAGING__: JSON.stringify("STAGING"),
       __API_STAGING__: JSON.stringify("https://api-test.cacophony.org.nz"),
+      __VERSION__: JSON.stringify(gitRevisionPlugin.version()),
+      __COMMIT_HASH__: JSON.stringify(gitRevisionPlugin.commithash()),
+      __BRANCH__: JSON.stringify(gitRevisionPlugin.branch()),
+      __LAST_COMMIT_DATETIME__: JSON.stringify(gitRevisionPlugin.lastcommitdatetime()),
     }),
     new HtmlWebpackPlugin({
       filename: "index-prod.html",

@@ -9,15 +9,6 @@ const state = {
   rawSize: null,
   recording: null,
   tracks: [],
-
-  findTrack(trackId) {
-    for (const track of this.tracks) {
-      if (track.id == trackId) {
-        return track;
-      }
-    }
-    return null;
-  },
 };
 
 // getters https://vuex.vuejs.org/guide/getters.html
@@ -236,7 +227,9 @@ const mutations = {
   deleteTrackTag(state, deletedTag) {
     const track = state.tracks.find((track) => track.id === deletedTag.TrackId);
     if (track) {
-      track.TrackTags = track.TrackTags.filter((tag) => tag.id != deletedTag.id);
+      track.TrackTags = track.TrackTags.filter(
+        (tag) => tag.id != deletedTag.id
+      );
     }
   },
 };

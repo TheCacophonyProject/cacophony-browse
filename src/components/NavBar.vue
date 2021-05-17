@@ -11,6 +11,13 @@
         Revert</a
       >
     </div>
+    <div
+      v-if="config.env !== 'PRODUCTION' && showRevisionInfo"
+      class="git-revision-bar"
+    >
+      <span>{{ revisionInfo }}</span>
+      <a class="close-button" @click="showRevisionInfo = false">dismiss</a>
+    </div>
     <b-navbar toggleable="lg">
       <b-navbar-brand>
         <router-link class="navbar-brand" to="/" alt="home" />
@@ -115,6 +122,7 @@
 <script>
 import User from "../api/User.api";
 import { shouldViewAsSuperUser } from "@/utils";
+import config from "@/config";
 
 export default {
   name: "Navbar",
@@ -123,14 +131,21 @@ export default {
       internalShowChangeUserViewDialog: false,
       users: [],
       usersListLabel: "loading users",
+      showRevisionInfo: true,
       viewAs: "",
       selectedUser: {
         name: "",
         id: "",
       },
+      config,
     };
   },
   computed: {
+    revisionInfo() {
+      const commitTime = new Date(Date.parse(this.config.revisionInfo.time));
+
+      return `${this.config.revisionInfo.branch} :: ${this.config.revisionInfo.version}, ${commitTime.toLocaleDateString()} ${commitTime.toLocaleTimeString()}`
+    },
     userName() {
       return this.$store.state.User.userData.username;
     },
@@ -268,7 +283,8 @@ export default {
   text-align: center;
 }
 
-.super-user-bar {
+.super-user-bar,
+.git-revision-bar {
   background: purple;
   color: white;
   padding: 5px 10px;
@@ -281,6 +297,27 @@ export default {
     cursor: pointer;
     color: inherit;
     text-decoration: underline;
+  }
+}
+.git-revision-bar {
+  background: #2b333f;
+  font-size: 13px;
+  .close-button {
+    background: darken(#2b333f, 10%);
+    min-height: 22px;
+    line-height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 0 5px;
+    font-size: 10px;
+    user-select: none;
+    &:hover {
+      text-decoration: none;
+      background: lighten(#2b333f, 10%);
+    }
   }
 }
 
