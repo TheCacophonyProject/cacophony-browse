@@ -33,6 +33,13 @@ module.exports = merge(common, {
       __COMMIT_HASH__: JSON.stringify(gitRevisionPlugin.commithash()),
       __BRANCH__: JSON.stringify(gitRevisionPlugin.branch()),
       __LAST_COMMIT_DATETIME__: JSON.stringify(gitRevisionPlugin.lastcommitdatetime()),
+
+      __TRAVIS_TAG__: JSON.stringify(process.env.TRAVIS_TAG || ""),
+      __TRAVIS_BUILD_WEB_URL__: JSON.stringify(process.env.TRAVIS_BUILD_WEB_URL || ""),
+      __TRAVIS_COMMIT__: JSON.stringify(process.env.TRAVIS_COMMIT || ""),
+      __TRAVIS_COMMIT_RANGE__: JSON.stringify(process.env.TRAVIS_COMMIT_RANGE || ""),
+      __TRAVIS_COMMIT_MESSAGE__: JSON.stringify(process.env.TRAVIS_COMMIT_MESSAGE || ""),
+      __TRAVIS_REPO_SLUG__: JSON.stringify(process.env.TRAVIS_REPO_SLUG || ""),
     }),
     new HtmlWebpackPlugin({
       filename: "index-prod.html",

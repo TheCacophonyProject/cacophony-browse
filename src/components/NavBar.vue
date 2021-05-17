@@ -143,8 +143,10 @@ export default {
   computed: {
     revisionInfo() {
       const commitTime = new Date(Date.parse(this.config.revisionInfo.time));
-
-      return `${this.config.revisionInfo.branch} :: ${this.config.revisionInfo.version}, ${commitTime.toLocaleDateString()} ${commitTime.toLocaleTimeString()}`
+      console.log("CONFIG", this.config);
+      return `${this.config.revisionInfo.branch} :: ${
+        this.config.revisionInfo.version
+      }, ${commitTime.toLocaleDateString()} ${commitTime.toLocaleTimeString()}`;
     },
     userName() {
       return this.$store.state.User.userData.username;

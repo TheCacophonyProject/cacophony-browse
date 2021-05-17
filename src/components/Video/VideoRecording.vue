@@ -294,8 +294,7 @@ export default {
         );
       }
       if (track.playToEnd) {
-        selectedTrack.end_s =
-          targetTrack.data.end_s - this.timespanAdjustment;
+        selectedTrack.end_s = targetTrack.data.end_s - this.timespanAdjustment;
       }
       if (
         selectedTrack.trackId &&
@@ -320,7 +319,7 @@ export default {
         });
       } else {
         await this.trackSelected({
-          trackIndex: 0
+          trackIndex: 0,
         });
       }
     },
