@@ -319,7 +319,9 @@ export default {
           gotoStart: true,
         });
       } else {
-        await this.trackSelected(0);
+        await this.trackSelected({
+          trackIndex: 0
+        });
       }
     },
     updateComment(comment) {
