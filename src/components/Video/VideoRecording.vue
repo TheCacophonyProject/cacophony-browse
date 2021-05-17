@@ -294,7 +294,8 @@ export default {
         );
       }
       if (track.playToEnd) {
-        selectedTrack.end_s = targetTrack.data.end_s - this.timespanAdjustment;
+        selectedTrack.end_s =
+          targetTrack.data.end_s - this.timespanAdjustment;
       }
       if (
         selectedTrack.trackId &&
@@ -312,7 +313,7 @@ export default {
       const selectedTrackIndex = this.tracks.findIndex(
         (track) => track.id === Number(this.$route.params.trackid)
       );
-      if (selectedTrackIndex) {
+      if (selectedTrackIndex !== -1) {
         await this.trackSelected({
           trackIndex: selectedTrackIndex,
           gotoStart: true,
