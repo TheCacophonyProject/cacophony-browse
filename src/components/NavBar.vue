@@ -144,16 +144,22 @@ export default {
   },
   computed: {
     revisionInfo() {
+      let version = this.config.revisionInfo.version;
+      if (this.config.revisionInfo.travis) {
+        version =
+          this.config.revisionInfo.travis.branch ||
+          this.config.revisionInfo.travis.tag;
+      }
       const commitTime = new Date(Date.parse(this.config.revisionInfo.time));
-      return `${this.config.revisionInfo.branch} :: ${
-        this.config.revisionInfo.version
-      }, ${commitTime.toLocaleDateString()} ${commitTime.toLocaleTimeString()}`;
+      return `${
+        this.config.revisionInfo.branch
+      } :: ${version}, ${commitTime.toLocaleDateString()} ${commitTime.toLocaleTimeString()}`;
     },
     revisionLink() {
       const info = this.config.revisionInfo;
       let slug;
       if (info.travis && info.travis.tag) {
-        slug = `release/${info.travis.tag}`;
+        slug = `releases/tag/${info.travis.tag}`;
       } else {
         slug = `commit/${info.commit}`;
       }

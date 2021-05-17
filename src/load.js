@@ -18,6 +18,8 @@ if (window.__TRAVIS_TAG__ !== undefined) {
     // eslint-disable-next-line no-undef
     tag: __TRAVIS_TAG__,
     // eslint-disable-next-line no-undef
+    branch: __TRAVIS_BRANCH__,
+    // eslint-disable-next-line no-undef
     buildWebUrl: __TRAVIS_BUILD_WEB_URL__,
     // eslint-disable-next-line no-undef
     commit: __TRAVIS_COMMIT__,
