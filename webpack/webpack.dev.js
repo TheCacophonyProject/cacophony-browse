@@ -25,7 +25,6 @@ module.exports = merge(common, {
       __COMMIT_HASH__: JSON.stringify(gitRevisionPlugin.commithash()),
       __BRANCH__: JSON.stringify(gitRevisionPlugin.branch()),
       __LAST_COMMIT_DATETIME__: JSON.stringify(gitRevisionPlugin.lastcommitdatetime()),
-      __FULL_ENV__: JSON.stringify(process.env || ""),
 
       __TRAVIS_TAG__: JSON.stringify(process.env.TRAVIS_TAG || ""),
       __TRAVIS_BUILD_WEB_URL__: JSON.stringify(process.env.TRAVIS_BUILD_WEB_URL || ""),

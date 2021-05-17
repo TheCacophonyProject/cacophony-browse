@@ -15,7 +15,9 @@
       v-if="config.env !== 'PRODUCTION' && showRevisionInfo"
       class="git-revision-bar"
     >
-      <span>{{ revisionInfo }}</span>
+      <a :href="revisionLink" target="_blank" :title="commitMessage">{{
+        revisionInfo
+      }}</a>
       <a class="close-button" @click="showRevisionInfo = false">dismiss</a>
     </div>
     <b-navbar toggleable="lg">
@@ -143,10 +145,25 @@ export default {
   computed: {
     revisionInfo() {
       const commitTime = new Date(Date.parse(this.config.revisionInfo.time));
-      console.log("CONFIG", this.config);
       return `${this.config.revisionInfo.branch} :: ${
         this.config.revisionInfo.version
       }, ${commitTime.toLocaleDateString()} ${commitTime.toLocaleTimeString()}`;
+    },
+    revisionLink() {
+      const info = this.config.revisionInfo;
+      let slug;
+      if (info.travis && info.travis.tag) {
+        slug = `release/${info.travis.tag}`;
+      } else {
+        slug = `commit/${info.commit}`;
+      }
+      return `https://github.com/TheCacophonyProject/cacophony-browse/${slug}`;
+    },
+    commitMessage() {
+      if (this.config.revisionInfo.travis) {
+        return this.config.revisionInfo.travis.commitMessage;
+      }
+      return false;
     },
     userName() {
       return this.$store.state.User.userData.username;
@@ -295,16 +312,25 @@ export default {
   user-select: none;
   a,
   a:hover {
-    float: right;
     cursor: pointer;
     color: inherit;
     text-decoration: underline;
   }
 }
+.super-user-bar {
+  a,
+  a:hover {
+    float: right;
+  }
+}
 .git-revision-bar {
   background: #2b333f;
   font-size: 13px;
+  a {
+    text-decoration: none;
+  }
   .close-button {
+    float: right;
     background: darken(#2b333f, 10%);
     min-height: 22px;
     line-height: 20px;
