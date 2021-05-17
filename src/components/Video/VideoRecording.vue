@@ -6,6 +6,7 @@
           :cptv-url="videoRawUrl"
           :cptv-size="rawSize"
           :tracks="tracks"
+          :user-files="false"
           :recording-id="recording.id"
           :known-duration="recording.duration"
           :current-track="selectedTrack"

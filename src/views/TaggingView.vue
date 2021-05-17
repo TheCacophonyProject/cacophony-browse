@@ -22,6 +22,7 @@
             ref="thermalPlayer"
             :ext-loading="loading"
             :cptv-url="fileSource"
+            :user-files="false"
             :cptv-size="fileSize"
             :tracks="tracks"
             :colours="colours"
