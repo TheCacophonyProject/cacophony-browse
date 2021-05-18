@@ -26,7 +26,7 @@ module.exports = merge(common, {
       __API__: JSON.stringify("https://api.cacophony.org.nz"),
       __LINZ_API_KEY__: JSON.stringify(process.env.LINZ_BASEMAP_API_KEY || ""),
       __ENV_STAGING__: JSON.stringify("STAGING"),
-      __API_STAGING__: JSON.stringify("https://api-test.cacophony.org.nz"),
+      __API_STAGING__: JSON.stringify("https://feature-test-api.cacophony.org.nz/"),
     }),
     new HtmlWebpackPlugin({
       filename: "index-prod.html",
