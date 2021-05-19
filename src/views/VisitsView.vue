@@ -56,7 +56,6 @@
             <div style="display: flex">
               <h1 style="flex-grow: 100">Visits</h1>
               <div style="align-self: flex-end">
-                <CsvDownload :params="queryParams" :visits="true" />
                 <b-button variant="link" @click="showInfo = true">
                   <font-awesome-icon icon="question-circle" size="sm" />
                   Help</b-button
@@ -71,12 +70,11 @@
             <h2 v-else>
               {{ countMessage }}
             </h2>
-            <p class="search-description" v-html="currentQueryDescription"></p>
             <div
               v-if="!queryPending && !noQueryYet && visits.length > 0"
               class="results"
             >
-              <h1>Visit Summary Per Device</h1>
+              <h1><span v-if="canLoadMore">(Incomplete)</span> Visit Summary Per Device</h1>
               <div class="scrollable">
                 <div v-for="devMap in deviceSummary" :key="devMap.id">
                   <div v-if="Object.entries(devMap).length > 0">
@@ -330,13 +328,14 @@ export default {
   computed: {
     countMessage() {
       if (this.visits.length > 0) {
-        let suffix;
+        let visit_s;
         if (this.visits.length > 1) {
-          suffix = "visits";
+          visit_s = "visits";
         } else {
-          suffix = "visit";
+          visit_s = "visit";
         }
-        return `${this.visits.length} ${suffix} found (total)`;
+        const end = (this.canLoadMore) ? "found so far.  (There are more within search period)" : "found";
+        return `${this.visits.length} ${visit_s} ${end}`;
       } else {
         return "No Visits";
       }
