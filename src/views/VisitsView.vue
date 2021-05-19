@@ -74,7 +74,10 @@
               v-if="!queryPending && !noQueryYet && visits.length > 0"
               class="results"
             >
-              <h1><span v-if="canLoadMore">(Incomplete)</span> Visit Summary Per Device</h1>
+              <h1>
+                <span v-if="canLoadMore">(Incomplete)</span> Visit Summary Per
+                Device
+              </h1>
               <div class="scrollable">
                 <div v-for="devMap in deviceSummary" :key="devMap.id">
                   <div v-if="Object.entries(devMap).length > 0">
@@ -268,13 +271,12 @@ import { Visit, DayVisits } from "../api/visits";
 import DefaultLabels, { imgSrc } from "../const.js";
 import EventSummary from "../components/EventSummary.vue";
 import AudioSummary from "../components/AudioBaitSummary.vue";
-import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import api from "../api/index";
 import { RecordingQuery, VisitsQueryResult } from "../api/Recording.api";
 export default {
   name: "VisitsView",
-  components: { QueryRecordings, EventSummary, AudioSummary, CsvDownload },
+  components: { QueryRecordings, EventSummary, AudioSummary },
   data() {
     return {
       queryParams: {},
@@ -334,7 +336,9 @@ export default {
         } else {
           visit_s = "visit";
         }
-        const end = (this.canLoadMore) ? "found so far.  (There are more within search period)" : "found";
+        const end = this.canLoadMore
+          ? "found so far.  (There are more within search period)"
+          : "found";
         return `${this.visits.length} ${visit_s} ${end}`;
       } else {
         return "No Visits";
