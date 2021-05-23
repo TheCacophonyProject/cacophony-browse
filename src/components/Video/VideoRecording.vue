@@ -5,15 +5,18 @@
         <CptvPlayer
           :cptv-url="videoRawUrl"
           :cptv-size="rawSize"
-          :tracks="orderedTracks"
-          :recording="recording"
+          :tracks="tracks"
+          :user-files="false"
+          :recording-id="recording.id"
+          :known-duration="recording.duration"
           :current-track="selectedTrack"
+          :colours="colours"
           :recently-added-tag="recentlyAddedTrackTag"
           :can-go-backwards="canGoBackwardInSearch"
           :can-go-forwards="canGoForwardInSearch"
           :export-requested="requestedExport"
           @track-selected="trackSelected"
-          @received-header="gotHeader"
+          @ready-to-play="playerReady"
           @request-next-recording="nextRecording"
           @request-prev-recording="prevRecording"
           @export-complete="requestedExport = false"
@@ -22,10 +25,11 @@
       <b-col cols="12" lg="4">
         <div v-if="tracks && tracks.length > 0" class="accordion">
           <TrackInfo
-            v-for="(track, index) in orderedTracks"
+            v-for="(track, index) in tracks"
             :key="index"
             :track="track"
             :index="index"
+            :tracks="tracks"
             :num-tracks="tracks.length"
             :recording-id="getRecordingId()"
             :is-wallaby-project="isWallabyProject()"
@@ -77,7 +81,7 @@ import { mapState } from "vuex";
 import PrevNext from "./PrevNext.vue";
 import RecordingControls from "./RecordingControls.vue";
 import TrackInfo from "./Track.vue";
-import CptvPlayer from "@/components/Video/CptvPlayer.vue";
+import CptvPlayer from "cptv-player-vue/src/CptvPlayer.vue";
 import RecordingProperties from "./RecordingProperties.vue";
 import { TagColours, WALLABY_GROUP } from "@/const";
 import api from "@/api";
@@ -94,7 +98,7 @@ export default {
   props: {
     trackid: {
       type: Number,
-      require: false,
+      required: false,
     },
     recording: {
       type: Object,
@@ -137,29 +141,10 @@ export default {
       }
       return 0;
     },
-    orderedTracks() {
-      return ([...this.tracks] || []).sort(
-        (a, b) => a.data.start_s - b.data.start_s
-      );
-    },
   },
   async mounted() {
-    this.selectedTrack = {
-      trackIndex: this.getSelectedTrack(),
-    };
     await this.checkPreviousAndNextRecordings();
   },
-  watch: {
-    async recording() {
-      this.trackSelected(0);
-    },
-    tracks() {
-      this.selectedTrack = {
-        trackIndex: this.getSelectedTrack(),
-      };
-    },
-  },
-
   methods: {
     requestedMp4Export(advanced?: boolean) {
       if (advanced === true) {
@@ -182,18 +167,7 @@ export default {
         true
       );
     },
-    getSelectedTrack() {
-      if (this.$route.params.trackid) {
-        const index = this.orderedTracks.findIndex(
-          (track) => track.id === this.$route.params.trackid
-        );
-        if (index > -1) {
-          return index;
-        }
-      }
-      return 0;
-    },
-    async gotoNextRecording(direction, tagMode, tags, skipMessage) {
+    async gotoNextRecording(direction, tagMode, tags, skipMessage = false) {
       const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
       if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
         await this.$router.push({
@@ -309,20 +283,46 @@ export default {
         this.recentlyAddedTrackTag = null;
       }, 2000);
     },
-    trackSelected(track) {
+    async trackSelected(track) {
+      const selectedTrack = {
+        ...track,
+      };
+      const targetTrack = this.tracks[track.trackIndex];
       if (track.gotoStart) {
-        this.selectedTrack = {
-          trackIndex: track.trackIndex,
-          start_s:
-            this.orderedTracks[track.trackIndex].data.start_s -
-            this.timespanAdjustment,
-        };
-      } else {
-        this.selectedTrack = track;
+        selectedTrack.start_s = Math.max(
+          0,
+          targetTrack.data.start_s - this.timespanAdjustment
+        );
       }
+      if (track.playToEnd) {
+        selectedTrack.end_s = targetTrack.data.end_s - this.timespanAdjustment;
+      }
+      if (
+        selectedTrack.trackId &&
+        Number(this.$route.params.trackid) !== selectedTrack.trackId
+      ) {
+        await this.$router.replace({
+          path: `/recording/${this.recording.id}/${selectedTrack.trackId}`,
+          query: this.$route.query,
+        });
+      }
+      this.selectedTrack = selectedTrack;
     },
-    gotHeader(header) {
+    async playerReady(header) {
       this.header = header;
+      const selectedTrackIndex = this.tracks.findIndex(
+        (track) => track.id === Number(this.$route.params.trackid)
+      );
+      if (selectedTrackIndex !== -1) {
+        await this.trackSelected({
+          trackIndex: selectedTrackIndex,
+          gotoStart: true,
+        });
+      } else {
+        await this.trackSelected({
+          trackIndex: 0,
+        });
+      }
     },
     updateComment(comment) {
       const recordingId = Number(this.$route.params.id);

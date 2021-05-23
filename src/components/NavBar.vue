@@ -11,6 +11,15 @@
         Revert</a
       >
     </div>
+    <div
+      v-if="config.env !== 'PRODUCTION' && showRevisionInfo"
+      class="git-revision-bar"
+    >
+      <a :href="revisionLink" target="_blank" :title="commitMessage">{{
+        revisionInfo
+      }}</a>
+      <a class="close-button" @click="showRevisionInfo = false">dismiss</a>
+    </div>
     <b-navbar toggleable="lg">
       <b-navbar-brand>
         <router-link class="navbar-brand" to="/" alt="home" />
@@ -115,6 +124,7 @@
 <script>
 import User from "../api/User.api";
 import { shouldViewAsSuperUser } from "@/utils";
+import config from "@/config";
 
 export default {
   name: "Navbar",
@@ -123,14 +133,44 @@ export default {
       internalShowChangeUserViewDialog: false,
       users: [],
       usersListLabel: "loading users",
+      showRevisionInfo: true,
       viewAs: "",
       selectedUser: {
         name: "",
         id: "",
       },
+      config,
     };
   },
   computed: {
+    revisionInfo() {
+      let version = this.config.revisionInfo.version;
+      if (this.config.revisionInfo.travis) {
+        version =
+          this.config.revisionInfo.travis.branch ||
+          this.config.revisionInfo.travis.tag;
+      }
+      const commitTime = new Date(Date.parse(this.config.revisionInfo.time));
+      return `${
+        this.config.revisionInfo.branch
+      } :: ${version}, ${commitTime.toLocaleDateString()} ${commitTime.toLocaleTimeString()}`;
+    },
+    revisionLink() {
+      const info = this.config.revisionInfo;
+      let slug;
+      if (info.travis && info.travis.tag) {
+        slug = `releases/tag/${info.travis.tag}`;
+      } else {
+        slug = `commit/${info.commit}`;
+      }
+      return `https://github.com/TheCacophonyProject/cacophony-browse/${slug}`;
+    },
+    commitMessage() {
+      if (this.config.revisionInfo.travis) {
+        return this.config.revisionInfo.travis.commitMessage;
+      }
+      return false;
+    },
     userName() {
       return this.$store.state.User.userData.username;
     },
@@ -268,7 +308,8 @@ export default {
   text-align: center;
 }
 
-.super-user-bar {
+.super-user-bar,
+.git-revision-bar {
   background: purple;
   color: white;
   padding: 5px 10px;
@@ -277,10 +318,40 @@ export default {
   user-select: none;
   a,
   a:hover {
-    float: right;
     cursor: pointer;
     color: inherit;
     text-decoration: underline;
+  }
+}
+.super-user-bar {
+  a,
+  a:hover {
+    float: right;
+  }
+}
+.git-revision-bar {
+  background: #2b333f;
+  font-size: 13px;
+  a {
+    text-decoration: none;
+  }
+  .close-button {
+    float: right;
+    background: darken(#2b333f, 10%);
+    min-height: 22px;
+    line-height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 0 5px;
+    font-size: 10px;
+    user-select: none;
+    &:hover {
+      text-decoration: none;
+      background: lighten(#2b333f, 10%);
+    }
   }
 }
 

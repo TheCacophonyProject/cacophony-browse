@@ -22,18 +22,19 @@
             ref="thermalPlayer"
             :ext-loading="loading"
             :cptv-url="fileSource"
+            :user-files="false"
             :cptv-size="fileSize"
-            :tracks="orderedTracks"
-            :recording="currentRecording"
+            :tracks="tracks"
+            :colours="colours"
+            :known-duration="currentRecording.duration"
+            :recording-id="currentRecording.id"
             :current-track="cTrack"
             :can-select-tracks="false"
             :show-overlays-for-current-track-only="true"
             :stand-alone="true"
-            @track-selected="trackSelected"
-            @received-header="gotHeader"
+            @ready-to-play="playerReady"
             @request-next-recording="nextRecording"
             @request-prev-recording="prevRecording"
-            @ready-to-play="playerIsReady"
           />
           <div v-else class="player-loading-placeholder"></div>
           <div class="actions">
@@ -111,7 +112,7 @@
 
 <script lang="ts">
 import config from "@/config";
-import CptvPlayer from "@/components/Video/CptvPlayer.vue";
+import CptvPlayer from "cptv-player-vue/src/CptvPlayer.vue";
 import AddCustomTrackTag from "../components/Video/AddCustomTrackTag.vue";
 import api from "@/api";
 import DefaultLabels, { TagColours } from "@/const";
@@ -173,8 +174,10 @@ export default Vue.extend({
     };
   },
   methods: {
-    trackSelected() {},
-    gotHeader() {},
+    playerReady() {
+      this.readyToPlay = true;
+      this.currentTrackIndex = 0;
+    },
     prevRecording() {},
 
     async undo() {
@@ -188,9 +191,6 @@ export default Vue.extend({
       this.readyToPlay = false;
       await api.recording.del(this.currentRecording.RecordingId);
       await this.nextRecording();
-    },
-    playerIsReady() {
-      this.readyToPlay = true;
     },
     isTagged(tagValue: string): boolean {
       if (this.currentRecording && this.tracks && this.currentTrack) {
@@ -342,12 +342,16 @@ export default Vue.extend({
             return acc;
           }, {});
           this.tracks = Object.values(tracks)
-            .map((track, trackIndex) => ({
+            .map((track) => ({
               ...track,
-              trackIndex,
               tags: [],
             }))
-            .filter((track) => track.needsTagging);
+            .filter((track) => track.needsTagging)
+            .sort((a, b) => a.data.start_s - b.data.start_s);
+
+          for (let i = 0; i < this.tracks.length; i++) {
+            this.tracks[i].trackIndex = i;
+          }
         }
         this.currentRecording = recording;
 
@@ -371,11 +375,6 @@ export default Vue.extend({
     numSkipped(): number {
       return this.history.filter(({ tag }) => tag.what === "skipped").length;
     },
-    orderedTracks() {
-      return ([...this.tracks] || []).sort(
-        (a, b) => a.data.start_s - b.data.start_s
-      );
-    },
     allTracksInRecordingAreTaggedByHuman(): boolean {
       return (
         this.tracks.filter((track) => track.needsTagging === false).length ===
@@ -395,16 +394,16 @@ export default Vue.extend({
         this.nextTrackOrRecordingTimeout === 0
       );
     },
-    currentTrack(): Track | undefined {
+    currentTrack(): Track {
       if (this.tracks && this.currentTrackIndex < this.tracks.length) {
         return this.tracks[this.currentTrackIndex];
       }
       // NOTE: This is technically an error, but we don't really want to return undefined from this
-      return (this.tracks && this.tracks![0]) || undefined;
+      return this.tracks && this.tracks[0];
     },
     cTrack() {
       return {
-        trackIndex: this.currentTrackIndex || 0,
+        trackIndex: this.currentTrack.trackIndex,
         start_s: (this.currentTrack && this.currentTrack.data.start_s) || 0,
       };
     },

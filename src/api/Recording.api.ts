@@ -157,10 +157,11 @@ export interface TrackTag {
   what: string;
   confidence?: number;
   automatic?: boolean;
-  data?: "";
+  data: string | { name: string } | undefined;
   createdAt?: UtcTimestamp;
   updatedAt?: UtcTimestamp;
   User?: User;
+  user?: User;
 }
 
 export interface LimitedTrackTag {
