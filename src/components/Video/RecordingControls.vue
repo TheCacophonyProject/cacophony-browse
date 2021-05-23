@@ -75,9 +75,13 @@
         <b-col cols="6" md="3">
           <b-button-group class="btn-block">
             <b-dropdown text="Download" right class="btn-block">
-              <b-dropdown-item :href="downloadFileUrl" target="_blank">
+              <b-dropdown-item @click="$emit('requested-export')">
                 <font-awesome-icon :icon="['far', 'file-video']" />
-                Video
+                Export Video
+              </b-dropdown-item>
+              <b-dropdown-item @click="$emit('requested-export', true)">
+                <font-awesome-icon :icon="['far', 'file-video']" />
+                Export Video (Advanced)
               </b-dropdown-item>
               <b-dropdown-item :href="downloadRawUrl" target="_blank">
                 <font-awesome-icon :icon="['far', 'file']" />
@@ -146,10 +150,6 @@ export default {
       default: "",
     },
     downloadRawUrl: {
-      type: String,
-      default: "",
-    },
-    downloadFileUrl: {
       type: String,
       default: "",
     },
