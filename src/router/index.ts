@@ -9,6 +9,7 @@ import LoginView from "@/views/LoginView.vue";
 import RecordingsView from "@/views/RecordingsView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import RecordingVue from "@/views/RecordingView.vue";
+import MonitoringView from "@/views/MonitoringView.vue";
 import AddEmailView from "@/views/AddEmailView.vue";
 import AnalysisView from "@/views/AnalysisView.vue";
 import VisitsView from "@/views/VisitsView.vue";
@@ -59,6 +60,10 @@ function createRouter() {
       {
         path: "/recordings",
         component: RecordingsView,
+      },
+      {
+        path: "/monitoring",
+        component: MonitoringView,
       },
       {
         path: "/register",

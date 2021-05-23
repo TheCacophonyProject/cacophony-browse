@@ -25,7 +25,7 @@
         <SelectRecordingType v-model="recordingType" />
       </div>
       <SelectDateRange v-model="dates" />
-      <b-form-row>
+      <b-form-row v-if="!simpleOnly">
         <b-col>
           <b-button
             variant="link"
@@ -55,7 +55,6 @@ import SelectTags from "./SelectTags.vue";
 import SelectDuration from "./SelectDuration.vue";
 import SelectRecordingType from "./SelectRecordingType.vue";
 import SelectDateRange from "./SelectDateRange.vue";
-import Vue from "vue";
 
 export default {
   name: "QueryRecordings",
@@ -75,21 +74,13 @@ export default {
       type: Boolean,
       required: true,
     },
-    path: {
-      type: String,
-      required: true,
-    },
-    currentPage: {
-      type: Number,
-      required: false,
-    },
-    perPage: {
-      type: Number,
-      required: false,
-    },
     onlyRecordingType: {
       type: String,
       required: false,
+    },
+    simpleOnly: {
+      type: Boolean,
+      required: true,
     },
   },
   data() {
@@ -118,15 +109,12 @@ export default {
   created() {
     this.resetToDefaultQuery();
 
-    if (Object.keys(this.$route.query).length === 0) {
-      // Populate the url params if we got here without them, ie. /recordings
-      this.updateRouteQuery();
-    } else {
-      this.deserialiseRouteIntoQuery(this.$route.query);
+    if (Object.keys(this.$route.query).length !== 0) {
+      this.deserialiseQuery(this.$route.query);
     }
   },
   mounted() {
-    this.makeApiRequest("mounted");
+    this.onMountOrSubmit("mounted");
   },
   methods: {
     resetToDefaultQuery() {
@@ -141,33 +129,18 @@ export default {
         tagMode: "any",
       };
     },
-    saveLastQuery() {
-      this.lastQuery = this.serialiseQueryForRecall();
-      this.$emit("description", this.makeSearchDescription());
-    },
-    queryHasChanged() {
-      return (
-        JSON.stringify(this.lastQuery) !==
-        JSON.stringify(this.serialiseQueryForRecall())
-      );
-    },
-    updatePagination(perPage, page) {
-      this.query.limit = perPage;
-      this.query.offset = Math.max(0, (page - 1) * perPage);
-      this.updateRouteQuery();
-      this.makeApiRequest();
-    },
     setAdvancedInitialState() {
-      // If there was an advanced query, start with the advanced toggle area open.
-      this.advanced =
-        (this.tagData && this.tagData.tagMode !== "any") ||
-        this.duration.hasOwnProperty("maxS") ||
-        this.duration.hasOwnProperty("minS");
+      if (this.simpleOnly) {
+        this.advanced = false;
+      } else {
+        // If there was an advanced query, start with the advanced toggle area open.
+        this.advanced =
+          (this.tagData && this.tagData.tagMode !== "any") ||
+          this.duration.hasOwnProperty("maxS") ||
+          this.duration.hasOwnProperty("minS");
+      }
     },
-    deserialiseRouteIntoQuery(routeQuery) {
-      setOnlyIfExists("offset", routeQuery, this.query);
-      setOnlyIfExists("limit", routeQuery, this.query);
-
+    deserialiseQuery(routeQuery) {
       setOnlyIfExists("tagMode", routeQuery, this.tagData);
 
       setOnlyIfExists("minS", routeQuery, this.duration);
@@ -200,7 +173,7 @@ export default {
 
       this.setAdvancedInitialState();
     },
-    serialiseQueryForRecall() {
+    serialiseQuery() {
       if (this.isAudio) {
         this.tagData = {
           tags: [],
@@ -213,8 +186,6 @@ export default {
         tag: this.tagData.tags,
         minS: this.duration.minS,
         maxS: this.duration.maxS,
-        limit: this.query.limit,
-        offset: this.query.offset,
         days: this.dates.days,
         from: this.dates.from,
         to: this.dates.to,
@@ -224,16 +195,6 @@ export default {
       };
     },
 
-    updateRouteQuery() {
-      // Update the url query params string so that this search can be easily shared.
-      if (this.queryHasChanged()) {
-        this.$router.push({
-          path: this.path,
-          query: this.serialiseQueryForRecall(),
-        });
-      }
-    },
-
     submit: function () {
       if (!this.onlyRecordingType) {
         this.$store.commit("User/updateRecordingTypePref", this.recordingType);
@@ -241,15 +202,16 @@ export default {
 
       // Every time we submit a new query, we need to clear the offset param, as if we are on page 2+ of the results,
       // we can end up with an offset that is greater than the number of results in the new query.
-      Vue.delete(this.query, "offset");
-      this.updateRouteQuery();
-      this.makeApiRequest();
+      this.onMountOrSubmit();
     },
 
-    makeApiRequest: function (event = "submit") {
-      this.saveLastQuery();
+    onMountOrSubmit: function (event = "submit") {
+      this.lastQuery = this.serialiseQuery();
+      this.$emit("description", this.makeSearchDescription());
+
       this.toggleSearchPanel();
-      this.$emit(event, this.serialiseQueryForRecall());
+
+      this.$emit(event, this.serialiseQuery());
     },
     toggleAdvancedSearch: function () {
       this.advanced = !this.advanced;

@@ -31,7 +31,7 @@ export type GroupId = number;
 export type JwtToken<T> = string;
 type UtcTimestamp = string;
 
-interface FetchResult<T> {
+export interface FetchResult<T> {
   result: T;
   success: boolean;
   status: number;
@@ -212,6 +212,8 @@ export interface RecordingQuery {
   tag?: string[] | string;
   limit?: number;
   offset?: number;
+  page?: number;
+  perPage?: number;
   days?: number | "all";
   from?: string;
   to?: string;
@@ -262,18 +264,8 @@ function makeApiQuery(query: RecordingQuery): any {
     apiWhere["DeviceId"] = query.device;
   }
 
-  let from = query.from;
-  const until = query.to;
-  if (query.hasOwnProperty("days") && query.days !== "all" && query.days) {
-    // For the previous x days we want to do it at the time the submit is pressed and not cache it.
-    // they could have had the window open for a few days.
-    const now = new Date();
-    from = moment(now)
-      .add(-1 * query.days, "days")
-      .format("YYYY-MM-DD HH:mm:ss");
-  }
-  addIfSet(apiWhere, from, "recordingDateTime", "$gt");
-  addIfSet(apiWhere, until, "recordingDateTime", "$lt");
+  addIfSet(apiWhere, calculateFromTime(query), "recordingDateTime", "$gt");
+  addIfSet(apiWhere, query.to, "recordingDateTime", "$lt");
 
   const apiParams = {};
   const whereString = JSON.stringify(apiWhere);
@@ -404,4 +396,21 @@ function needsTag(biasToDeviceId?: DeviceId): Promise<RecordingToTag> {
     requestUri += `?deviceId=${biasToDeviceId}`;
   }
   return CacophonyApi.get(requestUri);
+}
+
+export function calculateFromTime(query: RecordingQuery): string {
+  if (query.hasOwnProperty["from"] && query.from.length > 0) {
+    return query.from;
+  }
+
+  if (query.hasOwnProperty("days") && query.days !== "all" && query.days) {
+    // For the previous x days we want to do it at the time the submit is pressed and not cache it.
+    // they could have had the window open for a few days.
+    const now = new Date();
+    return moment(now)
+      .add(-1 * query.days, "days")
+      .format("YYYY-MM-DD HH:mm:ss");
+  }
+
+  return null;
 }

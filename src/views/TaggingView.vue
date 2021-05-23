@@ -131,7 +131,7 @@ import {
 
 interface TaggingViewData {
   colours: string[];
-  tags: { text: string; valuec: string }[];
+  tags: { text: string; value: string }[];
   currentTrackIndex: number;
   currentRecording: TagLimitedRecording | null;
   loading: boolean;
