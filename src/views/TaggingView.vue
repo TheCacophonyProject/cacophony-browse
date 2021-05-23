@@ -352,8 +352,6 @@ export default Vue.extend({
           for (let i = 0; i < this.tracks.length; i++) {
             this.tracks[i].trackIndex = i;
           }
-
-          console.log(this.tracks);
         }
         this.currentRecording = recording;
 
