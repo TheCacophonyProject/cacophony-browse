@@ -38,6 +38,15 @@
 
               <b-dropdown-item
                 v-b-tooltip.hover.left="
+                  'Missing an earlier recording that explains how the animal got to where it is now'
+                "
+                @click="addTag('missed recording')"
+              >
+                Missed recording
+              </b-dropdown-item>
+
+              <b-dropdown-item
+                v-b-tooltip.hover.left="
                   'Mark this as a cool or interesting recording'
                 "
                 @click="addCoolTag"
