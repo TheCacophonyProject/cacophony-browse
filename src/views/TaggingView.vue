@@ -17,28 +17,32 @@
               <div class="countdown">{{ nextTrackOrRecordingTimeout }}</div>
             </div>
           </transition>
-          <ThermalVideoPlayer
-            v-if="fileSource || loading"
+          <CptvPlayer
+            v-if="fileSource"
             ref="thermalPlayer"
-            :video-url="fileSource || ''"
+            :ext-loading="loading"
+            :cptv-url="fileSource"
+            :user-files="false"
+            :cptv-size="fileSize"
             :tracks="tracks"
-            :current-track="currentTrackIndex"
+            :colours="colours"
+            :known-duration="currentRecording.duration"
+            :recording-id="currentRecording.id"
+            :current-track="cTrack"
             :can-select-tracks="false"
-            :loop-selected-track="true"
-            :show-motion-paths="showMotionPaths"
             :show-overlays-for-current-track-only="true"
+            :stand-alone="true"
+            @ready-to-play="playerReady"
             @request-next-recording="nextRecording"
-            @ready-to-play="playerIsReady"
+            @request-prev-recording="prevRecording"
           />
+          <div v-else class="player-loading-placeholder"></div>
           <div class="actions">
             <b-button
               :disabled="!readyToTag || history.length === 0"
               @click="undo"
             >
               Undo last action
-            </b-button>
-            <b-button @click="showMotionPaths = !showMotionPaths">
-              {{ showMotionPaths ? "Hide" : "Show" }} motion paths
             </b-button>
             <b-button
               variant="danger"
@@ -76,7 +80,7 @@
             <img
               alt="Other tag"
               title="Open form to add other tag"
-              src="../assets/video/plus.png"
+              src="/plus.png"
             />
             <span>other...</span>
           </b-button>
@@ -107,11 +111,11 @@
 </template>
 
 <script lang="ts">
-import config from "../config";
-import ThermalVideoPlayer from "../components/Video/ThermalVideoPlayer.vue";
+import config from "@/config";
+import CptvPlayer from "cptv-player-vue/src/CptvPlayer.vue";
 import AddCustomTrackTag from "../components/Video/AddCustomTrackTag.vue";
-import api from "../api";
-import DefaultLabels, { TagColours } from "../const";
+import api from "@/api";
+import DefaultLabels, { TagColours } from "@/const";
 import Vue from "vue";
 
 import {
@@ -123,17 +127,16 @@ import {
   TrackTag,
   User,
   JwtToken,
-} from "../api/Recording.api";
+} from "@/api/Recording.api";
 
 interface TaggingViewData {
   colours: string[];
-  tags: { text: string; value: string }[];
+  tags: { text: string; valuec: string }[];
   currentTrackIndex: number;
   currentRecording: TagLimitedRecording | null;
   loading: boolean;
   taggingPending: boolean;
   readyToPlay: boolean;
-  showMotionPaths: boolean;
   tracks: LimitedTrack[];
   history: {
     tracks: LimitedTrack[];
@@ -147,7 +150,7 @@ interface TaggingViewData {
 
 export default Vue.extend({
   name: "TaggingView",
-  components: { ThermalVideoPlayer, AddCustomTrackTag },
+  components: { CptvPlayer, AddCustomTrackTag },
   data(): TaggingViewData {
     return {
       colours: TagColours,
@@ -167,9 +170,16 @@ export default Vue.extend({
       nextTrackOrRecordingTimeout: 0,
       showMotionPaths: false,
       currentTimeout: null,
+      fileSize: 0,
     };
   },
   methods: {
+    playerReady() {
+      this.readyToPlay = true;
+      this.currentTrackIndex = 0;
+    },
+    prevRecording() {},
+
     async undo() {
       const { recording, tracks, trackIndex, tag } = this.history.pop();
       await this.deleteTag(tag, recording, tracks[trackIndex]);
@@ -181,9 +191,6 @@ export default Vue.extend({
       this.readyToPlay = false;
       await api.recording.del(this.currentRecording.RecordingId);
       await this.nextRecording();
-    },
-    playerIsReady() {
-      this.readyToPlay = true;
     },
     isTagged(tagValue: string): boolean {
       if (this.currentRecording && this.tracks && this.currentTrack) {
@@ -226,7 +233,6 @@ export default Vue.extend({
     async nextRecording() {
       const currentDeviceId =
         this.currentRecording && this.currentRecording.DeviceId;
-      this.currentRecording = null;
       this.tracks = [];
       this.readyToPlay = false;
       this.loading = true;
@@ -234,7 +240,6 @@ export default Vue.extend({
       this.loading = false;
     },
     async nextRecordingUnbiased() {
-      this.currentRecording = null;
       this.tracks = [];
       this.readyToPlay = false;
       this.loading = true;
@@ -320,6 +325,7 @@ export default Vue.extend({
       const { result, success } = recordingResponse;
       if (success) {
         const recording = result.rows[0];
+        this.fileSize = recording.fileSize;
         // Make sure it's not a recording we've seen before and skipped tracks from.
         if (
           this.history.find(
@@ -328,12 +334,26 @@ export default Vue.extend({
         ) {
           return await this.getRecording();
         }
+
+        // FIXME: Dedupe these tracks, we seem to not be getting DISTINCT tracks on the DB side.
+        if (recording.tracks.length) {
+          const tracks = recording.tracks.reduce((acc, track) => {
+            acc[track.TrackId] = track;
+            return acc;
+          }, {});
+          this.tracks = Object.values(tracks)
+            .map((track) => ({
+              ...track,
+              tags: [],
+            }))
+            .filter((track) => track.needsTagging)
+            .sort((a, b) => a.data.start_s - b.data.start_s);
+
+          for (let i = 0; i < this.tracks.length; i++) {
+            this.tracks[i].trackIndex = i;
+          }
+        }
         this.currentRecording = recording;
-        this.tracks = recording.tracks.map((track, trackIndex) => ({
-          ...track,
-          trackIndex,
-          tags: [],
-        }));
 
         // Advance to next untagged track
         let nextIndex = 0;
@@ -374,21 +394,25 @@ export default Vue.extend({
         this.nextTrackOrRecordingTimeout === 0
       );
     },
-    currentTrack(): Track | undefined {
+    currentTrack(): Track {
       if (this.tracks && this.currentTrackIndex < this.tracks.length) {
         return this.tracks[this.currentTrackIndex];
       }
       // NOTE: This is technically an error, but we don't really want to return undefined from this
-      return (this.tracks && this.tracks![0]) || undefined;
+      return this.tracks && this.tracks[0];
+    },
+    cTrack() {
+      return {
+        trackIndex: this.currentTrack.trackIndex,
+        start_s: (this.currentTrack && this.currentTrack.data.start_s) || 0,
+      };
     },
     currentUser(): User {
       return this.$store.state.User.userData;
     },
     fileSource(): string | false {
-      if (!this.loading) {
-        if (this.currentRecording) {
-          return `${config.api}/api/v1/signedUrl?jwt=${this.currentRecording.recordingJWT}`;
-        }
+      if (this.currentRecording) {
+        return `${config.api}/api/v1/signedUrl?jwt=${this.currentRecording.recordingJWT}`;
       }
       return false;
     },
@@ -400,6 +424,14 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
+.player-loading-placeholder {
+  background: black;
+  border-radius: 5px;
+  width: 100%;
+  min-height: 500px;
+  // TODO
+}
+
 .tagging-view {
   display: flex;
   flex-direction: column;

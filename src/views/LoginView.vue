@@ -26,6 +26,7 @@
               v-model="usernameOrEmail"
               placeholder="Username or Email Address"
               type="text"
+              autocapitalize="none"
             />
           </b-form-group>
 

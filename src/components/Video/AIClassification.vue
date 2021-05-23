@@ -91,12 +91,14 @@ export default {
     },
     aiGuessIsSameAsSomeUser() {
       return (
+        this.aiGuess &&
         this.userTags.length !== 0 &&
         this.userTags.includes(this.mapName(this.aiGuess.what))
       );
     },
     aiGuessIsDifferentFromSomeUser() {
       return (
+        this.aiGuess &&
         this.userTags.length !== 0 &&
         this.userTags.filter((tag) => tag !== this.mapName(this.aiGuess.what))
           .length > 0

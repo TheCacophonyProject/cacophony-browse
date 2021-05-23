@@ -2,7 +2,7 @@
   <div :class="['card', trackClass]">
     <div class="card-header">
       <button
-        v-if="index != 0"
+        v-if="index !== 0"
         title="Previous track"
         class="prev-track button btn"
         @click="trackSelected(-1)"
@@ -15,8 +15,9 @@
         <span class="out-of-tracks">/ {{ numTracks }}</span>
       </h5>
       <div class="track-time" @click="trackSelected(0)">
-        <span class="title">Time:</span> {{ track.data.start_s }} -
-        {{ track.data.end_s }}s <br />
+        <span class="title">Time:</span>
+        {{ Math.max(0, track.data.start_s - adjustTimespans).toFixed(1) }} -
+        {{ (track.data.end_s - adjustTimespans).toFixed(1) }}s <br />
         <span class="delta">
           (&#916;
           {{ (track.data.end_s - track.data.start_s).toFixed(1) }}s)
@@ -92,6 +93,10 @@ export default {
       type: Object,
       required: true,
     },
+    tracks: {
+      type: Array,
+      required: true,
+    },
     recordingId: {
       type: Number,
       required: true,
@@ -115,6 +120,10 @@ export default {
     isWallabyProject: {
       type: Boolean,
       default: false,
+    },
+    adjustTimespans: {
+      type: Number,
+      default: 0,
     },
   },
   data() {
@@ -155,26 +164,42 @@ export default {
     addTag(tag) {
       const recordingId = this.recordingId;
       const trackId = this.track.id;
-      this.$store.dispatch("Video/ADD_TRACK_TAG", {
-        tag,
-        recordingId,
-        trackId,
-      });
+      this.$store
+        .dispatch("Video/ADD_TRACK_TAG", {
+          tag,
+          recordingId,
+          trackId,
+        })
+        .then(() => {
+          this.$emit("change-tag", { trackIndex: this.index, tag });
+        });
     },
     promptUserToAddTag() {
       this.showUserTaggingHintCountDown = true;
     },
     deleteTag(tag) {
       const recordingId = this.recordingId;
-      this.$store.dispatch("Video/DELETE_TRACK_TAG", {
-        tag,
-        recordingId,
-      });
+      this.$store
+        .dispatch("Video/DELETE_TRACK_TAG", {
+          tag,
+          recordingId,
+        })
+        .then(() => {
+          this.$emit("change-tag", { trackIndex: this.index, tag });
+        });
     },
     trackSelected(increment) {
-      const index = this.index + increment;
+      const index = Math.min(
+        this.numTracks - 1,
+        Math.max(0, this.index + increment)
+      );
       if (0 <= index && index < this.numTracks) {
-        this.$emit("trackSelected", this.index + increment);
+        this.$emit("track-selected", {
+          trackIndex: this.tracks[index].trackIndex,
+          trackId: this.tracks[index].id,
+          gotoStart: true,
+          playToEnd: true,
+        });
       }
     },
   },
@@ -215,7 +240,9 @@ export default {
   margin-bottom: 0;
   margin-top: 0.1em;
   flex: 1 1 auto;
+  line-height: unset;
   cursor: pointer;
+  user-select: none;
 }
 
 .track-time {
@@ -231,7 +258,7 @@ export default {
 
 .track-image {
   display: inline-block;
-  vertical-align: bottom;
+  vertical-align: text-bottom;
   width: 20px;
   height: 20px;
 }

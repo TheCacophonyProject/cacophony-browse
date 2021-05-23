@@ -228,12 +228,11 @@ const DefaultLabels = {
       allLabels.inTrap,
       allLabels.trapInteraction,
       allLabels.cool,
-      allLabels.multipleAnimals
+      allLabels.multipleAnimals,
     ];
   },
   searchRecordingLabels: function () {
-    return this.recordingLabels()
-      .concat(this.tagTypes)
+    return this.recordingLabels().concat(this.tagTypes);
   },
   searchLabels: function () {
     var searchLabels = this.animals.concat([

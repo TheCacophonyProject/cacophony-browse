@@ -8,6 +8,9 @@ const webpack = require("webpack");
 
 module.exports = {
   target: "web", // NOTE: Hot module reloading via vue-loader breaks without this, even though it is supposed to be the default.
+  experiments: {
+    syncWebAssembly: true,
+  },
   module: {
     rules: [
       {
@@ -21,7 +24,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         loader: "ts-loader",
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!(cptv-player-vue)\/).*/,
         options: {
           appendTsSuffixTo: [/\.vue$/],
           transpileOnly: true,
@@ -30,7 +33,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: "babel-loader",
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!(cptv-player-vue|cptv-decoder)\/).*/,
         include: [
           path.resolve(__dirname, "src"),
           /\.js$/,
@@ -59,15 +62,23 @@ module.exports = {
     new ESLintPlugin(),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.DefinePlugin({
-      "process.env.BUILD": JSON.stringify("web"),
+      "process.env.BUILD": JSON.stringify("web")
     }),
   ],
   resolve: {
+    fallback: {
+      // NOTE: These are needed for h264-mp4-encoder to package properly.
+      fs: false,
+      module: false,
+      path: false,
+      crypto: false,
+      worker_threads: false,
+    },
     alias: {
       vue$: "vue/dist/vue.esm.js",
       "@": path.resolve(__dirname, '../src')
     },
-    extensions: ["*", ".js", ".vue", ".json", ".ts"],
+    extensions: ["*", ".js", ".vue", ".json", ".ts", ".wasm", ".mjs"],
   },
   devServer: {
     historyApiFallback: true,

@@ -5,26 +5,17 @@ import store from "../index";
 const state = {
   downloadFileJWT: null,
   downloadRawJWT: null,
-  recording: {
-    Tags: [],
-  },
+  fileSize: null,
+  rawSize: null,
+  recording: null,
   tracks: [],
-
-  findTrack(trackId) {
-    for (const track of this.tracks) {
-      if (track.id == trackId) {
-        return track;
-      }
-    }
-    return null;
-  },
 };
 
 // getters https://vuex.vuejs.org/guide/getters.html
 
 const getters = {
   getTagItems(state) {
-    const tags = state.recording.Tags;
+    const tags = (state.recording && state.recording.Tags) || [];
     const tagItems = [];
     tags.map((tag) => {
       const tagItem = {};
@@ -50,7 +41,7 @@ const getters = {
     return tagItems;
   },
   getAudioTagItems(state) {
-    const tags = state.recording.Tags;
+    const tags = (state.recording && state.recording.Tags) || [];
     const tagItems = [];
     tags.map((tag) => {
       const tagItem = {};
@@ -92,8 +83,10 @@ const actions = {
   async GET_RECORDING({ commit }, recordingId) {
     const tracksPromise = api.recording.tracks(recordingId);
     const recordingPromise = api.recording.id(recordingId);
-    const { result: recording } = await recordingPromise;
-    const { result: tracks } = await tracksPromise;
+    const [{ result: recording }, { result: tracks }] = await Promise.all([
+      recordingPromise,
+      tracksPromise,
+    ]);
     commit("receiveRecording", recording);
     commit("receiveTracks", tracks);
     return {
@@ -148,9 +141,9 @@ const actions = {
     }
 
     // Add an initial tag to update the UI more quickly.
-    const newTag = Object.assign({}, tag);
-    newTag.id = result.trackTagId;
-    newTag.TrackId = trackId;
+    const newTag = { ...tag };
+    newTag.id = Number(result.trackTagId);
+    newTag.TrackId = Number(trackId);
     newTag.createdAt = new Date();
     commit("addTrackTag", newTag);
 
@@ -162,11 +155,8 @@ const actions = {
     if (!syncSuccess) {
       return;
     }
-    for (const track of syncResult.tracks) {
-      if (track.id == trackId) {
-        commit("setTrackTags", track);
-      }
-    }
+    const track = syncResult.tracks.find((track) => track.id === trackId);
+    commit("setTrackTags", track);
     return result;
   },
 
@@ -182,15 +172,22 @@ const actions = {
 
 // mutations https://vuex.vuejs.org/guide/mutations.html
 const mutations = {
-  receiveRecording(state, { recording, downloadFileJWT, downloadRawJWT }) {
+  receiveRecording(
+    state,
+    { recording, downloadFileJWT, downloadRawJWT, fileSize, rawSize }
+  ) {
     state.recording = recording;
     state.downloadFileJWT = downloadFileJWT;
     state.downloadRawJWT = downloadRawJWT;
+    state.fileSize = fileSize;
+    state.rawSize = rawSize;
   },
 
   receiveTracks(state, { tracks }) {
+    tracks.sort((a, b) => a.data.start_s - b.data.start_s);
     for (let i = 0; i < tracks.length; i++) {
       tracks[i].trackIndex = i;
+      tracks[i].data = Object.freeze(tracks[i].data);
     }
     state.tracks = tracks;
   },
@@ -214,20 +211,26 @@ const mutations = {
   },
 
   addTrackTag(state, tag) {
-    const track = state.findTrack(tag.TrackId);
-    track.TrackTags.push(tag);
+    const track = state.tracks.find((track) => track.id === tag.TrackId);
+    if (track) {
+      track.TrackTags.push(tag);
+    }
   },
 
   setTrackTags(state, newTrack) {
-    const track = state.findTrack(newTrack.id);
+    const track = state.tracks.find((track) => track.id === newTrack.id);
     if (track) {
       track.TrackTags = newTrack.TrackTags;
     }
   },
 
   deleteTrackTag(state, deletedTag) {
-    const track = state.findTrack(deletedTag.TrackId);
-    track.TrackTags = track.TrackTags.filter((tag) => tag.id != deletedTag.id);
+    const track = state.tracks.find((track) => track.id === deletedTag.TrackId);
+    if (track) {
+      track.TrackTags = track.TrackTags.filter(
+        (tag) => tag.id != deletedTag.id
+      );
+    }
   },
 };
 

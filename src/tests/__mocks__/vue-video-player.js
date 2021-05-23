@@ -1,1 +1,0 @@
-// This empty file mocks vue-video-player and is required to get the tests running.
