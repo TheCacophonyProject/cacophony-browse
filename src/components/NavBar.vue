@@ -12,7 +12,7 @@
       >
     </div>
     <div
-      v-if="config.env !== 'PRODUCTION' && showRevisionInfo"
+      v-if="config.environment !== 'PRODUCTION' && showRevisionInfo"
       class="git-revision-bar"
     >
       <a :href="revisionLink" target="_blank" :title="commitMessage">{{
