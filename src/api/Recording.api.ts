@@ -399,11 +399,11 @@ function needsTag(biasToDeviceId?: DeviceId): Promise<RecordingToTag> {
 }
 
 export function calculateFromTime(query: RecordingQuery): string {
-  if (query.hasOwnProperty["from"] && query.from.length > 0) {
+  if (query.hasOwnProperty("from") && query.from && query.from.length > 0) {
     return query.from;
   }
 
-  if (query.hasOwnProperty("days") && query.days !== "all" && query.days) {
+  if (query.hasOwnProperty("days") && query.days && query.days !== "all") {
     // For the previous x days we want to do it at the time the submit is pressed and not cache it.
     // they could have had the window open for a few days.
     const now = new Date();
