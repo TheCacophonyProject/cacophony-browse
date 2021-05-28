@@ -11,23 +11,37 @@ export class VisitSearchParams {
   all: boolean;
   devices: number[];
   groups: number[];
+  compareAi: string;
   estimatedCount: number;
-  estimatedPages: number;
+  pagesEstimate: number;
   page: number; // page we are on
-  from: string; // original query from date
-  until: string; // original query to date
+  searchFrom: string; // original query from date
+  searchUntil: string; // original query to date
   pageFrom: string; // visits for this page start after this date
-  pageTo: string; // visits for this page start before or on this date
+  pageUntil: string; // visits for this page start before or on this date
+}
+
+interface VisitRecordingTag {
+  aiTag: string;
+  end: number;
+  start: number;
+  tag: string;
+  isAITagged: boolean;
 }
 
 export class NewVisit {
-  aiWhat?: string; // what was the best guess from the AI?
-  what?: string; // what was the best guess overall?
-  isUserTagged: boolean; // is the best guess derived from a user tag?
-  start: string; // date for start of visit
-  end: string; // date for start of visit
+  classFromUserTag?: boolean; // is the best guess derived from a user tag?
+  classification?: string; // what was the best guess overall?
+  classificationAi?: string; // what was the best guess from the AI?
+  device: string;
+  deviceId: number;
+  stationId: number;
+  station: string;
+  tracks: number; // track count
+  timeStart: string; // date for start of visit
+  timeEnd: string; // date for start of visit
   incomplete: boolean; // is it possible that this visit still has more recordings that should be attached?
-  recordings: any[];
+  recordings: { recId: number; start: string; tracks: VisitRecordingTag[] }[];
 }
 
 export interface NewVisitsQueryResult {
@@ -53,7 +67,7 @@ function queryVisitPage(
 ): Promise<FetchResult<NewVisitsQueryResult>> {
   return CacophonyApi.get(
     `${apiPath}/page?${querystring.stringify(makeApiQuery(visitQuery))}${
-      shouldViewAsSuperUser() ? "" : "?view-mode=user"
+      shouldViewAsSuperUser() ? "" : "&view-mode=user"
     }`
   );
 }

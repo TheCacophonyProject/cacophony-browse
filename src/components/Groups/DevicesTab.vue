@@ -33,7 +33,10 @@
         <b-link
           :to="{
             name: 'device',
-            params: { devicename: row.item.deviceName, groupname: groupName },
+            params: {
+              deviceName: row.item.deviceName,
+              groupName
+              },
           }"
         >
           {{ row.item.deviceName }}

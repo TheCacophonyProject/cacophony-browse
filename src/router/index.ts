@@ -8,13 +8,16 @@ import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/LoginView.vue";
 import RecordingsView from "@/views/RecordingsView.vue";
 import RegisterView from "@/views/RegisterView.vue";
-import RecordingVue from "@/views/RecordingView.vue";
+import RecordingView from "@/views/RecordingView.vue";
 import MonitoringView from "@/views/MonitoringView.vue";
 import AddEmailView from "@/views/AddEmailView.vue";
 import AnalysisView from "@/views/AnalysisView.vue";
 import VisitsView from "@/views/VisitsView.vue";
 import TaggingView from "@/views/TaggingView.vue";
 import EndUserAgreementView from "@/views/EndUserAgreementView.vue";
+import MonitoringTimeline from "@/views/MonitoringTimeline.vue";
+
+// TODO(jon): We should be lazy loading some of these components for better code-splitting
 
 function createRouter() {
   const router = new Router({
@@ -26,7 +29,7 @@ function createRouter() {
     }),
     routes: [
       {
-        path: "/groups/:groupname/:devicename",
+        path: "/groups/:groupName/device/:deviceName/:tabName?",
         name: "device",
         component: DeviceView,
       },
@@ -40,7 +43,7 @@ function createRouter() {
         component: GroupsView,
       },
       {
-        path: "/groups/:groupname",
+        path: "/groups/:groupName/:tabName?",
         name: "group",
         component: GroupView,
       },
@@ -66,6 +69,10 @@ function createRouter() {
         component: MonitoringView,
       },
       {
+        path: "/monitoring-timeline",
+        component: MonitoringTimeline,
+      },
+      {
         path: "/register",
         component: RegisterView,
         meta: {
@@ -73,8 +80,8 @@ function createRouter() {
         },
       },
       {
-        path: "/recording/:id/:trackid?",
-        component: RecordingVue,
+        path: "/recording/:id/:trackId?",
+        component: RecordingView,
       },
       {
         path: "/add_email",

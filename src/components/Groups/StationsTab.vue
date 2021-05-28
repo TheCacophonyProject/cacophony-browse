@@ -221,7 +221,7 @@ export default {
           OpenStreetMapFallbackLayer,
         ];
       }
-      return [OpenStreetMapFallbackLayer];
+      return [{ ...OpenStreetMapFallbackLayer, visible: true }];
     },
     stations() {
       return this.items

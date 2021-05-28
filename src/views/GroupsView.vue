@@ -28,15 +28,15 @@
         <b-col v-if="hasGroups" class="col-12 col-lg-8">
           <div class="list-wrapper" data-cy="groups-list">
             <router-link
-              v-for="({ groupname }, index) in groups"
+              v-for="(groupName, index) in groups"
               :key="index"
               :to="{
                 name: 'group',
-                params: { groupname },
+                params: { groupName },
               }"
               class="list-group-item list-group-item-action"
             >
-              {{ groupname }}
+              {{ groupName }}
               <font-awesome-icon class="icon" icon="chevron-right" size="xs" />
             </router-link>
           </div>
@@ -91,9 +91,9 @@ export default {
         try {
           const { result } = await api.groups.getGroups();
           // Groups are always ordered alphabetically.
-          this.groups = result.groups.sort((a, b) =>
-            a.groupname.localeCompare(b.groupname)
-          );
+          this.groups = result.groups
+            .map(({ groupname }) => groupname)
+            .sort((a, b) => a.localeCompare(b));
         } catch (error) {
           // Do something with the error.
         }

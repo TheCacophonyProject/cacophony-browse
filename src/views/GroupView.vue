@@ -97,7 +97,7 @@ export default {
       users: [],
       devices: [],
       stations: [],
-      currentTabIndex: 0, // Which tab is the default one
+      tabNames: ["users", "devices", "stations"],
     };
   },
   computed: {
@@ -105,7 +105,7 @@ export default {
       currentUser: (state) => (state as any).User.userData,
     }),
     groupName() {
-      return this.$route.params.groupname;
+      return this.$route.params.groupName;
     },
     isGroupAdmin() {
       return (
@@ -120,8 +120,39 @@ export default {
       return this.stations.filter((station) => station.retiredAt === null)
         .length;
     },
+    currentTabName() {
+      return this.$route.params.tabName;
+    },
+    currentTabIndex: {
+      get() {
+        return Math.max(0, this.tabNames.indexOf(this.currentTabName));
+      },
+      set(tabIndex) {
+        const nextTabName = this.tabNames[tabIndex];
+        if (nextTabName !== this.currentTabName) {
+          this.$router.push({
+            name: "group",
+            params: {
+              groupName: this.groupName,
+              tabName: nextTabName,
+            },
+          });
+        }
+      },
+    },
   },
   created() {
+    const nextTabName = this.tabNames[this.currentTabIndex];
+    if (nextTabName !== this.currentTabName) {
+      this.$router.replace({
+        name: "group",
+        params: {
+          groupName: this.groupName,
+          tabName: nextTabName,
+        },
+      });
+    }
+    this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
     this.fetchUsers();
     this.fetchDevices();
     this.fetchStations();

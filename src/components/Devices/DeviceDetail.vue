@@ -55,8 +55,51 @@ export default {
   },
   data() {
     return {
-      currentTabIndex: 0,
+      tabNames: ["current-software", "device-users", "device-events"],
     };
+  },
+  created() {
+    const nextTabName = this.tabNames[this.currentTabIndex];
+    if (nextTabName !== this.currentTabName) {
+      this.$router.replace({
+        name: "device",
+        params: {
+          groupName: this.groupName,
+          deviceName: this.deviceName,
+          tabName: nextTabName,
+        },
+      });
+    }
+    this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
+  },
+  computed: {
+    groupName() {
+      return this.$route.params.groupName;
+    },
+    deviceName() {
+      return this.$route.params.deviceName;
+    },
+    currentTabName() {
+      return this.$route.params.tabName;
+    },
+    currentTabIndex: {
+      get() {
+        return Math.max(0, this.tabNames.indexOf(this.currentTabName));
+      },
+      set(tabIndex) {
+        const nextTabName = this.tabNames[tabIndex];
+        if (nextTabName !== this.currentTabName) {
+          this.$router.push({
+            name: "device",
+            params: {
+              groupName: this.groupName,
+              deviceName: this.deviceName,
+              tabName: nextTabName,
+            },
+          });
+        }
+      },
+    },
   },
 };
 </script>

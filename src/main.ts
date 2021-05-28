@@ -11,6 +11,8 @@ import "./styles/global.scss";
 import config from "./config";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
+import VueApexCharts from "vue-apexcharts";
+
 // Leaflet CSS
 import "leaflet/dist/leaflet.css";
 import Router from "vue-router";
@@ -25,6 +27,10 @@ export default function () {
   Vue.use(Router);
 
   Vue.component("font-awesome-icon", FontAwesomeIcon);
+
+  // https://apexcharts.com/docs/vue-charts/
+  Vue.use(VueApexCharts);
+  Vue.component("apexchart", VueApexCharts);
 
   // https://vue-multiselect.js.org
   Vue.component("multiselect", Multiselect);

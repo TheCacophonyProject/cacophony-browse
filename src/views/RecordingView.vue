@@ -7,8 +7,8 @@
             :to="{
               name: 'device',
               params: {
-                devicename: deviceName,
-                groupname: groupName,
+                deviceName,
+                groupName,
               },
             }"
           >
