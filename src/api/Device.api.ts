@@ -65,11 +65,31 @@ function getLatestSoftwareVersion(deviceId) {
   return getLatestEvents(deviceId, params);
 }
 
+export const DeviceEventTypes = [
+  "alert",
+  "attiny-sleep",
+  "audioBait",
+  "daytime-power-off",
+  "powered-off",
+  "power-on-test",
+  "rpi-power-on",
+  "salt-update",
+  "systemError",
+  "test",
+  "throttle",
+  "versionData",
+] as const;
+
+type IsoFormattedString = string;
+
+export type DeviceEvent = typeof DeviceEventTypes[number];
+
 export interface EventApiParams {
   limit?: number;
   offset?: number;
-  type?: string;
-  endTime?: string;
+  type?: DeviceEvent | DeviceEvent[];
+  endTime?: IsoFormattedString; // Or in the format YYYY-MM-DD hh:mm:ss
+  startTime?: IsoFormattedString;
 }
 
 function getLatestEvents(deviceId, params?: EventApiParams) {

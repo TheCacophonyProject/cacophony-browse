@@ -45,6 +45,7 @@
             title="Devices"
             :isLoading="devicesLoading"
             :value="devices.length"
+            :has-warnings="anyDevicesAreUnhealthy"
           />
         </template>
         <DevicesTab
@@ -69,6 +70,20 @@
           @change="() => fetchStations()"
         />
       </b-tab>
+      <b-tab lazy>
+        <template #title>
+          <TabTemplate
+            title="Recordings"
+            :isLoading="recordingsLoading"
+            :value="recordings.length"
+          />
+        </template>
+        <RecordingsTab
+          :items="recordings"
+          :loading="recordingsLoading"
+          :group-name="groupName"
+        />
+      </b-tab>
     </b-tabs>
   </b-container>
 </template>
@@ -80,10 +95,12 @@ import StationsTab from "@/components/Groups/StationsTab.vue";
 import UsersTab from "@/components/Groups/UsersTab.vue";
 import DevicesTab from "@/components/Groups/DevicesTab.vue";
 import TabTemplate from "@/components/TabTemplate.vue";
+import RecordingsTab from "@/components/Groups/RecordingsTab.vue";
 
 export default {
   name: "GroupView",
   components: {
+    RecordingsTab,
     UsersTab,
     StationsTab,
     DevicesTab,
@@ -94,10 +111,12 @@ export default {
       stationsLoading: false,
       usersLoading: false, // Loading all users on page load
       devicesLoading: false, // Loading all users on page load
+      recordingsLoading: false,
       users: [],
       devices: [],
       stations: [],
-      tabNames: ["users", "devices", "stations"],
+      recordings: [],
+      tabNames: ["users", "devices", "stations", "recordings"],
     };
   },
   computed: {
@@ -140,6 +159,9 @@ export default {
         }
       },
     },
+    anyDevicesAreUnhealthy() {
+      return this.devices.some((device) => device.isHealthy === false);
+    },
   },
   created() {
     const nextTabName = this.tabNames[this.currentTabIndex];
@@ -170,7 +192,28 @@ export default {
       this.devicesLoading = true;
       {
         const { result } = await api.groups.getDevicesForGroup(this.groupName);
-        this.devices = result.devices;
+        this.devices = result.devices.map((device) => ({
+          ...device,
+          isHealthy: true,
+        }));
+
+        const last24Hours = new Date(
+          new Date().getTime() - 60 * 1000 * 60 * 24
+        ).toISOString();
+
+        // Get device health.
+        //This is secondary info, so fine to lazy load
+        for (const device of this.devices) {
+          api.device
+            .getLatestEvents(device.id, {
+              limit: 1,
+              type: "daytime-power-off",
+              startTime: last24Hours,
+            })
+            .then(({ result }) => {
+              device.isHealthy = result.rows.length !== 0;
+            });
+        }
       }
       this.devicesLoading = false;
     },

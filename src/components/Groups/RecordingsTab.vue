@@ -67,7 +67,7 @@
 import Help from "@/components/Help.vue";
 
 export default {
-  name: "DevicesTab",
+  name: "RecordingsTab",
   components: {
     Help,
   },

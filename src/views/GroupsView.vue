@@ -7,7 +7,7 @@
         recordings. Click on a group to see its devices and users.
       </p>
     </b-jumbotron>
-    <b-container>
+    <b-container class="groups-container">
       <b-row v-if="isLoading">
         <spinner />
       </b-row>
@@ -26,20 +26,23 @@
           </b-button>
         </b-col>
         <b-col v-if="hasGroups" class="col-12 col-lg-8">
-          <div class="list-wrapper" data-cy="groups-list">
-            <router-link
-              v-for="(groupName, index) in groups"
+          <b-list-group data-cy="groups-list">
+            <b-list-group-item
+              class="list-group-item list-group-item-action"
               :key="index"
               :to="{
                 name: 'group',
                 params: { groupName },
               }"
-              class="list-group-item list-group-item-action"
+              v-for="({ groupName, deviceCount, userCount }, index) in groups"
             >
-              {{ groupName }}
+              <span>
+                <strong>{{ groupName }}</strong> - {{ deviceCount }} devices
+                with {{ userCount }} users
+              </span>
               <font-awesome-icon class="icon" icon="chevron-right" size="xs" />
-            </router-link>
-          </div>
+            </b-list-group-item>
+          </b-list-group>
         </b-col>
         <b-col v-else class="col-12 col-lg-8">
           <b-card class="no-content-placeholder">
@@ -91,9 +94,18 @@ export default {
         try {
           const { result } = await api.groups.getGroups();
           // Groups are always ordered alphabetically.
+
+          // FIXME(jon): This returns inactive devices for groups.
+
+          // TODO(jon): Maybe also show groups that have devices with issues here?
+
           this.groups = result.groups
-            .map(({ groupname }) => groupname)
-            .sort((a, b) => a.localeCompare(b));
+            .map(({ groupname, Devices, GroupUsers }) => ({
+              groupName: groupname,
+              deviceCount: Devices.length,
+              userCount: GroupUsers.length,
+            }))
+            .sort((a, b) => a.groupName.localeCompare(b.groupName));
         } catch (error) {
           // Do something with the error.
         }
@@ -103,3 +115,14 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.groups-container {
+  padding-top: 20px;
+}
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+}
+</style>

@@ -2,7 +2,7 @@
   <b-container fluid class="admin">
     <b-jumbotron class="jumbotron" fluid>
       <h1>
-<!--        TODO(jon): Maybe active router-link component -->
+        <!--        TODO(jon): Maybe active router-link component -->
         <router-link
           v-if="userIsMemberOfGroup"
           :to="{
@@ -81,7 +81,7 @@ export default {
         this.userIsSuperUserAndViewingAsSuperUser ||
         (this.group.GroupUsers &&
           this.group.GroupUsers.find(
-            ({username}) => username === this.currentUser.username
+            ({ username }) => username === this.currentUser.username
           ) !== undefined)
       );
     },
