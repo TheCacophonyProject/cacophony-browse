@@ -41,68 +41,10 @@
             <h5 v-else>Loading...</h5>
             <p class="search-description" v-html="currentQueryDescription" />
           </div>
-          <div v-if="!queryPending" class="results">
-            <div v-if="showCards">
-              <div
-                v-for="(itemsByDay, index_a) in tableItemsChunkedByDayAndHour"
-                :key="index_a"
-              >
-                <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
-                <div
-                  v-for="(itemsByHour, index_b) in itemsByDay"
-                  :key="index_b"
-                >
-                  <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
-                  <RecordingSummary
-                    v-for="(item, index) in itemsByHour"
-                    :item="item"
-                    :key="`${index}_${getResultsDisplayStyle}`"
-                    :futureSearchQuery="viewRecordingQuery"
-                    :display-style="getResultsDisplayStyle"
-                  />
-                </div>
-              </div>
-            </div>
-            <div
-              v-else-if="tableItems && tableItems.length !== 0"
-              class="all-rows"
-            >
-              <div class="results-header">
-                <div>
-                  <span>ID</span>
-                  <span>Type</span>
-                  <span>Device</span>
-                  <span>Date</span>
-                  <span>Time</span>
-                  <span>Duration</span>
-                  <span>Tags</span>
-                  <span>Group</span>
-                  <span>Location</span>
-                  <span>Battery</span>
-                </div>
-              </div>
-              <div class="results-rows">
-                <RecordingSummary
-                  v-for="(item, index) in tableItems"
-                  :item="item"
-                  :is-even-row="index % 2 === 1"
-                  :key="`${index}_${getResultsDisplayStyle}`"
-                  :display-style="getResultsDisplayStyle"
-                  :futureSearchQuery="viewRecordingQuery"
-                />
-              </div>
-            </div>
-          </div>
-          <div v-else class="results loading">
-            <div
-              v-for="i in 10"
-              :style="{
-                background: `rgba(240, 240, 240, ${1 / i}`,
-              }"
-              :key="i"
-              class="recording-placeholder"
-            />
-          </div>
+          <RecordingsList
+            :recordings="recordings"
+            :query-pending="queryPending"
+          />
           <div v-if="countMessage === 'No matches'" class="no-results">
             <h6 class="text-muted">No recordings found</h6>
             <p class="small text-muted">Try modifying your search criteria.</p>
@@ -136,18 +78,13 @@
 <script>
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
-import RecordingSummary from "../components/RecordingSummary.vue";
+import RecordingsList from "../components/RecordingsList.vue";
 import api from "../api/index";
-import {
-  toStringTodayYesterdayOrDate,
-  toNZDateString,
-  startOfDay,
-  startOfHour,
-} from "@/helpers/datetime";
+import { toStringTodayYesterdayOrDate } from "@/helpers/datetime";
 
 export default {
   name: "RecordingsView",
-  components: { RecordingSummary, QueryRecordings, CsvDownload },
+  components: { QueryRecordings, CsvDownload, RecordingsList },
   props: {},
   data() {
     return {
@@ -157,7 +94,6 @@ export default {
       queryPending: false,
       searchPanelIsCollapsed: true,
       recordings: [],
-      tableItems: [],
       count: null,
       countMessage: null,
       currentPage: 1,
@@ -198,27 +134,6 @@ export default {
     }
   },
   computed: {
-    tableItemsChunkedByDayAndHour() {
-      const chunks = [];
-      let current = chunks;
-      for (const item of this.tableItems) {
-        if (item.kind === "dataSeparator") {
-          if (item.hasOwnProperty("date")) {
-            chunks.push([]);
-            current = chunks[chunks.length - 1];
-          }
-          if (item.hasOwnProperty("hour")) {
-            current.push([]);
-          }
-        } else {
-          current[current.length - 1].push(item);
-        }
-      }
-      return chunks;
-    },
-    getResultsDisplayStyle() {
-      return this.showCards ? "card" : "row";
-    },
     viewRecordingQuery() {
       const queryCopy = JSON.parse(JSON.stringify(this.serialisedQuery));
 
@@ -242,18 +157,6 @@ export default {
     perPageChanged(perPage) {
       this.currentPage = 0;
       this.paginationHasChanged(this.currentPage, perPage);
-    },
-    relativeDay(itemDate) {
-      itemDate = itemDate[0][0].dateObj;
-      return toStringTodayYesterdayOrDate(itemDate);
-    },
-    hour(itemDate) {
-      itemDate = itemDate.length && itemDate[0].dateObj;
-      const hours = itemDate && itemDate.getHours();
-      if (hours === 0) {
-        return "12am";
-      }
-      return `${hours <= 12 ? hours : hours - 12}${hours < 12 ? "am" : "pm"}`;
     },
     getPreferredResultsDisplayStyle() {
       return localStorage.getItem("results-display-style") !== "row";
@@ -320,7 +223,6 @@ export default {
       // Remove previous values
       this.countMessage = "";
       this.recordings = [];
-      this.tableItems = [];
       // Call API and process results
       this.queryPending = true;
       const { result, success } = await api.recording.query(whereQuery);
@@ -329,7 +231,6 @@ export default {
       // Remove previous values *again* since it's possible for the query to have been called twice
       // since it's async, and then you'd append values twice.
       this.recordings = [];
-      this.tableItems = [];
 
       if (!success) {
         result.messages &&
@@ -338,184 +239,14 @@ export default {
           });
       } else {
         this.currentQueryDescription = this.nextQueryDescription;
-        this.recordings = result.rows;
         this.count = result.count;
         if (result.count > 0) {
           this.countMessage = `${result.count} matches found (total)`;
         } else if (result.count === 0) {
           this.countMessage = "No matches";
         }
-        // New day, new hour.
-        let prevDate = null;
-        for (const row of result.rows) {
-          const thisDate = new Date(row.recordingDateTime);
-          if (
-            prevDate === null ||
-            startOfDay(thisDate, true).getTime() !==
-              startOfDay(prevDate, true).getTime()
-          ) {
-            const item = {
-              kind: "dataSeparator",
-              hour: thisDate,
-            };
-            item.date = thisDate;
-            this.tableItems.push(item);
-            prevDate = thisDate;
-          } else if (
-            startOfHour(thisDate, true).getTime() !==
-            startOfHour(prevDate, true).getTime()
-          ) {
-            const item = {
-              kind: "dataSeparator",
-              hour: thisDate,
-            };
-            this.tableItems.push(item);
-            prevDate = thisDate;
-          }
-          const itemData = {
-            kind: "dataRow",
-            id: row.id,
-            type: row.type,
-            devicename: row.Device.devicename,
-            groupname: row.Group.groupname,
-            location: this.parseLocation(row.location),
-            dateObj: thisDate,
-            date: toNZDateString(thisDate),
-            time: thisDate.toLocaleTimeString(),
-            duration: row.duration,
-            tags: this.collateTags(row.Tags, row.Tracks),
-            other: this.parseOther(row),
-            trackCount: row.Tracks.length,
-            processing_state: this.parseProcessingState(row.processingState),
-          };
-          if (row.Station) {
-            itemData.stationname = row.Station.name;
-          }
-          this.tableItems.push(itemData);
-        }
+        this.recordings = result.rows;
       }
-    },
-    parseLocation(location) {
-      if (location && typeof location === "object") {
-        const latitude = location.coordinates[0];
-        const longitude = location.coordinates[1];
-        return latitude + ", " + longitude;
-      } else {
-        return "(unknown)";
-      }
-    },
-    parseOther(row) {
-      const out = {};
-      if (row.batteryLevel !== null) {
-        out.batteryLevel = row.batteryLevel;
-      }
-      return out;
-    },
-    parseProcessingState(result) {
-      const string = result.toLowerCase();
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    },
-    collateTags(tags, tracks) {
-      // Build a collection of tagItems - one per animal
-      const tagItems = {};
-      for (let i = 0; i < tags.length; i++) {
-        const tag = tags[i];
-        const tagName = tag.animal === null ? tag.event : tag.animal;
-        const taggerId = tag.taggerId;
-        this.addToListOfTags(tagItems, tagName, tag.automatic, taggerId);
-      }
-
-      if (tracks) {
-        for (let j = 0; j < tracks.length; j++) {
-          const track = tracks[j];
-          // For track tags, pick the best one, which is the "master AI" tag.
-          const aiTag = track.TrackTags.find(
-            (tag) =>
-              tag.data && (tag.data === "Master" || tag.data.name === "Master")
-          );
-          const humanTags = track.TrackTags.filter((tag) => !tag.automatic);
-          // If the same track has one or more human tags, and none of them agree with the AI just show that:
-          let humansDisagree = false;
-          if (aiTag && humanTags.length !== 0) {
-            humansDisagree =
-              humanTags.find((tag) => tag.what === aiTag.what) === undefined;
-          }
-
-          if (aiTag && !humansDisagree) {
-            const taggerId = aiTag.UserId || aiTag.taggerId;
-            this.addToListOfTags(
-              tagItems,
-              aiTag.what,
-              aiTag.automatic,
-              taggerId
-            );
-          }
-
-          // Also add human tags:
-          for (const tag of humanTags) {
-            const taggerId = tag.UserId || tag.taggerId;
-            this.addToListOfTags(tagItems, tag.what, tag.automatic, taggerId);
-          }
-        }
-      }
-
-      // Use automatic and human status to create an ordered array of objects
-      // suitable for parsing into coloured spans
-      const result = [];
-      for (let animal of Object.keys(tagItems).sort()) {
-        const tagItem = tagItems[animal];
-        let subOrder = 0;
-        if (animal === "false positive") {
-          animal = "false positive";
-          subOrder = 3;
-        } else if (animal === "multiple animals") {
-          animal = "multiple";
-          subOrder = 2;
-        } else if (animal === "unidentified") {
-          animal = "?";
-          subOrder = 1;
-        }
-
-        if (tagItem.automatic && tagItem.human) {
-          result.push({
-            text: animal,
-            class: "automatic human",
-            taggerIds: tagItem.taggerIds,
-            order: subOrder,
-          });
-        } else if (tagItem.human) {
-          result.push({
-            text: animal,
-            class: "human",
-            taggerIds: tagItem.taggerIds,
-            order: 10 + subOrder,
-          });
-        } else if (tagItem.automatic) {
-          result.push({
-            text: animal,
-            class: "automatic",
-            order: 20 + subOrder,
-          });
-        }
-      }
-      // Sort the result array
-      result.sort((a, b) => {
-        return a.order - b.order;
-      });
-      return result;
-    },
-    addToListOfTags: function (allTags, tagName, isAutomatic, taggerId) {
-      const tag = allTags[tagName] || {};
-      tag.taggerIds = tag.taggerIds || [];
-      if (taggerId && !tag.taggerIds.includes(taggerId)) {
-        tag.taggerIds.push(taggerId);
-      }
-      if (isAutomatic) {
-        tag.automatic = true;
-      } else {
-        tag.human = true;
-      }
-      allTags[tagName] = tag;
     },
   },
 };

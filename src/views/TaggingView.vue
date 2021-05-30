@@ -168,7 +168,6 @@ export default Vue.extend({
       taggingPending: false,
       readyToPlay: false,
       nextTrackOrRecordingTimeout: 0,
-      showMotionPaths: false,
       currentTimeout: null,
       fileSize: 0,
     };

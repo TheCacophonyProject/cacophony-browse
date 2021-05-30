@@ -42,7 +42,7 @@ interface Device {
   devicename: string;
 }
 
-interface Location {
+export interface Location {
   type: "Point" | string;
   coordinates: [number, number];
 }
@@ -58,7 +58,7 @@ export interface RecordingInfo {
   processingState: "FINISHED"; // Or?
   duration: number; //seconds
   location: Location;
-  batteryLevel: null;
+  batteryLevel: null | number;
   DeviceId: DeviceId;
   GroupId: GroupId;
   StationId: StationId | null;
@@ -150,19 +150,36 @@ export interface User {
   globalPermission: "read" | "write" | "off";
 }
 
-export interface TrackTag {
-  id: TrackTagId;
+export interface TagCommon {
+  id?: TrackTagId;
   TrackId: TrackId;
-  UserId?: UserId;
   what: string;
-  confidence?: number;
-  automatic?: boolean;
-  data: string | { name: string } | undefined;
-  createdAt?: UtcTimestamp;
-  updatedAt?: UtcTimestamp;
-  User?: User;
-  user?: User;
+  confidence: number;
 }
+
+// export interface TrackTag {
+//   data: string | { name: string } | null;
+//   createdAt?: UtcTimestamp;
+//   updatedAt?: UtcTimestamp;
+//
+//   //user?: User;
+// }
+
+export interface AiTag extends TagCommon {
+  data: string | { name: string };
+  UserId: null;
+  User: null;
+  automatic: true;
+}
+
+export interface HumanTag extends TagCommon {
+  data: null;
+  UserId: UserId;
+  User: User;
+  automatic: false;
+}
+
+export type TrackTag = AiTag | HumanTag;
 
 export interface LimitedTrackTag {
   TrackTagId: TrackTagId;
@@ -170,8 +187,19 @@ export interface LimitedTrackTag {
 }
 
 export interface Tag {
-  what: string;
   confidence: number;
+  animal: null | string;
+  automatic: boolean;
+  createdAt: string;
+  detail: string;
+  event: string;
+  duration: null | number;
+  id: number;
+  startTime: null | string;
+  tagger: { username: string; id: number };
+  taggerId: number;
+  version: number;
+  what: null | string;
 }
 
 export interface QueryResultCount {

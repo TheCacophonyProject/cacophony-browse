@@ -17,15 +17,15 @@
       <div class="recording-details">
         <span class="recording-group">
           <font-awesome-icon icon="users" size="xs" />
-          <span class="label">{{ item.groupname }}</span>
+          <span class="label">{{ item.groupName }}</span>
         </span>
-        <span class="recording-station" v-if="item.stationname">
+        <span class="recording-station" v-if="item.stationName">
           <font-awesome-icon icon="map-marker-alt" size="xs" />
-          <span class="label">{{ item.stationname }}</span>
+          <span class="label">{{ item.stationName }}</span>
         </span>
         <span class="recording-device" v-else>
           <font-awesome-icon icon="microchip" size="xs" />
-          <span class="label">{{ item.devicename }}</span>
+          <span class="label">{{ item.deviceName }}</span>
         </span>
         <span class="recording-tracks">
           <font-awesome-icon icon="stream" size="xs" />
