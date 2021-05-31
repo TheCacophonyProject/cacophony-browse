@@ -131,14 +131,14 @@ export default {
         // Don't change the route if we're ctrl-clicking
         event.preventDefault();
         this.$router.push({
-          path: `recording/${recordingId}`,
+          path: `/recording/${recordingId}`,
           query: this.futureSearchQuery,
         });
       }
     },
     getRecordingPath(recordingId) {
       return this.$router.resolve({
-        path: `recording/${recordingId}`,
+        path: `/recording/${recordingId}`,
         query: this.futureSearchQuery,
       }).href;
     },
