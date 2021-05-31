@@ -44,6 +44,8 @@
           <RecordingsList
             :recordings="recordings"
             :query-pending="queryPending"
+            :show-cards="showCards"
+            :view-recording-query="viewRecordingQuery"
           />
           <div v-if="countMessage === 'No matches'" class="no-results">
             <h6 class="text-muted">No recordings found</h6>
@@ -80,7 +82,6 @@ import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import RecordingsList from "../components/RecordingsList.vue";
 import api from "../api/index";
-import { toStringTodayYesterdayOrDate } from "@/helpers/datetime";
 
 export default {
   name: "RecordingsView",
@@ -228,10 +229,6 @@ export default {
       const { result, success } = await api.recording.query(whereQuery);
       this.queryPending = false;
 
-      // Remove previous values *again* since it's possible for the query to have been called twice
-      // since it's async, and then you'd append values twice.
-      this.recordings = [];
-
       if (!success) {
         result.messages &&
           result.messages.forEach((message) => {
@@ -271,48 +268,6 @@ $main-content-width: 640px;
     color: $gray-700;
   }
 
-  .recordings-day {
-    position: sticky;
-    top: 0;
-    background: transparentize($white, 0.15);
-    padding: 0.5rem 0;
-    font-size: 1em;
-    font-weight: 600;
-    border-bottom: 1px solid $gray-200;
-  }
-
-  .recordings-hour {
-    font-size: 0.9em;
-    font-weight: 600;
-  }
-
-  @include media-breakpoint-down(md) {
-    .recordings-hour {
-      position: sticky;
-      top: 0;
-      right: 0;
-      text-align: right;
-      margin-top: -1rem;
-      margin-bottom: 0;
-      padding: 0.7rem 0;
-    }
-    .recordings-day + div .recordings-hour {
-      margin-top: -2.8rem;
-      margin-bottom: 11px;
-    }
-  }
-
-  @include media-breakpoint-up(md) {
-    .recordings-hour {
-      display: inline-block;
-      position: sticky;
-      float: left;
-      top: 40px;
-      margin-left: -60px;
-      margin-top: 15px;
-    }
-  }
-
   .search-results {
     max-width: $main-content-width;
     margin: 0 auto;
@@ -325,46 +280,7 @@ $main-content-width: 640px;
       width: 100%;
       max-width: calc(100vw - 2em);
     }
-
-    .results {
-      overflow: auto;
-    }
-
-    .results-rows {
-      display: table-row-group;
-    }
-    .all-rows {
-      display: table;
-      width: 100%;
-      border-top: 1px solid $border-color;
-      border-left: 1px solid $border-color;
-    }
-
-    .results-header {
-      margin-bottom: 0;
-      display: table-header-group;
-      > div {
-        display: table-row;
-
-        > span {
-          position: sticky;
-          top: 0;
-          background: transparentize($white, 0.15);
-          padding: 5px;
-          font-weight: 700;
-          vertical-align: middle;
-          display: table-cell;
-          border-right: 1px solid $border-color;
-          border-bottom: 2px solid $border-color;
-        }
-      }
-    }
   }
-}
-
-.recording-placeholder {
-  height: 110px;
-  margin-bottom: 15px;
 }
 
 .no-results {

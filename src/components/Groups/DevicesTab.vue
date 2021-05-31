@@ -29,6 +29,11 @@
           formatter: sortBool,
           sortByFormatted: true,
         },
+        {
+          key: 'type',
+          label: 'Device Type',
+          sortable: true,
+        },
       ]"
       sort-by="devicename"
       hover
@@ -49,8 +54,36 @@
           {{ row.item.deviceName }}
         </b-link>
       </template>
+      <template v-slot:cell(type)="row">
+        <span>
+          <b-spinner
+            v-if="!row.item.type"
+            class="spinner"
+            type="border"
+            small
+          />
+          <font-awesome-icon
+            v-if="row.item.type === 'VideoRecorder'"
+            icon="video"
+            class="icon"
+          />
+          <font-awesome-icon
+            v-else-if="row.item.type === 'AudioRecorder'"
+            icon="music"
+            class="icon"
+          />
+          <font-awesome-icon
+            v-else-if="row.item.type === 'UnknownDeviceType'"
+            icon="question"
+            class="icon"
+          />
+        </span>
+      </template>
       <template v-slot:cell(deviceHealth)="row">
-        <span :class="[{ healthy: row.item.isHealthy }, 'device-health']">
+        <span
+          :class="[{ healthy: row.item.isHealthy }, 'device-health']"
+          v-if="row.item.type === 'VideoRecorder'"
+        >
           <font-awesome-icon
             v-if="row.item.isHealthy"
             icon="heart"
@@ -58,6 +91,12 @@
           />
           <font-awesome-icon v-else icon="heart-broken" class="icon" />
         </span>
+        <b-spinner v-if="!row.item.type" type="border" small />
+        <font-awesome-icon
+          v-else-if="row.item.type !== 'VideoRecorder'"
+          icon="question"
+          class="icon"
+        />
       </template>
     </b-table>
   </div>
@@ -79,7 +118,7 @@ export default {
   },
   methods: {
     sortBool(_v, _k, i) {
-      return i.isHealthy.toString();
+      return `${i.type}_${i.isHealthy}`;
     },
   },
   computed: {
@@ -89,7 +128,12 @@ export default {
     tableItems() {
       return this.devices.map((device) => ({
         ...device,
-        _rowVariant: device.isHealthy ? "okay" : "warn",
+        _rowVariant:
+          device.type === "VideoRecorder"
+            ? device.isHealthy
+              ? "okay"
+              : "warn"
+            : "empty",
       }));
     },
   },
@@ -98,7 +142,7 @@ export default {
 
 <style lang="scss">
 .device-health {
-  color: darkgray;
+  color: #555;
   &.healthy {
     color: #dc3545;
   }
@@ -108,5 +152,11 @@ export default {
 }
 .table-warn {
   border-left: 10px solid #eecccf;
+}
+.table-empty {
+  border-left: 10px solid #ddd;
+}
+.spinner {
+  color: #ccc;
 }
 </style>

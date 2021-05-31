@@ -25,7 +25,7 @@ export default {
       default: false,
     },
     value: {
-      type: Number,
+      type: [Number, String],
       default: 0,
     },
     hasWarnings: {

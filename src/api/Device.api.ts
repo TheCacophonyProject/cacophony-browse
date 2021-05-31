@@ -1,6 +1,7 @@
 import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
 import { shouldViewAsSuperUser } from "@/utils";
+import recording from "./Recording.api";
 
 export default {
   getDevices,
@@ -9,6 +10,7 @@ export default {
   removeUserFromDevice,
   getLatestSoftwareVersion,
   getLatestEvents,
+  getType,
 };
 
 export interface DeviceInfo {
@@ -50,14 +52,14 @@ function addUserToDevice(username, deviceId, admin) {
   );
 }
 
-function removeUserFromDevice(username, deviceId) {
+function removeUserFromDevice(username: string, deviceId: number) {
   return CacophonyApi.delete("/api/v1/devices/users", {
-    username: username,
-    deviceId: deviceId,
+    username,
+    deviceId,
   });
 }
 
-function getLatestSoftwareVersion(deviceId) {
+function getLatestSoftwareVersion(deviceId: number) {
   const params: EventApiParams = {
     limit: 1,
     type: "versionData",
@@ -92,10 +94,25 @@ export interface EventApiParams {
   startTime?: IsoFormattedString;
 }
 
-function getLatestEvents(deviceId, params?: EventApiParams) {
+function getLatestEvents(deviceId: number, params?: EventApiParams) {
   return CacophonyApi.get(
     `/api/v1/events?latest=true&deviceId=${deviceId}&${querystring.stringify(
       params as any
     )}`
   );
+}
+
+async function getType(
+  deviceId: number
+): Promise<"AudioRecorder" | "VideoRecorder" | "UnknownDeviceType"> {
+  const rec = await recording.query({
+    limit: 1,
+    days: "all",
+    device: [deviceId],
+  });
+  if (rec.result.rows.length) {
+    const type = rec.result.rows[0].type;
+    return type === "thermalRaw" ? "VideoRecorder" : "AudioRecorder";
+  }
+  return "UnknownDeviceType";
 }

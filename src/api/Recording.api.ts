@@ -247,6 +247,7 @@ export interface RecordingQuery {
   to?: string;
   group?: number[];
   device?: number[];
+  station?: number[];
   type?: string;
   order?: any; // TODO - It's not clear what order accepts (it's a sequelize thing), but nobody seems to use it right now.
 }
@@ -284,12 +285,29 @@ function makeApiQuery(query: RecordingQuery): any {
   // it to accurately share search parameters via urls.
   const hasDevices = query.hasOwnProperty("device") && query.device.length > 0;
   const hasGroups = query.hasOwnProperty("group") && query.group.length > 0;
-  if (hasDevices && hasGroups) {
-    apiWhere["$or"] = [{ DeviceId: query.device }, { GroupId: query.group }];
+  const hasStations =
+    query.hasOwnProperty("station") && query.station.length > 0;
+  if (
+    (hasDevices && hasGroups) ||
+    (hasDevices && hasStations) ||
+    (hasGroups && hasStations)
+  ) {
+    apiWhere["$or"] = [];
+    if (hasDevices) {
+      apiWhere["$or"].push({ DeviceId: query.device });
+    }
+    if (hasGroups) {
+      apiWhere["$or"].push({ GroupId: query.group });
+    }
+    if (hasStations) {
+      apiWhere["$or"].push({ StationId: query.station });
+    }
   } else if (hasGroups) {
     apiWhere["GroupId"] = query.group;
   } else if (hasDevices) {
     apiWhere["DeviceId"] = query.device;
+  } else if (hasStations) {
+    apiWhere["StationId"] = query.station;
   }
 
   addIfSet(apiWhere, calculateFromTime(query), "recordingDateTime", "$gt");

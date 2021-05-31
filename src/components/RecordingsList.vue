@@ -1,5 +1,8 @@
 <template>
-  <div v-if="!queryPending" class="results">
+  <div
+    v-if="!queryPending"
+    :class="['results', { 'display-rows': !showCards }]"
+  >
     <div v-if="showCards">
       <div
         v-for="(itemsByDay, index_a) in recordingsChunkedByDayAndHour"
@@ -83,10 +86,6 @@ const parseLocation = (location: Location): string => {
   } else {
     return "(unknown)";
   }
-};
-
-const parseOther = (recording: RecordingInfo): number | null => {
-  return recording.batteryLevel;
 };
 
 const parseProcessingState = (result: string): string => {
@@ -228,7 +227,7 @@ interface ItemData {
   time: string;
   duration: number;
   tags: DisplayTag[];
-  other: any;
+  batteryLevel: number | null;
   trackCount: number;
   processingState: string;
 }
@@ -329,7 +328,7 @@ export default {
           time: thisDate.toLocaleTimeString(),
           duration: recording.duration,
           tags: collateTags(recording.Tags, recording.Tracks),
-          other: recording.batteryLevel,
+          batteryLevel: recording.batteryLevel,
           trackCount: recording.Tracks.length,
           processingState: parseProcessingState(recording.processingState),
         };
@@ -344,4 +343,89 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+.recordings-day {
+  position: sticky;
+  top: 0;
+  background: transparentize($white, 0.15);
+  padding: 0.5rem 0;
+  font-size: 1em;
+  font-weight: 600;
+  border-bottom: 1px solid $gray-200;
+}
+
+.recordings-hour {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+@include media-breakpoint-down(md) {
+  .recordings-hour {
+    position: sticky;
+    top: 0;
+    right: 0;
+    text-align: right;
+    margin-top: -1rem;
+    margin-bottom: 0;
+    padding: 0.7rem 0;
+  }
+  .recordings-day + div .recordings-hour {
+    margin-top: -2.8rem;
+    margin-bottom: 11px;
+  }
+}
+
+@include media-breakpoint-up(md) {
+  .recordings-hour {
+    display: inline-block;
+    position: sticky;
+    float: left;
+    top: 40px;
+    margin-left: -60px;
+    margin-top: 15px;
+  }
+}
+
+.recording-placeholder {
+  height: 110px;
+  margin-bottom: 15px;
+}
+
+.results.display-rows {
+  overflow: auto;
+
+  .results-rows {
+    display: table-row-group;
+  }
+  .all-rows {
+    display: table;
+    width: 100%;
+    border-top: 1px solid $border-color;
+    border-left: 1px solid $border-color;
+  }
+
+  .results-header {
+    margin-bottom: 0;
+    display: table-header-group;
+    > div {
+      display: table-row;
+
+      > span {
+        position: sticky;
+        top: 0;
+        background: transparentize($white, 0.15);
+        padding: 5px;
+        font-weight: 700;
+        vertical-align: middle;
+        display: table-cell;
+        border-right: 1px solid $border-color;
+        border-bottom: 2px solid $border-color;
+      }
+    }
+  }
+}
+</style>

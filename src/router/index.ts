@@ -4,6 +4,7 @@ import DeviceView from "@/views/DeviceView.vue";
 import ErrorView from "@/views/ErrorView.vue";
 import GroupsView from "@/views/GroupsView.vue";
 import GroupView from "@/views/GroupView.vue";
+import StationView from "@/views/StationView.vue";
 import HomeView from "@/views/HomeView.vue";
 import LoginView from "@/views/LoginView.vue";
 import RecordingsView from "@/views/RecordingsView.vue";
@@ -32,6 +33,11 @@ function createRouter() {
         path: "/groups/:groupName/device/:deviceName/:tabName?",
         name: "device",
         component: DeviceView,
+      },
+      {
+        path: "/groups/:groupName/station/:stationName/:tabName?",
+        name: "station",
+        component: StationView,
       },
       {
         path: "/error",

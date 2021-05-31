@@ -74,14 +74,14 @@
         <template #title>
           <TabTemplate
             title="Recordings"
-            :isLoading="recordingsLoading"
-            :value="recordings.length"
+            :isLoading="recordingsCountLoading"
+            :value="recordingsCount"
           />
         </template>
         <RecordingsTab
-          :items="recordings"
-          :loading="recordingsLoading"
+          :loading="recordingsCountLoading"
           :group-name="groupName"
+          :recordings-query="recordingQueryFinal"
         />
       </b-tab>
     </b-tabs>
@@ -95,7 +95,7 @@ import StationsTab from "@/components/Groups/StationsTab.vue";
 import UsersTab from "@/components/Groups/UsersTab.vue";
 import DevicesTab from "@/components/Groups/DevicesTab.vue";
 import TabTemplate from "@/components/TabTemplate.vue";
-import RecordingsTab from "@/components/Groups/RecordingsTab.vue";
+import RecordingsTab from "@/components/RecordingsTab.vue";
 
 export default {
   name: "GroupView",
@@ -111,11 +111,13 @@ export default {
       stationsLoading: false,
       usersLoading: false, // Loading all users on page load
       devicesLoading: false, // Loading all users on page load
-      recordingsLoading: false,
+      recordingsCountLoading: false,
+      recordingsCount: 0,
+      groupId: null,
+      recordingQueryFinal: {},
       users: [],
       devices: [],
       stations: [],
-      recordings: [],
       tabNames: ["users", "devices", "stations", "recordings"],
     };
   },
@@ -160,7 +162,10 @@ export default {
       },
     },
     anyDevicesAreUnhealthy() {
-      return this.devices.some((device) => device.isHealthy === false);
+      return this.devices.some(
+        (device) =>
+          device.type === "VideoRecorder" && device.isHealthy === false
+      );
     },
   },
   created() {
@@ -178,8 +183,19 @@ export default {
     this.fetchUsers();
     this.fetchDevices();
     this.fetchStations();
+    this.fetchRecordingCount();
   },
   methods: {
+    recordingQuery() {
+      return {
+        tagMode: "any",
+        offset: 0,
+        limit: 20,
+        page: 1,
+        days: "all",
+        group: [this.groupId],
+      };
+    },
     async fetchUsers() {
       this.usersLoading = true;
       {
@@ -188,6 +204,29 @@ export default {
       }
       this.usersLoading = false;
     },
+    async fetchRecordingCount() {
+      this.recordingsCountLoading = true;
+      try {
+        const { result } = await api.groups.getGroup(this.groupName);
+        if (result.groups.length !== 0) {
+          this.groupId = result.groups[0].id;
+          this.recordingQueryFinal = this.recordingQuery();
+          {
+            const { result } = await api.recording.queryCount({
+              ...this.recordingQuery(),
+              days: 1,
+            });
+            if (result.count !== 0) {
+              this.recordingsCount = `${result.count} NEW`;
+            }
+          }
+        }
+      } catch (e) {
+        this.recordingsCountLoading = false;
+      }
+
+      this.recordingsCountLoading = false;
+    },
     async fetchDevices() {
       this.devicesLoading = true;
       {
@@ -195,6 +234,7 @@ export default {
         this.devices = result.devices.map((device) => ({
           ...device,
           isHealthy: true,
+          type: null,
         }));
 
         const last24Hours = new Date(
@@ -213,6 +253,10 @@ export default {
             .then(({ result }) => {
               device.isHealthy = result.rows.length !== 0;
             });
+
+          api.device.getType(device.id).then((type) => {
+            device.type = type;
+          });
         }
       }
       this.devicesLoading = false;

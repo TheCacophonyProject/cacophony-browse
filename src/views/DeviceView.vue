@@ -2,7 +2,6 @@
   <b-container fluid class="admin">
     <b-jumbotron class="jumbotron" fluid>
       <h1>
-        <!--        TODO(jon): Maybe active router-link component -->
         <router-link
           v-if="userIsMemberOfGroup"
           :to="{
@@ -60,7 +59,7 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
 import { mapState } from "vuex";
 import DeviceDetail from "../components/Devices/DeviceDetail.vue";
 import Spinner from "../components/Spinner.vue";
@@ -113,15 +112,15 @@ export default {
     this.queryDevice();
   },
   methods: {
-    queryDevice: async function () {
+    async queryDevice() {
       this.loadedDevice = false;
       try {
-        const { result } = await api.groups.getGroup(this.groupName);
+        // eslint-disable-next-line no-unused-vars
+        const [{ result }, _] = await Promise.all([
+          api.groups.getGroup(this.groupName),
+          this.fetchDevice(),
+        ]);
         this.group = result.groups[0];
-
-        console.log(this.group, this.currentUser, this.userIsMemberOfGroup);
-
-        await this.fetchDevice();
         if (this.device) {
           await this.getSoftwareDetails(this.device.id);
         }
@@ -130,14 +129,14 @@ export default {
       }
       this.loadedDevice = true;
     },
-    fetchDevice: async function () {
+    async fetchDevice() {
       const request = await api.device.getDevice(
         this.groupName,
         this.deviceName
       );
       this.device = request.result.device;
     },
-    getSoftwareDetails: async function (deviceId) {
+    async getSoftwareDetails(deviceId: number) {
       const results = await api.device.getLatestSoftwareVersion(deviceId);
       if (results.success && results.result.rows.length > 0) {
         this.softwareDetails.message = "Success";

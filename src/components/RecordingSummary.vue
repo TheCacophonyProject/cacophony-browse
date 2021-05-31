@@ -29,11 +29,10 @@
         </span>
         <span class="recording-tracks">
           <font-awesome-icon icon="stream" size="xs" />
-          <span class="label" v-if="item.trackCount !== 0"
-            >{{ item.trackCount }} track<span v-if="item.trackCount > 1"
-              >s</span
-            ></span
-          >
+          <span class="label" v-if="item.trackCount !== 0">
+            {{ item.trackCount }} track
+            <span v-if="item.trackCount > 1">s</span>
+          </span>
           <span class="label" v-else>No tracks</span>
         </span>
       </div>
@@ -50,7 +49,7 @@
           <span class="label">{{ item.duration }} seconds</span>
         </div>
         <div v-if="hasBattery" class="recording-battery">
-          <BatteryLevel :battery-level="item.other.batteryLevel" />
+          <BatteryLevel :battery-level="item.batteryLevel" />
         </div>
       </div>
     </div>
@@ -90,10 +89,7 @@
     </span>
     <span>{{ item.groupname }}</span>
     <span>{{ item.location }}</span>
-    <BatteryLevel
-      v-if="item.other && item.other.batteryLevel"
-      :battery-level="item.other.batteryLevel"
-    />
+    <BatteryLevel v-if="item.batteryLevel" :battery-level="item.batteryLevel" />
     <span v-else />
   </div>
 </template>
@@ -121,7 +117,7 @@ export default {
   },
   computed: {
     hasBattery() {
-      return this.item.other && this.item.other.batteryLevel;
+      return this.item.batteryLevel;
     },
     window: {
       get() {

@@ -26,6 +26,20 @@
       <b-tab title="All Events">
         <DeviceEvents :device="device" />
       </b-tab>
+      <b-tab title="Recordings">
+        <template #title>
+          <TabTemplate
+            title="Recordings"
+            :isLoading="recordingsCountLoading"
+            :value="recordingsCount"
+          />
+        </template>
+        <RecordingsTab
+          :group-name="groupName"
+          :device-name="deviceName"
+          :recordings-query="recordingQuery()"
+        />
+      </b-tab>
     </b-tabs>
   </b-container>
 </template>
@@ -35,10 +49,18 @@ import DeviceUsers from "./DeviceUsers.vue";
 import DeviceSoftware from "./DeviceSoftware.vue";
 import DeviceEvents from "./DeviceEvents.vue";
 import TabTemplate from "@/components/TabTemplate.vue";
+import RecordingsTab from "@/components/RecordingsTab";
+import api from "@/api";
 
 export default {
   name: "DeviceDetail",
-  components: { DeviceUsers, DeviceSoftware, DeviceEvents, TabTemplate },
+  components: {
+    RecordingsTab,
+    DeviceUsers,
+    DeviceSoftware,
+    DeviceEvents,
+    TabTemplate,
+  },
   props: {
     device: {
       type: Object,
@@ -55,7 +77,14 @@ export default {
   },
   data() {
     return {
-      tabNames: ["current-software", "device-users", "device-events"],
+      tabNames: [
+        "current-software",
+        "device-users",
+        "device-events",
+        "recordings",
+      ],
+      recordingsCount: 0,
+      recordingsCountLoading: false,
     };
   },
   created() {
@@ -71,6 +100,7 @@ export default {
       });
     }
     this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
+    this.fetchRecordingCount();
   },
   computed: {
     groupName() {
@@ -99,6 +129,30 @@ export default {
           });
         }
       },
+    },
+  },
+  methods: {
+    recordingQuery() {
+      return {
+        tagMode: "any",
+        offset: 0,
+        limit: 20,
+        page: 1,
+        days: "all",
+        device: [this.device.id],
+      };
+    },
+    async fetchRecordingCount() {
+      this.recordingsCountLoading = true;
+      try {
+        const { result } = await api.recording.queryCount(
+          this.recordingQuery()
+        );
+        this.recordingsCount = result.count;
+      } catch (e) {
+        this.recordingsCountLoading = false;
+      }
+      this.recordingsCountLoading = false;
     },
   },
 };

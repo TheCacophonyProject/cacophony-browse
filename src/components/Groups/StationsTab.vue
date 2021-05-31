@@ -59,7 +59,28 @@
             <l-tooltip>{{ station.name }}</l-tooltip>
           </l-circle-marker>
         </l-map>
-        <b-table-lite :items="stations" striped hover />
+        <b-table :items="stations" striped hover>
+          <template #cell(name)="data">
+            <b-link
+              :to="{
+                name: 'station',
+                params: {
+                  groupName,
+                  stationName: data.item.name,
+                },
+              }"
+            >
+              {{ data.item.name }}
+            </b-link>
+          </template>
+          <template #cell(latitude)="data">
+            <span v-html="data.value" />
+          </template>
+          <template #cell(longitude)="data">
+            <span v-html="data.value" />
+          </template>
+        </b-table>
+
         <b-btn
           v-if="!enableEditingStations && isGroupAdmin"
           @click="enableEditingStations = true"
@@ -149,6 +170,8 @@ import {
   LCircle,
   LCircleMarker,
 } from "vue2-leaflet";
+
+// TODO(jon): Do we want to be able to view retired stations?
 
 const Marker = icon({
   iconUrl: "/marker-icon.png",
