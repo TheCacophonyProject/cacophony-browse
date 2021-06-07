@@ -37,19 +37,26 @@ export interface NewVisitsQueryResult {
 }
 
 export interface NewVisitQuery {
-  limit?: number;
-  offset?: number;
+  perPage?: number;
+  page?: number;
   days?: number | "all";
   from?: string;
   to?: string;
   group?: number[];
   device?: number[];
+  ai?: string;
+}
+
+export interface AIVisitsForStats {
+  totalVisits: number;
+  labelledVisits: NewVisit[];
+  all: boolean;
 }
 
 const apiPath = "/api/v1/monitoring";
 
 function queryVisitPage(
-  visitQuery: RecordingQuery
+  visitQuery: NewVisitQuery
 ): Promise<FetchResult<NewVisitsQueryResult>> {
   return CacophonyApi.get(
     `${apiPath}/page?${querystring.stringify(makeApiQuery(visitQuery))}${
@@ -58,11 +65,48 @@ function queryVisitPage(
   );
 }
 
-function makeApiQuery(query: RecordingQuery) {
+async function getAIVisitsForStats (
+  visitQuery: NewVisitQuery
+) : Promise<AIVisitsForStats> {
+  let statVisits : NewVisit[] = [];
+  let allVisitsCount = 0;
+  let more = true;
+  let request = 0;
+  let nextRequestQuery = visitQuery;
+  nextRequestQuery.perPage = 100;
+  nextRequestQuery.page = 1;
+  while (more && request < 10) {
+    request++;
+    const response = await queryVisitPage(nextRequestQuery);
+    // what if failed???
+    allVisitsCount += response.result.visits.length;
+    let labelledVisits = response.result.visits.filter(visit => (visit.classFromUserTag)); 
+    statVisits = [...statVisits, ...labelledVisits];
+    more = response.result.params.pagesEstimate != 1;
+    if (more) {
+      nextRequestQuery = {
+        perPage: 100,
+        page: 1,
+        from: response.result.params.searchFrom,
+        to: response.result.params.pageFrom,
+        group: response.result.params.groups,
+        device: response.result.params.devices,
+      }
+    }
+  }
+  return {
+    totalVisits: allVisitsCount, 
+    labelledVisits: statVisits,
+    all: !more
+  }
+}
+
+function makeApiQuery(query: NewVisitQuery) {
   const apiParams: any = {};
 
   addValueIfSet(apiParams, calculateFromTime(query), "from");
   addValueIfSet(apiParams, query.to, "until");
+  addValueIfSet(apiParams, query.ai, "ai");
   addArrayValueIfSet(apiParams, query.group, "groups");
   addArrayValueIfSet(apiParams, query.device, "devices");
   apiParams["page-size"] = query.perPage || 10;
@@ -85,4 +129,5 @@ function addValueIfSet(map: any, value: string, key: string) {
 
 export default {
   queryVisitPage,
+  getAIVisitsForStats,
 };
