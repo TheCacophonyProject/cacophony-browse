@@ -25,6 +25,7 @@
     "cptv-player-vue": "github:TheCacophonyProject/cptv-player-vue#v1.0.11",
     "cross-fetch": "^3.0.6",
     "csvtojson": "^2.0.10",
+    "highcharts": "^9.1.1",
     "jquery": "^3.5.1",
     "leaflet": "^1.7.1",
     "moment": "^2.29.1",

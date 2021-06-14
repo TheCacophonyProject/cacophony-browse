@@ -89,7 +89,7 @@ async function getAIVisitsForStats (
   let nextRequestQuery = visitQuery;
   nextRequestQuery.perPage = 100;
   nextRequestQuery.page = 1;
-  while (more && request < 10) {
+  while (more && request < 100) {
     request++;
     const response = await queryVisitPage(nextRequestQuery);
     // what if failed???
