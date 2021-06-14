@@ -10,7 +10,11 @@
         {{ `${deviceName ? "device" : "group"}` }}
       </help>
     </h2>
-    <RecordingsList :query-pending="loading" :recordings="recordings" />
+    <RecordingsList
+      :query-pending="loading"
+      :recordings="recordings"
+      @load-more="requestRecordings"
+    />
     <div v-if="!loading && recordings.length === 0">
       No recordings found for this {{ `${deviceName ? "device" : "group"}` }}
     </div>
@@ -21,7 +25,7 @@
 import Help from "@/components/Help.vue";
 import RecordingsList from "@/components/RecordingsList.vue";
 import api from "@/api";
-
+const LOAD_PER_PAGE_CARDS = 10;
 export default {
   name: "RecordingsTab",
   components: {
@@ -39,12 +43,37 @@ export default {
       recordings: [],
       totalRecordingCount: 0,
       loading: true,
+      currentPage: 1,
     };
   },
   async mounted() {
     await this.fetchRecordings();
   },
   methods: {
+    async requestRecordings() {
+      // Keep track of the offset of the page.
+      const nextQuery = { ...this.recordingsQuery };
+      nextQuery.limit = LOAD_PER_PAGE_CARDS;
+      nextQuery.offset = Math.max(
+        0,
+        (this.currentPage - 1) * LOAD_PER_PAGE_CARDS
+      );
+      // Make sure the request wouldn't go past the count?
+      const totalPages =
+        Math.ceil(this.totalRecordingCount / LOAD_PER_PAGE_CARDS) + 1;
+      if (this.currentPage < totalPages) {
+        this.currentPage += 1;
+        this.loading = true;
+        const { result } = await api.recording.query(nextQuery);
+
+        // TODO: It's possible that more recordings have come in since we loaded the page,
+        //  in which case our offsets are wrong. So check for duplicate recordings here.
+        this.recordings.push(...result.rows);
+        this.loading = false;
+      } else {
+        // At end of search
+      }
+    },
     async fetchRecordings() {
       if (
         (this.recordingsQuery.group &&

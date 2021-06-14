@@ -24,10 +24,6 @@ function createRouter() {
   const router = new Router({
     mode: "history",
     fallback: false,
-    scrollBehavior: () => ({
-      x: 0,
-      y: 0,
-    }),
     routes: [
       {
         path: "/groups/:groupName/device/:deviceName/:tabName?",

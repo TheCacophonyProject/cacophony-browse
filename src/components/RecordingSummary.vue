@@ -17,21 +17,58 @@
       <div class="recording-details">
         <span class="recording-group">
           <font-awesome-icon icon="users" size="xs" />
-          <span class="label">{{ item.groupName }}</span>
+          <span class="label">
+            <b-link
+              :to="{
+                name: 'group',
+                params: {
+                  groupName: item.groupName,
+                  tabName: 'recordings',
+                },
+              }"
+            >
+              {{ item.groupName }}
+            </b-link>
+          </span>
         </span>
         <span class="recording-station" v-if="item.stationName">
           <font-awesome-icon icon="map-marker-alt" size="xs" />
-          <span class="label">{{ item.stationName }}</span>
+          <span class="label">
+            <b-link
+              :to="{
+                name: 'station',
+                params: {
+                  groupName: item.groupName,
+                  stationName: item.stationName,
+                  tabName: 'recordings',
+                },
+              }"
+            >
+              {{ item.stationName }}
+            </b-link>
+          </span>
         </span>
-        <span class="recording-device" v-else>
+        <span class="recording-device">
           <font-awesome-icon icon="microchip" size="xs" />
-          <span class="label">{{ item.deviceName }}</span>
+          <span class="label">
+            <b-link
+              :to="{
+                name: 'device',
+                params: {
+                  groupName: item.groupName,
+                  deviceName: item.deviceName,
+                  tabName: 'recordings',
+                },
+              }"
+            >
+              {{ item.deviceName }}
+            </b-link>
+          </span>
         </span>
         <span class="recording-tracks">
           <font-awesome-icon icon="stream" size="xs" />
           <span class="label" v-if="item.trackCount !== 0">
-            {{ item.trackCount }} track
-            <span v-if="item.trackCount > 1">s</span>
+            {{ item.trackCount }} track<span v-if="item.trackCount > 1">s</span>
           </span>
           <span class="label" v-else>No tracks</span>
         </span>
@@ -80,14 +117,54 @@
       <font-awesome-icon :icon="['far', 'file-video']" size="2x" />
     </span>
 
-    <span>{{ item.devicename }}</span>
+    <span>
+      <b-link
+        :to="{
+          name: 'device',
+          params: {
+            groupName: item.groupName,
+            deviceName: item.deviceName,
+            tabName: 'recordings',
+          },
+        }"
+      >
+        {{ item.deviceName }}
+      </b-link>
+    </span>
     <span>{{ item.date }}</span>
     <span class="recording-time">{{ item.time }}</span>
     <span>{{ item.duration }}s</span>
     <span>
       <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />
     </span>
-    <span>{{ item.groupname }}</span>
+    <span>
+      <b-link
+        :to="{
+          name: 'group',
+          params: {
+            groupName: item.groupName,
+            tabName: 'recordings',
+          },
+        }"
+      >
+        {{ item.groupName }}
+      </b-link>
+    </span>
+    <span>
+      <b-link
+        v-if="item.stationName"
+        :to="{
+          name: 'station',
+          params: {
+            groupName: item.groupName,
+            stationName: item.stationName,
+            tabName: 'recordings',
+          },
+        }"
+      >
+        {{ item.stationName }}
+      </b-link>
+    </span>
     <span>{{ item.location }}</span>
     <BatteryLevel v-if="item.batteryLevel" :battery-level="item.batteryLevel" />
     <span v-else />
@@ -104,6 +181,10 @@ export default {
   props: {
     item: {
       type: Object,
+      required: true,
+    },
+    index: {
+      type: Number,
       required: true,
     },
     displayStyle: {
@@ -127,6 +208,10 @@ export default {
   },
   methods: {
     navigateToRecording(event, recordingId) {
+      if (event.target !== event.currentTarget) {
+        // Clicking a link inside the outer card link
+        return;
+      }
       if (!(event.metaKey || event.ctrlKey || event.shiftKey)) {
         // Don't change the route if we're ctrl-clicking
         event.preventDefault();

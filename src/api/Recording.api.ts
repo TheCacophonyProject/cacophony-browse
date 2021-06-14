@@ -262,8 +262,15 @@ function query(
   );
 }
 
-function addIfSet(map: any, value: string, submap: string, key = "") {
-  if (value && value.trim() !== "") {
+function addIfSet(map: any, value: string | number, submap: string, key = "") {
+  if (value && typeof value === "string" && value.trim() !== "") {
+    map[submap] = map[submap] || {};
+    if (Number(value).toString() == value) {
+      map[submap][key] = Number(value);
+    } else {
+      map[submap][key] = value;
+    }
+  } else if (typeof value === "number") {
     map[submap] = map[submap] || {};
     map[submap][key] = value;
   }

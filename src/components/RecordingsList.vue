@@ -1,7 +1,7 @@
 <template>
   <div
-    v-if="!queryPending"
     :class="['results', { 'display-rows': !showCards }]"
+    ref="list-container"
   >
     <div v-if="showCards">
       <div
@@ -14,11 +14,23 @@
           <RecordingSummary
             v-for="(item, index) in itemsByHour"
             :item="item"
+            :index="item.index"
             :key="`${index}_card`"
+            :ref="item.id"
             :futureSearchQuery="viewRecordingQuery"
             display-style="card"
           />
         </div>
+      </div>
+      <div v-if="queryPending" class="results loading">
+        <div
+          v-for="i in 10"
+          :style="{
+            background: `rgba(240, 240, 240, ${1 / i}`,
+          }"
+          :key="i"
+          class="recording-placeholder"
+        />
       </div>
     </div>
     <div v-else-if="tableItems && tableItems.length !== 0" class="all-rows">
@@ -32,6 +44,7 @@
           <span>Duration</span>
           <span>Tags</span>
           <span>Group</span>
+          <span>Station</span>
           <span>Location</span>
           <span>Battery</span>
         </div>
@@ -40,30 +53,44 @@
         <RecordingSummary
           v-for="(item, index) in tableItems"
           :item="item"
+          :ref="item.id"
           :is-even-row="index % 2 === 1"
           :key="`${index}_row`"
           display-style="row"
           :futureSearchQuery="viewRecordingQuery"
         />
+
+        <div
+          v-for="i in queryPending ? 20 : 0"
+          :key="i"
+          class="recording-summary-row"
+          :style="{
+            background: `rgba(240, 240, 240, ${1 / i}`,
+          }"
+        >
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+          <span>&nbsp;</span>
+        </div>
       </div>
     </div>
-  </div>
-  <div v-else class="results loading">
-    <div
-      v-for="i in 10"
-      :style="{
-        background: `rgba(240, 240, 240, ${1 / i}`,
-      }"
-      :key="i"
-      class="recording-placeholder"
-    />
+    <div v-if="allLoaded || atEnd" class="all-loaded">
+      That's all! No more recordings to load for the current query.
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import {
   Location,
-  Recording,
   RecordingInfo,
   RecordingType,
   Tag,
@@ -217,6 +244,7 @@ const collateTags = (tags: Tag[], tracks: Track[]): DisplayTag[] => {
 interface ItemData {
   kind: "dataRow" | "dataSeparator";
   id: number;
+  index: number;
   type: RecordingType;
   deviceName: string;
   groupName: string;
@@ -231,6 +259,8 @@ interface ItemData {
   trackCount: number;
   processingState: string;
 }
+
+const start = 0;
 
 export default {
   name: "RecordingsList",
@@ -252,46 +282,31 @@ export default {
       type: Object,
       default: () => ({}),
     },
-  },
-  methods: {
-    relativeDay(itemDate) {
-      itemDate = itemDate[0][0].dateObj;
-      return toStringTodayYesterdayOrDate(itemDate);
-    },
-    hour(itemDate) {
-      itemDate = itemDate.length && itemDate[0].dateObj;
-      const hours = itemDate && itemDate.getHours();
-      if (hours === 0) {
-        return "12am";
-      }
-      return `${hours <= 12 ? hours : hours - 12}${hours < 12 ? "am" : "pm"}`;
+    allLoaded: {
+      type: Boolean,
+      default: false,
     },
   },
-  computed: {
-    recordingsChunkedByDayAndHour(): Recording[] {
-      const chunks = [];
-      let current = chunks;
-      for (const item of this.tableItems) {
-        if (item.kind === "dataSeparator") {
-          if (item.hasOwnProperty("date")) {
-            chunks.push([]);
-            current = chunks[chunks.length - 1];
-          }
-          if (item.hasOwnProperty("hour")) {
-            current.push([]);
-          }
-        } else {
-          current[current.length - 1].push(item);
-        }
-      }
-      return chunks;
+  watch: {
+    showCards() {
+      this.setupIntersectionObservers();
     },
-    tableItems() {
-      // New day, new hour.
-      const items = [];
+    recordings() {
       let prevDate = null;
       const recordings = this.recordings as RecordingInfo[];
-      for (const recording of recordings) {
+      if (recordings.length === 0) {
+        this.tableItems = [];
+        this.recordingsChunkedByDayAndHour = [];
+        this.loadedRecordingsCount = 0;
+        return;
+      }
+      // Slice from last recordings count, so we're only processing new recordings.
+      const newRecordings = recordings.slice(this.loadedRecordingsCount);
+      let index = this.loadedRecordingsCount + 1;
+      this.loadedRecordingsCount = this.recordings.length;
+      const items = [];
+
+      for (const recording of newRecordings) {
         const thisDate = new Date(recording.recordingDateTime);
         if (
           prevDate === null ||
@@ -331,14 +346,132 @@ export default {
           batteryLevel: recording.batteryLevel,
           trackCount: recording.Tracks.length,
           processingState: parseProcessingState(recording.processingState),
+          index: index++,
         };
         if (recording.Station) {
           itemData.stationName = recording.Station.name;
         }
         items.push(itemData);
       }
-      return items;
+      if (!this.showCards) {
+        // Setup observers
+        this.setupIntersectionObservers();
+      }
+      this.tableItems.push(...items);
+
+      // Now calculate chunks of days and hour groupings
+      {
+        const chunks = [];
+        let current = chunks;
+        for (const item of items) {
+          if (item.kind === "dataSeparator") {
+            if (item.hasOwnProperty("date")) {
+              chunks.push([]);
+              current = chunks[chunks.length - 1];
+            }
+            if (item.hasOwnProperty("hour")) {
+              current.push([]);
+            }
+          } else {
+            current[current.length - 1].push(item);
+          }
+        }
+        if (this.showCards) {
+          this.setupIntersectionObservers();
+        }
+        if (chunks.length === 0) {
+          // We've reached the end of the recordings.
+          this.atEnd = true;
+          console.log("At end of recordings");
+        }
+        if (
+          this.recordingsChunkedByDayAndHour.length !== 0 &&
+          chunks.length !== 0
+        ) {
+          // We need to be careful joining these here:
+          const lastDay =
+            this.recordingsChunkedByDayAndHour[
+              this.recordingsChunkedByDayAndHour.length - 1
+            ];
+          const lastHour =
+            lastDay[lastDay.length - 1][lastDay[lastDay.length - 1].length - 1];
+          const firstDay = chunks[0];
+          const firstHour = firstDay[0][0];
+
+          if (lastHour.date === firstHour.date) {
+            // We're going to push firstDay into lastDay
+            if (lastHour.time.split(":")[0] === firstHour.time.split(":")[0]) {
+              lastDay[lastDay.length - 1].push(...firstDay[0]);
+            } else {
+              lastDay.push(...firstDay);
+            }
+            this.recordingsChunkedByDayAndHour.push(...chunks.slice(1));
+          } else {
+            this.recordingsChunkedByDayAndHour.push(...chunks);
+          }
+        } else {
+          // If lastDay/Hour is the same as previous, join them.
+          this.recordingsChunkedByDayAndHour.push(...chunks);
+        }
+      }
     },
+  },
+  methods: {
+    intersectionChanged(entries: IntersectionObserverEntry[]) {
+      for (const intersectionEvent of entries) {
+        if (intersectionEvent.isIntersecting) {
+          this.observer.unobserve(intersectionEvent.target);
+          this.$emit("load-more");
+        }
+      }
+    },
+    setupIntersectionObservers() {
+      this.observer && this.observer.disconnect();
+      this.$nextTick(() => {
+        this.observer = new IntersectionObserver(this.intersectionChanged);
+        // Observe intersections of cards
+        const maxY = [];
+        // Just observe the nth to last item, and when it comes into view, we load more, and disconnect the observer.
+        const n = 3;
+        for (const ref of Object.values(this.$refs)) {
+          if ((ref as any[]).length !== 0) {
+            if (ref[0] && ref[0].$el) {
+              const bounds = ref[0].$el.getBoundingClientRect();
+              maxY.push([bounds.y, ref[0].$el]);
+              maxY.sort((a, b) => b[0] - a[0]);
+              if (maxY.length > n) {
+                maxY.pop();
+              }
+            }
+          }
+        }
+        if (maxY.length) {
+          const observerTrigger = maxY[maxY.length - 1][1];
+          this.$refs["list-container"].style.height = `${maxY[0][0]}px`;
+          this.observer && this.observer.observe(observerTrigger);
+        }
+      });
+    },
+    relativeDay(itemDate) {
+      itemDate = itemDate[0][0].dateObj;
+      return toStringTodayYesterdayOrDate(itemDate);
+    },
+    hour(itemDate) {
+      itemDate = itemDate.length && itemDate[0].dateObj;
+      const hours = itemDate && itemDate.getHours();
+      if (hours === 0) {
+        return "12am";
+      }
+      return `${hours <= 12 ? hours : hours - 12}${hours < 12 ? "am" : "pm"}`;
+    },
+  },
+  data() {
+    return {
+      recordingsChunkedByDayAndHour: [],
+      tableItems: [],
+      atEnd: false,
+      loadedRecordingsCount: 0,
+    };
   },
 };
 </script>
@@ -395,8 +528,14 @@ export default {
   margin-bottom: 15px;
 }
 
+.results {
+  max-width: 640px;
+}
+
 .results.display-rows {
-  overflow: auto;
+  overflow-x: auto;
+  //overflow-y: unset;
+  max-width: unset;
 
   .results-rows {
     display: table-row-group;
@@ -427,5 +566,28 @@ export default {
       }
     }
   }
+}
+
+// Row view variant
+.recording-summary-row {
+  width: 100%;
+  &:nth-child(odd) {
+    background-color: #eee;
+  }
+  border-top: 1px solid $border-color;
+  display: table-row;
+  > * {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 5px;
+    border-right: 1px solid $border-color;
+    &:last-child {
+      padding-right: 5px;
+    }
+  }
+}
+.all-loaded {
+  text-align: center;
+  padding-bottom: 20px;
 }
 </style>

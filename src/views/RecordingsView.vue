@@ -46,31 +46,12 @@
             :query-pending="queryPending"
             :show-cards="showCards"
             :view-recording-query="viewRecordingQuery"
+            :all-loaded="atEndOfSearch"
+            @load-more="requestMoreRecordings"
           />
           <div v-if="countMessage === 'No matches'" class="no-results">
             <h6 class="text-muted">No recordings found</h6>
             <p class="small text-muted">Try modifying your search criteria.</p>
-          </div>
-        </div>
-
-        <div class="sticky-footer">
-          <div class="pagination-per-page">
-            <b-form-select
-              id="recordsPerPage"
-              v-model="perPage"
-              :options="perPageOptions"
-              class="results-per-page"
-              @change="perPageChanged"
-            />
-            <b-pagination
-              :total-rows="count"
-              v-model="currentPage"
-              :per-page="perPage"
-              :limit="limitPaginationButtons"
-              class="pagination-buttons"
-              @change="pagination"
-              v-if="count > perPage"
-            />
           </div>
         </div>
       </div>
@@ -82,6 +63,9 @@ import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import CsvDownload from "../components/QueryRecordings/CsvDownload.vue";
 import RecordingsList from "../components/RecordingsList.vue";
 import api from "../api/index";
+
+const LOAD_PER_PAGE_CARDS = 10;
+const LOAD_PER_PAGE_ROWS = 20;
 
 export default {
   name: "RecordingsView",
@@ -98,29 +82,17 @@ export default {
       count: null,
       countMessage: null,
       currentPage: 1,
-      perPage: 100,
+      perPage: this.getPreferredResultsDisplayStyle()
+        ? LOAD_PER_PAGE_CARDS
+        : LOAD_PER_PAGE_ROWS,
       showCards: this.getPreferredResultsDisplayStyle(),
-      limitPaginationButtons: 5,
-      perPageOptions: [
-        { value: 10, text: "10 per page" },
-        { value: 50, text: "50 per page" },
-        { value: 100, text: "100 per page" },
-        { value: 300, text: "300 per page" },
-        { value: 500, text: "500 per page" },
-        { value: 1000, text: "1000 per page" },
-      ],
     };
   },
   watch: {
     $route() {
-      if (this.$route.query.limit) {
-        this.perPage = Number(this.$route.query.limit);
-      } else {
-        this.perPage = 100;
-      }
       if (this.$route.query.offset) {
         this.currentPage =
-          Math.ceil(this.$route.query.offset / this.perPage) + 1;
+          Math.ceil(Number(this.$route.query.offset) / this.perPage) + 1;
       } else {
         this.currentPage = 1;
       }
@@ -131,7 +103,8 @@ export default {
       this.perPage = Number(this.$route.query.limit);
     }
     if (this.$route.query.offset) {
-      this.currentPage = Math.ceil(this.$route.query.offset / this.perPage) + 1;
+      this.currentPage =
+        Math.ceil(Number(this.$route.query.offset) / this.perPage) + 1;
     }
   },
   computed: {
@@ -150,8 +123,42 @@ export default {
 
       return queryCopy;
     },
+    totalPages() {
+      return (
+        Math.ceil(
+          this.count /
+            (this.showCards ? LOAD_PER_PAGE_CARDS : LOAD_PER_PAGE_ROWS)
+        ) + 1
+      );
+    },
+    atEndOfSearch() {
+      return !(this.currentPage < this.totalPages);
+    },
   },
   methods: {
+    async requestMoreRecordings() {
+      console.log("Request next page", this.currentPage);
+      const nextQuery = this.makePaginatedQuery(
+        this.serialisedQuery,
+        this.currentPage + 1,
+        this.showCards ? LOAD_PER_PAGE_CARDS : LOAD_PER_PAGE_ROWS
+      );
+
+      // Make sure the request wouldn't go past the count?
+      if (this.currentPage < this.totalPages) {
+        this.updateRoute(nextQuery);
+        this.queryPending = true;
+        const { result } = await api.recording.query(nextQuery);
+
+        // TODO: It's possible that more recordings have come in since we loaded the page,
+        //  in which case our offsets are wrong. So check for duplicate recordings here.
+        this.recordings.push(...result.rows);
+        this.queryPending = false;
+      } else {
+        // At end of search
+        console.log("At end of search");
+      }
+    },
     pagination(page) {
       this.paginationHasChanged(page, this.perPage);
     },
@@ -170,7 +177,7 @@ export default {
       );
     },
     makePaginatedQuery(origQuery, page, perPage) {
-      const query = Object.assign({}, origQuery);
+      const query = { ...origQuery };
       query.limit = perPage;
       query.offset = Math.max(0, (page - 1) * perPage);
       return query;
@@ -205,15 +212,17 @@ export default {
       const queryParamsHaveChanged =
         JSON.stringify(query) !== JSON.stringify(this.serialisedQuery);
       if (queryParamsHaveChanged) {
-        this.currentPage = 0;
+        this.currentPage = 1;
       }
 
       this.serialisedQuery = query;
+
       const fullQuery = this.makePaginatedQuery(
         query,
         this.currentPage,
         this.perPage
       );
+      fullQuery.offset = 0;
       this.updateRoute(fullQuery);
       this.getRecordings(fullQuery);
     },
@@ -278,7 +287,7 @@ $main-content-width: 640px;
     .search-results {
       margin: 0;
       width: 100%;
-      max-width: calc(100vw - 2em);
+      max-width: 100vw;
     }
   }
 }
@@ -289,28 +298,6 @@ $main-content-width: 640px;
   margin-top: 20vh;
   text-align: center;
 }
-
-.sticky-footer {
-  background: $white;
-  border-top: 1px solid $gray-200;
-  padding: 7px;
-  .pagination-per-page {
-    max-width: $main-content-width;
-    margin: 0 auto;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-    .results-per-page {
-      width: auto;
-      float: right;
-    }
-  }
-  .pagination {
-    margin-bottom: 0;
-    justify-content: center;
-  }
-}
-
 .search-filter-wrapper {
   background: $gray-100;
   position: relative;
@@ -343,10 +330,6 @@ $main-content-width: 640px;
     overflow-y: scroll;
     margin: 0;
     max-height: calc(100vh - var(--navbar-height));
-  }
-  .sticky-footer {
-    position: sticky;
-    bottom: 0;
   }
 }
 .display-toggle {

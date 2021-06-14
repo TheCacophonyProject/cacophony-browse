@@ -155,7 +155,7 @@ export default {
       }
 
       this.dates = {
-        days: routeQuery.days,
+        days: Number(routeQuery.days),
         to: routeQuery.to,
         from: routeQuery.from,
       };
@@ -181,7 +181,7 @@ export default {
         };
       }
 
-      return {
+      const query = {
         tagMode: this.tagData.tagMode,
         tag: this.tagData.tags,
         minS: this.duration.minS,
@@ -193,6 +193,13 @@ export default {
         device: this.selectedDevices,
         group: this.selectedGroups,
       };
+
+      for (const [key, value] of Object.entries(query)) {
+        if (typeof value === "string" && Number(value).toString() === value) {
+          query[key] = Number(value);
+        }
+      }
+      return query;
     },
 
     submit: function () {
@@ -208,10 +215,8 @@ export default {
     onMountOrSubmit: function (event = "submit") {
       this.lastQuery = this.serialiseQuery();
       this.$emit("description", this.makeSearchDescription());
-
       this.toggleSearchPanel();
-
-      this.$emit(event, this.serialiseQuery());
+      this.$emit(event, { ...this.lastQuery, offset: 0 });
     },
     toggleAdvancedSearch: function () {
       this.advanced = !this.advanced;

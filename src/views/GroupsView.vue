@@ -37,8 +37,10 @@
               v-for="({ groupName, deviceCount, userCount }, index) in groups"
             >
               <span>
-                <strong>{{ groupName }}</strong> - {{ deviceCount }} devices
-                with {{ userCount }} users
+                <strong>{{ groupName }}</strong> -
+                <span v-if="deviceCount !== false"
+                  >{{ deviceCount }} devices with {{ userCount }} users</span
+                ><b-spinner v-else type="border" small />
               </span>
               <font-awesome-icon class="icon" icon="chevron-right" size="xs" />
             </b-list-group-item>
@@ -94,18 +96,23 @@ export default {
         try {
           const { result } = await api.groups.getGroups();
           // Groups are always ordered alphabetically.
-
-          // FIXME(jon): This returns inactive devices for groups.
-
           // TODO(jon): Maybe also show groups that have devices with issues here?
 
           this.groups = result.groups
-            .map(({ groupname, Devices, GroupUsers }) => ({
+            .map(({ groupname, GroupUsers }) => ({
               groupName: groupname,
-              deviceCount: Devices.length,
+              deviceCount: false,
               userCount: GroupUsers.length,
             }))
             .sort((a, b) => a.groupName.localeCompare(b.groupName));
+
+          for (const group of this.groups) {
+            api.groups
+              .getDevicesForGroup(group.groupName)
+              .then(({ result }) => {
+                group.deviceCount = result.devices.length;
+              });
+          }
         } catch (error) {
           // Do something with the error.
         }
