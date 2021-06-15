@@ -136,8 +136,7 @@ export default {
       return {
         tagMode: "any",
         offset: 0,
-        limit: 20,
-        page: 1,
+        limit: 10,
         days: "all",
         device: [this.device.id],
       };

@@ -53,6 +53,7 @@
         <RecordingSummary
           v-for="(item, index) in tableItems"
           :item="item"
+          :index="item.index"
           :ref="item.id"
           :is-even-row="index % 2 === 1"
           :key="`${index}_row`"
@@ -260,8 +261,6 @@ interface ItemData {
   processingState: string;
 }
 
-const start = 0;
-
 export default {
   name: "RecordingsList",
   components: { RecordingSummary },
@@ -288,9 +287,6 @@ export default {
     },
   },
   watch: {
-    showCards() {
-      this.setupIntersectionObservers();
-    },
     recordings() {
       let prevDate = null;
       const recordings = this.recordings as RecordingInfo[];
@@ -302,11 +298,13 @@ export default {
       }
       // Slice from last recordings count, so we're only processing new recordings.
       const newRecordings = recordings.slice(this.loadedRecordingsCount);
-      let index = this.loadedRecordingsCount + 1;
+      let index = this.loadedRecordingsCount;
       this.loadedRecordingsCount = this.recordings.length;
       const items = [];
 
       for (const recording of newRecordings) {
+        this.rByTime[recording.recordingDateTime] = this.rByTime[recording.recordingDateTime] || 0;
+        this.rByTime[recording.recordingDateTime]++;
         const thisDate = new Date(recording.recordingDateTime);
         if (
           prevDate === null ||
@@ -346,16 +344,12 @@ export default {
           batteryLevel: recording.batteryLevel,
           trackCount: recording.Tracks.length,
           processingState: parseProcessingState(recording.processingState),
-          index: index++,
+          index: ++index,
         };
         if (recording.Station) {
           itemData.stationName = recording.Station.name;
         }
         items.push(itemData);
-      }
-      if (!this.showCards) {
-        // Setup observers
-        this.setupIntersectionObservers();
       }
       this.tableItems.push(...items);
 
@@ -375,9 +369,6 @@ export default {
           } else {
             current[current.length - 1].push(item);
           }
-        }
-        if (this.showCards) {
-          this.setupIntersectionObservers();
         }
         if (chunks.length === 0) {
           // We've reached the end of the recordings.
@@ -402,6 +393,7 @@ export default {
             // We're going to push firstDay into lastDay
             if (lastHour.time.split(":")[0] === firstHour.time.split(":")[0]) {
               lastDay[lastDay.length - 1].push(...firstDay[0]);
+              lastDay.push(...firstDay.slice(1));
             } else {
               lastDay.push(...firstDay);
             }
@@ -416,6 +408,37 @@ export default {
       }
     },
   },
+  beforeDestroy() {
+    this.observer && this.observer.disconnect();
+  },
+  beforeUpdate() {
+    this.observer && this.observer.disconnect();
+  },
+  updated() {
+    // Setup next intersection observer to see the page has scrolled enough to load more items
+    this.observer = new IntersectionObserver(this.intersectionChanged);
+    // Observe intersections of cards
+    const maxY = [];
+    // Just observe the nth to last item, and when it comes into view, we load more, and disconnect the observer.
+    const n = 3;
+    for (const ref of Object.values(this.$refs)) {
+      if ((ref as any[]).length !== 0) {
+        if (ref[0] && ref[0].$el) {
+          const bounds = ref[0].$el.getBoundingClientRect();
+          maxY.push([bounds.y, ref[0].$el]);
+          maxY.sort((a, b) => b[0] - a[0]);
+          if (maxY.length > n) {
+            maxY.pop();
+          }
+        }
+      }
+    }
+    if (maxY.length) {
+      const observerTrigger = maxY[maxY.length - 1][1];
+      this.$refs["list-container"].style.height = `${maxY[0][0]}px`;
+      this.observer && this.observer.observe(observerTrigger);
+    }
+  },
   methods: {
     intersectionChanged(entries: IntersectionObserverEntry[]) {
       for (const intersectionEvent of entries) {
@@ -424,33 +447,6 @@ export default {
           this.$emit("load-more");
         }
       }
-    },
-    setupIntersectionObservers() {
-      this.observer && this.observer.disconnect();
-      this.$nextTick(() => {
-        this.observer = new IntersectionObserver(this.intersectionChanged);
-        // Observe intersections of cards
-        const maxY = [];
-        // Just observe the nth to last item, and when it comes into view, we load more, and disconnect the observer.
-        const n = 3;
-        for (const ref of Object.values(this.$refs)) {
-          if ((ref as any[]).length !== 0) {
-            if (ref[0] && ref[0].$el) {
-              const bounds = ref[0].$el.getBoundingClientRect();
-              maxY.push([bounds.y, ref[0].$el]);
-              maxY.sort((a, b) => b[0] - a[0]);
-              if (maxY.length > n) {
-                maxY.pop();
-              }
-            }
-          }
-        }
-        if (maxY.length) {
-          const observerTrigger = maxY[maxY.length - 1][1];
-          this.$refs["list-container"].style.height = `${maxY[0][0]}px`;
-          this.observer && this.observer.observe(observerTrigger);
-        }
-      });
     },
     relativeDay(itemDate) {
       itemDate = itemDate[0][0].dateObj;
@@ -470,6 +466,7 @@ export default {
       recordingsChunkedByDayAndHour: [],
       tableItems: [],
       atEnd: false,
+      rByTime: {},
       loadedRecordingsCount: 0,
     };
   },

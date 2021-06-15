@@ -13,6 +13,7 @@
     <RecordingsList
       :query-pending="loading"
       :recordings="recordings"
+      :all-loaded="allLoaded"
       @load-more="requestRecordings"
     />
     <div v-if="!loading && recordings.length === 0">
@@ -43,6 +44,7 @@ export default {
       recordings: [],
       totalRecordingCount: 0,
       loading: true,
+      allLoaded: false,
       currentPage: 1,
     };
   },
@@ -54,10 +56,7 @@ export default {
       // Keep track of the offset of the page.
       const nextQuery = { ...this.recordingsQuery };
       nextQuery.limit = LOAD_PER_PAGE_CARDS;
-      nextQuery.offset = Math.max(
-        0,
-        (this.currentPage - 1) * LOAD_PER_PAGE_CARDS
-      );
+      nextQuery.offset = Math.max(0, this.currentPage * LOAD_PER_PAGE_CARDS);
       // Make sure the request wouldn't go past the count?
       const totalPages =
         Math.ceil(this.totalRecordingCount / LOAD_PER_PAGE_CARDS) + 1;
@@ -72,6 +71,7 @@ export default {
         this.loading = false;
       } else {
         // At end of search
+        this.allLoaded = true;
       }
     },
     async fetchRecordings() {

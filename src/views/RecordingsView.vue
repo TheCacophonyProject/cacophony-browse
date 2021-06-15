@@ -137,7 +137,6 @@ export default {
   },
   methods: {
     async requestMoreRecordings() {
-      console.log("Request next page", this.currentPage);
       const nextQuery = this.makePaginatedQuery(
         this.serialisedQuery,
         this.currentPage + 1,

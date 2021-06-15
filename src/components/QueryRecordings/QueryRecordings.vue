@@ -19,6 +19,7 @@
       <SelectDevice
         :selected-devices="selectedDevices"
         :selected-groups="selectedGroups"
+        :selected-stations="selectedStations"
         @update-device-selection="updateDeviceSelection"
       />
       <div v-if="!onlyRecordingType">
@@ -91,6 +92,7 @@ export default {
       advanced: false,
       selectedDevices: [],
       selectedGroups: [],
+      selectedStations: [],
       dates: {},
       dateDescription: "",
       duration: {},
@@ -120,6 +122,7 @@ export default {
     resetToDefaultQuery() {
       this.selectedDevices = [];
       this.selectedGroups = [];
+      this.selectedStations = [];
       this.dates = {
         days: 7,
       };
@@ -170,6 +173,11 @@ export default {
           Number(item)
         );
       }
+      if (routeQuery.hasOwnProperty("stations")) {
+        this.selectedStations = makeArray(routeQuery.stations).map((item) =>
+          Number(item)
+        );
+      }
 
       this.setAdvancedInitialState();
     },
@@ -192,6 +200,7 @@ export default {
         type: this.recordingType,
         device: this.selectedDevices,
         group: this.selectedGroups,
+        station: this.selectedStations,
       };
 
       for (const [key, value] of Object.entries(query)) {
@@ -227,18 +236,32 @@ export default {
     devicesDescription() {
       const numDevices = this.selectedDevices.length;
       const numGroups = this.selectedGroups.length;
-      const total = numDevices + numGroups;
+      const numStations = this.selectedStations.length;
+      const total = numDevices + numGroups + numStations;
 
       const multipleSuffix = total > 1 ? "s" : "";
 
       if (total === 0) {
         return "All devices";
-      } else if (numDevices && numGroups) {
-        return `${total} groups and devices`;
-      } else if (numGroups) {
+      } else if (numGroups && !numDevices && !numStations) {
         return `${total} group${multipleSuffix}`;
+      } else if (numStations && !numDevices && !numGroups) {
+        return `${total} station${multipleSuffix}`;
+      } else if (numDevices && !numStations && !numGroups) {
+        return `${total} device${multipleSuffix}`;
+      } else {
+        const items = [];
+        if (numGroups) {
+          items.push("groups");
+        }
+        if (numDevices) {
+          items.push("devices");
+        }
+        if (numStations) {
+          items.push("stations");
+        }
+        return `${total} ${items.join(" and ")}`;
       }
-      return `${total} device${multipleSuffix}`;
     },
     makeSearchDescription() {
       // Get the current search query, not the live updated one.
@@ -262,6 +285,9 @@ export default {
       }
       if (eventData.hasOwnProperty("groups")) {
         this.selectedGroups = eventData.groups;
+      }
+      if (eventData.hasOwnProperty("stations")) {
+        this.selectedStations = eventData.stations;
       }
     },
   },
