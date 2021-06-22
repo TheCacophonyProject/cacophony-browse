@@ -39,6 +39,20 @@
           @user-removed="(userName) => removedUser(userName)"
         />
       </b-tab>
+      <b-tab>
+        <template #title>
+          <TabTemplate
+            title="Visits"
+            :isLoading="visitsCountLoading"
+            :value="visitsCount"
+          />
+        </template>
+        <MonitoringTab
+          :loading="visitsCountLoading"
+          :group-name="groupName"
+          :visits-query="visitsQueryFinal"
+        />
+      </b-tab>
       <b-tab title="Devices">
         <template #title>
           <TabTemplate
@@ -96,6 +110,7 @@ import UsersTab from "@/components/Groups/UsersTab.vue";
 import DevicesTab from "@/components/Groups/DevicesTab.vue";
 import TabTemplate from "@/components/TabTemplate.vue";
 import RecordingsTab from "@/components/RecordingsTab.vue";
+import MonitoringTab from "@/components/MonitoringTab.vue";
 
 export default {
   name: "GroupView",
@@ -105,6 +120,7 @@ export default {
     StationsTab,
     DevicesTab,
     TabTemplate,
+    MonitoringTab,
   },
   data() {
     return {
@@ -112,13 +128,17 @@ export default {
       usersLoading: false, // Loading all users on page load
       devicesLoading: false, // Loading all users on page load
       recordingsCountLoading: false,
+      visitsCountLoading: false,
       recordingsCount: 0,
+      visitsCount: 0,
       groupId: null,
       recordingQueryFinal: {},
+      visitsQueryFinal: {},
       users: [],
       devices: [],
       stations: [],
-      tabNames: ["users", "devices", "stations", "recordings"],
+      visits: [],
+      tabNames: ["users", "visits", "devices", "stations", "recordings"],
     };
   },
   computed: {
@@ -184,6 +204,7 @@ export default {
     this.fetchDevices();
     this.fetchStations();
     this.fetchRecordingCount();
+    this.fetchVisitsCount();
   },
   methods: {
     recordingQuery() {
@@ -194,6 +215,17 @@ export default {
         page: 1,
         days: "all",
         group: [this.groupId],
+      };
+    },
+    visitsQuery() {
+      return {
+        tagMode: "any",
+        days: "all",
+        type: "video",
+        device: [],
+        group: [this.groupId],
+        perPage: 10,
+        page: 1,
       };
     },
     async fetchUsers() {
@@ -227,6 +259,29 @@ export default {
 
       this.recordingsCountLoading = false;
     },
+    async fetchVisitsCount() {
+      this.visitsCountLoading = true;
+      try {
+        const { result } = await api.groups.getGroup(this.groupName);
+        if (result.groups.length !== 0) {
+          this.groupId = result.groups[0].id;
+          this.visitsQueryFinal = this.visitsQuery();
+          {
+            const { result } = await api.monitoring.queryVisitPage({
+              ...this.visitsQuery(),
+              days: "all",
+              perPage: 1,
+              page: 1,
+            });
+            this.visitsCount = `${result.params.pagesEstimate}`;
+          }
+        }
+      } catch (e) {
+        this.visitsCountLoading = false;
+      }
+      this.visitsCountLoading = false;
+    },
+
     async fetchDevices() {
       this.devicesLoading = true;
       {
@@ -252,11 +307,17 @@ export default {
             })
             .then(({ result }) => {
               device.isHealthy = result.rows.length !== 0;
-            });
+            })
+            // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+            .catch((_) => {});
 
-          api.device.getType(device.id).then((type) => {
-            device.type = type;
-          });
+          api.device
+            .getType(device.id)
+            .then((type) => {
+              device.type = type;
+            })
+            // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+            .catch((_) => {});
         }
       }
       this.devicesLoading = false;

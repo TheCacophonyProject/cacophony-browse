@@ -105,6 +105,21 @@
             :recordings-query="recordingsQueryFinal"
           />
         </b-tab>
+        <b-tab lazy>
+          <template #title>
+            <TabTemplate
+              title="Visits"
+              :isLoading="visitsCountLoading"
+              :value="visitsCount"
+            />
+          </template>
+          <MonitoringTab
+            :loading="visitsCountLoading"
+            :group-name="groupName"
+            :station-name="stationName"
+            :recordings-query="visitsQueryFinal"
+          />
+        </b-tab>
       </b-tabs>
     </div>
     <div v-else class="container no-tabs">
@@ -119,8 +134,9 @@
 import { mapState } from "vuex";
 import Spinner from "../components/Spinner.vue";
 import api from "../api/index";
-import TabTemplate from "@/components/TabTemplate";
-import RecordingsTab from "@/components/RecordingsTab";
+import TabTemplate from "@/components/TabTemplate.vue";
+import RecordingsTab from "@/components/RecordingsTab.vue";
+import MonitoringTab from "@/components/MonitoringTab.vue";
 import { linzBasemapApiKey } from "@/config";
 import { latLng, latLngBounds } from "leaflet";
 import {
@@ -137,6 +153,7 @@ export default {
     Spinner,
     TabTemplate,
     RecordingsTab,
+    MonitoringTab,
     LMap,
     LTooltip,
     LCircle,
@@ -208,9 +225,12 @@ export default {
     return {
       loadedStation: false,
       recordingsCountLoading: false,
+      visitsCountLoading: false,
       recordingsCount: 0,
+      visitsCount: 0,
       currentTabIndex: 0,
       recordingsQueryFinal: {},
+      visitsQueryFinal: {},
       station: null,
       group: {},
     };
@@ -234,16 +254,26 @@ export default {
           tagMode: "any",
           offset: 0,
           limit: 20,
-          page: 1,
           days: "all",
           station: [this.station.id],
         };
         this.recordingsCountLoading = true;
-        const result = await api.recording.queryCount(
-          this.recordingsQueryFinal
-        );
-        this.recordingsCount = result.result.count;
+        {
+          const { result } = await api.recording.queryCount(
+            this.recordingsQueryFinal
+          );
+          this.recordingsCount = result.count;
+        }
         this.recordingsCountLoading = false;
+
+        this.visitsCountLoading = true;
+        {
+          const { result } = await api.monitoring.queryVisitPage(
+            this.recordingsQueryFinal
+          );
+          this.visitsCount = result.visits.length;
+        }
+        this.visitsCountLoading = false;
       } catch (e) {
         // TODO - we will move away from global error handling, and show any errors locally in the component
       }

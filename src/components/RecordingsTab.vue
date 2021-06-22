@@ -7,17 +7,19 @@
       >
       <help>
         All recordings ever made for this
-        {{ `${deviceName ? "device" : "group"}` }}
+        {{ `${deviceName ? "device" : stationName ? "station" : "group"}` }}
       </help>
     </h2>
     <RecordingsList
       :query-pending="loading"
       :recordings="recordings"
       :all-loaded="allLoaded"
+      :view-recording-query="recordingsQuery"
       @load-more="requestRecordings"
     />
     <div v-if="!loading && recordings.length === 0">
-      No recordings found for this {{ `${deviceName ? "device" : "group"}` }}
+      No recordings found for this
+      {{ `${deviceName ? "device" : stationName ? "station" : "group"}` }}
     </div>
   </div>
 </template>
@@ -63,11 +65,14 @@ export default {
       if (this.currentPage < totalPages) {
         this.currentPage += 1;
         this.loading = true;
-        const { result } = await api.recording.query(nextQuery);
+        try {
+          const { result } = await api.recording.query(nextQuery);
 
-        // TODO: It's possible that more recordings have come in since we loaded the page,
-        //  in which case our offsets are wrong. So check for duplicate recordings here.
-        this.recordings.push(...result.rows);
+          // TODO: It's possible that more recordings have come in since we loaded the page,
+          //  in which case our offsets are wrong. So check for duplicate recordings here.
+          this.recordings.push(...result.rows);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
         this.loading = false;
       } else {
         // At end of search

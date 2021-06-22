@@ -40,6 +40,20 @@
           :recordings-query="recordingQuery()"
         />
       </b-tab>
+      <b-tab title="Visits">
+        <template #title>
+          <TabTemplate
+            title="Visits"
+            :isLoading="visitsCountLoading"
+            :value="visitsCount"
+          />
+        </template>
+        <MonitoringTab
+          :group-name="groupName"
+          :device-name="deviceName"
+          :visits-query="visitsQuery()"
+        />
+      </b-tab>
     </b-tabs>
   </b-container>
 </template>
@@ -49,7 +63,8 @@ import DeviceUsers from "./DeviceUsers.vue";
 import DeviceSoftware from "./DeviceSoftware.vue";
 import DeviceEvents from "./DeviceEvents.vue";
 import TabTemplate from "@/components/TabTemplate.vue";
-import RecordingsTab from "@/components/RecordingsTab";
+import RecordingsTab from "@/components/RecordingsTab.vue";
+import MonitoringTab from "@/components/MonitoringTab.vue";
 import api from "@/api";
 
 export default {
@@ -60,6 +75,7 @@ export default {
     DeviceSoftware,
     DeviceEvents,
     TabTemplate,
+    MonitoringTab,
   },
   props: {
     device: {
@@ -82,9 +98,12 @@ export default {
         "device-users",
         "device-events",
         "recordings",
+        "visits",
       ],
       recordingsCount: 0,
       recordingsCountLoading: false,
+      visitsCount: 0,
+      visitsCountLoading: false,
     };
   },
   created() {
@@ -101,6 +120,7 @@ export default {
     }
     this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
     this.fetchRecordingCount();
+    this.fetchVisitsCount();
   },
   computed: {
     groupName() {
@@ -141,6 +161,16 @@ export default {
         device: [this.device.id],
       };
     },
+    visitsQuery() {
+      return {
+        page: 1,
+        perPage: 100,
+        days: "all",
+        // TODO(jon): This should really be chunked into a per-day type thing.
+
+        device: [this.device.id],
+      };
+    },
     async fetchRecordingCount() {
       this.recordingsCountLoading = true;
       try {
@@ -152,6 +182,21 @@ export default {
         this.recordingsCountLoading = false;
       }
       this.recordingsCountLoading = false;
+    },
+    async fetchVisitsCount() {
+      this.visitsCountLoading = true;
+      try {
+        const { result } = await api.monitoring.queryVisitPage({
+          page: 1,
+          perPage: 1,
+          days: "all",
+          device: [this.device.id],
+        });
+        this.visitsCount = result.params.pagesEstimate;
+      } catch (e) {
+        this.visitsCountLoading = false;
+      }
+      this.visitsCountLoading = false;
     },
   },
 };

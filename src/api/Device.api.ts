@@ -105,11 +105,7 @@ function getLatestEvents(deviceId: number, params?: EventApiParams) {
 async function getType(
   deviceId: number
 ): Promise<"AudioRecorder" | "VideoRecorder" | "UnknownDeviceType"> {
-  const rec = await recording.query({
-    limit: 1,
-    days: "all",
-    device: [deviceId],
-  });
+  const rec = await recording.latestForDevice(deviceId);
   if (rec.result.rows.length) {
     const type = rec.result.rows[0].type;
     return type === "thermalRaw" ? "VideoRecorder" : "AudioRecorder";

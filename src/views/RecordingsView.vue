@@ -229,29 +229,32 @@ export default {
       this.nextQueryDescription = description;
     },
     async getRecordings(whereQuery) {
-      // Remove previous values
-      this.countMessage = "";
-      this.recordings = [];
-      // Call API and process results
-      this.queryPending = true;
-      const { result, success } = await api.recording.query(whereQuery);
-      this.queryPending = false;
+      try {
+        // Remove previous values
+        this.countMessage = "";
+        this.recordings = [];
+        // Call API and process results
+        this.queryPending = true;
+        const { result, success } = await api.recording.query(whereQuery);
+        this.queryPending = false;
 
-      if (!success) {
-        result.messages &&
-          result.messages.forEach((message) => {
-            this.$store.dispatch("Messaging/WARN", message);
-          });
-      } else {
-        this.currentQueryDescription = this.nextQueryDescription;
-        this.count = result.count;
-        if (result.count > 0) {
-          this.countMessage = `${result.count} matches found (total)`;
-        } else if (result.count === 0) {
-          this.countMessage = "No matches";
+        if (!success) {
+          result.messages &&
+            result.messages.forEach((message) => {
+              this.$store.dispatch("Messaging/WARN", message);
+            });
+        } else {
+          this.currentQueryDescription = this.nextQueryDescription;
+          this.count = result.count;
+          if (result.count > 0) {
+            this.countMessage = `${result.count} matches found (total)`;
+          } else if (result.count === 0) {
+            this.countMessage = "No matches";
+          }
+          this.recordings = result.rows;
         }
-        this.recordings = result.rows;
-      }
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
     },
   },
 };

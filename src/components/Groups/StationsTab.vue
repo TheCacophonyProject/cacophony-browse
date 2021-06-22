@@ -67,6 +67,7 @@
                 params: {
                   groupName,
                   stationName: data.item.name,
+                  tabName: 'recordings',
                 },
               }"
             >
@@ -74,10 +75,10 @@
             </b-link>
           </template>
           <template #cell(latitude)="data">
-            <span v-html="data.value" />
+            <span v-html="Number(data.value).toFixed(5)" />
           </template>
           <template #cell(longitude)="data">
-            <span v-html="data.value" />
+            <span v-html="Number(data.value).toFixed(5)" />
           </template>
         </b-table>
 
@@ -131,10 +132,10 @@
         <p>The following changes will be made</p>
         <b-table class="station-diff-table" :items="pendingStationsDiff">
           <template #cell(latitude)="data">
-            <span v-html="data.value" />
+            <span v-html="Number(data.value).toFixed(5)" />
           </template>
           <template #cell(longitude)="data">
-            <span v-html="data.value" />
+            <span v-html="Number(data.value).toFixed(5)" />
           </template>
         </b-table>
         <b-checkbox class="back-date" v-model="backDateRecordings">

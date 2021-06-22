@@ -106,15 +106,16 @@ export default {
       const params = this.makeEventRequestParams();
 
       this.eventsLoading = true;
-
-      const { result } = await api.device.getLatestEvents(
-        this.device.id,
-        params
-      );
-      this.events = result.rows;
-      this.count = result.count;
-      this.page = result.offset + 1;
-
+      try {
+        const { result } = await api.device.getLatestEvents(
+          this.device.id,
+          params
+        );
+        this.events = result.rows;
+        this.count = result.count;
+        this.page = result.offset + 1;
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
       this.eventsLoading = false;
     },
     makeEventRequestParams() {

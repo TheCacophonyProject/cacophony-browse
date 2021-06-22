@@ -83,7 +83,7 @@
         </div>
         <div class="recording-duration">
           <font-awesome-icon :icon="['far', 'clock']" size="xs" />
-          <span class="label">{{ item.duration }} seconds</span>
+          <span class="label">{{ Math.round(item.duration) }} seconds</span>
         </div>
         <div v-if="hasBattery" class="recording-battery">
           <BatteryLevel :battery-level="item.batteryLevel" />
@@ -98,11 +98,17 @@
           ''
         )},16z`"
         target="_blank"
+        title="View location"
+        class="location-link"
         @click.stop.prevent="
           ({ currentTarget: { href, target } }) => window.open(href, target)
         "
       >
-        View location
+        <font-awesome-icon
+          icon="map-marker-alt"
+          size="3x"
+          style="color: #bbb"
+        />
       </a>
     </div>
   </a>
@@ -133,7 +139,7 @@
     </span>
     <span>{{ item.date }}</span>
     <span class="recording-time">{{ item.time }}</span>
-    <span>{{ item.duration }}s</span>
+    <span>{{ Math.round(item.duration) }}s</span>
     <span>
       <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />
     </span>
@@ -181,10 +187,6 @@ export default {
   props: {
     item: {
       type: Object,
-      required: true,
-    },
-    index: {
-      type: Number,
       required: true,
     },
     displayStyle: {
@@ -251,12 +253,21 @@ $recording-side-padding: 0.9rem;
   cursor: pointer;
   transition: box-shadow 0.2s;
   color: unset;
+  a:visited {
+    color: purple;
+  }
   div {
     color: inherit;
   }
   &:hover {
     box-shadow: 0 1px 3px $gray-400;
     text-decoration: unset;
+  }
+  &:visited {
+    border: 1px solid rgb(245, 245, 245);
+    a:visited {
+      color: #b314b3;
+    }
   }
 }
 
@@ -363,9 +374,12 @@ $recording-side-padding: 0.9rem;
 
 // map
 .recording-location {
+  display: flex;
   flex: 0 1 110px;
   min-width: 109px;
   text-align: center;
+  align-items: center;
+  justify-content: center;
   background: $gray-100;
   @include media-breakpoint-between(xs, sm) {
     display: none;

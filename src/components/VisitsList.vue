@@ -5,19 +5,24 @@
   >
     <div v-if="showCards">
       <div
-        v-for="(itemsByDay, index_a) in recordingsChunkedByDayAndHour"
+        v-for="(itemsByDay, index_a) in visitsChunkedByDayAndHour"
         :key="index_a"
+        class="day-wrapper"
       >
-        <h4 class="recordings-day">{{ relativeDay(itemsByDay) }}</h4>
-        <div v-for="(itemsByHour, index_b) in itemsByDay" :key="index_b">
+        <h4 class="recordings-day">
+          <span>{{ relativeDay(itemsByDay) }}</span>
+        </h4>
+        <div
+          v-for="(itemsByHour, index_b) in reverse(itemsByDay)"
+          :key="index_b"
+        >
           <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
-          <RecordingSummary
-            v-for="(item, index) in itemsByHour"
-            :item="item"
+          <VisitSummary
+            v-for="(item, index) in reverse(itemsByHour)"
             :key="`${index}_card`"
-            :ref="item.id"
-            :futureSearchQuery="viewRecordingQuery"
-            display-style="card"
+            :item="item"
+            :ref="item.time"
+            :future-search-query="viewVisitsQuery"
           />
         </div>
       </div>
@@ -49,15 +54,15 @@
         </div>
       </div>
       <div class="results-rows">
-        <RecordingSummary
-          v-for="(item, index) in tableItems"
-          :item="item"
-          :ref="item.id"
-          :is-even-row="index % 2 === 1"
-          :key="`${index}_row`"
-          display-style="row"
-          :futureSearchQuery="viewRecordingQuery"
-        />
+        <!--        <RecordingSummary-->
+        <!--          v-for="(item, index) in tableItems"-->
+        <!--          :item="item"-->
+        <!--          :ref="item.id"-->
+        <!--          :is-even-row="index % 2 === 1"-->
+        <!--          :key="`${index}_row`"-->
+        <!--          display-style="row"-->
+        <!--          :futureSearchQuery="viewRecordingQuery"-->
+        <!--        />-->
 
         <div
           v-for="i in queryPending ? 20 : 0"
@@ -82,27 +87,22 @@
       </div>
     </div>
     <div v-if="allLoaded || atEnd" class="all-loaded">
-      <span>That's all! No more recordings to load for the current query.</span>
+      <span>That's all! No more visits to load for the current query.</span>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { Location, Tag, Track, TrackTag } from "@/api/Recording.api";
 import {
-  Location,
-  RecordingInfo,
-  RecordingType,
-  Tag,
-  Track,
-  TrackTag,
-} from "@/api/Recording.api";
-import RecordingSummary from "@/components/RecordingSummary.vue";
-import {
-  toNZDateString,
   startOfDay,
   startOfHour,
+  startOfEvening,
   toStringTodayYesterdayOrDate,
+  toStringTodayYesterdayOrDateInNights,
 } from "@/helpers/datetime";
+import { NewVisit } from "@/api/Monitoring.api";
+import VisitSummary from "@/components/VisitSummary.vue";
 
 const parseLocation = (location: Location): string => {
   if (location && typeof location === "object") {
@@ -242,27 +242,19 @@ const collateTags = (tags: Tag[], tracks: Track[]): DisplayTag[] => {
 
 interface ItemData {
   kind: "dataRow" | "dataSeparator";
-  id: number;
-  type: RecordingType;
-  deviceName: string;
-  groupName: string;
-  stationName?: string;
-  location: string;
-  dateObj: Date;
-  date: string;
-  time: string;
-  duration: number;
-  tags: DisplayTag[];
-  batteryLevel: number | null;
-  trackCount: number;
-  processingState: string;
+  name: string;
+  fromDate: Date;
+  toDate: Date;
+  item: NewVisit;
 }
 
 export default {
-  name: "RecordingsList",
-  components: { RecordingSummary },
+  name: "VisitsList",
+  components: {
+    VisitSummary,
+  },
   props: {
-    recordings: {
+    visits: {
       type: Array,
       required: true,
     },
@@ -274,7 +266,7 @@ export default {
       type: Boolean,
       required: true,
     },
-    viewRecordingQuery: {
+    viewVisitsQuery: {
       type: Object,
       default: () => ({}),
     },
@@ -284,64 +276,77 @@ export default {
     },
   },
   watch: {
-    recordings() {
+    visits() {
+      // TODO(jon): Chunk this by "night" of recording, so that I can easily see what happened in
+      //  the previous night from dusk till dawn.
+      // For each day, have a summary of species at the top.
+      // Keep lazy loading until we have each day, so that we can display proper summaries for each day.
+
+      // Should I show periods of "no activity"? Yes, I think that makes things clearer.
+
+      let prevFromDate = null;
       let prevDate = null;
-      const recordings = this.recordings as RecordingInfo[];
-      if (recordings.length === 0) {
+      const visits = this.visits as NewVisit[];
+      if (visits.length === 0) {
         this.tableItems = [];
-        this.recordingsChunkedByDayAndHour = [];
+        this.visitsChunkedByDayAndHour = [];
         this.loadedRecordingsCount = 0;
         return;
       }
       // Slice from last recordings count, so we're only processing new recordings.
-      const newRecordings = recordings.slice(this.loadedRecordingsCount);
-      this.loadedRecordingsCount = this.recordings.length;
+      const newVisits = visits.slice(this.loadedVisitsCount);
+      this.loadedVisitsCount = this.visits.length;
       const items = [];
 
-      for (const recording of newRecordings) {
-        const thisDate = new Date(recording.recordingDateTime);
+      for (const visit of newVisits) {
+        const fromDate = new Date(visit.timeStart);
+        const toDate = new Date(visit.timeEnd);
         if (
-          prevDate === null ||
-          startOfDay(thisDate, true).getTime() !==
-            startOfDay(prevDate, true).getTime()
+          prevFromDate === null ||
+          startOfEvening(fromDate).getTime() !==
+            startOfEvening(prevFromDate).getTime()
         ) {
           const item = {
             kind: "dataSeparator",
-            hour: thisDate,
-            date: thisDate,
+            hour: fromDate,
+            date: fromDate,
           };
           items.push(item);
-          prevDate = thisDate;
+          prevFromDate = fromDate;
         } else if (
-          startOfHour(thisDate, true).getTime() !==
-          startOfHour(prevDate, true).getTime()
+          startOfHour(fromDate).getTime() !==
+          startOfHour(prevFromDate).getTime()
         ) {
           const item = {
             kind: "dataSeparator",
-            hour: thisDate,
+            hour: fromDate,
           };
           items.push(item);
-          prevDate = thisDate;
+          prevFromDate = fromDate;
         }
+
+        if (
+          prevDate &&
+          Math.abs(prevDate.getTime() - toDate.getTime()) < 1000 * 60 * 60 * 8
+        ) {
+          // Push "no activity block" if less than 8 eight hours of inactivity
+          items.push({
+            kind: "noActivity",
+            name: "no activity",
+            fromDate: toDate,
+            toDate: prevDate,
+            item: { recordings: [] },
+          });
+        }
+
         const itemData: ItemData = {
           kind: "dataRow",
-          id: recording.id,
-          type: recording.type,
-          deviceName: recording.Device.devicename,
-          groupName: recording.Group.groupname,
-          location: parseLocation(recording.location),
-          dateObj: thisDate,
-          date: toNZDateString(thisDate),
-          time: thisDate.toLocaleTimeString(),
-          duration: recording.duration,
-          tags: collateTags(recording.Tags, recording.Tracks),
-          batteryLevel: recording.batteryLevel,
-          trackCount: recording.Tracks.length,
-          processingState: parseProcessingState(recording.processingState),
+          name: visit.classification,
+          fromDate,
+          toDate,
+          item: visit,
         };
-        if (recording.Station) {
-          itemData.stationName = recording.Station.name;
-        }
+        prevDate = fromDate;
         items.push(itemData);
       }
       this.tableItems.push(...items);
@@ -366,16 +371,16 @@ export default {
         if (chunks.length === 0) {
           // We've reached the end of the recordings.
           this.atEnd = true;
-          console.log("At end of recordings");
+          console.log("At end of visits");
         }
         if (
-          this.recordingsChunkedByDayAndHour.length !== 0 &&
+          this.visitsChunkedByDayAndHour.length !== 0 &&
           chunks.length !== 0
         ) {
           // We need to be careful joining these here:
           const lastDay =
-            this.recordingsChunkedByDayAndHour[
-              this.recordingsChunkedByDayAndHour.length - 1
+            this.visitsChunkedByDayAndHour[
+              this.visitsChunkedByDayAndHour.length - 1
             ];
           const lastHour =
             lastDay[lastDay.length - 1][lastDay[lastDay.length - 1].length - 1];
@@ -390,13 +395,13 @@ export default {
             } else {
               lastDay.push(...firstDay);
             }
-            this.recordingsChunkedByDayAndHour.push(...chunks.slice(1));
+            this.visitsChunkedByDayAndHour.push(...chunks.slice(1));
           } else {
-            this.recordingsChunkedByDayAndHour.push(...chunks);
+            this.visitsChunkedByDayAndHour.push(...chunks);
           }
         } else {
           // If lastDay/Hour is the same as previous, join them.
-          this.recordingsChunkedByDayAndHour.push(...chunks);
+          this.visitsChunkedByDayAndHour.push(...chunks);
         }
       }
     },
@@ -442,24 +447,50 @@ export default {
       }
     },
     relativeDay(itemDate) {
-      itemDate = itemDate[0][0].dateObj;
-      return toStringTodayYesterdayOrDate(itemDate);
+      const fromDate = itemDate[0][0].fromDate;
+      const toDate = new Date(fromDate.getTime());
+      toDate.setDate(toDate.getDate() - 1);
+      return toStringTodayYesterdayOrDateInNights(fromDate, toDate);
+    },
+    reverse(arr) {
+      return [...arr].reverse();
     },
     hour(itemDate) {
-      itemDate = itemDate.length && itemDate[0].dateObj;
-      const hours = itemDate && itemDate.getHours();
-      if (hours === 0) {
-        return "12am";
+      const fromDate = itemDate.length && itemDate[0].fromDate;
+      const fromHours = fromDate && fromDate.getHours();
+      let toHoursString;
+      let fromHoursString;
+      if (fromHours === 0) {
+        fromHoursString = "12am";
+      } else {
+        fromHoursString = `${fromHours <= 12 ? fromHours : fromHours - 12}${
+          fromHours < 12 ? "am" : "pm"
+        }`;
       }
-      return `${hours <= 12 ? hours : hours - 12}${hours < 12 ? "am" : "pm"}`;
+
+      const toDate = itemDate.length && itemDate[itemDate.length - 1].fromDate;
+      const toHours = toDate && toDate.getHours();
+      if (toHours === 0) {
+        toHoursString = "12am";
+      } else {
+        toHoursString = `${toHours <= 12 ? toHours : toHours - 12}${
+          toHours < 12 ? "am" : "pm"
+        }`;
+      }
+
+      if (fromHours === toHours) {
+        return fromHoursString;
+      } else {
+        return `${toHoursString} - ${fromHoursString}`;
+      }
     },
   },
   data() {
     return {
-      recordingsChunkedByDayAndHour: [],
+      visitsChunkedByDayAndHour: [],
       tableItems: [],
       atEnd: false,
-      loadedRecordingsCount: 0,
+      loadedVisitsCount: 0,
     };
   },
 };
@@ -473,11 +504,18 @@ export default {
 .recordings-day {
   position: sticky;
   top: 0;
-  background: transparentize($white, 0.15);
-  padding: 0.5rem 0;
+  > span {
+    display: inline-block;
+    width: 100%;
+    background: transparentize($white, 0.15);
+    padding: 0.5rem 0 0.5rem 10px;
+    border-bottom: 1px solid $gray-200;
+  }
   font-size: 1em;
   font-weight: 600;
-  border-bottom: 1px solid $gray-200;
+  border-left: 2px dashed gray;
+  padding-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .recordings-hour {
@@ -504,10 +542,12 @@ export default {
 @include media-breakpoint-up(md) {
   .recordings-hour {
     display: inline-block;
+    min-width: 100px;
     position: sticky;
     float: left;
     top: 40px;
-    margin-left: -60px;
+    text-align: right;
+    margin-left: -110px;
     margin-top: 15px;
   }
 }
@@ -585,5 +625,8 @@ export default {
     background: $gray-100;
     font-weight: bold;
   }
+}
+.day-wrapper > div:last-of-type > div {
+  padding-bottom: 10px;
 }
 </style>

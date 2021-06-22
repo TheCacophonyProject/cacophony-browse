@@ -17,8 +17,14 @@ import VisitsView from "@/views/VisitsView.vue";
 import TaggingView from "@/views/TaggingView.vue";
 import EndUserAgreementView from "@/views/EndUserAgreementView.vue";
 import MonitoringTimeline from "@/views/MonitoringTimeline.vue";
+import { CurrentViewAbortController } from "@/main";
 
 // TODO(jon): We should be lazy loading some of these components for better code-splitting
+
+const cancelPendingRequests = (to, from, next) => {
+  CurrentViewAbortController.newView();
+  return next();
+};
 
 function createRouter() {
   const router = new Router({
@@ -29,30 +35,36 @@ function createRouter() {
         path: "/groups/:groupName/device/:deviceName/:tabName?",
         name: "device",
         component: DeviceView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/groups/:groupName/station/:stationName/:tabName?",
         name: "station",
         component: StationView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/error",
         component: ErrorView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/groups",
         name: "groups",
         component: GroupsView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/groups/:groupName/:tabName?",
         name: "group",
         component: GroupView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/",
         name: "home",
         component: HomeView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/login",
@@ -61,18 +73,22 @@ function createRouter() {
         meta: {
           noAuth: true,
         },
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/recordings",
         component: RecordingsView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/monitoring",
         component: MonitoringView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/monitoring-timeline",
         component: MonitoringTimeline,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/register",
@@ -80,10 +96,12 @@ function createRouter() {
         meta: {
           noAuth: true,
         },
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/recording/:id/:trackId?",
         component: RecordingView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/add_email",
@@ -92,30 +110,34 @@ function createRouter() {
         meta: {
           noEmail: true,
         },
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/analysis",
         name: "analysis",
         component: AnalysisView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/visits",
         name: "visits",
         component: VisitsView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/tagging",
         name: "tagging",
         component: TaggingView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/end_user_agreement",
         name: "endUserAgreement",
         component: EndUserAgreementView,
+        beforeEnter: cancelPendingRequests,
       },
     ],
   });
-
   router.beforeEach(async (to, from, next) => {
     const now = new Date().getTime();
     const euaUpdatedAt = new Date(store.getters["User/euaUpdatedAt"]).getTime();

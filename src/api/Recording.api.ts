@@ -17,6 +17,7 @@ export default {
   replaceTrackTag,
   needsTag,
   makeApiQuery,
+  latestForDevice,
 };
 
 export type DeviceId = number;
@@ -466,4 +467,12 @@ export function calculateFromTime(query: RecordingQuery): string {
   }
 
   return null;
+}
+
+export function latestForDevice(deviceId: number) {
+  return query({
+    limit: 1,
+    days: "all",
+    device: [deviceId],
+  });
 }

@@ -17,6 +17,15 @@ import VueApexCharts from "vue-apexcharts";
 import "leaflet/dist/leaflet.css";
 import Router from "vue-router";
 
+// Allows us to abort all pending fetch requests when switching between major views.
+export const CurrentViewAbortController = {
+  newView() {
+    this.controller && this.controller.abort();
+    this.controller = new AbortController();
+  },
+  controller: new AbortController(),
+};
+
 export default function () {
   // https://bootstrap-vue.js.org/docs
   Vue.use(BootstrapVue);

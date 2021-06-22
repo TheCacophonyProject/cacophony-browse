@@ -143,8 +143,24 @@ export default {
       return (this.recording.Group && this.recording.Group.groupname) || "";
     },
   },
+  watch: {
+    async $route(to) {
+      if (Number(to.params.id) !== this.recording.id) {
+        try {
+          await this.$store.dispatch(
+            "Video/GET_RECORDING",
+            this.$route.params.id
+          );
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+      }
+    },
+  },
   mounted: async function () {
-    await this.$store.dispatch("Video/GET_RECORDING", this.$route.params.id);
+    try {
+      await this.$store.dispatch("Video/GET_RECORDING", this.$route.params.id);
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
   },
 };
 </script>
