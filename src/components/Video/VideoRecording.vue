@@ -154,18 +154,12 @@ export default {
       }
     },
     async checkPreviousAndNextRecordings() {
-      this.canGoForwardInSearch = await this.hasNextRecording(
-        "next",
-        "any",
-        false,
-        true
-      );
-      this.canGoBackwardInSearch = await this.hasNextRecording(
-        "previous",
-        "any",
-        false,
-        true
-      );
+      const prevNext = await Promise.all([
+        this.hasNextRecording("previous", "any", false, true),
+        this.hasNextRecording("next", "any", false, true),
+      ]);
+      this.canGoBackwardInSearch = prevNext[0];
+      this.canGoForwardInSearch = prevNext[1];
     },
     async gotoNextRecording(direction, tagMode, tags, skipMessage = false) {
       const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
