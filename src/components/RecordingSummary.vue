@@ -84,7 +84,7 @@
     <span>{{ item.devicename }}</span>
     <span>{{ item.date }}</span>
     <span class="recording-time">{{ item.time }}</span>
-    <span>{{ item.duration }}s</span>
+    <span>{{ Math.round(item.duration) }}s</span>
     <span>
       <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />
     </span>
