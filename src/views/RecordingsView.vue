@@ -399,7 +399,7 @@ export default {
       if (location && typeof location === "object") {
         const latitude = location.coordinates[0];
         const longitude = location.coordinates[1];
-        return latitude + ", " + longitude;
+        return latitude.toFixed(5) + ", " + longitude.toFixed(5);
       } else {
         return "(unknown)";
       }
