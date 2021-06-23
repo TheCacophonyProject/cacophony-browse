@@ -21,7 +21,7 @@
             v-for="(item, index) in reverse(itemsByHour)"
             :key="`${index}_card`"
             :item="item"
-            :ref="item.time"
+            :ref="item.fromDate.toISOString()"
             :future-search-query="viewVisitsQuery"
           />
         </div>
@@ -245,6 +245,7 @@ interface ItemData {
   name: string;
   fromDate: Date;
   toDate: Date;
+  time: string;
   item: NewVisit;
 }
 
@@ -335,6 +336,7 @@ export default {
             name: "no activity",
             fromDate: toDate,
             toDate: prevDate,
+            time: toDate.toLocaleTimeString(),
             item: { recordings: [] },
           });
         }
@@ -344,6 +346,7 @@ export default {
           name: visit.classification,
           fromDate,
           toDate,
+          time: fromDate.toLocaleTimeString(),
           item: visit,
         };
         prevDate = fromDate;
@@ -505,7 +508,7 @@ export default {
   position: sticky;
   top: 0;
   > span {
-    display: inline-block;
+    display: block;
     width: 100%;
     background: transparentize($white, 0.15);
     padding: 0.5rem 0 0.5rem 10px;

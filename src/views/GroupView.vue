@@ -39,20 +39,20 @@
           @user-removed="(userName) => removedUser(userName)"
         />
       </b-tab>
-      <b-tab>
-        <template #title>
-          <TabTemplate
-            title="Visits"
-            :isLoading="visitsCountLoading"
-            :value="visitsCount"
-          />
-        </template>
-        <MonitoringTab
-          :loading="visitsCountLoading"
-          :group-name="groupName"
-          :visits-query="visitsQueryFinal"
-        />
-      </b-tab>
+<!--      <b-tab>-->
+<!--        <template #title>-->
+<!--          <TabTemplate-->
+<!--            title="Visits"-->
+<!--            :isLoading="visitsCountLoading"-->
+<!--            :value="visitsCount"-->
+<!--          />-->
+<!--        </template>-->
+<!--        <MonitoringTab-->
+<!--          :loading="visitsCountLoading"-->
+<!--          :group-name="groupName"-->
+<!--          :visits-query="visitsQueryFinal"-->
+<!--        />-->
+<!--      </b-tab>-->
       <b-tab title="Devices">
         <template #title>
           <TabTemplate
@@ -110,7 +110,7 @@ import UsersTab from "@/components/Groups/UsersTab.vue";
 import DevicesTab from "@/components/Groups/DevicesTab.vue";
 import TabTemplate from "@/components/TabTemplate.vue";
 import RecordingsTab from "@/components/RecordingsTab.vue";
-import MonitoringTab from "@/components/MonitoringTab.vue";
+//import MonitoringTab from "@/components/MonitoringTab.vue";
 
 export default {
   name: "GroupView",
@@ -120,7 +120,7 @@ export default {
     StationsTab,
     DevicesTab,
     TabTemplate,
-    MonitoringTab,
+    //MonitoringTab,
   },
   data() {
     return {
@@ -138,7 +138,7 @@ export default {
       devices: [],
       stations: [],
       visits: [],
-      tabNames: ["users", "visits", "devices", "stations", "recordings"],
+      tabNames: ["users", "devices", "stations", "recordings"],
     };
   },
   computed: {

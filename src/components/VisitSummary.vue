@@ -102,13 +102,11 @@ export default {
   > .over-period {
     padding-left: 63px;
   }
-  position: relative;
   &.visit {
     border-left: 2px solid gray;
     padding-left: 30px;
   }
   &.visit::before {
-    position: absolute;
     top: 24px;
     content: "";
     width: 30px;
@@ -118,10 +116,12 @@ export default {
     margin-left: -30px;
   }
   img {
+    display: inline-block;
     background: #aaa;
     border-radius: 50%;
     padding: 5px;
-    filter: invert(1) saturate(200%);
+    //filter: invert(1);
+    // TODO(jon): Make all our predator icons SVGs, so that we can easily change the colour.
     margin-right: 15px;
   }
   //outline: 1px solid red;

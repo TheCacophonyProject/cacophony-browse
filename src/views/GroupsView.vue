@@ -193,6 +193,13 @@ export default {
               '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
             url: `https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=${linzBasemapApiKey}`,
           },
+          {
+            name: "LINZ Topo",
+            visible: false, // Make the LINZ basemap the default one
+            attribution:
+              '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
+            url: `http://tiles-a.data-cdn.linz.govt.nz/services;key=${linzBasemapApiKey}/tiles/v4/layer=767/EPSG:3857/{z}/{x}/{y}.png`,
+          },
           OpenStreetMapFallbackLayer,
         ];
       }
