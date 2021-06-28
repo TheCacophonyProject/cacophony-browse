@@ -27,20 +27,32 @@ export class ClassificationCounter {
         }
     }
 
+    static makeKey(index:number, aiIndex: number) {
+        return `${index}-${aiIndex}`;
+    }
 }
 
-export function countByClassThenAiClass(visits: NewVisit[], allLabels: string[], otherLabel: string) {
+export type AiCounters = { [key: string]: ClassificationCounter };
+
+export interface AiConfusionMatrix {
+    labels : string[];
+    points : number[][];
+    percentages: number[][];
+    counters : AiCounters;
+}
+
+export function countByClassThenAiClass(visits: NewVisit[], allLabels: string[], otherLabel: string) : AiConfusionMatrix {
 
     const otherIndex = allLabels.findIndex(label => label === otherLabel);
 
-    const byClass =  visits.reduce((acc, visit: NewVisit) => {
+    const counters =  visits.reduce((acc: AiCounters, visit: NewVisit) => {
 
         const classi = visit.classification || "none";
         const aiClassi = visit.classificationAi || "none";
         const index = findLabelIndex(classi, allLabels, otherIndex);
         const aiIndex = findLabelIndex(aiClassi, allLabels, otherIndex);
 
-        const key = `${index}-${aiIndex}`;
+        const key = ClassificationCounter.makeKey(index, aiIndex);
 
         const counter = acc[key] || new ClassificationCounter(index, aiIndex);
         counter.addVisit(visit);
@@ -52,16 +64,26 @@ export function countByClassThenAiClass(visits: NewVisit[], allLabels: string[],
     }, {});
 
 
-    const heatMapPoints = [];
+    const points : number[][] = [];
+    const rowCounts : number[] = new Array(allLabels.length).fill(0);
     
-    for (const [key, aCounter ] of Object.entries(byClass)) {
-        const counter = (aCounter as ClassificationCounter);
-        heatMapPoints.push([counter.aiClassIndex, counter.userClassIndex, counter.count]);
+    for (const [key, counter ] of Object.entries(counters)) {
+        points.push([counter.aiClassIndex, counter.userClassIndex, counter.count]);
+
+        rowCounts[counter.userClassIndex] += counter.count;
+    }
+
+    const percentages : number[][] = [];
+    for (const [key, counter ] of Object.entries(counters)) {
+        const percent = (counter.count/rowCounts[counter.userClassIndex]);
+        percentages.push([counter.aiClassIndex, counter.userClassIndex, percent]);
     }
 
     return {
-        heatMapPoints,
-        counters : byClass
+        labels: allLabels,
+        points,
+        percentages,
+        counters,
     }
 }
 

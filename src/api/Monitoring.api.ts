@@ -58,7 +58,7 @@ export interface NewVisitQuery {
   to?: string;
   group?: number[];
   device?: number[];
-  ai?: string;
+  aiModel?: string;
 }
 
 export interface AIVisitsForStats {
@@ -80,13 +80,14 @@ function queryVisitPage(
 }
 
 async function getAIVisitsForStats (
-  visitQuery: NewVisitQuery
+  visitQuery: NewVisitQuery, progress?:(number) => void 
 ) : Promise<AIVisitsForStats> {
   let statVisits : NewVisit[] = [];
   let allVisitsCount = 0;
   let more = true;
   let request = 0;
   let nextRequestQuery = visitQuery;
+  let pages = 0;
   nextRequestQuery.perPage = 100;
   nextRequestQuery.page = 1;
   while (more && request < 100) {
@@ -97,6 +98,11 @@ async function getAIVisitsForStats (
     let labelledVisits = response.result.visits.filter(visit => (visit.classFromUserTag)); 
     statVisits = [...statVisits, ...labelledVisits];
     more = response.result.params.pagesEstimate != 1;
+    if (progress) {
+      progress(pages / (pages + response.result.params.pagesEstimate));
+      pages += 1;
+    }
+
     if (more) {
       nextRequestQuery = {
         perPage: 100,
@@ -120,7 +126,7 @@ function makeApiQuery(query: NewVisitQuery) {
 
   addValueIfSet(apiParams, calculateFromTime(query), "from");
   addValueIfSet(apiParams, query.to, "until");
-  addValueIfSet(apiParams, query.ai, "ai");
+  addValueIfSet(apiParams, query.aiModel, "ai");
   addArrayValueIfSet(apiParams, query.group, "groups");
   addArrayValueIfSet(apiParams, query.device, "devices");
   apiParams["page-size"] = query.perPage || 10;
