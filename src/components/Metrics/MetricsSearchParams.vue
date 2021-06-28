@@ -52,7 +52,7 @@ export default {
   },
   data() {
     return {
-      days: 1,
+      days: 7,
       beforeDateString: "",
       aiModel: "",
       fromDate: null,
