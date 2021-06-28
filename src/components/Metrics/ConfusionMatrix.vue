@@ -35,7 +35,7 @@ export default {
         this.chart.destroy();
         this.chart = null;
       }
-      if (this.matrix.percentages) {
+      if (this.matrix) {
         this.makeAllCategoriesHeatmap();
       }
     }

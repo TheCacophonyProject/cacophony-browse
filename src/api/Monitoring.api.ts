@@ -79,8 +79,8 @@ function queryVisitPage(
   );
 }
 
-async function getAIVisitsForStats (
-  visitQuery: NewVisitQuery, progress?:(number) => void 
+async function getAllVisits (
+  visitQuery: NewVisitQuery, visitsFilter?: (NewVisit) => boolean, progress?:(number) => void 
 ) : Promise<AIVisitsForStats> {
   let statVisits : NewVisit[] = [];
   let allVisitsCount = 0;
@@ -95,8 +95,13 @@ async function getAIVisitsForStats (
     const response = await queryVisitPage(nextRequestQuery);
     // what if failed???
     allVisitsCount += response.result.visits.length;
-    let labelledVisits = response.result.visits.filter(visit => (visit.classFromUserTag)); 
-    statVisits = [...statVisits, ...labelledVisits];
+    if (visitsFilter) {
+      let filteredVisits = response.result.visits.filter(visitsFilter); 
+      statVisits = [...statVisits, ...filteredVisits];
+    } else {
+      statVisits = [...statVisits, ...response.result.visits];
+    }
+
     more = response.result.params.pagesEstimate != 1;
     if (progress) {
       progress(pages / (pages + response.result.params.pagesEstimate));
@@ -149,5 +154,5 @@ function addValueIfSet(map: any, value: string, key: string) {
 
 export default {
   queryVisitPage,
-  getAIVisitsForStats,
+  getAllVisits,
 };

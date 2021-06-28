@@ -67,14 +67,18 @@ export default {
       this.pendingProgress = 0; 
       this.allCategoriesMatrix = null;
       // Call API and process results
-      this.results = await api.monitoring.getAIVisitsForStats (queryParams, progress => {
-        this.pendingProgress = progress;
-      });
+      this.results = await api.monitoring.getAllVisits(queryParams, aiComparisonVisit, this.updateProgress);
       this.queryPending = false;
       this.allCategoriesMatrix = countByClassThenAiClass(this.results.labelledVisits, this.labels, "other");
     },
+    updateProgress(progress) {
+      this.pendingProgress = progress; 
+    }
   },
 };
+function aiComparisonVisit(visit) {
+  return visit.classFromUserTag || false; 
+}
 </script>
 
 <style scoped lang="scss">
