@@ -95,14 +95,10 @@ async function getAllVisits (
     }
 
     if (more) {
-      nextRequestQuery = {
-        perPage: 100,
-        page: 1,
-        from: response.result.params.searchFrom,
-        to: response.result.params.pageFrom,
-        group: response.result.params.groups,
-        device: response.result.params.devices,
-      }
+      // get the next query in the stime series.   Use the returned from parameter not the paging
+      // just incase recordings have been create or deleted between queries.  
+      nextRequestQuery = JSON.parse(JSON.stringify(visitQuery));
+      nextRequestQuery.to = response.result.params.pageFrom;
     }
   }
   return {

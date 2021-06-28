@@ -47,12 +47,13 @@ export default {
     "rodent", 
     "mustelid",
     "wallaby", 
-    "other",
+    "false-positive",
     "none",
     "unidentified",
-    "unknown", 
-    "none"]
-    };
+    "un known", 
+    "none", 
+    "other"
+      ]};
   },
   mounted() {
   //  this.getVisits();
