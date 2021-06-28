@@ -20,13 +20,12 @@
       />
     </b-col> 
     <b-col sm="4">
-
-      <!-- <label>Model</label>
+      <label>Model</label>
       <b-form-input
         v-model="aiModel"
         type="string"
-        placeholder="Default"
-      /> -->
+        placeholder="Master"
+      />
     </b-col>
     <b-col sm="2">
       <label/>
@@ -48,7 +47,7 @@ export default {
   props: {
     disabled: {
       type: Boolean,
-      required: false
+      default: false
     }
   },
   data() {
