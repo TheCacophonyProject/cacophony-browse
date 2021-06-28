@@ -6,8 +6,6 @@ const ESLintPlugin = require("eslint-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 const webpack = require("webpack");
 
-const DEV_MODE = process.argv.includes("webpack/webpack.dev.js");
-
 module.exports = {
   target: "web", // NOTE: Hot module reloading via vue-loader breaks without this, even though it is supposed to be the default.
   experiments: {
@@ -41,9 +39,6 @@ module.exports = {
           /\.js$/,
           require.resolve("bootstrap-vue"),
         ],
-        options: {
-          compact: !DEV_MODE
-        }
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
@@ -63,13 +58,7 @@ module.exports = {
   plugins: [
     new VueLoaderPlugin(),
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: path.resolve(__dirname, "../src/assets/favicon") },
-        { from: path.resolve(__dirname, "../src/assets/video") },
-        { from: path.resolve(__dirname, "../src/assets/map") },
-      ]
-    }),
+    new CopyWebpackPlugin(["src/assets/favicon", "src/assets/video", "src/assets/map"]),
     new ESLintPlugin(),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.DefinePlugin({
