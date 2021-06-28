@@ -47,7 +47,7 @@
         </div>
         <div class="recording-duration">
           <font-awesome-icon :icon="['far', 'clock']" size="xs" />
-          <span class="label">{{ item.duration }} seconds</span>
+          <span class="label">{{ Math.round(item.duration) }} seconds</span>
         </div>
         <div v-if="hasBattery" class="recording-battery">
           <BatteryLevel :battery-level="item.other.batteryLevel" />
@@ -84,7 +84,7 @@
     <span>{{ item.devicename }}</span>
     <span>{{ item.date }}</span>
     <span class="recording-time">{{ item.time }}</span>
-    <span>{{ item.duration }}s</span>
+    <span>{{ Math.round(item.duration) }}s</span>
     <span>
       <TagBadge v-for="(tag, index) in item.tags" :key="index" :tag="tag" />
     </span>

@@ -59,7 +59,29 @@
             <l-tooltip>{{ station.name }}</l-tooltip>
           </l-circle-marker>
         </l-map>
-        <b-table-lite :items="stations" striped hover />
+        <b-table :items="stations" striped hover>
+          <template #cell(name)="data">
+            <b-link
+              :to="{
+                name: 'station',
+                params: {
+                  groupName,
+                  stationName: data.item.name,
+                  tabName: 'recordings',
+                },
+              }"
+            >
+              {{ data.item.name }}
+            </b-link>
+          </template>
+          <template #cell(latitude)="data">
+            <span v-html="Number(data.value).toFixed(5)" />
+          </template>
+          <template #cell(longitude)="data">
+            <span v-html="Number(data.value).toFixed(5)" />
+          </template>
+        </b-table>
+
         <b-btn
           v-if="!enableEditingStations && isGroupAdmin"
           @click="enableEditingStations = true"
@@ -110,10 +132,10 @@
         <p>The following changes will be made</p>
         <b-table class="station-diff-table" :items="pendingStationsDiff">
           <template #cell(latitude)="data">
-            <span v-html="data.value" />
+            <span v-html="Number(data.value).toFixed(5)" />
           </template>
           <template #cell(longitude)="data">
-            <span v-html="data.value" />
+            <span v-html="Number(data.value).toFixed(5)" />
           </template>
         </b-table>
         <b-checkbox class="back-date" v-model="backDateRecordings">
@@ -221,7 +243,7 @@ export default {
           OpenStreetMapFallbackLayer,
         ];
       }
-      return [OpenStreetMapFallbackLayer];
+      return [{ ...OpenStreetMapFallbackLayer, visible: true }];
     },
     stations() {
       return this.items

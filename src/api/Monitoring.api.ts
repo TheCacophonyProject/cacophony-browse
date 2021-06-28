@@ -37,19 +37,26 @@ export interface NewVisitsQueryResult {
 }
 
 export interface NewVisitQuery {
-  limit?: number;
-  offset?: number;
+  perPage?: number;
+  page?: number;
   days?: number | "all";
   from?: string;
   to?: string;
   group?: number[];
   device?: number[];
+  aiModel?: string;
+}
+
+export interface AIVisitsForStats {
+  totalVisits: number;
+  labelledVisits: NewVisit[];
+  all: boolean;
 }
 
 const apiPath = "/api/v1/monitoring";
 
 function queryVisitPage(
-  visitQuery: RecordingQuery
+  visitQuery: NewVisitQuery
 ): Promise<FetchResult<NewVisitsQueryResult>> {
   return CacophonyApi.get(
     `${apiPath}/page?${querystring.stringify(makeApiQuery(visitQuery))}${
@@ -58,11 +65,55 @@ function queryVisitPage(
   );
 }
 
-function makeApiQuery(query: RecordingQuery) {
+async function getAllVisits (
+  visitQuery: NewVisitQuery, visitsFilter?: (NewVisit) => boolean, progress?:(number) => void 
+) : Promise<AIVisitsForStats> {
+  let statVisits : NewVisit[] = [];
+  let allVisitsCount = 0;
+  let more = true;
+  let request = 0;
+  let nextRequestQuery = visitQuery;
+  let pages = 0;
+  nextRequestQuery.perPage = 100;
+  nextRequestQuery.page = 1;
+  while (more && request < 100) {
+    request++;
+    const response = await queryVisitPage(nextRequestQuery);
+    // what if failed???
+    allVisitsCount += response.result.visits.length;
+    if (visitsFilter) {
+      let filteredVisits = response.result.visits.filter(visitsFilter); 
+      statVisits = [...statVisits, ...filteredVisits];
+    } else {
+      statVisits = [...statVisits, ...response.result.visits];
+    }
+
+    more = response.result.params.pagesEstimate != 1;
+    if (progress) {
+      progress(pages / (pages + response.result.params.pagesEstimate));
+      pages += 1;
+    }
+
+    if (more) {
+      // get the next query in the stime series.   Use the returned from parameter not the paging
+      // just incase recordings have been create or deleted between queries.  
+      nextRequestQuery = JSON.parse(JSON.stringify(visitQuery));
+      nextRequestQuery.to = response.result.params.pageFrom;
+    }
+  }
+  return {
+    totalVisits: allVisitsCount, 
+    labelledVisits: statVisits,
+    all: !more
+  }
+}
+
+function makeApiQuery(query: NewVisitQuery) {
   const apiParams: any = {};
 
   addValueIfSet(apiParams, calculateFromTime(query), "from");
   addValueIfSet(apiParams, query.to, "until");
+  addValueIfSet(apiParams, query.aiModel, "ai");
   addArrayValueIfSet(apiParams, query.group, "groups");
   addArrayValueIfSet(apiParams, query.device, "devices");
   apiParams["page-size"] = query.perPage || 10;
@@ -85,4 +136,5 @@ function addValueIfSet(map: any, value: string, key: string) {
 
 export default {
   queryVisitPage,
+  getAllVisits,
 };
