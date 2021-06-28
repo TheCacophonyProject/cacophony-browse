@@ -7,24 +7,21 @@
         v-model="days"
         type="number"
         min="1"
+        @change="calculateBeforeDate"
       />
     </b-col>
     <b-col sm="4">
-      <label>Date range</label>
-      <b-form-select
-        v-model="dateRange"
-        :options="options"
-        data-cy="date-select"
-      />
-    </b-col>
-    <b-col sm="4">
-      <SelectDate
+      <label >Start date:</label>
+      <input
         v-model="fromDate"
-        :before-date-time="toDate || ''"
-        v-if="dateRange === 'custom'"
-        title="From"
-        data-cy="date-from"
-      />      <!-- <label>Model</label>
+        type="date"
+        class="form-control"
+        :max="beforeDateString"
+      />
+    </b-col> 
+    <b-col sm="4">
+
+      <!-- <label>Model</label>
       <b-form-input
         v-model="aiModel"
         type="string"
@@ -43,6 +40,7 @@
 
 <script>
 import SelectDate from "../QueryRecordings/SelectDate.vue";
+import * as moment from "moment";
 
 export default {
   name: "MetricsSearchParams",
@@ -55,36 +53,30 @@ export default {
   },
   data() {
     return {
-      days: 7,
+      days: 1,
+      beforeDateString: "",
       aiModel: "",
-      start: null,
-      dateRange: "recent",
-      options: [
-        {
-          value: "recent",
-          text: "Most Recent",
-        },
-        {
-          value: "custom",
-          text: "Choose start date",
-        }
-      ]
+      fromDate: null,
     };
   },
-  created() {
-    this.$emit("input", this.serialisedData);
-  },
-  computed: {
-    serialisedData: function () {
-    },
+  created: function() {
+    this.calculateBeforeDate(this.days)
   },
   methods: {
-    updateDays(newValue) {
+    calculateBeforeDate(useDays) {
+      this.beforeDateString = moment(new Date()).add(-1 * useDays -1, "days").format("YYYY-MM-DD");
+      if (!this.fromDate || moment(this.fromDate).isAfter(this.beforeDateString)) {
+        this.fromDate = this.beforeDateString;
+      };
     },
     submit() {
-      let params = { days: this.days };
-      if (this.start) {
-        params.from = this.start;
+      let params = {};
+      if (this.fromDate && this.fromDate != "") {
+        params.from = this.fromDate + " 12:00:00";
+        params.to = moment(params.from).add(this.days, "days").format("YYYY-MM-DD") + " 12:00:00";
+      }
+      else {
+        params.days = this.days;
       }
 
       if (this.aiModel && this.aiModel.length > 0) {
@@ -93,15 +85,6 @@ export default {
 
       this.$emit("submit", params);
     }
-  },
-
-  watch: {
-    serialisedData: function (value) {
-      this.$emit("input", value);
-    },
-    value: function (val) {
-      this.deserialise(val);
-    },
   },
 };
 </script>

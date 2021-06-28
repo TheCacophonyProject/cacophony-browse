@@ -1,5 +1,5 @@
 <template>
-  <div :id="id" class="confusion" width="70%"/>
+  <div :id="id" width="70%" class="confusion"/>
 </template>
 
 <script>
@@ -24,9 +24,18 @@ export default {
       default: "confusion-matrix"
     },
   },
+  data() {
+    return {
+      chart: null
+    };
+  },
   watch: {
     matrix: function() {
-      if (this.matrix.points) {
+      if (this.chart) {
+        this.chart.destroy();
+        this.chart = null;
+      }
+      if (this.matrix.percentages) {
         this.makeAllCategoriesHeatmap();
       }
     }
@@ -42,7 +51,7 @@ export default {
       const otherClasses = (point) => JSON.stringify(this.getCounter(point).otherClasses);
       const recordingIds = (point) => this.getCounter(point).recIds;
       const actualNumber = (point) => this.getCounter(point).count;
-      Highcharts.chart(this.id, {
+      this.chart = Highcharts.chart(this.id, {
 
         chart: {
             type: 'heatmap',
@@ -113,7 +122,7 @@ export default {
       series: [{
           name: 'Visits per category',
           borderWidth: 1,
-          data: this.matrix.percentages,
+          data: this.matrix.percentages || {},
           dataLabels: {
               enabled: true,
               color: '#000000',
