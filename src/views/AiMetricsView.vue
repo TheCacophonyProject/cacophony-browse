@@ -1,19 +1,21 @@
 <template>
   <b-container fluid>
-    <MetricsSearchParams
-      :disabled="queryPending"
-      @submit="querySubmitted"
-    />
-    <b-row class="visits-progress" v-if="queryPending">
-      <h3>Calculating visits....</h3>
-    </b-row>
-    <b-row class="visits-progress" v-if="queryPending">
-      <b-progress :value="pendingProgress" :max="1"></b-progress>
-    </b-row>
-    <b-row>
-      <h2>Results ({{ results && results.labelledVisits ? results.labelledVisits.length : 0 }})</h2>
-      <confusion-matrix :matrix="allCategoriesMatrix"/>
-    </b-row>
+    <b-col>
+      <MetricsSearchParams
+        :disabled="queryPending"
+        @submit="querySubmitted"
+      />
+      <b-row class="visits-progress" v-if="queryPending">
+        <h3>Calculating visits....</h3>
+      </b-row>
+      <b-row class="visits-progress" v-if="queryPending">
+        <b-progress :value="pendingProgress" :max="1"></b-progress>
+      </b-row>
+      <b-row id="matrix" :class="allCategoriesMatrix ? '' :'disabled'">
+        <h2>Results ({{ results && results.labelledVisits ? results.labelledVisits.length : 0 }})</h2>
+        <confusion-matrix :matrix="allCategoriesMatrix"/>
+      </b-row>
+    </b-col>
   </b-container>
 </template>
 <script>
@@ -61,7 +63,6 @@ export default {
     },
     async getVisits(queryParams) {
       // Remove previous values
-      debugger;
       this.queryPending = true;
       this.pendingProgress = 0; 
       this.allCategoriesMatrix = null;
@@ -108,4 +109,7 @@ $main-content-width: 1000px;
   padding-bottom: 100%;
 }
 
+#matrix.disabled  {
+  opacity: 0;
+}
 </style>
