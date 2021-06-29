@@ -14,11 +14,7 @@ export default {
   props: {
     matrix: {
       type: Object,
-      required: true,
-    },
-    otherClass: {
-      type: String,
-      default: "",
+      default: null,
     },
     id: {
       type: String,
@@ -65,11 +61,13 @@ export default {
 
         xAxis: {
           categories: this.matrix.labels,
+          title: { text: "AI label" },
         },
 
         yAxis: {
           categories: this.matrix.labels,
           reversed: true,
+          title: { text: "User label" },
         },
 
         colorAxis: {

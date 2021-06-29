@@ -1,14 +1,14 @@
 <template>
   <b-container fluid>
     <b-col>
-      <MetricsSearchParams @submit="querySubmitted" />
+      <MetricsSearchParams :disabled="queryPending" @submit="querySubmitted" />
       <b-row class="visits-progress" v-if="queryPending">
         <h3>Calculating visits....</h3>
       </b-row>
       <b-row class="visits-progress" v-if="queryPending">
         <b-progress :value="pendingProgress" :max="1"></b-progress>
       </b-row>
-      <b-row id="matrix" :class="allCategoriesMatrix ? '' : 'disabled'">
+      <b-row :class="allCategoriesMatrix ? '' : 'matrix-disabled'">
         <h2>
           Results ({{
             results && results.filteredVisits
@@ -111,6 +111,7 @@ $main-content-width: 1000px;
     font-size: 1.2rem;
     margin-bottom: 0.8rem;
     color: $gray-700;
+    width: 100%;
   }
 }
 
@@ -125,7 +126,7 @@ $main-content-width: 1000px;
   padding-bottom: 100%;
 }
 
-#matrix.disabled {
+.matrix-disabled {
   opacity: 0;
 }
 </style>

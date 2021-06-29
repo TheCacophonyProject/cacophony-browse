@@ -3,7 +3,7 @@
     <b-col sm="2">
       <label>Days</label>
       <b-form-input
-        :max="28"
+        max="28"
         v-model="days"
         type="number"
         min="1"
@@ -21,7 +21,7 @@
     </b-col>
     <b-col sm="4">
       <label>Model</label>
-      <b-form-input v-model="aiModel" type="string" placeholder="Master" />
+      <b-form-input v-model="aiModel" placeholder="Master" />
     </b-col>
     <b-col sm="2">
       <label />
@@ -38,25 +38,18 @@ import * as moment from "moment";
 
 export default {
   name: "MetricsSearchParams",
-  // props: {
-  //   disabled: {
-  //   },
-  //   otherClass: {
-  //     type: String,
-  //     default: "",
-  //   },
-  //   id: {
-  //     type: String,
-  //     default: "confusion-matrix",
-  //   },
-  // },
+  props: {
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       days: 7,
       beforeDateString: "",
       aiModel: "",
       fromDate: null,
-      disabled: false,
     };
   },
   created: function () {
