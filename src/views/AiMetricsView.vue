@@ -1,34 +1,37 @@
 <template>
   <b-container fluid>
     <b-col>
-      <MetricsSearchParams
-        :disabled="queryPending"
-        @submit="querySubmitted"
-      />
+      <MetricsSearchParams :disabled="queryPending" @submit="querySubmitted" />
       <b-row class="visits-progress" v-if="queryPending">
         <h3>Calculating visits....</h3>
       </b-row>
       <b-row class="visits-progress" v-if="queryPending">
         <b-progress :value="pendingProgress" :max="1"></b-progress>
       </b-row>
-      <b-row id="matrix" :class="allCategoriesMatrix ? '' :'disabled'">
-        <h2>Results ({{ results && results.labelledVisits ? results.labelledVisits.length : 0 }})</h2>
-        <confusion-matrix :matrix="allCategoriesMatrix"/>
+      <b-row id="matrix" :class="allCategoriesMatrix ? '' : 'disabled'">
+        <h2>
+          Results ({{
+            results && results.filteredVisits
+              ? results.filteredVisits.length
+              : 0
+          }})
+        </h2>
+        <confusion-matrix :matrix="allCategoriesMatrix" />
       </b-row>
     </b-col>
   </b-container>
 </template>
 <script>
 import api from "../api/index";
-import ConfusionMatrix from "@/components/Metrics/ConfusionMatrix"
-import MetricsSearchParams from "@/components/Metrics/MetricsSearchParams"
+import ConfusionMatrix from "@/components/Metrics/ConfusionMatrix";
+import MetricsSearchParams from "@/components/Metrics/MetricsSearchParams";
 import { countByClassThenAiClass } from "@/helpers/aiStats";
 
 export default {
   name: "AiMetricsView",
   components: {
     ConfusionMatrix,
-    MetricsSearchParams
+    MetricsSearchParams,
   },
   props: {},
   data() {
@@ -40,23 +43,24 @@ export default {
       queryPending: false,
       allCategoriesMatrix: null,
       labels: [
-    "bird", 
-    "possum", 
-    "cat", 
-    "hedgehog", 
-    "rodent", 
-    "mustelid",
-    "wallaby", 
-    "false-positive",
-    "none",
-    "unidentified",
-    "un known", 
-    "none", 
-    "other"
-      ]};
+        "bird",
+        "possum",
+        "cat",
+        "hedgehog",
+        "rodent",
+        "mustelid",
+        "wallaby",
+        "false-positive",
+        "none",
+        "unidentified",
+        "un known",
+        "none",
+        "other",
+      ],
+    };
   },
   mounted() {
-  //  this.getVisits();
+    //  this.getVisits();
   },
   methods: {
     querySubmitted(queryParams) {
@@ -65,20 +69,28 @@ export default {
     async getVisits(queryParams) {
       // Remove previous values
       this.queryPending = true;
-      this.pendingProgress = 0; 
+      this.pendingProgress = 0;
       this.allCategoriesMatrix = null;
       // Call API and process results
-      this.results = await api.monitoring.getAllVisits(queryParams, aiComparisonVisit, this.updateProgress);
+      this.results = await api.monitoring.getAllVisits(
+        queryParams,
+        aiComparisonVisit,
+        this.updateProgress
+      );
       this.queryPending = false;
-      this.allCategoriesMatrix = countByClassThenAiClass(this.results.labelledVisits, this.labels, "other");
+      this.allCategoriesMatrix = countByClassThenAiClass(
+        this.results.filteredVisits,
+        this.labels,
+        "other"
+      );
     },
     updateProgress(progress) {
-      this.pendingProgress = progress; 
-    }
+      this.pendingProgress = progress;
+    },
   },
 };
 function aiComparisonVisit(visit) {
-  return visit.classFromUserTag || false; 
+  return visit.classFromUserTag || false;
 }
 </script>
 
@@ -107,14 +119,13 @@ $main-content-width: 1000px;
   height: 3em;
 }
 
-
 #heatmapcontainer:after {
   content: "";
   display: block;
   padding-bottom: 100%;
 }
 
-#matrix.disabled  {
+#matrix.disabled {
   opacity: 0;
 }
 </style>

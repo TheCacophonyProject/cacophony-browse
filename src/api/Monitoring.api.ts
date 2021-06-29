@@ -1,10 +1,6 @@
 import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
-import {
-  calculateFromTime,
-  FetchResult,
-  RecordingQuery,
-} from "./Recording.api";
+import { calculateFromTime, FetchResult } from "./Recording.api";
 import { shouldViewAsSuperUser } from "@/utils";
 
 export class VisitSearchParams {
@@ -61,12 +57,16 @@ export interface NewVisitQuery {
   aiModel?: string;
 }
 
-
 export interface AIVisitsForStats {
   totalVisits: number;
-  labelledVisits: NewVisit[];
+  filteredVisits: NewVisit[];
   all: boolean;
 }
+
+/* eslint-disable no-unused-vars */
+export type visitFilter = (visit: NewVisit) => boolean;
+export type progressUpdater = (progress: number) => void;
+/* eslint-enable no-unused-vars */
 
 const apiPath = "/api/v1/monitoring";
 
@@ -80,47 +80,47 @@ function queryVisitPage(
   );
 }
 
-async function getAllVisits (
-  visitQuery: NewVisitQuery, visitsFilter?: (NewVisit) => boolean, progress?:(number) => void 
-) : Promise<AIVisitsForStats> {
-  let statVisits : NewVisit[] = [];
+async function getAllVisits(
+  visitQuery: NewVisitQuery,
+  visitsFilter?: visitFilter, // only visits that pass this filter will be returned
+  progress?: progressUpdater // progress updates caller with how far through the request it is[0, 1]
+): Promise<AIVisitsForStats> {
+  let returnVisits: NewVisit[] = [];
   let allVisitsCount = 0;
-  let more = true;
+  let morePagesExist = true;
   let request = 0;
   let nextRequestQuery = visitQuery;
-  let pages = 0;
   nextRequestQuery.perPage = 100;
   nextRequestQuery.page = 1;
-  while (more && request < 100) {
+  while (morePagesExist && request < 100) {
     request++;
     const response = await queryVisitPage(nextRequestQuery);
     // what if failed???
     allVisitsCount += response.result.visits.length;
     if (visitsFilter) {
-      let filteredVisits = response.result.visits.filter(visitsFilter); 
-      statVisits = [...statVisits, ...filteredVisits];
+      const filteredVisits = response.result.visits.filter(visitsFilter);
+      returnVisits = [...returnVisits, ...filteredVisits];
     } else {
-      statVisits = [...statVisits, ...response.result.visits];
+      returnVisits = [...returnVisits, ...response.result.visits];
     }
 
-    more = response.result.params.pagesEstimate != 1;
+    morePagesExist = response.result.params.pagesEstimate != 1;
     if (progress) {
-      progress(pages / (pages + response.result.params.pagesEstimate));
-      pages += 1;
+      progress(request / (request + response.result.params.pagesEstimate));
     }
 
-    if (more) {
-      // get the next query in the stime series.   Use the returned from parameter not the paging
-      // just incase recordings have been create or deleted between queries.  
-      nextRequestQuery = JSON.parse(JSON.stringify(visitQuery));
+    if (morePagesExist) {
+      // Use the returned date from the params "pagefrom" parameter.
+      // Don't use paging just incase recordings have been create or deleted between queries.
+      nextRequestQuery = JSON.parse(JSON.stringify(visitQuery)); // copy query
       nextRequestQuery.to = response.result.params.pageFrom;
     }
   }
   return {
-    totalVisits: allVisitsCount, 
-    labelledVisits: statVisits,
-    all: !more
-  }
+    totalVisits: allVisitsCount,
+    filteredVisits: returnVisits,
+    all: !morePagesExist,
+  };
 }
 
 function makeApiQuery(query: NewVisitQuery) {
