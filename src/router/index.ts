@@ -15,6 +15,9 @@ import AnalysisView from "@/views/AnalysisView.vue";
 import VisitsView from "@/views/VisitsView.vue";
 import TaggingView from "@/views/TaggingView.vue";
 import EndUserAgreementView from "@/views/EndUserAgreementView.vue";
+import AiMetricsView from "@/views/AiMetricsView.vue";
+
+// TODO(jon): We should be lazy loading some of these components for better code-splitting
 
 function createRouter() {
   const router = new Router({
@@ -64,6 +67,10 @@ function createRouter() {
       {
         path: "/monitoring",
         component: MonitoringView,
+      },
+      {
+        path: "/ai-metrics",
+        component: AiMetricsView,
       },
       {
         path: "/register",

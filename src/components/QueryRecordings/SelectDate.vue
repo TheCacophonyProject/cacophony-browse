@@ -52,7 +52,7 @@ export default {
     };
   },
   methods: {
-    parseDate(newDate) {
+    onCreateParseDate(newDate) {
       this.date = parseDate(newDate);
       const parsedTime = parseTime(newDate);
 
@@ -64,7 +64,7 @@ export default {
     },
   },
   created: function () {
-    this.parseDate(this.value);
+    this.onCreateParseDate(this.value);
   },
   computed: {
     minDate: function () {
