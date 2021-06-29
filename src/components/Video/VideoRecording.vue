@@ -154,35 +154,70 @@ export default {
       }
     },
     async checkPreviousAndNextRecordings() {
-      const prevNext = await Promise.all([
-        this.hasNextRecording("previous", "any", false, true),
-        this.hasNextRecording("next", "any", false, true),
-      ]);
-      this.canGoBackwardInSearch = prevNext[0];
-      this.canGoForwardInSearch = prevNext[1];
+      const list = this.getListOfRecordingsIds();
+      if (list) {
+        const listIndex = list.indexOf(this.recording.id.toString());
+        this.canGoBackwardInSearch = listIndex > 0;
+        this.canGoForwardInSearch = listIndex < list.length - 1;
+      } else {
+        const prevNext = await Promise.all([
+          this.hasNextRecording("previous", "any", false, true),
+          this.hasNextRecording("next", "any", false, true),
+        ]);
+        this.canGoBackwardInSearch = prevNext[0];
+        this.canGoForwardInSearch = prevNext[1];
+      }
+    },
+    getListOfRecordingsIds(): string[] {
+      return this.$route.query.id;
     },
     async gotoNextRecording(direction, tagMode, tags, skipMessage = false) {
-      const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
-      if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
-        await this.$router.push({
-          path: `/recording/${this.recording.id}`,
-          query: searchQueryCopy,
-        });
-        if (direction === "next") {
-          this.canGoBackwardInSearch = true;
-          this.canGoForwardInSearch = await this.hasNextRecording(
-            "next",
-            tagMode,
-            tags,
-            true
-          );
-        } else if (direction === "previous") {
-          this.canGoForwardInSearch = true;
-          this.canGoBackwardInSearch = await this.hasNextRecording(
-            "previous",
-            tagMode,
-            tags,
-            true
+      const idsList = this.getListOfRecordingsIds();
+      if (idsList) {
+        this.goToNextRecordingInList(direction, idsList);
+      } else {
+        const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
+        if (
+          await this.getNextRecording(direction, tagMode, tags, skipMessage)
+        ) {
+          await this.$router.push({
+            path: `/recording/${this.recording.id}`,
+            query: searchQueryCopy,
+          });
+          if (direction === "next") {
+            this.canGoBackwardInSearch = true;
+            this.canGoForwardInSearch = await this.hasNextRecording(
+              "next",
+              tagMode,
+              tags,
+              true
+            );
+          } else if (direction === "previous") {
+            this.canGoForwardInSearch = true;
+            this.canGoBackwardInSearch = await this.hasNextRecording(
+              "previous",
+              tagMode,
+              tags,
+              true
+            );
+          }
+        }
+      }
+    },
+    async goToNextRecordingInList(direction, list: string[]) {
+      const listIndex = list.indexOf(this.recording.id.toString());
+      if (listIndex >= 0) {
+        const nextIndex = direction === "next" ? listIndex + 1 : listIndex - 1;
+        if (nextIndex >= 0 && nextIndex < list.length) {
+          await this.$router.push({
+            path: `/recording/${list[nextIndex]}`,
+            query: { id: list },
+          });
+          this.canGoBackwardInSearch = nextIndex > 0;
+          this.canGoForwardInSearch = nextIndex < list.length - 1;
+          return await this.$store.dispatch(
+            "Video/GET_RECORDING",
+            list[nextIndex]
           );
         }
       }
