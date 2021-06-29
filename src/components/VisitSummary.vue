@@ -13,6 +13,31 @@
     </span>
     <span>, {{ item.name }}</span>
   </div>
+  <div
+    v-else-if="item.kind === 'powerEvent'"
+    :class="['visit-item', 'power-event']"
+  >
+    <span>
+      <font-awesome-icon
+        v-if="item.name === 'rpi-power-on'"
+        icon="bolt"
+        size="xs"
+      />
+      <font-awesome-icon v-else icon="power-off" size="xs" />
+    </span>
+    <span
+      >&nbsp;{{ item.name }}, created at
+      {{ item.fromDate.toLocaleTimeString() }}, logged at
+      {{ new Date(item.item.createdAt).toLocaleTimeString() }}</span
+    >
+  </div>
+  <div
+    v-else-if="item.kind === 'duskDawn'"
+    :class="['visit-item', 'dusk-dawn']"
+  >
+    <span> </span>
+    <span>&nbsp;{{ item.name }}, {{ item.fromDate.toLocaleTimeString() }}</span>
+  </div>
   <div v-else class="visit-item visit">
     <div>
       <div>
@@ -34,11 +59,10 @@
             <font-awesome-icon :icon="['far', 'clock']" size="xs" />
             over a period of {{ visitLength }}
           </span>
+          <span> at {{ item.fromDate.toLocaleTimeString() }}</span>
         </div>
       </div>
     </div>
-    <!--    <span>{{ item.item.timeStart }}</span>-->
-    <!--    <span>{{ item.item.timeEnd }}</span>-->
   </div>
 </template>
 
@@ -71,7 +95,7 @@ export default {
   },
   computed: {
     imgSrc() {
-      if (this.item.name === "none") {
+      if (this.item.name === "none" || this.item.name === "conflicting tags") {
         return imgSrc("unidentified");
       }
       return imgSrc(this.item.name);
@@ -148,6 +172,18 @@ export default {
     &::before {
       padding-left: 400px;
     }
+  }
+  &.power-event,
+  &.dusk-dawn {
+    &::before {
+      content: "";
+      height: 0;
+      border-top: 2px solid gray;
+      display: inline-block;
+      padding-left: 20px;
+      margin-right: 10px;
+    }
+    border-left: 2px dashed gray;
   }
 }
 </style>

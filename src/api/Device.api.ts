@@ -1,7 +1,7 @@
 import CacophonyApi from "./CacophonyApi";
 import * as querystring from "querystring";
 import { shouldViewAsSuperUser } from "@/utils";
-import recording from "./Recording.api";
+import recording, { DeviceId } from "./Recording.api";
 
 export default {
   getDevices,
@@ -84,17 +84,32 @@ export const DeviceEventTypes = [
 
 type IsoFormattedString = string;
 
-export type DeviceEvent = typeof DeviceEventTypes[number];
+export type DeviceEventType = typeof DeviceEventTypes[number];
 
 export interface EventApiParams {
   limit?: number;
   offset?: number;
-  type?: DeviceEvent | DeviceEvent[];
+  type?: DeviceEventType | DeviceEventType[];
   endTime?: IsoFormattedString; // Or in the format YYYY-MM-DD hh:mm:ss
   startTime?: IsoFormattedString;
 }
 
-function getLatestEvents(deviceId: number, params?: EventApiParams) {
+export interface DeviceEvent {
+  id: number;
+  dateTime: IsoFormattedString;
+  createdAt: IsoFormattedString;
+  DeviceId: DeviceId;
+  Device: { devicename: string };
+  EventDetail: {
+    type: DeviceEventType;
+    details?: any;
+  };
+}
+
+function getLatestEvents(
+  deviceId: number,
+  params?: EventApiParams
+): Promise<{ result: { rows: DeviceEvent[] } }> {
   return CacophonyApi.get(
     `/api/v1/events?latest=true&deviceId=${deviceId}&${querystring.stringify(
       params as any

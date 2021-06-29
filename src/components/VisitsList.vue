@@ -1,29 +1,41 @@
 <template>
-  <div
-    :class="['results', { 'display-rows': !showCards }]"
-    ref="list-container"
-  >
-    <div v-if="showCards">
+  <div :class="['results']" ref="list-container">
+    <div>
       <div
         v-for="(itemsByDay, index_a) in visitsChunkedByDayAndHour"
         :key="index_a"
+        :ref="`day_${index_a}`"
         class="day-wrapper"
       >
-        <h4 class="recordings-day">
-          <span>{{ relativeDay(itemsByDay) }}</span>
-        </h4>
-        <div
-          v-for="(itemsByHour, index_b) in reverse(itemsByDay)"
-          :key="index_b"
+        <h4
+          class="recordings-day"
+          @click="() => toggleVisitDayVisibility(index_a)"
         >
-          <h5 class="recordings-hour">{{ hour(itemsByHour) }}</h5>
-          <VisitSummary
-            v-for="(item, index) in reverse(itemsByHour)"
-            :key="`${index}_card`"
-            :item="item"
-            :ref="item.fromDate.toISOString()"
-            :future-search-query="viewVisitsQuery"
+          <img
+            v-for="(item, i) in visitClasses(itemsByDay)"
+            :key="i"
+            :class="['summary-image', item]"
+            :src="imgSrc(item)"
+            width="24"
+            height="auto"
+            :alt="item"
+            onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
           />
+          <span v-html="relativeDay(itemsByDay)" />
+        </h4>
+        <div v-if="expandedDays[index_a]">
+          <div
+            v-for="(itemsByHour, index_b) in reverse(itemsByDay)"
+            :key="index_b"
+          >
+            <h5 class="recordings-hour">{{ hourRange(itemsByHour) }}</h5>
+            <VisitSummary
+              v-for="(item, index) in reverse(itemsByHour)"
+              :key="`${index}_card`"
+              :item="item"
+              :future-search-query="viewVisitsQuery"
+            />
+          </div>
         </div>
       </div>
       <div v-if="queryPending" class="results loading">
@@ -35,55 +47,6 @@
           :key="i"
           class="recording-placeholder"
         />
-      </div>
-    </div>
-    <div v-else-if="tableItems && tableItems.length !== 0" class="all-rows">
-      <div class="results-header">
-        <div>
-          <span>ID</span>
-          <span>Type</span>
-          <span>Device</span>
-          <span>Date</span>
-          <span>Time</span>
-          <span>Duration</span>
-          <span>Tags</span>
-          <span>Group</span>
-          <span>Station</span>
-          <span>Location</span>
-          <span>Battery</span>
-        </div>
-      </div>
-      <div class="results-rows">
-        <!--        <RecordingSummary-->
-        <!--          v-for="(item, index) in tableItems"-->
-        <!--          :item="item"-->
-        <!--          :ref="item.id"-->
-        <!--          :is-even-row="index % 2 === 1"-->
-        <!--          :key="`${index}_row`"-->
-        <!--          display-style="row"-->
-        <!--          :futureSearchQuery="viewRecordingQuery"-->
-        <!--        />-->
-
-        <div
-          v-for="i in queryPending ? 20 : 0"
-          :key="i"
-          class="recording-summary-row"
-          :style="{
-            background: `rgba(240, 240, 240, ${1 / i}`,
-          }"
-        >
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-          <span>&nbsp;</span>
-        </div>
       </div>
     </div>
     <div v-if="allLoaded || atEnd" class="all-loaded">
@@ -103,6 +66,7 @@ import {
 } from "@/helpers/datetime";
 import { NewVisit } from "@/api/Monitoring.api";
 import VisitSummary from "@/components/VisitSummary.vue";
+import { imgSrc } from "@/const";
 
 const parseLocation = (location: Location): string => {
   if (location && typeof location === "object") {
@@ -241,12 +205,20 @@ const collateTags = (tags: Tag[], tracks: Track[]): DisplayTag[] => {
 };
 
 interface ItemData {
-  kind: "dataRow" | "dataSeparator";
+  kind: "dataRow" | "dataSeparator" | "noActivity" | "powerEvent" | "duskDawn";
   name: string;
   fromDate: Date;
   toDate: Date;
   time: string;
   item: NewVisit;
+}
+
+interface VisitsListData {
+  visitsChunkedByDayAndHour: Array<Array<ItemData[]>>;
+  tableItems: ItemData[];
+  expandedDays: Record<number, boolean>;
+  atEnd: boolean;
+  loadedVisitsCount: number;
 }
 
 export default {
@@ -258,10 +230,6 @@ export default {
     visits: {
       type: Array,
       required: true,
-    },
-    showCards: {
-      type: Boolean,
-      default: true,
     },
     queryPending: {
       type: Boolean,
@@ -299,6 +267,8 @@ export default {
       this.loadedVisitsCount = this.visits.length;
       const items = [];
 
+      // TODO(jon): Intersperse power-on/power-off events and dusk/dawn times
+
       for (const visit of newVisits) {
         const fromDate = new Date(visit.timeStart);
         const toDate = new Date(visit.timeEnd);
@@ -333,16 +303,28 @@ export default {
           // Push "no activity block" if less than 8 eight hours of inactivity
           items.push({
             kind: "noActivity",
-            name: "no activity",
+            name:
+              visit.classification === "powered-off"
+                ? "powered down"
+                : "no activity",
             fromDate: toDate,
             toDate: prevDate,
             time: toDate.toLocaleTimeString(),
             item: { recordings: [] },
           });
         }
-
+        const powerEvents = [
+          "rpi-power-on",
+          "powered-off",
+          "daytime-power-off",
+        ];
+        const duskDawn = ["Sunset", "Sunrise"];
         const itemData: ItemData = {
-          kind: "dataRow",
+          kind: powerEvents.includes(visit.classification)
+            ? "powerEvent"
+            : duskDawn.includes(visit.classification)
+            ? "duskDawn"
+            : "dataRow",
           name: visit.classification,
           fromDate,
           toDate,
@@ -424,9 +406,9 @@ export default {
     const n = 3;
     for (const ref of Object.values(this.$refs)) {
       if ((ref as any[]).length !== 0) {
-        if (ref[0] && ref[0].$el) {
-          const bounds = ref[0].$el.getBoundingClientRect();
-          maxY.push([bounds.y, ref[0].$el]);
+        if (ref[0]) {
+          const bounds = ref[0].getBoundingClientRect();
+          maxY.push([bounds.y, ref[0]]);
           maxY.sort((a, b) => b[0] - a[0]);
           if (maxY.length > n) {
             maxY.pop();
@@ -441,6 +423,12 @@ export default {
     }
   },
   methods: {
+    imgSrc(what: string) {
+      if (what === "none" || what === "conflicting tags") {
+        return imgSrc("unidentified");
+      }
+      return imgSrc(what);
+    },
     intersectionChanged(entries: IntersectionObserverEntry[]) {
       for (const intersectionEvent of entries) {
         if (intersectionEvent.isIntersecting) {
@@ -449,17 +437,34 @@ export default {
         }
       }
     },
-    relativeDay(itemDate) {
-      const fromDate = itemDate[0][0].fromDate;
+    relativeDay(dayChunk: Array<ItemData[]>) {
+      const fromDate = dayChunk[0][0].fromDate;
       const toDate = new Date(fromDate.getTime());
       toDate.setDate(toDate.getDate() - 1);
       return toStringTodayYesterdayOrDateInNights(fromDate, toDate);
     },
+    visitClasses(dayChunk: Array<ItemData[]>): string[] {
+      return dayChunk.reduce((acc: string[], hourChunk: ItemData[]) => {
+        for (const item of hourChunk) {
+          if (item.kind === "dataRow") {
+            acc.push(item.name);
+          }
+        }
+        return acc;
+      }, []);
+    },
     reverse(arr) {
       return [...arr].reverse();
     },
-    hour(itemDate) {
-      const fromDate = itemDate.length && itemDate[0].fromDate;
+    toggleVisitDayVisibility(index: number) {
+      if (!this.expandedDays.hasOwnProperty(index)) {
+        this.$set(this.expandedDays, index, true);
+      } else {
+        this.$delete(this.expandedDays, index);
+      }
+    },
+    hourRange(hourChunk: ItemData[]) {
+      const fromDate = hourChunk.length && hourChunk[0].fromDate;
       const fromHours = fromDate && fromDate.getHours();
       let toHoursString;
       let fromHoursString;
@@ -471,7 +476,8 @@ export default {
         }`;
       }
 
-      const toDate = itemDate.length && itemDate[itemDate.length - 1].fromDate;
+      const toDate =
+        hourChunk.length && hourChunk[hourChunk.length - 1].fromDate;
       const toHours = toDate && toDate.getHours();
       if (toHours === 0) {
         toHoursString = "12am";
@@ -488,9 +494,10 @@ export default {
       }
     },
   },
-  data() {
+  data(): VisitsListData {
     return {
       visitsChunkedByDayAndHour: [],
+      expandedDays: {},
       tableItems: [],
       atEnd: false,
       loadedVisitsCount: 0,
@@ -506,7 +513,11 @@ export default {
 
 .recordings-day {
   position: sticky;
+  cursor: pointer;
   top: 0;
+  > img {
+    margin-top: 0.5rem;
+  }
   > span {
     display: block;
     width: 100%;
@@ -629,7 +640,13 @@ export default {
     font-weight: bold;
   }
 }
+.day-wrapper {
+  //min-height: 100px;
+}
 .day-wrapper > div:last-of-type > div {
   padding-bottom: 10px;
+}
+.summary-image {
+  float: right;
 }
 </style>

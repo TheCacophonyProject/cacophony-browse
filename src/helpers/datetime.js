@@ -23,17 +23,19 @@ function toStringTodayYesterdayOrDate(dateObject) {
 }
 
 function toStringTodayYesterdayOrDateInNights(fromDate, toDate) {
-  const todayStart = startOfDay(new Date());
+  const todayStart = startOfEvening(new Date());
   const dateTime = fromDate.getTime();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStart = startOfDay(yesterday);
+  const yesterdayStart = startOfEvening(yesterday);
   if (dateTime > todayStart.getTime()) {
     return "Last night";
   } else if (dateTime > yesterdayStart.getTime()) {
     return "Two nights ago";
   } else if (toDate) {
-    return `${toNZDateString(toDate)} - ${toNZDateString(fromDate)}`;
+    return `${toNZDateString(startOfEvening(toDate))} &mdash; ${toNZDateString(
+      startOfEvening(fromDate)
+    )}`;
   } else {
     return toNZDateString(fromDate);
   }
