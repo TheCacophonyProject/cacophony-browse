@@ -1,7 +1,7 @@
 <template>
   <b-container fluid>
     <b-col>
-      <MetricsSearchParams :disabled="queryPending" @submit="querySubmitted" />
+      <MetricsSearchParams @submit="querySubmitted" />
       <b-row class="visits-progress" v-if="queryPending">
         <h3>Calculating visits....</h3>
       </b-row>

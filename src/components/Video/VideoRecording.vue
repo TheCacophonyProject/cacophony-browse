@@ -85,7 +85,6 @@ import CptvPlayer from "cptv-player-vue/src/CptvPlayer.vue";
 import RecordingProperties from "./RecordingProperties.vue";
 import { TagColours, WALLABY_GROUP } from "@/const";
 import api from "@/api";
-import { getPosition } from 'suncalc';
 
 export default {
   name: "VideoRecording",
@@ -160,8 +159,7 @@ export default {
         const listIndex = list.indexOf(this.recording.id.toString());
         this.canGoBackwardInSearch = listIndex > 0;
         this.canGoForwardInSearch = listIndex < list.length - 1;
-      }
-      else {
+      } else {
         const prevNext = await Promise.all([
           this.hasNextRecording("previous", "any", false, true),
           this.hasNextRecording("next", "any", false, true),
@@ -170,7 +168,7 @@ export default {
         this.canGoForwardInSearch = prevNext[1];
       }
     },
-    getListOfRecordingsIds() : string[] {
+    getListOfRecordingsIds(): string[] {
       return this.$route.query.id;
     },
     async gotoNextRecording(direction, tagMode, tags, skipMessage = false) {
@@ -179,7 +177,9 @@ export default {
         this.goToNextRecordingInList(direction, idsList);
       } else {
         const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
-        if (await this.getNextRecording(direction, tagMode, tags, skipMessage)) {
+        if (
+          await this.getNextRecording(direction, tagMode, tags, skipMessage)
+        ) {
           await this.$router.push({
             path: `/recording/${this.recording.id}`,
             query: searchQueryCopy,
@@ -201,21 +201,24 @@ export default {
               true
             );
           }
-      }
+        }
       }
     },
     async goToNextRecordingInList(direction, list: string[]) {
-      let listIndex = list.indexOf(this.recording.id.toString());
+      const listIndex = list.indexOf(this.recording.id.toString());
       if (listIndex >= 0) {
-        const nextIndex = (direction === "next") ? listIndex + 1 : listIndex - 1;
-        if (nextIndex >= 0  && nextIndex < list.length) {
+        const nextIndex = direction === "next" ? listIndex + 1 : listIndex - 1;
+        if (nextIndex >= 0 && nextIndex < list.length) {
           await this.$router.push({
             path: `/recording/${list[nextIndex]}`,
-            query: { id: list }
+            query: { id: list },
           });
           this.canGoBackwardInSearch = nextIndex > 0;
           this.canGoForwardInSearch = nextIndex < list.length - 1;
-          return await this.$store.dispatch("Video/GET_RECORDING", list[nextIndex]);
+          return await this.$store.dispatch(
+            "Video/GET_RECORDING",
+            list[nextIndex]
+          );
         }
       }
     },

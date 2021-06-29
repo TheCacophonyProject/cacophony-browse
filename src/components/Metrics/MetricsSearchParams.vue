@@ -11,24 +11,20 @@
       />
     </b-col>
     <b-col sm="4">
-      <label >Start date:</label>
+      <label>Start date:</label>
       <input
         v-model="fromDate"
         type="date"
         class="form-control"
         :max="beforeDateString"
       />
-    </b-col> 
+    </b-col>
     <b-col sm="4">
       <label>Model</label>
-      <b-form-input
-        v-model="aiModel"
-        type="string"
-        placeholder="Master"
-      />
+      <b-form-input v-model="aiModel" type="string" placeholder="Master" />
     </b-col>
     <b-col sm="2">
-      <label/>
+      <label />
       <b-button :disabled="disabled" block variant="primary" @click="submit">
         <span v-if="!disabled">Search</span>
         <span v-else>Searching...</span>
@@ -38,43 +34,54 @@
 </template>
 
 <script>
-import SelectDate from "../QueryRecordings/SelectDate.vue";
 import * as moment from "moment";
 
 export default {
   name: "MetricsSearchParams",
-  components: { SelectDate },
-  props: {
-    disabled: {
-      type: Boolean,
-      default: false
-    }
-  },
+  // props: {
+  //   disabled: {
+  //   },
+  //   otherClass: {
+  //     type: String,
+  //     default: "",
+  //   },
+  //   id: {
+  //     type: String,
+  //     default: "confusion-matrix",
+  //   },
+  // },
   data() {
     return {
       days: 7,
       beforeDateString: "",
       aiModel: "",
       fromDate: null,
+      disabled: false,
     };
   },
-  created: function() {
-    this.calculateBeforeDate(this.days)
+  created: function () {
+    this.calculateBeforeDate(this.days);
   },
   methods: {
     calculateBeforeDate(useDays) {
-      this.beforeDateString = moment(new Date()).add(-1 * useDays -1, "days").format("YYYY-MM-DD");
-      if (!this.fromDate || moment(this.fromDate).isAfter(this.beforeDateString)) {
+      this.beforeDateString = moment(new Date())
+        .add(-1 * useDays - 1, "days")
+        .format("YYYY-MM-DD");
+      if (
+        !this.fromDate ||
+        moment(this.fromDate).isAfter(this.beforeDateString)
+      ) {
         this.fromDate = this.beforeDateString;
-      };
+      }
     },
     submit() {
-      let params = {};
+      const params = {};
       if (this.fromDate && this.fromDate != "") {
         params.from = this.fromDate + " 12:00:00";
-        params.to = moment(params.from).add(this.days, "days").format("YYYY-MM-DD") + " 12:00:00";
-      }
-      else {
+        params.to =
+          moment(params.from).add(this.days, "days").format("YYYY-MM-DD") +
+          " 12:00:00";
+      } else {
         params.days = this.days;
       }
 
@@ -83,7 +90,7 @@ export default {
       }
 
       this.$emit("submit", params);
-    }
+    },
   },
 };
 </script>
@@ -97,12 +104,9 @@ export default {
   border-bottom: 2px solid lightgrey;
   margin-bottom: 1em;
 }
-
 </style>
 <style>
-
 .criteria label {
   margin-bottom: 0;
 }
-
 </style>
