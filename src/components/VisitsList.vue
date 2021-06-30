@@ -31,7 +31,7 @@
             <h5 class="recordings-hour">{{ hourRange(itemsByHour) }}</h5>
             <VisitSummary
               v-for="(item, index) in reverse(itemsByHour)"
-              :key="`${index}_card`"
+              :key="`${index}_card_a`"
               :item="item"
               :future-search-query="viewVisitsQuery"
             />
@@ -56,153 +56,14 @@
 </template>
 
 <script lang="ts">
-import { Location, Tag, Track, TrackTag } from "@/api/Recording.api";
 import {
-  startOfDay,
   startOfHour,
   startOfEvening,
-  toStringTodayYesterdayOrDate,
   toStringTodayYesterdayOrDateInNights,
 } from "@/helpers/datetime";
 import { NewVisit } from "@/api/Monitoring.api";
 import VisitSummary from "@/components/VisitSummary.vue";
 import { imgSrc } from "@/const";
-
-const parseLocation = (location: Location): string => {
-  if (location && typeof location === "object") {
-    const latitude = location.coordinates[0];
-    const longitude = location.coordinates[1];
-    return latitude.toFixed(5) + ", " + longitude.toFixed(5);
-  } else {
-    return "(unknown)";
-  }
-};
-
-const parseProcessingState = (result: string): string => {
-  const string = result.toLowerCase();
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-interface IntermediateDisplayTag {
-  taggerIds: number[];
-  automatic: boolean;
-  human: boolean;
-}
-
-interface DisplayTag {
-  taggerIds: number[];
-  automatic: boolean;
-  class: "human" | "automatic" | "automatic human";
-  human: boolean;
-  order: number;
-}
-
-const addToListOfTags = (
-  allTags: Record<string, IntermediateDisplayTag>,
-  tagName: string,
-  isAutomatic: boolean,
-  taggerId: number | null
-) => {
-  const tag = allTags[tagName] || {
-    taggerIds: [],
-    automatic: false,
-    human: false,
-  };
-  if (taggerId && !tag.taggerIds.includes(taggerId)) {
-    tag.taggerIds.push(taggerId);
-  }
-  if (isAutomatic) {
-    tag.automatic = true;
-  } else {
-    tag.human = true;
-  }
-  allTags[tagName] = tag;
-};
-
-const collateTags = (tags: Tag[], tracks: Track[]): DisplayTag[] => {
-  // Build a collection of tagItems - one per animal
-  const tagItems: Record<string, DisplayTag> = {};
-  for (let i = 0; i < tags.length; i++) {
-    const tag = tags[i];
-    const tagName = tag.animal === null ? tag.event : tag.animal;
-    const taggerId = tag.taggerId;
-    addToListOfTags(tagItems, tagName, tag.automatic, taggerId);
-  }
-
-  if (tracks) {
-    for (let j = 0; j < tracks.length; j++) {
-      const track = tracks[j];
-      // For track tags, pick the best one, which is the "master AI" tag.
-      const aiTag: TrackTag = track.TrackTags.find(
-        (tag) =>
-          tag.data &&
-          (tag.data === "Master" ||
-            (typeof tag.data === "object" && tag.data.name === "Master"))
-      );
-      const humanTags = track.TrackTags.filter((tag) => !tag.automatic);
-      // If the same track has one or more human tags, and none of them agree with the AI just show that:
-      let humansDisagree = false;
-      if (aiTag && humanTags.length !== 0) {
-        humansDisagree =
-          humanTags.find((tag) => tag.what === aiTag.what) === undefined;
-      }
-
-      if (aiTag && !humansDisagree) {
-        addToListOfTags(tagItems, aiTag.what, aiTag.automatic, aiTag.UserId);
-      }
-
-      // Also add human tags:
-      for (const tag of humanTags) {
-        addToListOfTags(tagItems, tag.what, tag.automatic, tag.UserId);
-      }
-    }
-  }
-
-  // Use automatic and human status to create an ordered array of objects
-  // suitable for parsing into coloured spans
-  const result = [];
-  for (let animal of Object.keys(tagItems).sort()) {
-    const tagItem = tagItems[animal];
-    let subOrder = 0;
-    if (animal === "false positive") {
-      animal = "false positive";
-      subOrder = 3;
-    } else if (animal === "multiple animals") {
-      animal = "multiple";
-      subOrder = 2;
-    } else if (animal === "unidentified") {
-      animal = "?";
-      subOrder = 1;
-    }
-
-    if (tagItem.automatic && tagItem.human) {
-      result.push({
-        text: animal,
-        class: "automatic human",
-        taggerIds: tagItem.taggerIds,
-        order: subOrder,
-      });
-    } else if (tagItem.human) {
-      result.push({
-        text: animal,
-        class: "human",
-        taggerIds: tagItem.taggerIds,
-        order: 10 + subOrder,
-      });
-    } else if (tagItem.automatic) {
-      result.push({
-        text: animal,
-        class: "automatic",
-        order: 20 + subOrder,
-      });
-    }
-  }
-  // Sort the result array
-  result.sort((a, b) => {
-    return a.order - b.order;
-  });
-  return result;
-};
 
 interface ItemData {
   kind: "dataRow" | "dataSeparator" | "noActivity" | "powerEvent" | "duskDawn";
@@ -215,11 +76,22 @@ interface ItemData {
 
 interface VisitsListData {
   visitsChunkedByDayAndHour: Array<Array<ItemData[]>>;
-  tableItems: ItemData[];
   expandedDays: Record<number, boolean>;
   atEnd: boolean;
   loadedVisitsCount: number;
 }
+
+// NOTE: Sorting precedence for visit tags displayed as small summary icons
+const tagPrecedence = [
+  "unidentified",
+  "none",
+  "mustelid",
+  "cat",
+  "possum",
+  "hedgehog",
+  "rodent",
+  "leporidae",
+];
 
 export default {
   name: "VisitsList",
@@ -257,7 +129,6 @@ export default {
       let prevDate = null;
       const visits = this.visits as NewVisit[];
       if (visits.length === 0) {
-        this.tableItems = [];
         this.visitsChunkedByDayAndHour = [];
         this.loadedRecordingsCount = 0;
         return;
@@ -334,8 +205,6 @@ export default {
         prevDate = fromDate;
         items.push(itemData);
       }
-      this.tableItems.push(...items);
-
       // Now calculate chunks of days and hour groupings
       {
         const chunks = [];
@@ -444,14 +313,30 @@ export default {
       return toStringTodayYesterdayOrDateInNights(fromDate, toDate);
     },
     visitClasses(dayChunk: Array<ItemData[]>): string[] {
-      return dayChunk.reduce((acc: string[], hourChunk: ItemData[]) => {
-        for (const item of hourChunk) {
-          if (item.kind === "dataRow") {
-            acc.push(item.name);
+      return dayChunk
+        .reduce((acc: string[], hourChunk: ItemData[]) => {
+          for (const item of hourChunk) {
+            if (item.kind === "dataRow") {
+              acc.push(item.name);
+            }
           }
-        }
-        return acc;
-      }, []);
+          return acc;
+        }, [])
+        .map((item) => ({ name: item, priority: tagPrecedence.indexOf(item) }))
+        .sort((a, b) => {
+          if (a.priority === -1 && b.priority > -1) {
+            return -1;
+          } else if (b.priority === -1 && a.priority > -1) {
+            return 1;
+          } else if (a.priority === -1 && b.priority === -1) {
+            if (a.name === b.name) {
+              return 0;
+            }
+            return a.name > b.name ? 1 : -1;
+          }
+          return b.priority - a.priority;
+        })
+        .map(({ name }) => name);
     },
     reverse(arr) {
       return [...arr].reverse();
@@ -498,7 +383,6 @@ export default {
     return {
       visitsChunkedByDayAndHour: [],
       expandedDays: {},
-      tableItems: [],
       atEnd: false,
       loadedVisitsCount: 0,
     };

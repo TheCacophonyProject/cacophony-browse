@@ -96,6 +96,7 @@ function createRouter() {
       {
         path: "/ai-metrics",
         component: AiMetricsView,
+        beforeEnter: cancelPendingRequests,
       },
       {
         path: "/register",

@@ -69,13 +69,13 @@ export default {
         this.totalVisitsPages === null ||
         this.currentPage < this.totalVisitsPages
       ) {
-        this.currentPage += 1;
         this.loading = true;
         try {
           const { result } = await api.monitoring.queryVisitPage({
             ...this.visitsQuery,
             page: this.currentPage,
           });
+          this.currentPage += 1;
 
           if (!this.totalVisitsCount) {
             this.totalVisitsPages = result.params.pagesEstimate;
@@ -187,16 +187,16 @@ export default {
               ...visit,
               sortDate: new Date(visit.timeStart),
             })),
-            ...devicePowerEvents.map((event) => ({
-              ...event,
-              classification: event.EventDetail.type,
-              recordings: [],
-              timeStart: new Date(event.dateTime),
-              timeEnd: new Date(event.dateTime),
-              item: event,
-              sortDate: new Date(event.dateTime),
-            })),
-            ...duskDawnEvents,
+            // ...devicePowerEvents.map((event) => ({
+            //   ...event,
+            //   classification: event.EventDetail.type,
+            //   recordings: [],
+            //   timeStart: new Date(event.dateTime),
+            //   timeEnd: new Date(event.dateTime),
+            //   item: event,
+            //   sortDate: new Date(event.dateTime),
+            // })),
+            // ...duskDawnEvents,
           ].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
 
           // Collect up visits into pendingVisits until we have a full days worth, then update the model.

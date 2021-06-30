@@ -131,7 +131,7 @@ export default {
       tagItems() {
         return this.$store.getters["Video/getTagItems"];
       },
-      rawSize: (state) => state.Video.rawSize,
+      rawSize: (state) => (state as any).Video.rawSize,
     }),
     timespanAdjustment() {
       if (this.header) {
@@ -174,7 +174,7 @@ export default {
     async gotoNextRecording(direction, tagMode, tags, skipMessage = false) {
       const idsList = this.getListOfRecordingsIds();
       if (idsList) {
-        this.goToNextRecordingInList(direction, idsList);
+        await this.goToNextRecordingInList(direction, idsList);
       } else {
         const searchQueryCopy = JSON.parse(JSON.stringify(this.$route.query));
         try {
@@ -205,6 +205,7 @@ export default {
           }
           // eslint-disable-next-line no-empty
         } catch (e) {}
+      }
     },
     async goToNextRecordingInList(direction, list: string[]) {
       const listIndex = list.indexOf(this.recording.id.toString());
@@ -214,17 +215,16 @@ export default {
           try {
             await this.$router.push({
               path: `/recording/${list[nextIndex]}`,
-              query: {id: list},
+              query: { id: list },
             });
             this.canGoBackwardInSearch = nextIndex > 0;
             this.canGoForwardInSearch = nextIndex < list.length - 1;
             return await this.$store.dispatch(
-                "Video/GET_RECORDING",
-                list[nextIndex]
+              "Video/GET_RECORDING",
+              list[nextIndex]
             );
             // eslint-disable-next-line no-empty
           } catch (e) {}
-
         }
       }
     },

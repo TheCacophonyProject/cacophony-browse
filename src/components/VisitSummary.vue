@@ -11,7 +11,7 @@
       <font-awesome-icon :icon="['far', 'clock']" size="xs" />
       {{ visitLength }}
     </span>
-    <span>, {{ item.name }}</span>
+    <span>, {{ item.name }}, {{ item.fromDate.toLocaleTimeString() }}</span>
   </div>
   <div
     v-else-if="item.kind === 'powerEvent'"
@@ -60,6 +60,9 @@
             over a period of {{ visitLength }}
           </span>
           <span> at {{ item.fromDate.toLocaleTimeString() }}</span>
+          <a :href="recordingsListLink" @click="gotoRecordingsForVisit"
+            >View recordings</a
+          >
         </div>
       </div>
     </div>
@@ -108,6 +111,25 @@ export default {
         Math.abs(this.item.fromDate.getTime() - this.item.toDate.getTime()) <
         1000 * 60 * 16
       );
+    },
+    recordingsListLink() {
+      const firstRecordingId = this.item.item.recordings[0].recId;
+      const remainingIds = this.item.item.recordings
+        .slice(1)
+        .map(({ recId }) => `id=${recId}`);
+      let remainingIdsQuery = "";
+      if (remainingIds.length) {
+        remainingIdsQuery = `?${remainingIds.join("&")}`;
+      }
+      return `/recording/${firstRecordingId}${remainingIdsQuery}`;
+    },
+  },
+  methods: {
+    gotoRecordingsForVisit(e) {
+      e.preventDefault();
+      this.$router.push({
+        path: this.recordingsListLink,
+      });
     },
   },
 };

@@ -55,14 +55,14 @@ function startOfDay(date) {
   return d;
 }
 
-function startOfEvening(date) {
+function startOfEvening(date, eveningHours = 16) {
   // Set the time to the earliest midday from the given date.
   if (date.getHours() < 12) {
     date = new Date(date.getTime());
     date.setDate(date.getDate() - 1);
   }
   const d = startOfHour(date);
-  d.setHours(12);
+  d.setHours(eveningHours);
   return d;
 }
 
