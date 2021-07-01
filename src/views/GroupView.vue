@@ -39,20 +39,20 @@
           @user-removed="(userName) => removedUser(userName)"
         />
       </b-tab>
-<!--      <b-tab>-->
-<!--        <template #title>-->
-<!--          <TabTemplate-->
-<!--            title="Visits"-->
-<!--            :isLoading="visitsCountLoading"-->
-<!--            :value="visitsCount"-->
-<!--          />-->
-<!--        </template>-->
-<!--        <MonitoringTab-->
-<!--          :loading="visitsCountLoading"-->
-<!--          :group-name="groupName"-->
-<!--          :visits-query="visitsQueryFinal"-->
-<!--        />-->
-<!--      </b-tab>-->
+      <!--      <b-tab>-->
+      <!--        <template #title>-->
+      <!--          <TabTemplate-->
+      <!--            title="Visits"-->
+      <!--            :isLoading="visitsCountLoading"-->
+      <!--            :value="visitsCount"-->
+      <!--          />-->
+      <!--        </template>-->
+      <!--        <MonitoringTab-->
+      <!--          :loading="visitsCountLoading"-->
+      <!--          :group-name="groupName"-->
+      <!--          :visits-query="visitsQueryFinal"-->
+      <!--        />-->
+      <!--      </b-tab>-->
       <b-tab title="Devices">
         <template #title>
           <TabTemplate

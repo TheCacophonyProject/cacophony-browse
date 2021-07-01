@@ -168,12 +168,12 @@ export default {
         }
 
         // Get all data (first 1000 rows)
-        let {result: allData} = await api.query(searchParams);
+        let { result: allData } = await api.query(searchParams);
         // Check whether all data was fetched
         // if not, run again with increased limit to get all rows
         if (allData.count > limit) {
           searchParams.limit = allData.count;
-          ({result: allData} = await api.query(searchParams));
+          ({ result: allData } = await api.query(searchParams));
         }
         // Count the number of recordings for each device
         this.devices.map((device) => (this.deviceCount[device.id] = 0));

@@ -73,7 +73,7 @@ import Spinner from "@/components/Spinner";
 
 export default {
   name: "SelectDevice",
-  components: {Spinner},
+  components: { Spinner },
   props: {
     selectedDevices: {
       type: Array,
