@@ -187,16 +187,16 @@ export default {
               ...visit,
               sortDate: new Date(visit.timeStart),
             })),
-            // ...devicePowerEvents.map((event) => ({
-            //   ...event,
-            //   classification: event.EventDetail.type,
-            //   recordings: [],
-            //   timeStart: new Date(event.dateTime),
-            //   timeEnd: new Date(event.dateTime),
-            //   item: event,
-            //   sortDate: new Date(event.dateTime),
-            // })),
-            // ...duskDawnEvents,
+            ...devicePowerEvents.map((event) => ({
+              ...event,
+              classification: event.EventDetail.type,
+              recordings: [],
+              timeStart: new Date(event.dateTime),
+              timeEnd: new Date(event.dateTime),
+              item: event,
+              sortDate: new Date(event.dateTime),
+            })),
+            ...duskDawnEvents,
           ].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
 
           // Collect up visits into pendingVisits until we have a full days worth, then update the model.
