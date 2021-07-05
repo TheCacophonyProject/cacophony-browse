@@ -20,6 +20,7 @@
           "
         />
       </div>
+      <visit-download :params="serialisedQuery"/>
       <div :class="'search-content-wrapper'">
         <div class="search-results">
           <h1>Animal activity</h1>
@@ -74,11 +75,12 @@
 <script>
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import VisitList from "../components/Monitoring/VisitList.vue";
+import VisitDownload from "../components/Monitoring/VisitDownload.vue";
 import api from "../api/index";
 
 export default {
   name: "MonitoringView",
-  components: { VisitList, QueryRecordings },
+  components: { VisitList, QueryRecordings, VisitDownload },
   props: {},
   data() {
     return {
