@@ -1,7 +1,7 @@
 import { NewVisit } from "@/api/Monitoring.api";
 import { TrackLabel } from "@/const";
 
-class ClassificationCounter {
+ class ClassificationCounter {
   userClassIndex: number;
   aiClassIndex: number;
   recIds: number[];

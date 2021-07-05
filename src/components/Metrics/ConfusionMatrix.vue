@@ -126,8 +126,3 @@ export default {
   },
 };
 </script>
-<style>
-.count {
-  color: grey;
-}
-</style>

@@ -60,7 +60,6 @@ import ConfusionMatrix from "@/components/Metrics/ConfusionMatrix";
 import MetricsSearchParams from "@/components/Metrics/MetricsSearchParams";
 import { countByClassThenAiClass } from "@/helpers/aiStats";
     
-
 export default {
   name: "AiMetricsView",
   components: {
@@ -71,7 +70,7 @@ export default {
     return {
       results: null,
       visitStats: null,
-      days: 1,
+      days: 7,
       start: null,
       pendingProgress: 0,
       queryPending: false,
