@@ -14,35 +14,35 @@
           <span > ({{
             results.filteredVisits.length
           }} / {{ results.totalVisits }}) </span>
-          <span id="visit-numbers" class="info">i</span>
+          <span id="visit-numbers" class="info">?</span>
         </h4>
         <b-tooltip target="visit-numbers" triggers="hover">
           There are {{ results.totalVisits }} visits during this time period.  Of these {{ results.filteredVisits.length }} have been 
           user tagged.</b-tooltip>
       </b-row>
       <b-row v-if="visitStats" class="visit-stats">
-        <b-col sm="8">Accuracy:</b-col>
-        <b-col sm="4" id="visit-accuracy">
+        <b-col sm="6">Accuracy:</b-col>
+        <b-col sm="6" id="visit-accuracy">
           {{ visitStats.accuracy }}%  
-          <span class="info">i</span>
+          <span class="info">?</span>
           <b-tooltip target="visit-accuracy" triggers="hover">  
-          Accuracy is percentage of tagged birds and pests correctly identified by AI as either bird or pest.</b-tooltip>
+          Accuracy is percentage of user tagged birds and pests correctly identified by AI as either bird or pest.</b-tooltip>
         </b-col>       
-        <b-col sm="8">Squashed birds:</b-col>
-        <b-col id="squashed" sm="4">
-          <span v-if="visitStats.deadBirds">{{ visitStats.deadBirds.value.toFixed(0) }}% ({{ visitStats.deadBirds.count }})</span>
+        <b-col sm="6">Squashed birds:</b-col>
+        <b-col id="squashed" sm="6">
+          <span v-if="visitStats.deadBirds">{{ visitStats.deadBirds.value.toFixed(0) }}% of birds ({{ visitStats.deadBirds.count }})</span>
           <span v-else>None</span>
-          <span class="info">i</span>
+          <span class="info">?</span>
           <b-tooltip target="squashed" triggers="hover">
           Squashed birds are user tagged birds that were identified by AI as a pest.</b-tooltip>
         </b-col>
-        <b-col sm="8">Released pests:</b-col>
-        <b-col id="released" sm="4">
-          <span v-if="visitStats.escapedPests">{{ visitStats.escapedPestsPercent }}% ({{ visitStats.escapedPests }})</span>
+        <b-col sm="6">Released pests:</b-col>
+        <b-col id="released" sm="6">
+          <span v-if="visitStats.escapedPests">{{ visitStats.escapedPestsPercent }}% of pests ({{ visitStats.escapedPests }})</span>
           <span v-else>None</span>
-          <span class="info">i</span>
+          <span class="info">?</span>
           <b-tooltip target="released" triggers="hover">
-            Released pests are user tagged pests that weren't identified by AI as a pest.</b-tooltip>
+            Released pests are user tagged pests that were identified by AI as something other than a pest.</b-tooltip>
         </b-col>
       </b-row>
       <b-row sm="12">
@@ -59,7 +59,8 @@ import api from "../api/index";
 import ConfusionMatrix from "@/components/Metrics/ConfusionMatrix";
 import MetricsSearchParams from "@/components/Metrics/MetricsSearchParams";
 import { countByClassThenAiClass } from "@/helpers/aiStats";
-    
+import DefaultLabels from "@/const";
+
 export default {
   name: "AiMetricsView",
   components: {
@@ -75,9 +76,7 @@ export default {
       pendingProgress: 0,
       queryPending: false,
       allCategoriesMatrix: null,
-      overViewMatrix: null,
-      labelsOverview: DefaultLabels.overViewAiEvaluationMatrix(),
-      labelsDetailed: DefaultLabels.detailedAiEvaluationMatrix()
+      overViewMatrix: null
     };
   },
   mounted() {
@@ -104,12 +103,12 @@ export default {
       this.queryPending = false;
       this.allCategoriesMatrix = countByClassThenAiClass(
         this.results.filteredVisits,
-        this.labelsDetailed,
+        DefaultLabels.detailedAiEvaluationMatrix(),
         "other"
       );
       const overView = countByClassThenAiClass(
         this.results.filteredVisits,
-        this.labelsOverview,
+        DefaultLabels.overViewAiEvaluationMatrix(),
         "other"
       );
       overView.percentages = overView.percentages.filter(element => element.y != 2);
