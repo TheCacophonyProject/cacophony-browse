@@ -534,9 +534,7 @@ export default {
         if (newSummary.hasOwnProperty(DefaultLabels.birdLabel.value)) {
           delete newSummary[DefaultLabels.birdLabel.value];
         }
-        if (
-          newSummary.hasOwnProperty(DefaultLabels.falsePositiveLabel.value)
-        ) {
+        if (newSummary.hasOwnProperty(DefaultLabels.falsePositiveLabel.value)) {
           delete newSummary[DefaultLabels.falsePositiveLabel.value];
         }
         // filter out bird and false positive

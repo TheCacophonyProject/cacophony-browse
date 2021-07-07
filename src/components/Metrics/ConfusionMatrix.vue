@@ -21,8 +21,8 @@ export default {
     },
     title: {
       type: String,
-      default: ""
-    }
+      default: "",
+    },
   },
   data() {
     return {
@@ -35,7 +35,11 @@ export default {
         this.chart.destroy();
         this.chart = null;
       }
-      if (this.matrix && this.matrix.percentages && this.matrix.percentages.length > 0) {
+      if (
+        this.matrix &&
+        this.matrix.percentages &&
+        this.matrix.percentages.length > 0
+      ) {
         this.makeAllCategoriesHeatmap();
       }
     },
@@ -51,7 +55,7 @@ export default {
         },
 
         title: {
-          text: this.title
+          text: this.title,
         },
 
         xAxis: {
@@ -115,10 +119,11 @@ export default {
             data: this.matrix.percentages || {},
             dataLabels: {
               enabled: true,
-              align: 'center',
+              align: "center",
               color: "#000000",
-              format: "{point.value:.0f}%</br><span style='color: gray'>({point.count})</span>"     
-            }
+              format:
+                "{point.value:.0f}%</br><span style='color: gray'>({point.count})</span>",
+            },
           },
         ],
       });

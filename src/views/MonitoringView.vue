@@ -25,7 +25,7 @@
           <div class="search-results">
             <h1>Animal activity</h1>
             <div style="float: right">
-              <visit-download :params="serialisedQuery"/>
+              <visit-download :params="serialisedQuery" />
             </div>
             <h2 v-if="countMessage">
               {{ countMessage }}

@@ -1,9 +1,7 @@
-import { BIconAlarmFill } from "bootstrap-vue";
-
 const TRAP_NZ_IDS = new Map();
 const TRAP_NZ_SPECIES = [
   "rodent",
-  "none", 
+  "none",
   "lizard",
   "unspecified",
   "rat",
@@ -20,17 +18,22 @@ const TRAP_NZ_SPECIES = [
   "magpie",
   "cat",
   "dog",
-  "other"
- ];
- 
+  "other",
+];
+
 export class TrackLabel {
   value: string;
-  text:  string;
+  text: string;
   trapNzSpecies?: string;
   includes: TrackLabel[];
   allIncludedTags: string[];
 
-  constructor(parent: TrackLabel, dbLabel: string, description: string = null, trapNzName = null){
+  constructor(
+    parent: TrackLabel,
+    dbLabel: string,
+    description: string = null,
+    trapNzName = null
+  ) {
     this.value = dbLabel;
     this.text = description ? description : this.value;
     this.includes = [];
@@ -38,7 +41,7 @@ export class TrackLabel {
 
     if (parent) {
       parent.addChild(this);
-    }    
+    }
 
     this.trapNzSpecies = this.makeTrapIdSpecies(parent, trapNzName);
   }
@@ -48,61 +51,69 @@ export class TrackLabel {
     this.allIncludedTags.push(child.value);
   }
 
-  makeTrapIdSpecies(parent: TrackLabel, trapNzName = null) : string {
+  makeTrapIdSpecies(parent: TrackLabel, trapNzName = null): string {
     let trapNZ = trapNzName ? trapNzName : this.value;
     if (!TRAP_NZ_SPECIES.includes(trapNZ)) {
       trapNZ = parent ? parent.trapNzSpecies : null;
-    } 
+    }
 
     if (trapNZ) {
       TRAP_NZ_IDS.set(this.value, trapNZ);
     }
-    
+
     return trapNZ;
   }
 }
 
-const nomenclatureBase =  new TrackLabel(null, "base");
+const nomenclatureBase = new TrackLabel(null, "base");
 
 const things = new TrackLabel(nomenclatureBase, "things", "things", "other");
-const notKnown = new TrackLabel(nomenclatureBase, "not known", "not known", "unspecified");
+const notKnown = new TrackLabel(
+  nomenclatureBase,
+  "not known",
+  "not known",
+  "unspecified"
+);
 const nothing = new TrackLabel(nomenclatureBase, "nothing", "nothing", "none");
 const descriptors = new TrackLabel(nomenclatureBase, "descriptors");
 
 const allBirds = new TrackLabel(things, "allbirds", "any type of bird", "bird");
 const bird = new TrackLabel(allBirds, "bird");
 const kiwi = new TrackLabel(allBirds, "bird/kiwi", "kiwi");
-  
+
 const pest = new TrackLabel(things, "pest", "One of our target pest species");
 const possum = new TrackLabel(pest, "possum");
 const rodent = new TrackLabel(pest, "rodent", "rat or mouse", "rat");
 new TrackLabel(pest, "mustelid", "stoat, weasel or ferret (mustelid)", "stoat");
 const hedgehog = new TrackLabel(pest, "hedgehog");
-const cat =new TrackLabel(pest, "cat");
-  
+const cat = new TrackLabel(pest, "cat");
+
 new TrackLabel(things, "dog");
 new TrackLabel(things, "leporidae", "hare or rabbit (leporidae)", "rabbit");
-const wallaby = new TrackLabel(things,"wallaby");
-new TrackLabel(things,"pig");
-new TrackLabel(things,"human");
-new TrackLabel(things,"insect", "spider or insect (on camera lens or flying)");
-new TrackLabel(things,"penguin");
-new TrackLabel(things,"sealion");
-new TrackLabel(things,"deer");
-new TrackLabel(things,"goat");
+const wallaby = new TrackLabel(things, "wallaby");
+new TrackLabel(things, "pig");
+new TrackLabel(things, "human");
+new TrackLabel(things, "insect", "spider or insect (on camera lens or flying)");
+new TrackLabel(things, "penguin");
+new TrackLabel(things, "sealion");
+new TrackLabel(things, "deer");
+new TrackLabel(things, "goat");
 new TrackLabel(things, "vehicle");
 const other = new TrackLabel(things, "other");
-  
+
 const part = new TrackLabel(descriptors, "part", "part of animal (eg tail)");
 const poorTracking = new TrackLabel(descriptors, "poor tracking");
-const interesting = new TrackLabel(descriptors,"interesting");
-  
-const falsePositive = new TrackLabel(nothing, "false-positive", "not an animal");
+const interesting = new TrackLabel(descriptors, "interesting");
+
+const falsePositive = new TrackLabel(
+  nothing,
+  "false-positive",
+  "not an animal"
+);
 new TrackLabel(nothing, "none");
 
 new TrackLabel(notKnown, "unidentified");
 const unknown = new TrackLabel(notKnown, "not identifiable");
-
 
 // specified means - can have another specified tag in the search (eg Possum)
 const recordingLabelsBase = [
@@ -135,7 +146,7 @@ const recordingLabelsBase = [
     value: "cool",
     text: "Cool video",
     specified: true,
-  }
+  },
 ];
 
 const taggingFilters = [
@@ -177,35 +188,25 @@ const taggingFilters = [
 ];
 
 const DefaultLabels = {
-  trackLabelsBase: [...pest.includes,
+  trackLabelsBase: [
+    ...pest.includes,
     ...allBirds.includes,
     pest,
     ...things.includes,
-    unknown, 
-    part, 
-    poorTracking, 
-    other],
+    unknown,
+    part,
+    poorTracking,
+    other,
+  ],
   tagTypes: [...taggingFilters],
   otherTagLabels: function () {
     return [unknown, falsePositive];
   },
   quickTagLabels: function () {
-    return [
-      possum.value,
-      rodent.value,
-      hedgehog.value,
-      cat.value,
-      bird.value,
-    ];
+    return [possum.value, rodent.value, hedgehog.value, cat.value, bird.value];
   },
   wallabyQuickTagLabels: function () {
-    return [
-      wallaby.value,
-      possum.value,
-      rodent.value,
-      cat.value,
-      bird.value,
-    ];
+    return [wallaby.value, possum.value, rodent.value, cat.value, bird.value];
   },
   recordingLabels: function () {
     return [...recordingLabelsBase];
@@ -214,37 +215,28 @@ const DefaultLabels = {
     return [...recordingLabelsBase, ...taggingFilters];
   },
   searchLabels: function () {
-    return [
-      interesting, 
-      ...this.trackLabelsBase];
+    return [interesting, ...this.trackLabelsBase];
   },
   trackLabels: function () {
     return [...this.trackLabelsBase];
   },
   canHaveSpecifiedTags: function (tagType) {
-    return DefaultLabels.searchRecordingLabels().filter(tag => {
-      tag.specified && tag.value === tagType;
-    }).length > 0;
+    return (
+      DefaultLabels.searchRecordingLabels().filter((tag) => {
+        tag.specified && tag.value === tagType;
+      }).length > 0
+    );
   },
   overViewAiEvaluationMatrix: function () {
-    return [ 
-      bird, 
-      pest, 
-    ];
+    return [bird, pest];
   },
   detailedAiEvaluationMatrix: function () {
-    return [
-      bird,
-      ...pest.includes,
-      wallaby,
-      nothing,
-      notKnown,
-    ];
+    return [bird, ...pest.includes, wallaby, nothing, notKnown];
   },
   falsePositiveLabel: falsePositive,
   birdLabel: bird,
-  unknownLabel: unknown, 
-  unidentifiedLabel: undefined
+  unknownLabel: unknown,
+  unidentifiedLabel: undefined,
 };
 
 export const TagColours = [
