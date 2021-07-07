@@ -14,6 +14,7 @@
 <script>
 import api from "../../api/index";
 import { toNZDateString } from "@/helpers/datetime";
+import { getTrapNzSpecies } from '../../const';
 
 export default {
   name: "VisitDownload",
@@ -40,9 +41,9 @@ export default {
         visit.classification,
         visit.classificationAi,
         visit.classFromUserTag,
-        chooseSpecies(visit.classification),
+        getTrapNzSpecies(visit.classification),
         "cacophony",
-        visit.classFromUserTag ? "User tagged : " : "AI tagged: " + visit.classification,
+        `${visit.classFromUserTag ? "User tagged: " : "AI tagged: "} ${visit.classification}`,
       ]);
       const header = "station,start_date,end_date,class,ai_class,is_ai_tagged,species,recorded_by,notes\n";
       const csvVisits = rows.map(e => e.join(",")).join("\n");
@@ -65,35 +66,8 @@ export default {
   },
 };
 
-const TRAP_NZ_SPECIES = [
- "rodent",
- "none", 
- "lizard",
- "unspecified",
- "rat",
- "mouse",
- "ferret",
- "stoat",
- "weasel",
- "rabbit",
- "hedgehog",
- "possum",
- "insect",
- "weta",
- "bird",
- "magpie",
- "cat",
- "dog",
- "other"
-];
-
 function formatDate(value) {
   const date = new Date(value);
   return `${toNZDateString(date)} ${date.toTimeString().substring(0, 8)}`;
 };
-
-function chooseSpecies(classification) {
-  const classLower = classification.toLowerCase();
-  return (TRAP_NZ_SPECIES.indexOf(classLower) >= 0) ? classLower : "other";
-}
 </script>
