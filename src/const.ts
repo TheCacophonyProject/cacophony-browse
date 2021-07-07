@@ -187,6 +187,12 @@ const taggingFilters = [
   },
 ];
 
+const searchRecordingBase = [...recordingLabelsBase, ...taggingFilters];
+
+const filtersWhichCanHaveSpecifiedTags = searchRecordingBase.filter((tag) => tag.specified == true)
+ .map((tag) => tag.value);
+
+
 const DefaultLabels = {
   trackLabelsBase: [
     ...pest.includes,
@@ -212,7 +218,7 @@ const DefaultLabels = {
     return [...recordingLabelsBase];
   },
   searchRecordingLabels: function () {
-    return [...recordingLabelsBase, ...taggingFilters];
+    return [...searchRecordingBase];
   },
   searchLabels: function () {
     return [interesting, ...this.trackLabelsBase];
@@ -221,11 +227,7 @@ const DefaultLabels = {
     return [...this.trackLabelsBase];
   },
   canHaveSpecifiedTags: function (tagType) {
-    return (
-      DefaultLabels.searchRecordingLabels().filter((tag) => {
-        tag.specified && tag.value === tagType;
-      }).length > 0
-    );
+    return filtersWhichCanHaveSpecifiedTags.find(tag => tag === tagType) != null;
   },
   overViewAiEvaluationMatrix: function () {
     return [bird, pest];
