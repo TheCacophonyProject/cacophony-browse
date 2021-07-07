@@ -81,7 +81,7 @@ export function countByClassThenAiClass(
     rowCounts[counter.userClassIndex] += counter.count;
   }
 
-  const percentages: any[] = [];
+  const percentages: MatrixPoint[] = [];
   for (const counter of Object.values(counters)) {
     const total = rowCounts[counter.userClassIndex]
     const percent = total > 0 ? counter.count * 100 / rowCounts[counter.userClassIndex] : 0;
