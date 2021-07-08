@@ -1,10 +1,7 @@
 <template>
   <div class="container">
     <h2>
-      All recordings - {{ groupName
-      }}<span v-if="deviceName || stationName"
-        >, {{ `${deviceName || stationName || ""}` }}</span
-      >
+      All recordings
       <help>
         All recordings ever made for this
         {{ `${deviceName ? "device" : stationName ? "station" : "group"}` }}

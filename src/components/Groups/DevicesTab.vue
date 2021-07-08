@@ -21,7 +21,9 @@
         >:
       </p>
       <p v-else class="description-and-button-wrapper">
-        There are currently no devices associated with <strong>{{ groupName }}</strong>.
+        There are currently no devices associated with
+        <strong>{{ groupName }}</strong
+        >.
       </p>
     </div>
     <b-table
