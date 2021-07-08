@@ -124,23 +124,23 @@ export default {
   },
   methods: {
     pagination(page) {
-      console.log("Change pagination", page);
+      // console.log("Change pagination", page);
       this.paginationHasChanged(page, this.perPage);
     },
     perPageChanged(perPage) {
-      console.log("perPageChanged", perPage);
+      // console.log("perPageChanged", perPage);
       this.currentPage = 1;
       this.paginationHasChanged(this.currentPage, perPage);
     },
     makePaginatedQuery(origQuery, page, perPage) {
       const query = { ...origQuery };
-      console.log("Paginated query:", query);
+      // console.log("Paginated query:", query);
       query.perPage = perPage;
       query.page = page;
       return query;
     },
     updateRoute(query) {
-      console.log("Update route", query);
+      // console.log("Update route", query);
       // Catch errors to avoid redundant navigation error
       this.$router
         .push({
@@ -159,7 +159,7 @@ export default {
       this.getVisits(query);
     },
     queryRouteHasChanged(query) {
-      console.log("queryRouteHasChanged", query);
+      // console.log("queryRouteHasChanged", query);
       const fullQuery = this.makePaginatedQuery(
         query,
         this.currentPage,
@@ -192,9 +192,9 @@ export default {
       this.visits = [];
       // Call API and process results
       this.queryPending = true;
-      console.log("query", whereQuery);
+      // console.log("query", whereQuery);
       const results = await api.monitoring.queryVisitPage(whereQuery);
-      console.log("results", results);
+      // console.log("results", results);
       this.queryPending = false;
 
       // Remove previous values *again* since it's possible for the query to have been called twice

@@ -21,7 +21,7 @@ module.exports = {
       },
       {
         test: /\.vue$/,
-        loader: "vue-loader"
+        loader: "vue-loader",
       },
       {
         test: /\.tsx?$/,
@@ -42,8 +42,8 @@ module.exports = {
           require.resolve("bootstrap-vue"),
         ],
         options: {
-          compact: !DEV_MODE
-        }
+          compact: !DEV_MODE,
+        },
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
@@ -68,12 +68,12 @@ module.exports = {
         { from: path.resolve(__dirname, "../src/assets/favicon") },
         { from: path.resolve(__dirname, "../src/assets/video") },
         { from: path.resolve(__dirname, "../src/assets/map") },
-      ]
+      ],
     }),
     new ESLintPlugin(),
     new ForkTsCheckerWebpackPlugin(),
     new webpack.DefinePlugin({
-      "process.env.BUILD": JSON.stringify("web")
+      "process.env.BUILD": JSON.stringify("web"),
     }),
   ],
   resolve: {
@@ -87,7 +87,7 @@ module.exports = {
     },
     alias: {
       vue$: "vue/dist/vue.esm.js",
-      "@": path.resolve(__dirname, '../src')
+      "@": path.resolve(__dirname, "../src"),
     },
     extensions: ["*", ".js", ".vue", ".json", ".ts", ".wasm", ".mjs"],
   },

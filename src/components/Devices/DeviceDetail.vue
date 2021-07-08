@@ -54,12 +54,12 @@
           :visits-query="visitsQuery()"
         />
       </b-tab>
-<!--      <b-tab title="Schedule">-->
-<!--        <template #title>-->
-<!--          <TabTemplate title="Schedule" />-->
-<!--        </template>-->
-<!--        <DeviceSchedule />-->
-<!--      </b-tab>-->
+      <!--      <b-tab title="Schedule">-->
+      <!--        <template #title>-->
+      <!--          <TabTemplate title="Schedule" />-->
+      <!--        </template>-->
+      <!--        <DeviceSchedule />-->
+      <!--      </b-tab>-->
     </b-tabs>
   </b-container>
 </template>
@@ -72,7 +72,7 @@ import TabTemplate from "@/components/TabTemplate.vue";
 import RecordingsTab from "@/components/RecordingsTab.vue";
 import MonitoringTab from "@/components/MonitoringTab.vue";
 import api from "@/api";
-import DeviceSchedule from "@/components/Devices/DeviceSchedule";
+// import DeviceSchedule from "@/components/Devices/DeviceSchedule";
 
 export default {
   name: "DeviceDetail",

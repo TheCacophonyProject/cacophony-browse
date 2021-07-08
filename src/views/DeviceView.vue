@@ -120,7 +120,7 @@ export default {
     async queryDevice() {
       this.loadedDevice = false;
       try {
-        // eslint-disable-next-line no-unused-vars
+        // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
         const [{ result }, _] = await Promise.all([
           api.groups.getGroup(this.groupName),
           this.fetchDevice(),

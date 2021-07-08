@@ -48,8 +48,8 @@ export default {
     },
     tagSummary() {
       return Object.entries(this.visitsByTag).sort(
-        // eslint-disable-next-line no-unused-vars
-        ([_a, av], [_b, bv]) => {
+        // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+        ([_a, av]: [string, number], [_b, bv]: [string, number]) => {
           return bv - av;
         }
       );

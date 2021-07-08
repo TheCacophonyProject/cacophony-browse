@@ -23,24 +23,24 @@
         />
       </b-col>
       <b-col cols="12" lg="4">
-        <!--        <div v-if="tracks && tracks.length > 0" class="accordion">-->
-        <!--          <TrackInfo-->
-        <!--            v-for="(track, index) in tracks"-->
-        <!--            :key="index"-->
-        <!--            :track="track"-->
-        <!--            :index="index"-->
-        <!--            :tracks="tracks"-->
-        <!--            :num-tracks="tracks.length"-->
-        <!--            :recording-id="getRecordingId()"-->
-        <!--            :is-wallaby-project="isWallabyProject()"-->
-        <!--            :show="index === selectedTrack.trackIndex"-->
-        <!--            :colour="colours[index % colours.length]"-->
-        <!--            :adjust-timespans="timespanAdjustment"-->
-        <!--            @track-selected="trackSelected"-->
-        <!--            @change-tag="changedTrackTag"-->
-        <!--          />-->
-        <!--        </div>-->
-        <div v-if="true || processingCompleted" class="processing">
+        <div v-if="tracks && tracks.length > 0" class="accordion">
+          <TrackInfo
+            v-for="(track, index) in tracks"
+            :key="index"
+            :track="track"
+            :index="index"
+            :tracks="tracks"
+            :num-tracks="tracks.length"
+            :recording-id="getRecordingId()"
+            :is-wallaby-project="isWallabyProject()"
+            :show="index === selectedTrack.trackIndex"
+            :colour="colours[index % colours.length]"
+            :adjust-timespans="timespanAdjustment"
+            @track-selected="trackSelected"
+            @change-tag="changedTrackTag"
+          />
+        </div>
+        <div v-if="processingCompleted" class="processing">
           <b-spinner small />
           <span>Recording still processing.</span>
         </div>
@@ -59,6 +59,7 @@
           :comment="recording.comment"
           :download-raw-url="videoRawUrl"
           :download-file-url="''"
+          :processing-completed="processingCompleted"
           @deleteTag="deleteTag($event)"
           @addTag="addTag($event)"
           @updateComment="updateComment($event)"

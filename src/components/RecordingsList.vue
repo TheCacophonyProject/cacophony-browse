@@ -366,7 +366,7 @@ export default {
         if (chunks.length === 0) {
           // We've reached the end of the recordings.
           this.atEnd = true;
-          console.log("At end of recordings");
+          // console.log("At end of recordings");
         }
         if (
           this.recordingsChunkedByDayAndHour.length !== 0 &&

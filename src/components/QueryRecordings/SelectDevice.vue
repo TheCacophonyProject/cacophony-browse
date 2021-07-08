@@ -69,11 +69,9 @@
 
 <script>
 import api from "@/api";
-import Spinner from "@/components/Spinner";
 
 export default {
   name: "SelectDevice",
-  components: { Spinner },
   props: {
     selectedDevices: {
       type: Array,
@@ -211,7 +209,9 @@ export default {
             return acc;
           }, {})
         );
-      } catch (e) {}
+      } catch (e) {
+        // ...
+      }
       this.fetching = false;
     },
   },

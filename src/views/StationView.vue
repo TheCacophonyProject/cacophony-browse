@@ -105,20 +105,20 @@
             :recordings-query="recordingsQueryFinal"
           />
         </b-tab>
-<!--        <b-tab lazy>-->
-<!--          <template #title>-->
-<!--            <TabTemplate-->
-<!--              title="Visits"-->
-<!--              :isLoading="visitsCountLoading"-->
-<!--              :value="visitsCount"-->
-<!--            />-->
-<!--          </template>-->
-<!--          <MonitoringTab-->
-<!--            :group-name="groupName"-->
-<!--            :station-name="stationName"-->
-<!--            :visits-query="visitsQuery()"-->
-<!--          />-->
-<!--        </b-tab>-->
+        <!--        <b-tab lazy>-->
+        <!--          <template #title>-->
+        <!--            <TabTemplate-->
+        <!--              title="Visits"-->
+        <!--              :isLoading="visitsCountLoading"-->
+        <!--              :value="visitsCount"-->
+        <!--            />-->
+        <!--          </template>-->
+        <!--          <MonitoringTab-->
+        <!--            :group-name="groupName"-->
+        <!--            :station-name="stationName"-->
+        <!--            :visits-query="visitsQuery()"-->
+        <!--          />-->
+        <!--        </b-tab>-->
       </b-tabs>
     </div>
     <div v-else class="container no-tabs">
@@ -135,7 +135,7 @@ import Spinner from "../components/Spinner.vue";
 import api from "../api/index";
 import TabTemplate from "@/components/TabTemplate.vue";
 import RecordingsTab from "@/components/RecordingsTab.vue";
-import MonitoringTab from "@/components/MonitoringTab.vue";
+// import MonitoringTab from "@/components/MonitoringTab.vue";
 import { linzBasemapApiKey } from "@/config";
 import { latLng, latLngBounds } from "leaflet";
 import {
@@ -156,7 +156,7 @@ export default {
     Spinner,
     TabTemplate,
     RecordingsTab,
-    //MonitoringTab,
+    // MonitoringTab,
     LMap,
     LTooltip,
     LCircle,

@@ -25,9 +25,7 @@
 import Help from "@/components/Help.vue";
 import api from "@/api";
 import VisitsList from "@/components/VisitsList.vue";
-import { NewVisit } from "@/api/Monitoring.api";
-import { startOfEvening, startOfDay } from "@/helpers/datetime";
-import { DeviceEvent } from "@/api/Device.api";
+import { startOfEvening } from "@/helpers/datetime";
 import SunCalc from "suncalc";
 const LOAD_PER_PAGE_CARDS = 10;
 
@@ -227,6 +225,7 @@ export default {
               currentVisits.push(extraVisits.shift());
             }
           }
+          // eslint-disable-next-line no-console
           console.assert(
             this.visitsQuery.device.length === 1,
             "Should only have one device"

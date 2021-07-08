@@ -8,12 +8,7 @@
       <b-row class="pt-2 pb-2">
         <b-col cols="6" md="3">
           <b-button-group class="btn-block pb-2">
-            <b-dropdown
-              text="Label"
-              right
-              variant="info"
-              class="btn-block"
-            >
+            <b-dropdown text="Label" right variant="info" class="btn-block">
               <b-dropdown-item
                 v-b-tooltip.hover.left="
                   'An animal is in a trap in this recording'
@@ -35,7 +30,9 @@
               <b-dropdown-item
                 :disabled="!processingCompleted"
                 v-b-tooltip.hover.left="
-                  !processingCompleted ? 'Tracks are still being processed' : 'One or more animals do not have a corresponding track in this recording'
+                  !processingCompleted
+                    ? 'Tracks are still being processed'
+                    : 'One or more animals do not have a corresponding track in this recording'
                 "
                 @click="addMissedTrackTag"
               >

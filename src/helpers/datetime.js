@@ -24,7 +24,7 @@ function toStringTodayYesterdayOrDate(dateObject) {
 
 function toStringTodayYesterdayOrDateInNights(fromDate) {
   const todayStart = startOfEvening(new Date());
-  const dateTime = startOfEvening(fromDate).getTime()
+  const dateTime = startOfEvening(fromDate).getTime();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStart = startOfEvening(yesterday);
