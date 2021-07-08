@@ -105,21 +105,20 @@
             :recordings-query="recordingsQueryFinal"
           />
         </b-tab>
-        <b-tab lazy>
-          <template #title>
-            <TabTemplate
-              title="Visits"
-              :isLoading="visitsCountLoading"
-              :value="visitsCount"
-            />
-          </template>
-          <MonitoringTab
-            :loading="visitsCountLoading"
-            :group-name="groupName"
-            :station-name="stationName"
-            :recordings-query="visitsQueryFinal"
-          />
-        </b-tab>
+<!--        <b-tab lazy>-->
+<!--          <template #title>-->
+<!--            <TabTemplate-->
+<!--              title="Visits"-->
+<!--              :isLoading="visitsCountLoading"-->
+<!--              :value="visitsCount"-->
+<!--            />-->
+<!--          </template>-->
+<!--          <MonitoringTab-->
+<!--            :group-name="groupName"-->
+<!--            :station-name="stationName"-->
+<!--            :visits-query="visitsQuery()"-->
+<!--          />-->
+<!--        </b-tab>-->
       </b-tabs>
     </div>
     <div v-else class="container no-tabs">
@@ -149,13 +148,15 @@ import {
 import { isViewingAsOtherUser } from "@/components/NavBar.vue";
 import { shouldViewAsSuperUser } from "@/utils";
 
+// TODO(jon): Implement visits/monitoring page for stations - this will require API changes.
+
 export default {
   name: "StationView",
   components: {
     Spinner,
     TabTemplate,
     RecordingsTab,
-    MonitoringTab,
+    //MonitoringTab,
     LMap,
     LTooltip,
     LCircle,
@@ -209,6 +210,9 @@ export default {
     groupName() {
       return this.$route.params.groupName;
     },
+    currentTabName() {
+      return this.$route.params.tabName;
+    },
     location() {
       if (this.station) {
         return latLng(
@@ -225,6 +229,24 @@ export default {
       }
       return null;
     },
+    currentTabIndex: {
+      get() {
+        return Math.max(0, this.tabNames.indexOf(this.currentTabName));
+      },
+      set(tabIndex) {
+        const nextTabName = this.tabNames[tabIndex];
+        if (nextTabName !== this.currentTabName) {
+          this.$router.push({
+            name: "station",
+            params: {
+              groupName: this.groupName,
+              stationName: this.stationName,
+              tabName: nextTabName,
+            },
+          });
+        }
+      },
+    },
   },
   data() {
     return {
@@ -233,14 +255,26 @@ export default {
       visitsCountLoading: false,
       recordingsCount: 0,
       visitsCount: 0,
-      currentTabIndex: 0,
       recordingsQueryFinal: {},
       visitsQueryFinal: {},
       station: null,
       group: {},
+      tabNames: ["recordings", "visits"],
     };
   },
   mounted() {
+    const nextTabName = this.tabNames[this.currentTabIndex];
+    if (nextTabName !== this.currentTabName) {
+      this.$router.replace({
+        name: "station",
+        params: {
+          groupName: this.groupName,
+          stationName: this.stationName,
+          tabName: nextTabName,
+        },
+      });
+    }
+    this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
     this.fetchStation();
   },
   methods: {
@@ -284,6 +318,16 @@ export default {
       }
       this.loadedStation = true;
     },
+    visitsQuery() {
+      return {
+        page: 1,
+        perPage: 100,
+        days: "all",
+        // TODO(jon): This should really be chunked into a per-day type thing.
+
+        stationId: [this.station.id],
+      };
+    },
   },
 };
 </script>
@@ -308,10 +352,15 @@ export default {
   }
   .tabs-container {
     position: relative;
-    z-index: 10000;
-    margin-top: -54px;
+    z-index: 10001;
+    margin-top: -53px;
     .group-tabs .card-header {
       background: unset;
+    }
+    .nav-item {
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      background: transparentize(whitesmoke, 0.15);
     }
   }
 }

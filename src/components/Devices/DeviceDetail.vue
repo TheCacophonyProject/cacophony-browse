@@ -77,7 +77,7 @@ import DeviceSchedule from "@/components/Devices/DeviceSchedule";
 export default {
   name: "DeviceDetail",
   components: {
-    DeviceSchedule,
+    // DeviceSchedule,
     RecordingsTab,
     DeviceUsers,
     DeviceSoftware,

@@ -8,9 +8,9 @@
       </help>
     </h2>
     <b-button
-        v-if="groupHasStations"
-        class="export-visits"
-        @click="exportVisits"
+      v-if="groupHasStations"
+      class="export-visits"
+      @click="exportVisits"
     >
       <font-awesome-icon icon="download" class="fa-1x" />
       <span>Export TrapNZ Visits for devices</span>
