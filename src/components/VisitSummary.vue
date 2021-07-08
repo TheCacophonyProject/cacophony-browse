@@ -53,7 +53,7 @@
         {{ name }}
       </span>
       <span>
-        {{ startTime }}, {{ item.item.sortDate.toLocaleDateString() }}
+        {{ startTime }}
       </span>
     </div>
   </div>
@@ -73,7 +73,7 @@
         {{ name }}
       </span>
       <span>
-        {{ startTime }}, {{ item.item.sortDate.toLocaleDateString() }}
+        {{ startTime }}
       </span>
     </div>
     <span class="duration">
