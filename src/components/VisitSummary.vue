@@ -6,13 +6,7 @@
       { 'big-gap': !smallGapOfInactivity },
     ]"
     v-if="item.kind === 'noActivity'"
-  >
-    <span>
-      <font-awesome-icon :icon="['far', 'clock']" size="xs" />
-      {{ visitLength }}
-    </span>
-    <span>, {{ item.name }}, {{ item.fromDate.toLocaleTimeString() }}</span>
-  </div>
+  />
   <div
     v-else-if="item.kind === 'powerEvent'"
     :class="['visit-item', 'power-event']"
@@ -25,52 +19,79 @@
       />
       <font-awesome-icon v-else icon="power-off" size="xs" />
     </span>
-    <span
-      >&nbsp;{{ item.name }}, created at
-      {{ item.fromDate.toLocaleTimeString() }}, logged at
-      {{ new Date(item.item.createdAt).toLocaleTimeString() }}</span
-    >
+    <span>&nbsp;{{ item.name }}</span>
   </div>
   <div
     v-else-if="item.kind === 'duskDawn'"
     :class="['visit-item', 'dusk-dawn']"
   >
-    <span> </span>
-    <span>&nbsp;{{ item.name }}, {{ item.fromDate.toLocaleTimeString() }}</span>
-  </div>
-  <div v-else class="visit-item visit">
-    <div>
-      <div>
-        <img
-          :src="imgSrc"
-          onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
-          width="48"
-          height="auto"
-          :alt="item.name"
-        />
-      </div>
-      <div>
-        <span>
-          {{ item.name }}
-        </span>
-        <span>{{ item.item.recordings.length }}</span>
-        <div>
-          <span>
-            <font-awesome-icon :icon="['far', 'clock']" size="xs" />
-            over a period of {{ visitLength }}
-          </span>
-          <span> at {{ item.fromDate.toLocaleTimeString() }}</span>
-          <a :href="recordingsListLink" @click="gotoRecordingsForVisit"
-            >View recordings</a
-          >
-        </div>
-      </div>
+    <div class="visit-badge">
+      <svg
+        viewBox="0 0 32 32"
+        width="48"
+        fill="currentColor"
+        v-if="name === 'Sunrise'"
+      >
+        <path
+          d="M 15 15 L 15 19.09375 C 13.816406 19.265625 12.726563 19.722656 11.8125 20.40625 L 8.9375 17.5 L 7.5 18.9375 L 10.40625 21.8125 C 9.722656 22.726563 9.265625 23.816406 9.09375 25 L 5 25 L 5 27 L 27 27 L 27 25 L 22.90625 25 C 22.734375 23.816406 22.277344 22.726563 21.59375 21.8125 L 24.5 18.9375 L 23.0625 17.5 L 20.1875 20.40625 C 19.273438 19.722656 18.183594 19.265625 17 19.09375 L 17 15 Z M 16 21 C 18.425781 21 20.441406 22.714844 20.90625 25 L 11.09375 25 C 11.558594 22.714844 13.574219 21 16 21 Z"
+        ></path>
+        <path
+          d="M 15 5 L 15 9 L 12 9 L 16 13 L 20 9 L 17 9 L 17 5 Z"
+          transform="rotate(180), translate(0, 15)"
+          transform-origin="center"
+        ></path>
+      </svg>
+      <svg viewBox="0 0 32 32" fill="currentColor" v-else width="48">
+        <path
+          d="M 15 15 L 15 19.09375 C 13.816406 19.265625 12.726563 19.722656 11.8125 20.40625 L 8.9375 17.5 L 7.5 18.9375 L 10.40625 21.8125 C 9.722656 22.726563 9.265625 23.816406 9.09375 25 L 5 25 L 5 27 L 27 27 L 27 25 L 22.90625 25 C 22.734375 23.816406 22.277344 22.726563 21.59375 21.8125 L 24.5 18.9375 L 23.0625 17.5 L 20.1875 20.40625 C 19.273438 19.722656 18.183594 19.265625 17 19.09375 L 17 15 Z M 16 21 C 18.425781 21 20.441406 22.714844 20.90625 25 L 11.09375 25 C 11.558594 22.714844 13.574219 21 16 21 Z"
+        ></path>
+        <path d="M 15 5 L 15 9 L 12 9 L 16 13 L 20 9 L 17 9 L 17 5 Z"></path>
+      </svg>
     </div>
+    <div class="name-time">
+      <span>
+        {{ name }}
+      </span>
+      <span>
+        {{ startTime }}, {{ item.item.sortDate.toLocaleDateString() }}
+      </span>
+    </div>
+  </div>
+  <div v-else :class="['visit-item', 'visit', item.name]">
+    <div class="visit-badge">
+      <img
+        :src="imgSrc"
+        onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
+        width="48"
+        height="auto"
+        :alt="name"
+      />
+      <span class="recording-count">{{ item.item.recordings.length }}</span>
+    </div>
+    <div class="name-time">
+      <span>
+        {{ name }}
+      </span>
+      <span>
+        {{ startTime }}, {{ item.item.sortDate.toLocaleDateString() }}
+      </span>
+    </div>
+    <span class="duration">
+      <font-awesome-icon :icon="['far', 'clock']" size="xs" />
+      {{ visitLength }}
+    </span>
+    <a
+      class="recordings-link"
+      :href="recordingsListLink"
+      @click="gotoRecordingsForVisit"
+      >View recording<span v-if="item.item.recordings.length > 1">s</span></a
+    >
   </div>
 </template>
 
 <script lang="ts">
 import { imgSrc } from "@/const";
+import { formatName } from "./VisitsListDayItem.vue";
 
 const timeElapsed = (start: Date, end: Date): string => {
   const seconds = (end.getTime() - start.getTime()) / 1000;
@@ -82,6 +103,18 @@ const timeElapsed = (start: Date, end: Date): string => {
     return `${(seconds / 60 / 60).toFixed(2)} hours`;
   }
   return seconds.toString();
+};
+
+const timeFormat = (fromDate: Date): string => {
+  const fromHours = fromDate && fromDate.getHours();
+  const minutes = fromDate.getMinutes().toString().padStart(2, "0");
+  if (fromHours === 0) {
+    return `12:${minutes}am`;
+  } else {
+    return `${fromHours <= 12 ? fromHours : fromHours - 12}:${minutes}${
+      fromHours < 12 ? "am" : "pm"
+    }`;
+  }
 };
 
 export default {
@@ -98,7 +131,7 @@ export default {
   },
   computed: {
     imgSrc() {
-      if (this.item.name === "none" || this.item.name === "conflicting tags") {
+      if (this.item.name === "none" || this.item.name === "conflicting-tags") {
         return imgSrc("unidentified");
       }
       return imgSrc(this.item.name);
@@ -112,13 +145,19 @@ export default {
         1000 * 60 * 16
       );
     },
+    name() {
+      return formatName(this.item.name);
+    },
+    startTime() {
+      return timeFormat(this.item.fromDate);
+    },
     recordingsListLink() {
       const firstRecordingId = this.item.item.recordings[0].recId;
       const remainingIds = this.item.item.recordings.map(
         ({ recId }) => `id=${recId}`
       );
       let remainingIdsQuery = "";
-      if (remainingIds.length) {
+      if (remainingIds.length > 1) {
         remainingIdsQuery = `?${remainingIds.join("&")}`;
       }
       return `/recording/${firstRecordingId}${remainingIdsQuery}`;
@@ -126,10 +165,12 @@ export default {
   },
   methods: {
     gotoRecordingsForVisit(e) {
-      e.preventDefault();
-      this.$router.push({
-        path: this.recordingsListLink,
-      });
+      if (!e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        this.$router.push({
+          path: this.recordingsListLink,
+        });
+      }
     },
   },
 };
@@ -141,71 +182,90 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  > div {
+  font-size: 14px;
+  color: #444;
+  .name-time {
+    min-width: 120px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    > span:last-child {
+      font-size: 90%;
+    }
+  }
+  .duration {
+    min-width: 120px;
+  }
+  .recordings-link {
+    text-decoration: underline;
+  }
+
+  &.dusk-dawn {
+    color: #ccc;
+    .name-time {
+      > span:first-child {
+        font-style: italic;
+      }
+    }
+  }
+
+  > * {
+    //outline: 1px solid red;
   }
   > .over-period {
     padding-left: 63px;
   }
-  &.visit {
-    border-left: 2px solid gray;
-    padding-left: 30px;
+
+  border-left: 6px solid white;
+  &.mustelid {
+    border-color: red;
   }
-  &.visit::before {
-    top: 24px;
-    content: "";
-    width: 30px;
-    height: 2px;
-    background: gray;
-    display: inline-block;
-    margin-left: -30px;
+  &.bird {
+    border-color: #28a745;
+  }
+  &.rodent,
+  &.hedgehog {
+    border-color: lighten(coral, 20%);
+  }
+  &.possum,
+  &.cat {
+    border-color: #b53326;
+  }
+
+  .visit-badge {
+    position: relative;
+    border-radius: 50%;
+    margin-right: 15px;
+    .recording-count {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      color: white;
+      background: darkred;
+      border-radius: 50%;
+      min-width: 15px;
+      height: 15px;
+      display: inline-block;
+      line-height: 15px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: bold;
+      box-shadow: 0.5px 0.5px 2px #444;
+    }
   }
   img {
     display: inline-block;
-    background: #aaa;
-    border-radius: 50%;
     padding: 5px;
-    //filter: invert(1);
-    // TODO(jon): Make all our predator icons SVGs, so that we can easily change the colour.
-    margin-right: 15px;
   }
-  //outline: 1px solid red;
   &.small-gap,
   &.big-gap {
-    &::before {
-      content: "";
-      height: 0;
-      border-top: 2px dashed gray;
-      display: inline-block;
-      padding-left: 120px;
-      margin-right: 10px;
-    }
-    border-left: 2px dashed gray;
+    background: #fefefe;
   }
   &.small-gap {
-    min-height: 30px;
-    &::before {
-      padding-left: 300px;
-    }
+    min-height: 3px;
   }
   &.big-gap {
-    min-height: 60px;
-    &::before {
-      padding-left: 400px;
-    }
-  }
-  &.power-event,
-  &.dusk-dawn {
-    &::before {
-      content: "";
-      height: 0;
-      border-top: 2px solid gray;
-      display: inline-block;
-      padding-left: 20px;
-      margin-right: 10px;
-    }
-    border-left: 2px dashed gray;
+    min-height: 10px;
   }
 }
 </style>

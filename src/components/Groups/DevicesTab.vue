@@ -1,16 +1,29 @@
 <template>
   <div class="container" v-if="!loading">
     <h2>
-      Devices - {{ groupName }}
+      Devices
       <help>
         Devices specify which group they belong to when they first register.
         They can't be edited here.
       </help>
     </h2>
+    <b-button
+      v-if="groupHasDevices"
+      class="export-visits"
+      @click="exportVisits"
+    >
+      <font-awesome-icon icon="download" class="fa-1x" />
+      <span>Export TrapNZ Visits for devices</span>
+    </b-button>
     <div class="description-and-button-wrapper">
-      <p v-if="groupHasDevices">Devices associated with this group.</p>
+      <p v-if="groupHasDevices">
+        Devices associated with <strong>{{ groupName }}</strong
+        >:
+      </p>
       <p v-else class="description-and-button-wrapper">
-        There are currently no devices associated with this group.
+        There are currently no devices associated with this
+        <strong>{{ groupName }}</strong
+        >.
       </p>
     </div>
     <b-table
@@ -120,6 +133,10 @@ export default {
     sortBool(_v, _k, i) {
       return `${i.type}_${i.isHealthy}`;
     },
+    exportVisits() {
+      alert("To be implemented before release");
+      return;
+    },
   },
   computed: {
     groupHasDevices() {
@@ -142,9 +159,9 @@ export default {
 
 <style lang="scss">
 .device-health {
-  color: #555;
+  color: #dc3545;
   &.healthy {
-    color: #dc3545;
+    color: #555;
   }
 }
 .table-okay {
@@ -158,5 +175,8 @@ export default {
 }
 .spinner {
   color: #ccc;
+}
+.export-visits {
+  float: right;
 }
 </style>

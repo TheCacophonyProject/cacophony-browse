@@ -6,10 +6,10 @@
       nav-class="device-tabs-container container"
       v-model="currentTabIndex"
     >
-      <b-tab title="Current Software">
+      <b-tab title="Current Software" lazy>
         <DeviceSoftware :software="software" />
       </b-tab>
-      <b-tab title="Users">
+      <b-tab title="Users" lazy>
         <template #title>
           <TabTemplate
             title="Users"
@@ -23,10 +23,10 @@
           @reload-device="$emit('reload-device')"
         />
       </b-tab>
-      <b-tab title="All Events">
+      <b-tab title="All Events" lazy>
         <DeviceEvents :device="device" />
       </b-tab>
-      <b-tab title="Recordings">
+      <b-tab title="Recordings" lazy>
         <template #title>
           <TabTemplate
             title="Recordings"
@@ -40,7 +40,7 @@
           :recordings-query="recordingQuery()"
         />
       </b-tab>
-      <b-tab title="Visits">
+      <b-tab title="Visits" lazy>
         <template #title>
           <TabTemplate
             title="Visits"
@@ -54,12 +54,12 @@
           :visits-query="visitsQuery()"
         />
       </b-tab>
-      <b-tab title="Schedule">
-        <template #title>
-          <TabTemplate title="Schedule" />
-        </template>
-        <DeviceSchedule />
-      </b-tab>
+<!--      <b-tab title="Schedule">-->
+<!--        <template #title>-->
+<!--          <TabTemplate title="Schedule" />-->
+<!--        </template>-->
+<!--        <DeviceSchedule />-->
+<!--      </b-tab>-->
     </b-tabs>
   </b-container>
 </template>

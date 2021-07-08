@@ -1,43 +1,13 @@
 <template>
   <div :class="['results']" ref="list-container">
     <div>
-      <div
-        v-for="(itemsByDay, index_a) in visitsChunkedByDayAndHour"
-        :key="index_a"
-        :ref="`day_${index_a}`"
-        class="day-wrapper"
-      >
-        <h4
-          class="recordings-day"
-          @click="() => toggleVisitDayVisibility(index_a)"
-        >
-          <img
-            v-for="(item, i) in visitClasses(itemsByDay)"
-            :key="i"
-            :class="['summary-image', item]"
-            :src="imgSrc(item)"
-            width="24"
-            height="auto"
-            :alt="item"
-            onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='"
-          />
-          <span v-html="relativeDay(itemsByDay)" />
-        </h4>
-        <div v-if="expandedDays[index_a]">
-          <div
-            v-for="(itemsByHour, index_b) in reverse(itemsByDay)"
-            :key="index_b"
-          >
-            <h5 class="recordings-hour">{{ hourRange(itemsByHour) }}</h5>
-            <VisitSummary
-              v-for="(item, index) in reverse(itemsByHour)"
-              :key="`${index}_card_a`"
-              :item="item"
-              :future-search-query="viewVisitsQuery"
-            />
-          </div>
-        </div>
-      </div>
+      <VisitsListDayItem
+        v-for="(itemsByDay, index) in visitsChunkedByDay"
+        :key="index"
+        :items="itemsByDay"
+        :future-search-query="viewVisitsQuery"
+        :ref="`day_${index}`"
+      />
       <div v-if="queryPending" class="results loading">
         <div
           v-for="i in 10"
@@ -56,47 +26,22 @@
 </template>
 
 <script lang="ts">
-import {
-  startOfHour,
-  startOfEvening,
-  toStringTodayYesterdayOrDateInNights,
-} from "@/helpers/datetime";
+import { startOfEvening } from "@/helpers/datetime";
 import { NewVisit } from "@/api/Monitoring.api";
-import VisitSummary from "@/components/VisitSummary.vue";
-import { imgSrc } from "@/const";
-
-interface ItemData {
-  kind: "dataRow" | "dataSeparator" | "noActivity" | "powerEvent" | "duskDawn";
-  name: string;
-  fromDate: Date;
-  toDate: Date;
-  time: string;
-  item: NewVisit;
-}
+import VisitsListDayItem, {
+  ItemData,
+} from "@/components/VisitsListDayItem.vue";
 
 interface VisitsListData {
-  visitsChunkedByDayAndHour: Array<Array<ItemData[]>>;
-  expandedDays: Record<number, boolean>;
+  visitsChunkedByDay: Array<Array<ItemData[]>>;
   atEnd: boolean;
   loadedVisitsCount: number;
 }
 
-// NOTE: Sorting precedence for visit tags displayed as small summary icons
-const tagPrecedence = [
-  "unidentified",
-  "none",
-  "mustelid",
-  "cat",
-  "possum",
-  "hedgehog",
-  "rodent",
-  "leporidae",
-];
-
 export default {
   name: "VisitsList",
   components: {
-    VisitSummary,
+    VisitsListDayItem,
   },
   props: {
     visits: {
@@ -129,16 +74,25 @@ export default {
       let prevDate = null;
       const visits = this.visits as NewVisit[];
       if (visits.length === 0) {
-        this.visitsChunkedByDayAndHour = [];
+        this.visitsChunkedByDay = [];
         this.loadedRecordingsCount = 0;
         return;
+      } else {
+        prevFromDate = new Date(visits[visits.length - 1].timeStart);
+        prevDate = prevFromDate;
       }
       // Slice from last recordings count, so we're only processing new recordings.
       const newVisits = visits.slice(this.loadedVisitsCount);
-      this.loadedVisitsCount = this.visits.length;
       const items = [];
 
       // TODO(jon): Intersperse power-on/power-off events and dusk/dawn times
+      if (newVisits.length && this.loadedVisitsCount !== 0) {
+        items.push({
+          kind: "dataSeparator",
+          hour: prevFromDate,
+          date: prevFromDate,
+        });
+      }
 
       for (const visit of newVisits) {
         const fromDate = new Date(visit.timeStart);
@@ -155,16 +109,6 @@ export default {
           };
           items.push(item);
           prevFromDate = fromDate;
-        } else if (
-          startOfHour(fromDate).getTime() !==
-          startOfHour(prevFromDate).getTime()
-        ) {
-          const item = {
-            kind: "dataSeparator",
-            hour: fromDate,
-          };
-          items.push(item);
-          prevFromDate = fromDate;
         }
 
         if (
@@ -174,26 +118,16 @@ export default {
           // Push "no activity block" if less than 8 eight hours of inactivity
           items.push({
             kind: "noActivity",
-            name:
-              visit.classification === "powered-off"
-                ? "powered down"
-                : "no activity",
+            name: "no activity",
             fromDate: toDate,
             toDate: prevDate,
             time: toDate.toLocaleTimeString(),
             item: { recordings: [] },
           });
         }
-        const powerEvents = [
-          "rpi-power-on",
-          "powered-off",
-          "daytime-power-off",
-        ];
         const duskDawn = ["Sunset", "Sunrise"];
         const itemData: ItemData = {
-          kind: powerEvents.includes(visit.classification)
-            ? "powerEvent"
-            : duskDawn.includes(visit.classification)
+          kind: duskDawn.includes(visit.classification)
             ? "duskDawn"
             : "dataRow",
           name: visit.classification,
@@ -215,174 +149,82 @@ export default {
               chunks.push([]);
               current = chunks[chunks.length - 1];
             }
-            if (item.hasOwnProperty("hour")) {
-              current.push([]);
-            }
           } else {
-            current[current.length - 1].push(item);
+            current.push(item);
           }
+        }
+        if (current.length === 0) {
+          chunks.pop();
         }
         if (chunks.length === 0) {
           // We've reached the end of the recordings.
           this.atEnd = true;
-          console.log("At end of visits");
         }
-        if (
-          this.visitsChunkedByDayAndHour.length !== 0 &&
-          chunks.length !== 0
-        ) {
-          // We need to be careful joining these here:
-          const lastDay =
-            this.visitsChunkedByDayAndHour[
-              this.visitsChunkedByDayAndHour.length - 1
-            ];
-          const lastHour =
-            lastDay[lastDay.length - 1][lastDay[lastDay.length - 1].length - 1];
-          const firstDay = chunks[0];
-          const firstHour = firstDay[0][0];
-
-          if (lastHour.date === firstHour.date) {
-            // We're going to push firstDay into lastDay
-            if (lastHour.time.split(":")[0] === firstHour.time.split(":")[0]) {
-              lastDay[lastDay.length - 1].push(...firstDay[0]);
-              lastDay.push(...firstDay.slice(1));
-            } else {
-              lastDay.push(...firstDay);
-            }
-            this.visitsChunkedByDayAndHour.push(...chunks.slice(1));
-          } else {
-            this.visitsChunkedByDayAndHour.push(...chunks);
-          }
-        } else {
-          // If lastDay/Hour is the same as previous, join them.
-          this.visitsChunkedByDayAndHour.push(...chunks);
-        }
+        this.visitsChunkedByDay.push(
+          ...chunks.filter((chunk) => chunk.length !== 0)
+        );
       }
     },
   },
   beforeDestroy() {
-    this.observer && this.observer.disconnect();
+    this.unload();
   },
   beforeUpdate() {
-    this.observer && this.observer.disconnect();
+    this.unload();
   },
   updated() {
-    // Setup next intersection observer to see the page has scrolled enough to load more items
-    this.observer = new IntersectionObserver(this.intersectionChanged);
-    // Observe intersections of cards
-    const maxY = [];
-    // Just observe the nth to last item, and when it comes into view, we load more, and disconnect the observer.
-    const n = 3;
-    for (const ref of Object.values(this.$refs)) {
-      if ((ref as any[]).length !== 0) {
-        if (ref[0]) {
-          const bounds = ref[0].getBoundingClientRect();
-          maxY.push([bounds.y, ref[0]]);
-          maxY.sort((a, b) => b[0] - a[0]);
-          if (maxY.length > n) {
-            maxY.pop();
+    if (this.visits.length !== this.loadedVisitsCount) {
+      this.loadedVisitsCount = this.visits.length;
+      // Setup next intersection observer to see the page has scrolled enough to load more items
+      this.observer = new IntersectionObserver(this.intersectionChanged);
+      // Observe intersections of cards
+      const maxY = [];
+      // Just observe the nth to last item, and when it comes into view, we load more, and disconnect the observer.
+      const n = 3;
+      for (const ref of Object.values(this.$refs)) {
+        if ((ref as any[]).length !== 0) {
+          if (ref[0] && ref[0].$el) {
+            const bounds =
+              ref[0].$el.getBoundingClientRect &&
+              ref[0].$el.getBoundingClientRect();
+            if (bounds) {
+              maxY.push([bounds.y, ref[0].$el]);
+              maxY.sort((a, b) => b[0] - a[0]);
+              if (maxY.length > n) {
+                maxY.pop();
+              }
+            }
           }
         }
       }
-    }
-    if (maxY.length) {
-      const observerTrigger = maxY[maxY.length - 1][1];
-      this.$refs["list-container"].style.height = `${maxY[0][0]}px`;
-      this.observer && this.observer.observe(observerTrigger);
+      if (maxY.length) {
+        const observerTrigger = maxY[maxY.length - 1][1];
+        this.$refs["list-container"].style.height = `${maxY[0][0]}px`;
+        //console.log("Observing", observerTrigger);
+        this.observer && this.observer.observe(observerTrigger);
+      }
     }
   },
   methods: {
-    imgSrc(what: string) {
-      if (what === "none" || what === "conflicting tags") {
-        return imgSrc("unidentified");
-      }
-      return imgSrc(what);
-    },
     intersectionChanged(entries: IntersectionObserverEntry[]) {
       for (const intersectionEvent of entries) {
         if (intersectionEvent.isIntersecting) {
           this.observer.unobserve(intersectionEvent.target);
+          //console.log("Emitting load more", intersectionEvent);
           this.$emit("load-more");
         }
       }
     },
-    relativeDay(dayChunk: Array<ItemData[]>) {
-      const fromDate = dayChunk[0][0].fromDate;
-      const toDate = new Date(fromDate.getTime());
-      toDate.setDate(toDate.getDate() - 1);
-      return toStringTodayYesterdayOrDateInNights(fromDate, toDate);
-    },
-    visitClasses(dayChunk: Array<ItemData[]>): string[] {
-      return dayChunk
-        .reduce((acc: string[], hourChunk: ItemData[]) => {
-          for (const item of hourChunk) {
-            if (item.kind === "dataRow") {
-              acc.push(item.name);
-            }
-          }
-          return acc;
-        }, [])
-        .map((item) => ({ name: item, priority: tagPrecedence.indexOf(item) }))
-        .sort((a, b) => {
-          if (a.priority === -1 && b.priority > -1) {
-            return -1;
-          } else if (b.priority === -1 && a.priority > -1) {
-            return 1;
-          } else if (a.priority === -1 && b.priority === -1) {
-            if (a.name === b.name) {
-              return 0;
-            }
-            return a.name > b.name ? 1 : -1;
-          }
-          return b.priority - a.priority;
-        })
-        .map(({ name }) => name);
-    },
     reverse(arr) {
       return [...arr].reverse();
     },
-    toggleVisitDayVisibility(index: number) {
-      if (!this.expandedDays.hasOwnProperty(index)) {
-        this.$set(this.expandedDays, index, true);
-      } else {
-        this.$delete(this.expandedDays, index);
-      }
-    },
-    hourRange(hourChunk: ItemData[]) {
-      const fromDate = hourChunk.length && hourChunk[0].fromDate;
-      const fromHours = fromDate && fromDate.getHours();
-      let toHoursString;
-      let fromHoursString;
-      if (fromHours === 0) {
-        fromHoursString = "12am";
-      } else {
-        fromHoursString = `${fromHours <= 12 ? fromHours : fromHours - 12}${
-          fromHours < 12 ? "am" : "pm"
-        }`;
-      }
-
-      const toDate =
-        hourChunk.length && hourChunk[hourChunk.length - 1].fromDate;
-      const toHours = toDate && toDate.getHours();
-      if (toHours === 0) {
-        toHoursString = "12am";
-      } else {
-        toHoursString = `${toHours <= 12 ? toHours : toHours - 12}${
-          toHours < 12 ? "am" : "pm"
-        }`;
-      }
-
-      if (fromHours === toHours) {
-        return fromHoursString;
-      } else {
-        return `${toHoursString} - ${fromHoursString}`;
-      }
+    unload() {
+      this.observer && this.observer.disconnect();
     },
   },
   data(): VisitsListData {
     return {
-      visitsChunkedByDayAndHour: [],
-      expandedDays: {},
+      visitsChunkedByDay: [],
       atEnd: false,
       loadedVisitsCount: 0,
     };
@@ -395,23 +237,33 @@ export default {
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins";
 
+.day-summary {
+  cursor: pointer;
+}
+
+.summary-badge {
+  font-size: 14px;
+  background: #eee;
+  line-height: 30px;
+  padding: 0 10px;
+  margin: 0 0 0 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
 .recordings-day {
   position: sticky;
   cursor: pointer;
   top: 0;
-  > img {
-    margin-top: 0.5rem;
-  }
+  display: flex;
+  justify-content: space-between;
   > span {
-    display: block;
-    width: 100%;
+    display: inline-block;
     background: transparentize($white, 0.15);
-    padding: 0.5rem 0 0.5rem 10px;
-    border-bottom: 1px solid $gray-200;
+    padding: 0.5rem 15px 0.5rem 10px;
   }
-  font-size: 1em;
+  font-size: 1.1em;
   font-weight: 600;
-  border-left: 2px dashed gray;
   padding-bottom: 10px;
   margin-bottom: 0;
 }
@@ -523,14 +375,5 @@ export default {
     background: $gray-100;
     font-weight: bold;
   }
-}
-.day-wrapper {
-  //min-height: 100px;
-}
-.day-wrapper > div:last-of-type > div {
-  padding-bottom: 10px;
-}
-.summary-image {
-  float: right;
 }
 </style>

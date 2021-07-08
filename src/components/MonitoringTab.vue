@@ -1,10 +1,7 @@
 <template>
   <div class="container">
     <h2>
-      All visits - {{ groupName
-      }}<span v-if="deviceName || stationName"
-        >, {{ `${deviceName || stationName || ""}` }}</span
-      >
+      All visits
       <help>
         All visits ever recorded for this
         {{ `${deviceName ? "device" : stationName ? "station" : "group"}` }}
@@ -15,7 +12,7 @@
       :visits="visits"
       :all-loaded="allLoaded"
       :view-visits-query="visitsQuery"
-      @load-more="() => requestVisits(true, [])"
+      @load-more="() => requestVisitsUntilBeginningOfEarliestDay()"
     />
     <div v-if="!loading && visits.length === 0">
       No visits found for this
@@ -29,15 +26,152 @@ import Help from "@/components/Help.vue";
 import api from "@/api";
 import VisitsList from "@/components/VisitsList.vue";
 import { NewVisit } from "@/api/Monitoring.api";
-import { startOfEvening } from "@/helpers/datetime";
+import { startOfEvening, startOfDay } from "@/helpers/datetime";
 import { DeviceEvent } from "@/api/Device.api";
 import SunCalc from "suncalc";
 const LOAD_PER_PAGE_CARDS = 10;
 
 // TODO(jon): A histogram of activity by hour of the night.  Total visits, and by species.
 
+const extraVisits = [];
+const currentVisits = [];
+
+interface DateSortable {
+  sortDate: Date;
+}
+
+const addSupplementaryEvents = (
+  visits: DateSortable[],
+  devicePowerEvents: DateSortable[],
+  location?: [number, number]
+): DateSortable[] => {
+  // Get the days for visits, work out the days covered:
+  const daysCovered = new Set();
+  for (const visit of visits) {
+    const start = startOfEvening(visit.sortDate);
+    daysCovered.add(start.toISOString());
+    start.setDate(start.getDate() + 1);
+    daysCovered.add(start.toISOString());
+  }
+  const latestVisitDay = startOfEvening(visits[0].sortDate);
+  latestVisitDay.setDate(latestVisitDay.getDate() + 1);
+  const earliestVisitDay = startOfEvening(visits[visits.length - 1].sortDate);
+  // console.log(
+  //   "Earliest visit day",
+  //   earliestVisitDay.toLocaleDateString(),
+  //   earliestVisitDay
+  // );
+  // console.log(
+  //     "Latest visit day",
+  //     latestVisitDay.toLocaleDateString(),
+  //     latestVisitDay
+  // );
+  for (const powerEvent of devicePowerEvents) {
+    const eventDay = startOfEvening(powerEvent.sortDate);
+    if (eventDay > earliestVisitDay && powerEvent.sortDate < latestVisitDay) {
+      const eventDate = eventDay.toISOString();
+      if (!daysCovered.has(eventDate)) {
+        // No visits during this day, but the device was powered on, so add a dummy event.
+        visits.push(powerEvent);
+        //console.log("Adding power event for", eventDay.toLocaleDateString());
+        daysCovered.add(eventDate);
+      }
+    }
+  }
+  // console.log(
+  //   Array.from(daysCovered.keys())
+  //     .map((i) => new Date(i).getTime())
+  //     .sort()
+  //     .map((d) => new Date(d).toLocaleDateString())
+  //     .reverse()
+  // );
+  if (location !== undefined) {
+    // Add sunrise and set events for each day that has visits
+    const duskDawn = [];
+    for (const day of daysCovered.keys()) {
+      const dayDate = new Date(day as string);
+      //console.log("Calculating dusk/dawn for", dayDate.toLocaleDateString());
+      if (dayDate >= earliestVisitDay && dayDate < latestVisitDay) {
+        const times = SunCalc.getTimes(dayDate, location[0], location[1]);
+        duskDawn.push({
+          sortDate: times.sunsetStart,
+          timeStart: times.sunsetStart,
+          timeEnd: times.sunset,
+          classification: "Sunset",
+        } as DateSortable);
+      }
+      const nextDayDate = new Date(day as string);
+      nextDayDate.setDate(nextDayDate.getDate() + 1);
+      if (nextDayDate > earliestVisitDay && nextDayDate <= latestVisitDay) {
+        const times = SunCalc.getTimes(nextDayDate, location[0], location[1]);
+        duskDawn.push({
+          sortDate: times.sunrise,
+          timeStart: times.sunrise,
+          timeEnd: times.sunriseEnd,
+          classification: "Sunrise",
+        } as DateSortable);
+      }
+    }
+    for (const d of duskDawn) {
+      daysCovered.add(startOfEvening(d.sortDate).toISOString());
+    }
+    // console.log(
+    //   Array.from(daysCovered.keys())
+    //     .map((i) => new Date(i).getTime())
+    //     .sort()
+    //     .map((d) => new Date(d).toLocaleDateString())
+    //     .reverse()
+    // );
+    visits.push(...duskDawn);
+  }
+
+  return visits;
+};
+
+const getPowerEventsAndLocationForDevice = async (
+  device: number
+): Promise<{
+  devicePowerEvents: DateSortable[];
+  location: [number, number] | undefined;
+}> => {
+  const devicePowerEvents = [];
+  let location;
+  if (currentVisits.length && device) {
+    const nextDay = new Date(currentVisits[0].timeEnd);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const endOfCurrentDay = startOfEvening(nextDay);
+    const beginningOfDayOfEarliestDay = startOfEvening(
+      new Date(currentVisits[currentVisits.length - 1].timeStart)
+    );
+
+    const eventParams = {
+      type: ["daytime-power-off", "rpi-power-on", "powered-off"],
+      endTime: endOfCurrentDay.toISOString(),
+      startTime: beginningOfDayOfEarliestDay.toISOString(),
+    };
+    const [latestRecording, powerEvents] = await Promise.all([
+      // Calculate dusk/dawn, moonrise/set events for range.
+      api.recording.latestForDevice(device),
+      api.device.getLatestEvents(device, eventParams),
+    ]);
+    devicePowerEvents.push(
+      ...powerEvents.result.rows.map((row) => ({
+        ...row,
+        sortDate: new Date(row.dateTime),
+        timeStart: row.dateTime,
+        timeEnd: row.dateTime,
+      }))
+    );
+    location = latestRecording.result.rows[0].location?.coordinates;
+  }
+  return {
+    devicePowerEvents,
+    location,
+  };
+};
+
 export default {
-  name: "VisitsTab",
+  name: "MonitoringTab",
   components: {
     VisitsList,
     Help,
@@ -63,153 +197,87 @@ export default {
     await this.fetchVisits();
   },
   methods: {
-    async requestVisits(markStart: boolean = false, pendingVisits: NewVisit[]) {
-      // Keep track of the offset of the page.
+    async requestVisitsUntilBeginningOfEarliestDay() {
       if (
         this.totalVisitsPages === null ||
         this.currentPage < this.totalVisitsPages
       ) {
-        this.loading = true;
         try {
-          const { result } = await api.monitoring.queryVisitPage({
-            ...this.visitsQuery,
-            page: this.currentPage,
-          });
-          this.currentPage += 1;
+          this.loading = true;
+          if (!currentVisits.length) {
+            const { result } = await api.monitoring.queryVisitPage({
+              ...this.visitsQuery,
+              page: this.currentPage,
+            });
 
-          if (!this.totalVisitsCount) {
-            this.totalVisitsPages = result.params.pagesEstimate;
-            this.totalVisitsCount =
-              result.params.pagesEstimate * LOAD_PER_PAGE_CARDS;
-          }
+            if (!this.totalVisitsCount) {
+              this.totalVisitsPages = result.params.pagesEstimate;
+              this.totalVisitsCount =
+                result.params.pagesEstimate * LOAD_PER_PAGE_CARDS;
+            }
 
-          if (markStart && result.visits.length) {
-            this.startDateOfQuery = new Date(result.visits[0].timeEnd);
-          }
-          // Get the first visit (latest in time) to work out which day we're querying.
-          // Then continue querying until we get a visit that is not in that 24hr span.
-          const earliestEndDateOfQuery = new Date(this.startDateOfQuery);
-          earliestEndDateOfQuery.setDate(this.startDateOfQuery.getDate() - 1);
-
-          const nextDay = new Date(this.startDateOfQuery);
-          nextDay.setDate(nextDay.getDate() + 1);
-          const endOfCurrentDay = startOfEvening(nextDay);
-
-          const containsPrevDay = result.visits.some((visit) => {
-            return new Date(visit.timeEnd) < earliestEndDateOfQuery;
-          });
-          let devicePowerEvents: DeviceEvent[] = [];
-
-          const beginningOfDayOfEarliestDay = startOfEvening(
-            new Date(result.visits[result.visits.length - 1].timeStart)
-          );
-
-          let location: [number, number] | null = null;
-          if (this.visitsQuery.device && this.visitsQuery.device.length) {
-            for (const device of this.visitsQuery.device) {
-              const eventParams = {
-                type: ["daytime-power-off", "rpi-power-on", "powered-off"],
-                endTime: endOfCurrentDay.toISOString(),
-                startTime: beginningOfDayOfEarliestDay.toISOString(),
-              };
-              const [latestRecording, powerEvents] = await Promise.all([
-                // Calculate dusk/dawn, moonrise/set events for range.
-                api.recording.latestForDevice(device),
-                api.device.getLatestEvents(device, eventParams),
-              ]);
-              devicePowerEvents = powerEvents.result.rows;
-              location = latestRecording.result.rows[0].location.coordinates;
+            this.currentPage += 1;
+            // Visits ordered newest to oldest.
+            currentVisits.push(...result.visits);
+          } else if (extraVisits.length) {
+            while (currentVisits.length) {
+              currentVisits.pop();
+            }
+            while (extraVisits.length) {
+              currentVisits.push(extraVisits.shift());
             }
           }
-
-          devicePowerEvents.sort(
-            (a, b) =>
-              new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+          console.assert(
+            this.visitsQuery.device.length === 1,
+            "Should only have one device"
           );
-
-          // TODO(jon): If we get two power-on events in succession, insert a "power-interrupted" event, to show that the device didn't power down
-          // properly.
-
-          // Dedupe daytime power-off events doubling up.
-          for (let i = 1; i < devicePowerEvents.length; i++) {
-            const prevEvent = devicePowerEvents[i - 1];
-            const currEvent = devicePowerEvents[i];
-            if (
-              prevEvent.EventDetail.type === "daytime-power-off" &&
-              prevEvent.EventDetail.type === currEvent.EventDetail.type &&
-              prevEvent.EventDetail.details.powerOnAt ===
-                currEvent.EventDetail.details.powerOnAt
-            ) {
-              (currEvent as any).deleteMe = true;
-            }
-          }
-          devicePowerEvents = devicePowerEvents.filter(
-            (item) => !item.hasOwnProperty("deleteMe")
-          );
-
-          const duskDawnEvents = [];
-          if (location !== null) {
-            // Get dusk dawn events
-            const daysCovered = {};
-            for (const item of devicePowerEvents) {
-              const day = startOfEvening(new Date(item.dateTime));
-              daysCovered[day.toISOString()] = day;
-            }
-            const lastDay = new Date(
-              devicePowerEvents[devicePowerEvents.length - 1].dateTime
+          const { location, devicePowerEvents } =
+            await getPowerEventsAndLocationForDevice(
+              this.visitsQuery.device[0]
             );
-            daysCovered[lastDay.toISOString()] = lastDay;
 
-            for (const day of Object.values(daysCovered)) {
-              const times = SunCalc.getTimes(
-                day as Date,
-                location[0],
-                location[1]
-              );
-              duskDawnEvents.push({
-                sortDate: times.sunrise,
-                timeStart: times.sunrise,
-                timeEnd: times.sunriseEnd,
-                classification: "Sunrise",
-              });
-              duskDawnEvents.push({
-                sortDate: times.sunsetStart,
-                timeStart: times.sunsetStart,
-                timeEnd: times.sunset,
-                classification: "Sunset",
-              });
+          const oldestVisit = currentVisits[currentVisits.length - 1];
+          const oldestVisitDay = startOfEvening(
+            new Date(oldestVisit.timeStart)
+          );
+          // Now request again until we get a day that is less than oldestVisitDay.  Split the remaining array into before and after.
+          //debugger;
+          while (
+            extraVisits.length === 0 &&
+            this.currentPage <= this.totalVisitsPages
+          ) {
+            const { result } = await api.monitoring.queryVisitPage({
+              ...this.visitsQuery,
+              page: this.currentPage,
+            });
+            this.currentPage += 1;
+            const v = result.visits;
+            while (
+              v.length &&
+              startOfEvening(new Date(v[0].timeStart)) >= oldestVisitDay
+            ) {
+              //console.log("Grabbing additional visits", v[0]);
+              currentVisits.push(v.shift());
             }
-            // Pop the last sunset event, since it goes into the next day.
-            duskDawnEvents.pop();
+            //console.log("Breaking at", v[0]);
+            extraVisits.push(...v);
           }
-          const events = [
-            ...result.visits.map((visit) => ({
+          const supplementaryEvents = addSupplementaryEvents(
+            currentVisits.map((visit) => ({
               ...visit,
               sortDate: new Date(visit.timeStart),
             })),
-            ...devicePowerEvents.map((event) => ({
-              ...event,
-              classification: event.EventDetail.type,
-              recordings: [],
-              timeStart: new Date(event.dateTime),
-              timeEnd: new Date(event.dateTime),
-              item: event,
-              sortDate: new Date(event.dateTime),
-            })),
-            ...duskDawnEvents,
-          ].sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
-
-          // Collect up visits into pendingVisits until we have a full days worth, then update the model.
-          pendingVisits.push(...events);
-          if (!containsPrevDay) {
-            console.log("Ask for more visits up to end of day");
-            await this.requestVisits(false, pendingVisits);
-          } else {
-            this.visits.push(...pendingVisits);
-          }
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-        this.loading = false;
+            devicePowerEvents,
+            location
+          )
+            .sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime())
+            .map((o) => Object.freeze(o));
+          this.visits.push(...supplementaryEvents);
+          this.loading = false;
+          // Now merge these in with day
+        } catch (e) {
+          return;
+        }
       } else {
         // At end of search
         this.allLoaded = true;
@@ -227,7 +295,7 @@ export default {
           this.visitsQuery.station.length &&
           this.visitsQuery.station[0] !== null)
       ) {
-        await this.requestVisits(true, []);
+        await this.requestVisitsUntilBeginningOfEarliestDay();
       }
     },
   },
@@ -236,6 +304,14 @@ export default {
       // TODO(jon): Make sure we allow inactive devices to show recordings.
       this.fetchVisits();
     },
+  },
+  beforeDestroy() {
+    while (extraVisits.length) {
+      extraVisits.pop();
+    }
+    while (currentVisits.length) {
+      currentVisits.pop();
+    }
   },
 };
 </script>

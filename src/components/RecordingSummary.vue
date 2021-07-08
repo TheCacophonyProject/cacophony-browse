@@ -210,7 +210,7 @@ export default {
   },
   methods: {
     navigateToRecording(event, recordingId) {
-      if (event.target !== event.currentTarget) {
+      if (event.target !== event.currentTarget && event.target.href) {
         // Clicking a link inside the outer card link
         return;
       }

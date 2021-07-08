@@ -22,7 +22,7 @@
       nav-class="container"
       v-model="currentTabIndex"
     >
-      <b-tab>
+      <b-tab lazy>
         <template #title>
           <TabTemplate
             title="Users"
@@ -53,7 +53,7 @@
       <!--          :visits-query="visitsQueryFinal"-->
       <!--        />-->
       <!--      </b-tab>-->
-      <b-tab title="Devices">
+      <b-tab title="Devices" lazy>
         <template #title>
           <TabTemplate
             title="Devices"

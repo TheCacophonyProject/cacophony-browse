@@ -64,16 +64,21 @@ import { mapState } from "vuex";
 import DeviceDetail from "../components/Devices/DeviceDetail.vue";
 import Spinner from "../components/Spinner.vue";
 import api from "../api/index";
+import { isViewingAsOtherUser } from "@/components/NavBar.vue";
+import { shouldViewAsSuperUser } from "@/utils";
 
 export default {
   name: "DeviceView",
   components: { DeviceDetail, Spinner },
   computed: {
     ...mapState({
-      currentUser: (state) => state.User.userData,
+      currentUser: (state) => (state as any).User.userData,
     }),
     userIsSuperUserAndViewingAsSuperUser() {
-      return false;
+      return (
+        this.currentUser.globalPermission === "write" &&
+        (isViewingAsOtherUser() || shouldViewAsSuperUser())
+      );
     },
     userIsMemberOfGroup() {
       return (

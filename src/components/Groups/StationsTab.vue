@@ -7,6 +7,14 @@
         exported from a trap.nz account.
       </help>
     </h2>
+    <b-button
+        v-if="groupHasStations"
+        class="export-visits"
+        @click="exportVisits"
+    >
+      <font-awesome-icon icon="download" class="fa-1x" />
+      <span>Export TrapNZ Visits for devices</span>
+    </b-button>
     <div>
       <div v-if="groupHasStations && pendingStations.length === 0">
         <p>Stations that are currently associated with this group</p>
@@ -344,6 +352,10 @@ export default {
     },
   },
   methods: {
+    exportVisits() {
+      alert("To be implemented before release");
+      return;
+    },
     dragCsvFileOver(event: DragEvent) {
       this.draggingCsvOver = true;
       event.dataTransfer.dropEffect = "none";
@@ -510,5 +522,8 @@ export default {
 }
 .back-date {
   margin-bottom: 20px;
+}
+.export-visits {
+  float: right;
 }
 </style>

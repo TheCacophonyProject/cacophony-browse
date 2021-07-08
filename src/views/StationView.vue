@@ -146,6 +146,8 @@ import {
   LTooltip,
   LWMSTileLayer,
 } from "vue2-leaflet";
+import { isViewingAsOtherUser } from "@/components/NavBar.vue";
+import { shouldViewAsSuperUser } from "@/utils";
 
 export default {
   name: "StationView",
@@ -162,7 +164,7 @@ export default {
   },
   computed: {
     ...mapState({
-      currentUser: (state) => state.User.userData,
+      currentUser: (state) => (state as any).User.userData,
     }),
     mapLayers() {
       const OpenStreetMapFallbackLayer = {
@@ -187,7 +189,10 @@ export default {
       return [{ ...OpenStreetMapFallbackLayer, visible: true }];
     },
     userIsSuperUserAndViewingAsSuperUser() {
-      return false;
+      return (
+        this.currentUser.globalPermission === "write" &&
+        (isViewingAsOtherUser() || shouldViewAsSuperUser())
+      );
     },
     userIsMemberOfGroup() {
       return (

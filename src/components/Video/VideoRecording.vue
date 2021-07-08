@@ -23,28 +23,26 @@
         />
       </b-col>
       <b-col cols="12" lg="4">
-        <div v-if="tracks && tracks.length > 0" class="accordion">
-          <TrackInfo
-            v-for="(track, index) in tracks"
-            :key="index"
-            :track="track"
-            :index="index"
-            :tracks="tracks"
-            :num-tracks="tracks.length"
-            :recording-id="getRecordingId()"
-            :is-wallaby-project="isWallabyProject()"
-            :show="index === selectedTrack.trackIndex"
-            :colour="colours[index % colours.length]"
-            :adjust-timespans="timespanAdjustment"
-            @track-selected="trackSelected"
-            @change-tag="changedTrackTag"
-          />
-        </div>
-        <div
-          v-if="recording && recording['processingState'] !== 'FINISHED'"
-          class="processing"
-        >
-          Recording still processing...
+        <!--        <div v-if="tracks && tracks.length > 0" class="accordion">-->
+        <!--          <TrackInfo-->
+        <!--            v-for="(track, index) in tracks"-->
+        <!--            :key="index"-->
+        <!--            :track="track"-->
+        <!--            :index="index"-->
+        <!--            :tracks="tracks"-->
+        <!--            :num-tracks="tracks.length"-->
+        <!--            :recording-id="getRecordingId()"-->
+        <!--            :is-wallaby-project="isWallabyProject()"-->
+        <!--            :show="index === selectedTrack.trackIndex"-->
+        <!--            :colour="colours[index % colours.length]"-->
+        <!--            :adjust-timespans="timespanAdjustment"-->
+        <!--            @track-selected="trackSelected"-->
+        <!--            @change-tag="changedTrackTag"-->
+        <!--          />-->
+        <!--        </div>-->
+        <div v-if="true || processingCompleted" class="processing">
+          <b-spinner small />
+          <span>Recording still processing.</span>
         </div>
       </b-col>
     </b-row>
@@ -140,6 +138,9 @@ export default {
         }
       }
       return 0;
+    },
+    processingCompleted() {
+      return this.recording && this.recording["processingState"] !== "FINISHED";
     },
   },
   async mounted() {
@@ -377,13 +378,20 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .video-elements-wrapper {
   padding: 0;
 }
 .processing {
   color: darkred;
-  font-weight: 600;
-  font-size: 120%;
+  padding: 0 20px;
+  text-align: center;
+  > span {
+    vertical-align: middle;
+  }
+  > span:last-child {
+    font-weight: 600;
+    font-size: 120%;
+  }
 }
 </style>
