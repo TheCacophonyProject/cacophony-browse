@@ -112,11 +112,18 @@ export default {
       return imgSrc(what);
     },
     formatNameAndCount(name: string, count: number): string {
+      const formattedName = formatName(name);
       if (count > 1) {
         // Find the display name for the tag, pluralise it:
-        return `${count} ${formatName(name)}${count !== 1 ? "s" : ""}`;
+        return `${count} ${formattedName}${
+          count !== 1 &&
+          !formattedName.endsWith("s") &&
+          !formattedName.endsWith("ae") // Leporidae
+            ? "s"
+            : ""
+        }`;
       }
-      return formatName(name);
+      return formattedName;
     },
     toggleExpanded() {
       if (this.hasVisits) {
@@ -140,16 +147,14 @@ export default {
       const dayChunk = this.items as ItemData[];
       return Object.entries(
         dayChunk
-          .reduce((acc: string[], item: ItemData) => {
-            if (item.kind === "dataRow" && item.name) {
-              acc.push(item.name.replace(/ /g, "-"));
-            }
-            return acc;
-          }, [])
-          .map((item) => ({
-            name: item,
-            priority: tagPrecedence.indexOf(item),
-          }))
+          .filter((item) => item.name && item.kind === "dataRow")
+          .map((item) => {
+            const name = item.name.replace(/ /g, "-");
+            return {
+              name,
+              priority: tagPrecedence.indexOf(name),
+            };
+          })
           .sort((a, b) => {
             if (a.priority === -1 && b.priority > -1) {
               return 1;
@@ -163,10 +168,10 @@ export default {
             }
             return a.priority - b.priority;
           })
-          .map(({ name }) => name)
           .reduce((acc, item) => {
-            acc[item] = acc[item] || 0;
-            acc[item]++;
+            const name = item.name;
+            acc[name] = acc[name] || 0;
+            acc[name]++;
             return acc;
           }, {})
       );

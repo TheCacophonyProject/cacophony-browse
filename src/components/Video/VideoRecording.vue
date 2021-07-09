@@ -40,7 +40,7 @@
             @change-tag="changedTrackTag"
           />
         </div>
-        <div v-if="processingCompleted" class="processing">
+        <div v-if="!processingCompleted" class="processing">
           <b-spinner small />
           <span>Recording still processing.</span>
         </div>
@@ -141,7 +141,7 @@ export default {
       return 0;
     },
     processingCompleted() {
-      return this.recording && this.recording["processingState"] !== "FINISHED";
+      return this.recording && this.recording["processingState"] === "FINISHED";
     },
   },
   async mounted() {

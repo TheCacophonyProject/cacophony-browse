@@ -9,7 +9,7 @@
     "dev": "webpack serve --config webpack/webpack.dev.js --progress",
     "release": "webpack --config webpack/webpack.release.js --progress",
     "lint": "eslint ./src --ext .js,.vue,.ts",
-    "lint:fix": "eslint ./src --fix --ext .js,.vue,.ts",
+    "lint:fix": "eslint ./src --fix --ext .js,.vue,.ts && ./beautify.sh",
     "version": "./update-nfpm-version"
   },
   "dependencies": {

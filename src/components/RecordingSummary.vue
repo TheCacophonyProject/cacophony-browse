@@ -66,8 +66,10 @@
           </span>
         </span>
         <span class="recording-tracks">
-          <font-awesome-icon icon="stream" size="xs" />
-          <span class="label" v-if="item.trackCount !== 0">
+          <b-spinner small v-if="queuedForProcessing" />
+          <font-awesome-icon icon="stream" size="xs" v-else />
+          <span class="label" v-if="queuedForProcessing">Queued</span>
+          <span class="label" v-else-if="item.trackCount !== 0">
             {{ item.trackCount }} track<span v-if="item.trackCount > 1">s</span>
           </span>
           <span class="label" v-else>No tracks</span>
@@ -177,7 +179,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import BatteryLevel from "./BatteryLevel.vue";
 import TagBadge from "./TagBadge.vue";
 
@@ -206,6 +208,14 @@ export default {
       get() {
         return window;
       },
+    },
+    queuedForProcessing(): boolean {
+      return this.item.processingState === "Analyse";
+    },
+    processing(): boolean {
+      return (
+        this.item.processingState === "Analyse" && this.item.processingStartTime
+      );
     },
   },
   methods: {

@@ -23,9 +23,9 @@ function toStringTodayYesterdayOrDate(dateObject) {
 }
 
 function toStringTodayYesterdayOrDateInNights(fromDate) {
-  const todayStart = startOfEvening(new Date());
+  const todayStart = startOfEvening(startOfDay(new Date()));
   const dateTime = startOfEvening(fromDate).getTime();
-  const yesterday = new Date();
+  const yesterday = new Date(todayStart);
   yesterday.setDate(yesterday.getDate() - 1);
   const yesterdayStart = startOfEvening(yesterday);
   const oneYear = 1000 * 60 * 60 * 24 * 365;
