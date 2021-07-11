@@ -23,15 +23,26 @@ function toStringTodayYesterdayOrDate(dateObject) {
 }
 
 function toStringTodayYesterdayOrDateInNights(fromDate) {
-  const todayStart = startOfEvening(startOfDay(new Date()));
-  const dateTime = startOfEvening(fromDate).getTime();
+  const now = new Date();
+  const todayStart = startOfEvening(now);
+  const eventDayStart = startOfEvening(fromDate);
   const yesterday = new Date(todayStart);
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStart = startOfEvening(yesterday);
   const oneYear = 1000 * 60 * 60 * 24 * 365;
-  if (dateTime === todayStart.getTime()) {
+  if (eventDayStart.getTime() === todayStart.getTime()) {
+    const isInSameEvening =
+      startOfDay(now).getTime() === startOfDay(eventDayStart).getTime();
+    const isInSameMorningBeforeFiveAm =
+      now.getHours() <= 5 &&
+      startOfEvening(now).getTime() === startOfEvening(eventDayStart).getTime();
+    if (isInSameEvening || isInSameMorningBeforeFiveAm) {
+      return "Tonight";
+    }
     return "Last night";
-  } else if (dateTime >= yesterdayStart.getTime()) {
+  } else if (eventDayStart.getTime() >= yesterday.getTime()) {
+    if (now.getHours() >= 16 || now.getHours() <= 5) {
+      return "Last night";
+    }
     return "Two nights ago";
   } else if (fromDate) {
     return `Night of ${nthOfMonth(startOfEvening(fromDate))}${

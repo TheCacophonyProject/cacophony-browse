@@ -7,15 +7,7 @@
         They can't be edited here.
       </help>
     </h2>
-    <b-button
-      v-if="groupHasDevices"
-      class="export-visits"
-      @click="exportVisits"
-    >
-      <font-awesome-icon icon="download" class="fa-1x" />
-      <span>Export TrapNZ Visits for devices</span>
-    </b-button>
-    <div class="description-and-button-wrapper">
+    <div>
       <p v-if="groupHasDevices">
         Devices associated with <strong>{{ groupName }}</strong
         >:
@@ -112,6 +104,16 @@
         />
       </template>
     </b-table>
+    <div class="bottom-buttons">
+      <b-button
+        v-if="groupHasDevices"
+        class="export-visits"
+        @click="exportVisits"
+      >
+        <font-awesome-icon icon="download" class="fa-1x" />
+        <span>Export TrapNZ Visits for devices</span>
+      </b-button>
+    </div>
   </div>
 </template>
 
@@ -158,6 +160,10 @@ export default {
 </script>
 
 <style lang="scss">
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
 .device-health {
   color: #dc3545;
   &.healthy {
@@ -176,7 +182,21 @@ export default {
 .spinner {
   color: #ccc;
 }
-.export-visits {
-  float: right;
+
+@include media-breakpoint-up(md) {
+  .bottom-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+@include media-breakpoint-down(sm) {
+  .bottom-buttons {
+    display: flex;
+    flex-direction: column;
+    > * {
+      margin-bottom: 10px;
+    }
+  }
 }
 </style>
