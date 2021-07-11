@@ -189,9 +189,9 @@ const taggingFilters = [
 
 const searchRecordingBase = [...recordingLabelsBase, ...taggingFilters];
 
-const filtersWhichCanHaveSpecifiedTags = searchRecordingBase.filter((tag) => tag.specified == true)
- .map((tag) => tag.value);
-
+const filtersWhichCanHaveSpecifiedTags = searchRecordingBase
+  .filter((tag) => tag.specified == true)
+  .map((tag) => tag.value);
 
 const DefaultLabels = {
   trackLabelsBase: [
@@ -227,7 +227,9 @@ const DefaultLabels = {
     return [...this.trackLabelsBase];
   },
   canHaveSpecifiedTags: function (tagType) {
-    return filtersWhichCanHaveSpecifiedTags.find(tag => tag === tagType) != null;
+    return (
+      filtersWhichCanHaveSpecifiedTags.find((tag) => tag === tagType) != null
+    );
   },
   overViewAiEvaluationMatrix: function () {
     return [bird, pest];

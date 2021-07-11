@@ -22,8 +22,6 @@ import AiMetricsView from "@/views/AiMetricsView.vue";
 import MonitoringTimeline from "@/views/MonitoringTimeline.vue";
 import { CurrentViewAbortController } from "@/main";
 
-// TODO(jon): We should be lazy loading some of these components for better code-splitting
-
 const cancelPendingRequests = (to, from, next) => {
   CurrentViewAbortController.newView();
   return next();

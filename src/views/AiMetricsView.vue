@@ -9,7 +9,7 @@
         <b-progress :value="pendingProgress" :max="1"></b-progress>
       </b-row>
       <b-row v-if="results">
-        <h4 v-if="results.filteredVisits.length == 0">
+        <h4 v-if="results.filteredVisits.length === 0">
           There were no labelled visits for the time period selected.
         </h4>
         <h4 v-else>

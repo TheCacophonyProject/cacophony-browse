@@ -11,10 +11,11 @@
   </b-button>
 </template>
 
-<script>
-import api from "../../api/index";
+<script lang="ts">
+import api from "@/api/index";
 import { toNZDateString } from "@/helpers/datetime";
-import { getTrapNzSpecies } from "../../const";
+import { getTrapNzSpecies } from "@/const";
+import { NewVisitQuery } from "@/api/Monitoring.api";
 
 export default {
   name: "VisitDownload",
@@ -33,7 +34,9 @@ export default {
     async click() {
       this.queryPending = true;
       // Call API and process results
-      const results = await api.monitoring.getAllVisits(this.params);
+      const results = await api.monitoring.getAllVisits(
+        this.params as unknown as NewVisitQuery
+      );
       const rows = results.filteredVisits.map((visit) => [
         visit.stationId ? visit.station : visit.device,
         formatDate(visit.timeStart),
@@ -53,14 +56,14 @@ export default {
       this.createExport(header + csvVisits);
     },
     createExport(csvFormattedString) {
-      var blob = new Blob([csvFormattedString], {
+      const blob = new Blob([csvFormattedString], {
         type: "text/csv;charset=utf-8;",
       });
-      var link = document.createElement("a");
+      const link = document.createElement("a");
       if (link.download !== undefined) {
         // feature detection
         // Browsers that support HTML5 download attribute
-        var url = URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
         link.setAttribute("download", "visits.csv");
         link.style.visibility = "hidden";

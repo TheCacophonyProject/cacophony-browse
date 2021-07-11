@@ -88,14 +88,14 @@
           >
             Edit stations
           </b-btn>
-          <b-btn
-            v-if="groupHasStations"
-            class="export-visits"
-            @click="exportVisits"
-          >
-            <font-awesome-icon icon="download" class="fa-1x" />
-            <span>Export TrapNZ Visits for stations</span>
-          </b-btn>
+          <!--          <b-btn-->
+          <!--            v-if="groupHasStations"-->
+          <!--            class="export-visits"-->
+          <!--            @click="exportVisits"-->
+          <!--          >-->
+          <!--            <font-awesome-icon icon="download" class="fa-1x" />-->
+          <!--            <span>Export TrapNZ Visits for stations</span>-->
+          <!--          </b-btn>-->
         </div>
       </div>
       <p v-else-if="!groupHasStations">
