@@ -20,33 +20,38 @@
           "
         />
       </div>
-      <div :class="'search-content-wrapper'">
-        <div class="search-results">
-          <h1>Animal activity</h1>
-          <h2 v-if="countMessage">
-            {{ countMessage }}
-          </h2>
-          <h5 v-else>Loading...</h5>
-          <p class="search-description" v-html="currentQueryDescription" />
+      <b-col sm="12">
+        <div :class="'search-content-wrapper'">
+          <div class="search-results">
+            <h1>Animal activity</h1>
+            <div style="float: right">
+              <visit-download :params="serialisedQuery" />
+            </div>
+            <h2 v-if="countMessage">
+              {{ countMessage }}
+            </h2>
+            <h5 v-else>Loading...</h5>
+            <p class="search-description" v-html="currentQueryDescription" />
+          </div>
+          <div v-if="!queryPending" class="results">
+            <VisitList :visits="visits" />
+          </div>
+          <div v-else class="results loading">
+            <div
+              v-for="i in 10"
+              :style="{
+                background: `rgba(240, 240, 240, ${1 / i}`,
+              }"
+              :key="i"
+              class="recording-placeholder"
+            />
+          </div>
+          <div v-if="countMessage === 'No matches'" class="no-results">
+            <h6 class="text-muted">No visits found</h6>
+            <p class="small text-muted">Please check your search criteria.</p>
+          </div>
         </div>
-        <div v-if="!queryPending" class="results">
-          <VisitList :visits="visits" />
-        </div>
-        <div v-else class="results loading">
-          <div
-            v-for="i in 10"
-            :style="{
-              background: `rgba(240, 240, 240, ${1 / i}`,
-            }"
-            :key="i"
-            class="recording-placeholder"
-          />
-        </div>
-        <div v-if="countMessage === 'No matches'" class="no-results">
-          <h6 class="text-muted">No visits found</h6>
-          <p class="small text-muted">Please check your search criteria.</p>
-        </div>
-      </div>
+      </b-col>
 
       <div class="sticky-footer">
         <div class="pagination-per-page">
@@ -74,11 +79,12 @@
 <script>
 import QueryRecordings from "../components/QueryRecordings/QueryRecordings.vue";
 import VisitList from "../components/Monitoring/VisitList.vue";
+import VisitDownload from "../components/Monitoring/VisitDownload.vue";
 import api from "../api/index";
 
 export default {
   name: "MonitoringView",
-  components: { VisitList, QueryRecordings },
+  components: { VisitList, QueryRecordings, VisitDownload },
   props: {},
   data() {
     return {

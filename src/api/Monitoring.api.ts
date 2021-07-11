@@ -57,7 +57,7 @@ export interface NewVisitQuery {
   aiModel?: string;
 }
 
-export interface AIVisitsForStats {
+export interface AllVisitsResults {
   totalVisits: number;
   filteredVisits: NewVisit[];
   all: boolean;
@@ -84,7 +84,7 @@ async function getAllVisits(
   visitQuery: NewVisitQuery,
   visitsFilter?: visitFilter, // only visits that pass this filter will be returned
   progress?: progressUpdater // progress updates caller with how far through the request it is[0, 1]
-): Promise<AIVisitsForStats> {
+): Promise<AllVisitsResults> {
   let returnVisits: NewVisit[] = [];
   let allVisitsCount = 0;
   let morePagesExist = true;
