@@ -14,7 +14,7 @@
       <span class="no-activity" v-if="visitClasses.length === 0"
         >No activity</span
       >
-      <div v-else>
+      <div v-else class="visit-badges">
         <span
           v-for="([name, count], i) in visitClasses"
           :key="i"
@@ -190,6 +190,9 @@ export default {
   > .recordings-day {
     cursor: pointer;
   }
+  > .day-summary > .visit-badges {
+    padding: 0 5px;
+  }
 }
 
 .summary-badge {
@@ -197,7 +200,7 @@ export default {
   background: #f2f2f2;
   line-height: 30px;
   padding: 0 10px;
-  margin: 0 0 10px 10px;
+  margin: 0 5px 10px 5px;
   border-radius: 3px;
   display: inline-block;
   border: 2px solid transparent;
