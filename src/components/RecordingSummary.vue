@@ -250,7 +250,8 @@ export default {
 
 $recording-side-padding: 0.9rem;
 
-.svg-inline--fa {
+.svg-inline--fa,
+.spinner-border-sm {
   color: $gray-600;
 }
 
