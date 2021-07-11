@@ -71,9 +71,9 @@ export default {
   },
   computed: {
     ...mapState({
-      recording: (state): RecordingInfo => state.Video.recording,
-      tracks: (state) => state.Video.tracks,
-      fileSource: (state) => {
+      recording: (state: any): RecordingInfo => state.Video.recording,
+      tracks: (state: any) => state.Video.tracks,
+      fileSource: (state: any) => {
         return (
           (state.Video.downloadFileJWT &&
             `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadFileJWT}`) ||
@@ -82,7 +82,7 @@ export default {
       },
       // TODO(jon): Api endpoint that doesn't require signedUrl etc, just uses usual auth, and we say which recording we want.
       // Fixes issue with videos timing out on tabs that are open for a while.
-      rawSource: (state) =>
+      rawSource: (state: any) =>
         `${config.api}/api/v1/signedUrl?jwt=${state.Video.downloadRawJWT}`,
     }),
     timeString(): string {
@@ -96,13 +96,6 @@ export default {
         return this.date.toDateString();
       }
       return "";
-    },
-    moonPhase() {
-      return SunCalc.getMoonIllumination(
-        this.date,
-        this.recording.location.coordinates[0],
-        this.recording.location.coordinates[1]
-      );
     },
     sunTimes() {
       return SunCalc.getTimes(
