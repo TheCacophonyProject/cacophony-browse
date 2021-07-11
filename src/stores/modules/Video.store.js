@@ -148,10 +148,8 @@ const actions = {
     commit("addTrackTag", newTag);
 
     // Resync all tags for the track from the API.
-    const {
-      success: syncSuccess,
-      result: syncResult,
-    } = await api.recording.tracks(recordingId);
+    const { success: syncSuccess, result: syncResult } =
+      await api.recording.tracks(recordingId);
     if (!syncSuccess) {
       return;
     }

@@ -259,7 +259,7 @@ export default Vue.extend({
         tag,
         recordingId,
         trackId,
-        (this.currentRecording.tagJWT as unknown) as JwtToken<TrackTag>
+        this.currentRecording.tagJWT as unknown as JwtToken<TrackTag>
       );
       this.taggingPending = false;
       if (result.success) {

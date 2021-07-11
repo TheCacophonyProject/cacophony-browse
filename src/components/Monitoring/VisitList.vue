@@ -17,10 +17,10 @@
           <font-awesome-icon icon="thumbs-down" size="xs" />
         </span>
         &nbsp;
-      {{ data.item.classificationAi }}
+        {{ data.item.classificationAi }}
       </span>
     </template>
-   
+
     <template #cell(timeStart)="data">
       {{ formatDate(data.value) }}
     </template>
@@ -36,9 +36,7 @@
 </template>
 
 <script>
-import {
-  toNZDateString,
-} from "@/helpers/datetime";
+import { toNZDateString } from "@/helpers/datetime";
 
 export default {
   name: "VisitList",
@@ -53,8 +51,8 @@ export default {
       return [
         "device",
         "station",
-        { key: "classification", label: "Class"},
-        { key: "classificationAi", label: "AI Class"},
+        { key: "classification", label: "Class" },
+        { key: "classificationAi", label: "AI Class" },
         "timeStart",
         "timeEnd",
         "recordings",
@@ -63,7 +61,7 @@ export default {
     formatDate(value) {
       const date = new Date(value);
       return `${toNZDateString(date)} ${date.toTimeString().substring(0, 5)}`;
-    }
+    },
   },
 };
 </script>
