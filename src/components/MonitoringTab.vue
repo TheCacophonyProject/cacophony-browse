@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container visits-container">
     <h2>
       All visits
       <help>
@@ -316,16 +316,13 @@ export default {
 </script>
 
 <style lang="scss">
-.device-health {
-  color: darkgray;
-  &.healthy {
-    color: #dc3545;
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins";
+
+@include media-breakpoint-down(sm) {
+  .container.visits-container {
+    padding: 0;
   }
-}
-.table-okay {
-  border-left: 10px solid #cff1d7;
-}
-.table-warn {
-  border-left: 10px solid #eecccf;
 }
 </style>

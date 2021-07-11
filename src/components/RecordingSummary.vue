@@ -396,4 +396,7 @@ $recording-side-padding: 0.9rem;
     display: none;
   }
 }
+.recording-tracks {
+  display: inline-block;
+}
 </style>
