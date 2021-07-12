@@ -55,7 +55,7 @@
         @click="$router.push({ path: '/recordings' })"
         class="btn btn-link"
       >
-        Recordings
+        Return to recordings
       </button>
     </div>
   </b-container>
