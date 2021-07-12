@@ -25,6 +25,9 @@ function toStringTodayYesterdayOrDate(dateObject) {
 function toStringTodayYesterdayOrDateInNights(fromDate) {
   const now = new Date();
   const todayStart = startOfEvening(now);
+  if (todayStart > now) {
+    todayStart.setDate(todayStart.getDate() - 1);
+  }
   const eventDayStart = startOfEvening(fromDate);
   const yesterday = new Date(todayStart);
   yesterday.setDate(yesterday.getDate() - 1);
