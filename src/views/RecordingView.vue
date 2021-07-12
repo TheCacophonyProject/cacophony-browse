@@ -46,7 +46,19 @@
       :video-raw-url="rawSource"
     />
   </b-container>
-  <b-container v-else>Loading...</b-container>
+  <b-container v-else class="message-container">
+    <div>
+      {{ errorMessage || "Loading..." }}
+    </div>
+    <div v-if="errorMessage">
+      <button
+        @click="$router.push({ path: '/recordings' })"
+        class="btn btn-link"
+      >
+        Recordings
+      </button>
+    </div>
+  </b-container>
 </template>
 
 <script lang="ts">
@@ -67,6 +79,7 @@ export default {
       showAlert: false,
       alertMessage: "",
       alertVariant: "",
+      errorMessage: "",
     };
   },
   computed: {
@@ -144,16 +157,19 @@ export default {
             "Video/GET_RECORDING",
             this.$route.params.id
           );
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch (e) {
+          this.errorMessage =
+            "We couldn't find the recording you're looking for.";
+        }
       }
     },
   },
   mounted: async function () {
     try {
       await this.$store.dispatch("Video/GET_RECORDING", this.$route.params.id);
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (err) {
+      this.errorMessage = "We couldn't find the recording you're looking for.";
+    }
   },
 };
 </script>
@@ -226,5 +242,18 @@ export default {
   padding: 0 5px;
   border-bottom: 1px solid darken(#2b333f, 10%);
   height: 20px;
+}
+
+.message-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 20%;
+
+  div {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }
 }
 </style>
