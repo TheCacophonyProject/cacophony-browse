@@ -20,45 +20,20 @@
           v-if="updateWarnings !== null"
           v-html="updateWarningsText"
         />
-        <l-map
-          ref="stationsMap"
-          class="stations-map"
-          style="height: 400px"
-          :bounds="mapBounds.pad(0.25)"
-        >
-          <l-control-layers />
-          <l-w-m-s-tile-layer
-            v-for="layer in mapLayers"
-            :key="layer.name"
-            :base-url="layer.url"
-            :layers="layer.layers"
-            :visible="layer.visible"
-            :name="layer.name"
-            :attribution="layer.attribution"
-            layer-type="base"
-          />
-          <l-circle
-            v-for="station in stationsForMap"
-            :lat-lng="station.location"
-            :radius="60"
-            :key="`r_${station.name}`"
-            :fill-opacity="0.25"
-            :weight="1"
-            :stroke="false"
-            :interative="false"
-          />
-          <l-circle-marker
-            v-for="station in stationsForMap"
-            :lat-lng="station.location"
-            :key="station.name"
-            :radius="5"
-            color="black"
-            :weight="0.5"
-            :fill-opacity="1"
-          >
-            <l-tooltip>{{ station.name }}</l-tooltip>
-          </l-circle-marker>
-        </l-map>
+        <MapWithPoints
+          :points="stationsForMap"
+          :radius="60"
+          :navigate-to-point="
+            (point) => ({
+              name: 'station',
+              params: {
+                groupName,
+                stationName: point.name,
+                tabName: 'recordings',
+              },
+            })
+          "
+        />
         <b-table :items="stations" striped hover>
           <template #cell(name)="data">
             <b-link
@@ -88,14 +63,6 @@
           >
             Edit stations
           </b-btn>
-          <!--          <b-btn-->
-          <!--            v-if="groupHasStations"-->
-          <!--            class="export-visits"-->
-          <!--            @click="exportVisits"-->
-          <!--          >-->
-          <!--            <font-awesome-icon icon="download" class="fa-1x" />-->
-          <!--            <span>Export TrapNZ Visits for stations</span>-->
-          <!--          </b-btn>-->
         </div>
       </div>
       <p v-else-if="!groupHasStations">
@@ -172,14 +139,7 @@ import api from "@/api";
 import { linzBasemapApiKey } from "@/config";
 import * as csv from "csvtojson";
 import Help from "@/components/Help.vue";
-import {
-  LMap,
-  LTooltip,
-  LWMSTileLayer,
-  LControlLayers,
-  LCircle,
-  LCircleMarker,
-} from "vue2-leaflet";
+import MapWithPoints from "@/components/MapWithPoints.vue";
 
 // TODO(jon): Do we want to be able to view retired stations?
 
@@ -201,12 +161,7 @@ interface StationData {
 
 export default {
   components: {
-    LMap,
-    LControlLayers,
-    LTooltip,
-    LCircle,
-    LCircleMarker,
-    LWMSTileLayer,
+    MapWithPoints,
     Help,
   },
   name: "StationsTab",
@@ -234,28 +189,6 @@ export default {
     };
   },
   computed: {
-    mapLayers() {
-      const OpenStreetMapFallbackLayer = {
-        name: "OpenStreetMap Basemap",
-        visible: false,
-        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        attribution:
-          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      };
-      if (linzBasemapApiKey && linzBasemapApiKey !== "YOUR_API_KEY_HERE") {
-        return [
-          {
-            name: "LINZ Basemap",
-            visible: true, // Make the LINZ basemap the default one
-            attribution:
-              '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
-            url: `https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=${linzBasemapApiKey}`,
-          },
-          OpenStreetMapFallbackLayer,
-        ];
-      }
-      return [{ ...OpenStreetMapFallbackLayer, visible: true }];
-    },
     stations() {
       return this.items
         .filter(({ retiredAt }) => retiredAt === null)
@@ -284,10 +217,6 @@ export default {
         "<strong>Warnings:</strong><br>" +
         this.updateWarnings.replace(/\n/g, "<br>")
       );
-    },
-    mapBounds() {
-      // Calculate the initial map bounds and zoom level from the set of lat/lng points
-      return latLngBounds(this.stationsForMap.map(({ location }) => location));
     },
     pendingStationsDiff() {
       // Show pending stations, and mark any existing stations that don't have a match in pending as
@@ -353,10 +282,6 @@ export default {
     },
   },
   methods: {
-    exportVisits() {
-      alert("To be implemented before release");
-      return;
-    },
     dragCsvFileOver(event: DragEvent) {
       this.draggingCsvOver = true;
       event.dataTransfer.dropEffect = "none";

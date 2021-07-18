@@ -244,12 +244,11 @@ export default {
           this.groupId = result.groups[0].id;
           this.recordingQueryFinal = this.recordingQuery();
           {
-            const { result } = await api.recording.queryCount({
-              ...this.recordingQuery(),
-              days: 1,
-            });
+            const { result } = await api.recording.queryCount(
+              this.recordingQuery()
+            );
             if (result.count !== 0) {
-              this.recordingsCount = `${result.count} NEW`;
+              this.recordingsCount = result.count;
             }
           }
         }

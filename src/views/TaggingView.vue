@@ -407,7 +407,7 @@ export default Vue.extend({
     },
     cTrack() {
       return {
-        trackIndex: this.currentTrack.trackIndex,
+        trackIndex: this.currentTrack && this.currentTrack.trackIndex,
         start_s: (this.currentTrack && this.currentTrack.data.start_s) || 0,
       };
     },

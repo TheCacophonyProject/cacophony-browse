@@ -9,6 +9,7 @@
               params: {
                 deviceName: deviceName,
                 groupName: groupName,
+                tabName: 'recordings',
               },
             }"
           >

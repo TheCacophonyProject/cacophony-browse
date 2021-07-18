@@ -27,15 +27,22 @@
             </b-button>
           </div>
           <div v-if="hasGroups" class="group-list-wrapper">
+            <b-checkbox class="filter-option" v-model="showGroupsWithNoDevices"
+              >Include groups with no devices</b-checkbox
+            >
             <b-list-group data-cy="groups-list">
               <b-list-group-item
-                class="list-group-item list-group-item-action"
-                :key="index"
+                :class="[
+                  'list-group-item',
+                  'list-group-item-action',
+                  { 'no-devices': deviceCount === 0 },
+                ]"
+                :key="groupName"
                 :to="{
                   name: 'group',
-                  params: { groupName },
+                  params: { groupName, tabName: 'devices' },
                 }"
-                v-for="({ groupName, deviceCount, userCount }, index) in groups"
+                v-for="{ groupName, deviceCount, userCount } in filteredGroups"
               >
                 <span>
                   <strong>{{ groupName }}</strong> -
@@ -70,7 +77,12 @@
           </div>
         </b-col>
         <b-col class="col-md-6 col-12">
-          <l-map style="height: 500px" :bounds="mapBounds" class="groups-map">
+          <l-map
+            style="height: 500px"
+            :bounds="mapBounds"
+            class="groups-map"
+            v-if="!locationsLoading"
+          >
             <l-w-m-s-tile-layer
               v-for="layer in mapLayers"
               :key="layer.name"
@@ -82,7 +94,7 @@
               layer-type="base"
             />
             <l-circle-marker
-              v-for="{ location, devices, types } in devicesByLocation"
+              v-for="{ location, groups, types } in groupsByLocation"
               :lat-lng="location"
               :key="`${location.lat}_${location.lng}`"
               :radius="5"
@@ -90,6 +102,7 @@
               :fill-opacity="1"
               :fill-color="colorForType(types)"
               :weight="0.5"
+              @click="(e) => navigateToGroup(groups[0])"
             >
               <l-tooltip>
                 <font-awesome-icon
@@ -106,14 +119,18 @@
                 />
                 <font-awesome-icon
                   v-else
-                  icon="microchip"
+                  icon="users"
                   class="icon"
                   size="xs"
                 />
-                {{ devices.map((d) => d.deviceName).join(", ") }}
+                {{ groups.map((d) => d).join(", ") }}
               </l-tooltip>
             </l-circle-marker>
           </l-map>
+          <div class="map-loading" v-else>
+            <b-spinner small />
+            <div>&nbsp;Loading group locations</div>
+          </div>
         </b-col>
       </b-row>
     </b-container>
@@ -128,18 +145,19 @@ import GroupAdd from "@/components/Groups/GroupAdd.vue";
 import { linzBasemapApiKey } from "@/config";
 import { LatLng, latLng, latLngBounds } from "leaflet";
 import { LCircleMarker, LMap, LTooltip, LWMSTileLayer } from "vue2-leaflet";
-import { DeviceId } from "@/api/Recording.api";
 
-interface DevicesForLocation {
+interface GroupsForLocation {
   location: LatLng;
-  devices: DeviceId[]; // Multiple devices can be in the same place
+  groups: string[]; // Multiple devices can be in the same place
   types: "audio" | "thermalRaw" | "both" | null;
 }
 
 interface GroupsViewData {
   groups: any[];
   isLoading: boolean;
-  locations: Record<string, DevicesForLocation>;
+  locationsLoading: boolean;
+  showGroupsWithNoDevices: boolean;
+  locations: Record<string, GroupsForLocation>;
   requestController: AbortController;
 }
 
@@ -151,8 +169,6 @@ const NZ_BOUNDS = latLngBounds([
 const isInNZ = (location: LatLng): boolean => {
   return NZ_BOUNDS.contains(location);
 };
-
-// TODO(jon): Make this stack properly on mobile.
 
 export default {
   name: "GroupsView",
@@ -168,6 +184,8 @@ export default {
     return {
       groups: [],
       isLoading: false,
+      showGroupsWithNoDevices: false,
+      locationsLoading: false,
       locations: {},
       requestController: null,
     };
@@ -205,17 +223,27 @@ export default {
       }
       return [{ ...OpenStreetMapFallbackLayer, visible: true }];
     },
-    devicesByLocation(): DevicesForLocation[] {
+    groupsByLocation(): GroupsForLocation[] {
       return Object.values(this.locations);
     },
     mapBounds() {
       // Calculate the initial map bounds and zoom level from the set of lat/lng points
       return (
-        (this.devicesByLocation.length &&
+        (this.groupsByLocation.length &&
           latLngBounds(
-            this.devicesByLocation.map(({ location }) => location)
+            this.groupsByLocation.map(({ location }) => location)
           )) ||
         NZ_BOUNDS
+      );
+    },
+    filteredGroups(): any[] {
+      if (this.showGroupsWithNoDevices) {
+        return this.groups;
+      }
+      return this.groups.filter(
+        (group) =>
+          group.initialDeviceCount !== 0 &&
+          (group.deviceCount === false || group.deviceCount !== 0)
       );
     },
   },
@@ -223,6 +251,12 @@ export default {
     this.fetchGroups();
   },
   methods: {
+    navigateToGroup(groupName: string) {
+      this.$router.push({
+        name: "group",
+        params: { groupName, tabName: "devices" },
+      });
+    },
     colorForType(type: string) {
       switch (type) {
         case "thermalRaw":
@@ -235,75 +269,96 @@ export default {
     },
     async fetchGroups() {
       this.isLoading = true;
+      this.locationsLoading = true;
       {
         // TODO(jon): Error handling.
+
         try {
           const { result } = await api.groups.getGroups();
           // Groups are always ordered alphabetically.
           // TODO(jon): Maybe also show groups that have devices with issues here?
-
           this.groups = result.groups
-            .map(({ groupname, GroupUsers }) => ({
+            .map(({ groupname, GroupUsers, Devices }) => ({
               groupName: groupname,
-              deviceCount: false,
+              deviceCount: Devices.length === 0 ? 0 : false,
+              initialDeviceCount: Devices.length,
               userCount: GroupUsers.length,
             }))
             .sort((a, b) => a.groupName.localeCompare(b.groupName));
 
-          // TODO(jon): Loading for latest recordings/devices on map,
-          //  and store promises to cancel on navigation/unload.
+          const devicesForGroupsPromises = [];
+          const locations = {};
           for (const group of this.groups) {
-            api.groups
-              .getDevicesForGroup(group.groupName)
-              .then(({ result }) => {
-                group.deviceCount = result.devices.length;
-                for (const device of result.devices) {
-                  // TODO(jon): Use latest events too, to see which devices have phoned home lately.
-                  // TODO(jon): The order of this probably wants to be one device per group, then fill out the rest.
-                  // TODO(jon): Also toggle between bird monitors and thermalRecorders
+            if (group.initialDeviceCount !== 0) {
+              devicesForGroupsPromises.push(
+                new Promise((resolve) => {
+                  api.groups
+                    // FIXME: We only need to do this because getGroups returns both active and inactive devices right now.
+                    .getDevicesForGroup(group.groupName)
+                    .then(async ({ result }) => {
+                      group.deviceCount = result.devices.length;
+                      const latestRecordingForDevicesPromises = [];
+                      // TODO(jon): Use latest events too, to see which devices have phoned home lately.
+                      // TODO(jon): The order of this probably wants to be one device per group, then fill out the rest.
+                      // TODO(jon): Also toggle between bird monitors and thermalRecorders
+                      // TODO(jon): Could always draw these just as group circles, that cover the radius of all devices?
+                      const device = result.devices.pop();
 
-                  // TODO(jon): Could always draw these just as group circles, that cover the radius of all devices?
-
-                  api.recording
-                    .latestForDevice(device.id)
-                    .then((r) => {
-                      if (r.result.count !== 0 && r.result.rows[0].location) {
-                        const rec = r.result.rows[0];
-                        const location = latLng(
-                          rec.location.coordinates[0],
-                          rec.location.coordinates[1]
+                      // TODO(jon): Would be useful to be able to get the latest recording for each of a list of devices in a single request?
+                      device &&
+                        latestRecordingForDevicesPromises.push(
+                          api.recording.latestForDevice(device.id)
                         );
-                        if (isInNZ(location)) {
-                          if (
-                            !this.locations.hasOwnProperty(location.toString())
-                          ) {
-                            this.$set(this.locations, location.toString(), {
-                              location,
-                              devices: [],
-                              types: null,
-                            });
-                          }
-                          const loc = this.locations[location.toString()];
-                          if (
-                            (loc.types === "audio" &&
-                              rec.type === "thermalRaw") ||
-                            (loc.types === "thermalRaw" && rec.type === "audio")
-                          ) {
-                            loc.types = "both";
-                          } else if (loc.types === null) {
-                            loc.types = rec.type;
-                          }
-                          loc.devices.push(device);
-                        }
-                      }
+
+                      const latestRecordingForFirstDeviceInGroup =
+                        await Promise.all(latestRecordingForDevicesPromises);
+                      resolve(latestRecordingForFirstDeviceInGroup);
                     })
                     // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
                     .catch((_) => {});
-                }
-              })
-              // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
-              .catch((_) => {});
+                })
+              );
+            }
           }
+          Promise.all(devicesForGroupsPromises)
+            .then((devicesForGroups) => {
+              for (const results of devicesForGroups) {
+                for (const recordings of results) {
+                  if (
+                    recordings.result.count !== 0 &&
+                    recordings.result.rows[0].location
+                  ) {
+                    const rec = recordings.result.rows[0];
+                    const location = latLng(
+                      rec.location.coordinates[0],
+                      rec.location.coordinates[1]
+                    );
+                    if (isInNZ(location)) {
+                      if (!locations.hasOwnProperty(location.toString())) {
+                        locations[location.toString()] = {
+                          location,
+                          groups: [],
+                          types: "both",
+                        };
+                      }
+                      const loc = locations[location.toString()];
+                      // if (
+                      //   (loc.types === "audio" && rec.type === "thermalRaw") ||
+                      //   (loc.types === "thermalRaw" && rec.type === "audio")
+                      // ) {
+                      //   loc.types = "both";
+                      // } else if (loc.types === null) {
+                      //   loc.types = rec.type;
+                      // }
+                      loc.groups.push(rec.Group.groupname);
+                    }
+                  }
+                }
+              }
+              this.locations = locations;
+              this.locationsLoading = false;
+            })
+            .catch(() => {});
         } catch (error) {
           // Do something with the error.
         }
@@ -335,5 +390,20 @@ export default {
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
+  &.no-devices {
+    //background: #eee;
+    opacity: 0.5;
+  }
+}
+.map-loading {
+  background: #eee;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #444;
+}
+.filter-option {
+  margin: 10px;
 }
 </style>

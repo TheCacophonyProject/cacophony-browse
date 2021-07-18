@@ -100,13 +100,15 @@ import { imgSrc } from "@/const";
 import { formatName } from "./VisitsListDayItem.vue";
 
 const timeElapsed = (start: Date, end: Date): string => {
-  const seconds = (end.getTime() - start.getTime()) / 1000;
+  const seconds = Math.round((end.getTime() - start.getTime()) / 1000);
   if (seconds < 60) {
-    return `${Math.round(seconds)} seconds`;
+    return `${seconds} second${seconds > 1 ? "s" : ""}`;
   } else if (seconds < 60 * 60) {
-    return `${Math.round(seconds / 60)} minutes`;
+    const minutes = Math.round(seconds / 60);
+    return `${minutes} minute${minutes > 1 ? "s" : ""}`;
   } else if (seconds < 60 * 60 * 60) {
-    return `${(seconds / 60 / 60).toFixed(2)} hours`;
+    const hours = (seconds / 60 / 60).toFixed(2);
+    return `${hours} hour${Math.round(seconds / 60 / 60) > 1 ? "s" : ""}`;
   }
   return seconds.toString();
 };

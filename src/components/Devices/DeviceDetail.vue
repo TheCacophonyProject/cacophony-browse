@@ -40,7 +40,7 @@
           :recordings-query="recordingQuery()"
         />
       </b-tab>
-      <b-tab title="Visits" lazy>
+      <b-tab title="Visits" lazy v-if="deviceType === 'VideoRecorder'">
         <template #title>
           <TabTemplate
             title="Visits"
@@ -113,9 +113,10 @@ export default {
       recordingsCountLoading: false,
       visitsCount: 0,
       visitsCountLoading: false,
+      deviceType: null,
     };
   },
-  created() {
+  async created() {
     const nextTabName = this.tabNames[this.currentTabIndex];
     if (nextTabName !== this.currentTabName) {
       this.$router.replace({
@@ -128,6 +129,7 @@ export default {
       });
     }
     this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
+    this.deviceType = await api.device.getType(this.device.id);
     this.fetchRecordingCount();
     this.fetchVisitsCount();
   },

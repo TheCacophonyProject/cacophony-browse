@@ -2,6 +2,7 @@
   <div :class="['day-wrapper', { 'has-visits': hasVisits }]">
     <h4 class="recordings-day" @click="toggleExpanded">
       <span v-html="relativeDay" />
+<!--      <span>{{ reversedItems[0].fromDate.toLocaleDateString() }}</span>-->
       <span>
         <font-awesome-icon
           v-if="hasVisits"

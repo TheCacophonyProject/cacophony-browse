@@ -110,10 +110,10 @@ const falsePositive = new TrackLabel(
   "false-positive",
   "not an animal"
 );
-new TrackLabel(nothing, "none");
 
+new TrackLabel(nothing, "none");
 new TrackLabel(notKnown, "unidentified");
-const unknown = new TrackLabel(notKnown, "not identifiable");
+const unknown = new TrackLabel(notKnown, "unknown", "not identifiable");
 
 // specified means - can have another specified tag in the search (eg Possum)
 const recordingLabelsBase = [

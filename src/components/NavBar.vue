@@ -38,7 +38,7 @@
         <b-navbar-nav class="ml-auto">
           <b-nav-item to="/groups">
             <font-awesome-icon icon="users" class="icon" />
-            My Groups
+            Groups
           </b-nav-item>
           <b-nav-item-dropdown class="profile" right>
             <template slot="button-content">

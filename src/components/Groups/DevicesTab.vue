@@ -13,8 +13,9 @@
         >:
       </p>
       <p v-else class="description-and-button-wrapper">
-        There are currently no devices associated with
-        <strong>{{ groupName }}</strong
+        There are currently no devices associated with&nbsp;<strong>{{
+          groupName
+        }}</strong
         >.
       </p>
     </div>
@@ -40,7 +41,7 @@
           sortable: true,
         },
       ]"
-      sort-by="devicename"
+      sort-by="deviceName"
       hover
       outlined
       responsive
@@ -53,6 +54,8 @@
             params: {
               deviceName: row.item.deviceName,
               groupName,
+              tabName:
+                row.item.type === 'VideoRecorder' ? 'visits' : 'recordings',
             },
           }"
         >
@@ -149,7 +152,7 @@
 import Help from "@/components/Help.vue";
 import { getTrapNzSpecies } from "@/const";
 import api from "@/api";
-import { toNZDateString, startOfDay } from "@/helpers/datetime";
+import { toNZDateString, startOfDay, startOfEvening } from "@/helpers/datetime";
 
 const formatDate = (value) => {
   const date = new Date(value);
@@ -182,9 +185,12 @@ export default {
       this.exportProgress = 0;
 
       // Call API and process results
-      const to = startOfDay(new Date(this.exportTo));
-      to.setDate(to.getDate() + 1);
-      const from = startOfDay(new Date(this.exportFrom));
+      const exportTo = new Date(this.exportTo);
+      exportTo.setHours(12);
+      const to = startOfEvening(exportTo);
+      const exportFrom = new Date(this.exportFrom);
+      exportFrom.setHours(12);
+      const from = startOfEvening(exportFrom);
       const results = await api.monitoring.getAllVisits(
         {
           device: this.devices.map(({ id }) => id),

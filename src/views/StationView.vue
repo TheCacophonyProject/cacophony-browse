@@ -1,43 +1,13 @@
 <template>
   <b-container fluid class="admin outer">
-    <l-map
-      v-if="mapBounds"
-      ref="stationsMap"
-      class="stations-map"
-      style="height: 200px"
-      :options="{ zoomControl: false }"
-      :bounds="mapBounds.pad(0.5)"
-    >
-      <l-w-m-s-tile-layer
-        v-for="layer in mapLayers"
-        :key="layer.name"
-        :base-url="layer.url"
-        :layers="layer.layers"
-        :visible="layer.visible"
-        :name="layer.name"
-        :attribution="layer.attribution"
-        layer-type="base"
-      />
-      <l-circle
-        :lat-lng="location"
-        :radius="60"
-        :key="`r_${station.name}`"
-        :fill-opacity="0.25"
-        :weight="1"
-        :stroke="false"
-        :interative="false"
-      />
-      <l-circle-marker
-        :lat-lng="location"
-        :key="station.name"
-        :radius="5"
-        color="black"
-        :weight="0.5"
-        :fill-opacity="1"
-      >
-        <l-tooltip>{{ station.name }}</l-tooltip>
-      </l-circle-marker>
-    </l-map>
+    <MapWithPoints
+      v-if="station"
+      :height="200"
+      :radius="60"
+      :can-change-base-map="false"
+      :is-interactive="false"
+      :points="[{ name: station.name, location }]"
+    ></MapWithPoints>
     <b-jumbotron class="jumbotron" fluid>
       <div>
         <h1>
@@ -138,57 +108,25 @@ import RecordingsTab from "@/components/RecordingsTab.vue";
 // import MonitoringTab from "@/components/MonitoringTab.vue";
 import { linzBasemapApiKey } from "@/config";
 import { latLng, latLngBounds } from "leaflet";
-import {
-  LCircle,
-  LCircleMarker,
-  LMap,
-  LTooltip,
-  LWMSTileLayer,
-} from "vue2-leaflet";
 import { isViewingAsOtherUser } from "@/components/NavBar.vue";
 import { shouldViewAsSuperUser } from "@/utils";
+import MapWithPoints from "@/components/MapWithPoints.vue";
 
 // TODO(jon): Implement visits/monitoring page for stations - this will require API changes.
 
 export default {
   name: "StationView",
   components: {
+    MapWithPoints,
     Spinner,
     TabTemplate,
     RecordingsTab,
     // MonitoringTab,
-    LMap,
-    LTooltip,
-    LCircle,
-    LCircleMarker,
-    LWMSTileLayer,
   },
   computed: {
     ...mapState({
       currentUser: (state) => (state as any).User.userData,
     }),
-    mapLayers() {
-      const OpenStreetMapFallbackLayer = {
-        name: "OpenStreetMap Basemap",
-        visible: false,
-        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        attribution:
-          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      };
-      if (linzBasemapApiKey && linzBasemapApiKey !== "YOUR_API_KEY_HERE") {
-        return [
-          {
-            name: "LINZ Basemap",
-            visible: true, // Make the LINZ basemap the default one
-            attribution:
-              '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
-            url: `https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=${linzBasemapApiKey}`,
-          },
-          OpenStreetMapFallbackLayer,
-        ];
-      }
-      return [{ ...OpenStreetMapFallbackLayer, visible: true }];
-    },
     userIsSuperUserAndViewingAsSuperUser() {
       return (
         this.currentUser.globalPermission === "write" &&
@@ -219,13 +157,6 @@ export default {
           this.station.location.coordinates[0],
           this.station.location.coordinates[1]
         );
-      }
-      return null;
-    },
-    mapBounds() {
-      // Calculate the initial map bounds and zoom level from the set of lat/lng points
-      if (this.station) {
-        return latLngBounds([this.location]);
       }
       return null;
     },
@@ -305,14 +236,14 @@ export default {
         }
         this.recordingsCountLoading = false;
 
-        this.visitsCountLoading = true;
-        {
-          const { result } = await api.monitoring.queryVisitPage(
-            this.recordingsQueryFinal
-          );
-          this.visitsCount = result.visits.length;
-        }
-        this.visitsCountLoading = false;
+        // this.visitsCountLoading = true;
+        // {
+        //   const { result } = await api.monitoring.queryVisitPage(
+        //     this.recordingsQueryFinal
+        //   );
+        //   this.visitsCount = result.visits.length;
+        // }
+        // this.visitsCountLoading = false;
       } catch (e) {
         // TODO - we will move away from global error handling, and show any errors locally in the component
       }
@@ -342,7 +273,7 @@ export default {
     position: absolute;
     width: 100%;
     background: transparent;
-    z-index: 10000;
+    z-index: 1000;
     h1,
     p.lead {
       padding: 3px;
@@ -352,7 +283,7 @@ export default {
   }
   .tabs-container {
     position: relative;
-    z-index: 10001;
+    z-index: 1001;
     margin-top: -53px;
     .group-tabs .card-header {
       background: unset;
@@ -363,8 +294,5 @@ export default {
       background: transparentize(whitesmoke, 0.15);
     }
   }
-}
-.stations-map {
-  pointer-events: none;
 }
 </style>

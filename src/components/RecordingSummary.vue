@@ -93,18 +93,18 @@
       </div>
     </div>
     <div v-if="item.location !== '(unknown)'" class="recording-location">
-      <!-- NOTE: Temporary link to google maps while we figure out a good source for a mapping thumbnail service  -->
+      <b-modal
+        v-model="showingLocation"
+        hide-footer
+        :title="`${item.deviceName}: #${item.id}`"
+        lazy
+      >
+        <MapWithPoints :points="itemLocation" />
+      </b-modal>
       <a
-        :href="`https://www.google.com/maps/@${item.location.replace(
-          ' ',
-          ''
-        )},16z`"
-        target="_blank"
+        @click.stop.prevent="showLocation"
         title="View location"
         class="location-link"
-        @click.stop.prevent="
-          ({ currentTarget: { href, target } }) => window.open(href, target)
-        "
       >
         <font-awesome-icon
           icon="map-marker-alt"
@@ -173,7 +173,15 @@
         {{ item.stationName }}
       </b-link>
     </span>
-    <span>{{ item.location }}</span>
+    <b-modal
+      v-model="showingLocation"
+      hide-footer
+      :title="`${item.deviceName}: #${item.id}`"
+      lazy
+    >
+      <MapWithPoints :points="[itemLocation]" />
+    </b-modal>
+    <span @click="showLocation">{{ item.location }}</span>
     <BatteryLevel v-if="item.batteryLevel" :battery-level="item.batteryLevel" />
     <span v-else />
   </div>
@@ -182,10 +190,11 @@
 <script lang="ts">
 import BatteryLevel from "./BatteryLevel.vue";
 import TagBadge from "./TagBadge.vue";
+import MapWithPoints from "@/components/MapWithPoints.vue";
 
 export default {
   name: "RecordingSummary",
-  components: { TagBadge, BatteryLevel },
+  components: { MapWithPoints, TagBadge, BatteryLevel },
   props: {
     item: {
       type: Object,
@@ -199,6 +208,11 @@ export default {
     futureSearchQuery: {
       type: Object,
     },
+  },
+  data() {
+    return {
+      showingLocation: false,
+    };
   },
   computed: {
     hasBattery() {
@@ -217,8 +231,17 @@ export default {
         this.item.processingState === "Analyse" && this.item.processingStartTime
       );
     },
+    itemLocation(): { name: string; location: string }[] {
+      return [{
+        name: `${this.item.deviceName}, #${this.item.id}`,
+        location: this.item.location,
+      }];
+    },
   },
   methods: {
+    showLocation() {
+      this.showingLocation = true;
+    },
     navigateToRecording(event, recordingId) {
       if (event.target !== event.currentTarget && event.target.href) {
         // Clicking a link inside the outer card link
@@ -398,5 +421,12 @@ $recording-side-padding: 0.9rem;
 }
 .recording-tracks {
   display: inline-block;
+}
+.location-link {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
