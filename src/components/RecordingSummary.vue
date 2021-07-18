@@ -232,10 +232,12 @@ export default {
       );
     },
     itemLocation(): { name: string; location: string }[] {
-      return [{
-        name: `${this.item.deviceName}, #${this.item.id}`,
-        location: this.item.location,
-      }];
+      return [
+        {
+          name: `${this.item.deviceName}, #${this.item.id}`,
+          location: this.item.location,
+        },
+      ];
     },
   },
   methods: {

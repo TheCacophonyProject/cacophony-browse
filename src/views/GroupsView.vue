@@ -77,56 +77,17 @@
           </div>
         </b-col>
         <b-col class="col-md-6 col-12">
-          <l-map
-            style="height: 500px"
-            :bounds="mapBounds"
-            class="groups-map"
+          <MapWithPoints
             v-if="!locationsLoading"
-          >
-            <l-w-m-s-tile-layer
-              v-for="layer in mapLayers"
-              :key="layer.name"
-              :base-url="layer.url"
-              :layers="layer.layers"
-              :visible="layer.visible"
-              :name="layer.name"
-              :attribution="layer.attribution"
-              layer-type="base"
-            />
-            <l-circle-marker
-              v-for="{ location, groups, types } in groupsByLocation"
-              :lat-lng="location"
-              :key="`${location.lat}_${location.lng}`"
-              :radius="5"
-              color="black"
-              :fill-opacity="1"
-              :fill-color="colorForType(types)"
-              :weight="0.5"
-              @click="(e) => navigateToGroup(groups[0])"
-            >
-              <l-tooltip>
-                <font-awesome-icon
-                  v-if="types === 'thermalRaw'"
-                  icon="video"
-                  class="icon"
-                  size="xs"
-                />
-                <font-awesome-icon
-                  v-else-if="types === 'audio'"
-                  icon="music"
-                  class="icon"
-                  size="xs"
-                />
-                <font-awesome-icon
-                  v-else
-                  icon="users"
-                  class="icon"
-                  size="xs"
-                />
-                {{ groups.map((d) => d).join(", ") }}
-              </l-tooltip>
-            </l-circle-marker>
-          </l-map>
+            :points="groupsByLocation"
+            :height="500"
+            :navigate-to-point="
+              (point) => ({
+                name: 'group',
+                params: { groupName: point.name, tabName: 'devices' },
+              })
+            "
+          />
           <div class="map-loading" v-else>
             <b-spinner small />
             <div>&nbsp;Loading group locations</div>
@@ -142,14 +103,12 @@ import api from "@/api";
 import Spinner from "@/components/Spinner.vue";
 import GroupAdd from "@/components/Groups/GroupAdd.vue";
 
-import { linzBasemapApiKey } from "@/config";
 import { LatLng, latLng, latLngBounds } from "leaflet";
-import { LCircleMarker, LMap, LTooltip, LWMSTileLayer } from "vue2-leaflet";
+import MapWithPoints from "@/components/MapWithPoints.vue";
 
 interface GroupsForLocation {
   location: LatLng;
-  groups: string[]; // Multiple devices can be in the same place
-  types: "audio" | "thermalRaw" | "both" | null;
+  name: string;
 }
 
 interface GroupsViewData {
@@ -173,12 +132,9 @@ const isInNZ = (location: LatLng): boolean => {
 export default {
   name: "GroupsView",
   components: {
+    MapWithPoints,
     Spinner,
     GroupAdd,
-    LMap,
-    LTooltip,
-    LCircleMarker,
-    LWMSTileLayer,
   },
   data(): GroupsViewData {
     return {
@@ -194,47 +150,8 @@ export default {
     hasGroups(): boolean {
       return this.groups.length !== 0;
     },
-    mapLayers() {
-      const OpenStreetMapFallbackLayer = {
-        name: "OpenStreetMap Basemap",
-        visible: false,
-        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        attribution:
-          '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      };
-      if (linzBasemapApiKey && linzBasemapApiKey !== "YOUR_API_KEY_HERE") {
-        return [
-          {
-            name: "LINZ Basemap",
-            visible: true, // Make the LINZ basemap the default one
-            attribution:
-              '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
-            url: `https://basemaps.linz.govt.nz/v1/tiles/aerial/3857/{z}/{x}/{y}.webp?api=${linzBasemapApiKey}`,
-          },
-          {
-            name: "LINZ Topo",
-            visible: false, // Make the LINZ basemap the default one
-            attribution:
-              '<a href="//www.linz.govt.nz/data/linz-data/linz-basemaps/data-attribution">LINZ CC BY 4.0 © Imagery Basemap contributors</a>',
-            url: `http://tiles-a.data-cdn.linz.govt.nz/services;key=${linzBasemapApiKey}/tiles/v4/layer=767/EPSG:3857/{z}/{x}/{y}.png`,
-          },
-          OpenStreetMapFallbackLayer,
-        ];
-      }
-      return [{ ...OpenStreetMapFallbackLayer, visible: true }];
-    },
     groupsByLocation(): GroupsForLocation[] {
       return Object.values(this.locations);
-    },
-    mapBounds() {
-      // Calculate the initial map bounds and zoom level from the set of lat/lng points
-      return (
-        (this.groupsByLocation.length &&
-          latLngBounds(
-            this.groupsByLocation.map(({ location }) => location)
-          )) ||
-        NZ_BOUNDS
-      );
     },
     filteredGroups(): any[] {
       if (this.showGroupsWithNoDevices) {
@@ -251,27 +168,28 @@ export default {
     this.fetchGroups();
   },
   methods: {
-    navigateToGroup(groupName: string) {
-      this.$router.push({
-        name: "group",
-        params: { groupName, tabName: "devices" },
-      });
-    },
-    colorForType(type: string) {
-      switch (type) {
-        case "thermalRaw":
-          return "dodgerblue";
-        case "audio":
-          return "greenyellow";
-        case "both":
-          return "orange";
-      }
-    },
     async fetchGroups() {
       this.isLoading = true;
       this.locationsLoading = true;
       {
         // TODO(jon): Error handling.
+        // try {
+        //   const { result } = await api.device.getDevices();
+        //   const myUserId = 200;
+        //   const myDevices = result.devices.rows.filter((device) => {
+        //     return (
+        //       device.Users.length !== 0 &&
+        //       device.Users.find((user) => user.id === myUserId) !== undefined
+        //     );
+        //   });
+        //   console.log(myDevices);
+        //   for (const device of myDevices) {
+        //     const group = await api.device.getDeviceById(device.id);
+        //     console.log(group);
+        //   }
+        // } catch (e) {
+        //   // ....
+        // }
 
         try {
           const { result } = await api.groups.getGroups();
@@ -298,12 +216,7 @@ export default {
                     .then(async ({ result }) => {
                       group.deviceCount = result.devices.length;
                       const latestRecordingForDevicesPromises = [];
-                      // TODO(jon): Use latest events too, to see which devices have phoned home lately.
-                      // TODO(jon): The order of this probably wants to be one device per group, then fill out the rest.
-                      // TODO(jon): Also toggle between bird monitors and thermalRecorders
-                      // TODO(jon): Could always draw these just as group circles, that cover the radius of all devices?
                       const device = result.devices.pop();
-
                       // TODO(jon): Would be useful to be able to get the latest recording for each of a list of devices in a single request?
                       device &&
                         latestRecordingForDevicesPromises.push(
@@ -337,20 +250,11 @@ export default {
                       if (!locations.hasOwnProperty(location.toString())) {
                         locations[location.toString()] = {
                           location,
-                          groups: [],
-                          types: "both",
+                          group: "",
                         };
                       }
                       const loc = locations[location.toString()];
-                      // if (
-                      //   (loc.types === "audio" && rec.type === "thermalRaw") ||
-                      //   (loc.types === "thermalRaw" && rec.type === "audio")
-                      // ) {
-                      //   loc.types = "both";
-                      // } else if (loc.types === null) {
-                      //   loc.types = rec.type;
-                      // }
-                      loc.groups.push(rec.Group.groupname);
+                      loc.name = rec.Group.groupname;
                     }
                   }
                 }
