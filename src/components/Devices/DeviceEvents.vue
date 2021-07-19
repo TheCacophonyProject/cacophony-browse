@@ -94,7 +94,7 @@ export default {
       filtered: false,
       date: "",
       datePrint: "",
-      allEventTypes: [ALL_EVENTS, ...DeviceEventTypes],
+      allEventTypes: DeviceEventTypes,
     };
   },
 
@@ -113,7 +113,6 @@ export default {
         );
         this.events = result.rows;
         this.count = result.count;
-        this.page = result.offset + 1;
         // eslint-disable-next-line no-empty
       } catch (e) {}
       this.eventsLoading = false;
