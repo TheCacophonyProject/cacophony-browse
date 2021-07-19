@@ -25,7 +25,7 @@
 import Help from "@/components/Help.vue";
 import api from "@/api";
 import VisitsList from "@/components/VisitsList.vue";
-import { startOfEvening, startOfDay } from "@/helpers/datetime";
+import { startOfEvening } from "@/helpers/datetime";
 import SunCalc from "suncalc";
 const LOAD_PER_PAGE_CARDS = 10;
 

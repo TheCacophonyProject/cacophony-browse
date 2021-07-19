@@ -84,7 +84,8 @@ export default {
     userIsMemberOfGroup() {
       return (
         this.userIsSuperUserAndViewingAsSuperUser ||
-        (this.group && this.group.GroupUsers &&
+        (this.group &&
+          this.group.GroupUsers &&
           this.group.GroupUsers.find(
             ({ username }) => username === this.currentUser.username
           ) !== undefined)

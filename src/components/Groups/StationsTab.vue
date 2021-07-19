@@ -134,9 +134,8 @@
 </template>
 
 <script lang="ts">
-import { icon, latLng, latLngBounds } from "leaflet";
+import { icon, latLng } from "leaflet";
 import api from "@/api";
-import { linzBasemapApiKey } from "@/config";
 import * as csv from "csvtojson";
 import Help from "@/components/Help.vue";
 import MapWithPoints from "@/components/MapWithPoints.vue";
