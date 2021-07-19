@@ -108,10 +108,10 @@
         <p>The following changes will be made</p>
         <b-table class="station-diff-table" :items="pendingStationsDiff">
           <template #cell(latitude)="data">
-            <span v-html="Number(data.value).toFixed(5)" />
+            <span v-html="data.value" />
           </template>
           <template #cell(longitude)="data">
-            <span v-html="Number(data.value).toFixed(5)" />
+            <span v-html="data.value" />
           </template>
         </b-table>
         <b-checkbox class="back-date" v-model="backDateRecordings">
@@ -245,10 +245,14 @@ export default {
           ) {
             let { latitude, longitude } = updatedStation;
             if (Math.abs(latitude - station.latitude) > EPSILON) {
-              latitude = `<del>${station.latitude}</del> -> ${latitude}`;
+              latitude = `<del>${Number(station.latitude).toFixed(
+                5
+              )}</del> -> ${Number(latitude).toFixed(5)}`;
             }
             if (Math.abs(longitude - station.longitude) > EPSILON) {
-              longitude = `<del>${station.longitude}</del> -> ${longitude}`;
+              longitude = `<del>${Number(station.longitude).toFixed(
+                5
+              )}</del> -> ${Number(longitude).toFixed(5)}`;
             }
             diff[station.name] = {
               ...updatedStation,
