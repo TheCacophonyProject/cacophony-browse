@@ -198,7 +198,9 @@ export default {
         const stations = await Promise.all(stationPromises);
         this.stations = Object.freeze(
           stations.reduce((acc, curr) => {
-            for (const { name, id } of curr.result.stations) {
+            for (const { name, id } of curr.result.stations.filter(
+              (station) => station.retiredAt === null
+            )) {
               acc[id] = {
                 type: "station",
                 name,

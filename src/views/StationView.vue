@@ -216,9 +216,9 @@ export default {
           api.groups.getStationsForGroup(this.groupName),
         ]);
         this.group = group.result.groups[0];
-        this.station = stations.result.stations.find(
-          (station) => station.name === this.stationName
-        );
+        this.station = stations.result.stations
+          .filter((station) => station.retiredAt === null)
+          .find((station) => station.name === this.stationName);
         this.recordingsQueryFinal = {
           tagMode: "any",
           offset: 0,
