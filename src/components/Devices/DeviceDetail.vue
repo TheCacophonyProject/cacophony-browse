@@ -119,7 +119,7 @@ export default {
   async created() {
     const nextTabName = this.tabNames[this.currentTabIndex];
     if (nextTabName !== this.currentTabName) {
-      this.$router.replace({
+      await this.$router.replace({
         name: "device",
         params: {
           groupName: this.groupName,
@@ -130,8 +130,7 @@ export default {
     }
     this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
     this.deviceType = await api.device.getType(this.device.id);
-    this.fetchRecordingCount();
-    this.fetchVisitsCount();
+    await Promise.all([this.fetchRecordingCount(), this.fetchVisitsCount()]);
   },
   computed: {
     groupName() {

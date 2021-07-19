@@ -22,7 +22,7 @@
       nav-class="container"
       v-model="currentTabIndex"
     >
-      <b-tab lazy>
+      <b-tab lazy v-if="!limitedView">
         <template #title>
           <TabTemplate
             title="Users"
@@ -68,7 +68,7 @@
           :group-name="groupName"
         />
       </b-tab>
-      <b-tab lazy>
+      <b-tab lazy v-if="!limitedView">
         <template #title>
           <TabTemplate
             title="Stations"
@@ -138,7 +138,7 @@ export default {
       devices: [],
       stations: [],
       visits: [],
-      tabNames: ["users", "devices", "stations", "recordings"],
+      limitedView: false,
     };
   },
   computed: {
@@ -157,9 +157,18 @@ export default {
         )
       );
     },
+    tabNames() {
+      if (!this.limitedView) {
+        return ["users", "devices", "stations", "recordings"];
+      } else {
+        return ["limited-devices", "limited-recordings"];
+      }
+    },
     nonRetiredStationsCount(): number {
-      return this.stations.filter((station) => station.retiredAt === null)
-        .length;
+      return (
+        this.stations &&
+        this.stations.filter((station) => station.retiredAt === null).length
+      );
     },
     currentTabName() {
       return this.$route.params.tabName;
@@ -188,10 +197,16 @@ export default {
       );
     },
   },
-  created() {
+  async created() {
+    if (
+      this.$route.params.tabName === "limited-devices" ||
+      this.$route.params.tabName === "limited-recordings"
+    ) {
+      this.limitedView = true;
+    }
     const nextTabName = this.tabNames[this.currentTabIndex];
     if (nextTabName !== this.currentTabName) {
-      this.$router.replace({
+      await this.$router.replace({
         name: "group",
         params: {
           groupName: this.groupName,
@@ -200,11 +215,18 @@ export default {
       });
     }
     this.currentTabIndex = this.tabNames.indexOf(this.currentTabName);
-    this.fetchUsers();
-    this.fetchDevices();
-    this.fetchStations();
-    this.fetchRecordingCount();
-    this.fetchVisitsCount();
+    if (!this.limitedView) {
+      await Promise.all([
+        this.fetchUsers(),
+        this.fetchStations(),
+        this.fetchVisitsCount(),
+        this.fetchDevices(),
+        this.fetchRecordingCount(),
+      ]);
+    } else {
+      await this.fetchDevices();
+      await this.fetchRecordingCount();
+    }
   },
   methods: {
     recordingQuery() {
@@ -230,30 +252,64 @@ export default {
     },
     async fetchUsers() {
       this.usersLoading = true;
-      {
-        const { result } = await api.groups.getUsersForGroup(this.groupName);
-        this.users = result.users;
+      if (!this.limitedView) {
+        try {
+          const { result, status } = await api.groups.getUsersForGroup(
+            this.groupName
+          );
+          if (status === 403) {
+            this.limitedView = true;
+          } else {
+            this.users = result.users;
+          }
+        } catch (e) {
+          // ...
+        }
       }
       this.usersLoading = false;
     },
     async fetchRecordingCount() {
       this.recordingsCountLoading = true;
-      try {
-        const { result } = await api.groups.getGroup(this.groupName);
-        if (result.groups.length !== 0) {
-          this.groupId = result.groups[0].id;
+      if (!this.limitedView) {
+        try {
+          const { result } = await api.groups.getGroup(this.groupName);
+          if (result.groups.length !== 0) {
+            this.groupId = result.groups[0].id;
+            this.recordingQueryFinal = this.recordingQuery();
+            {
+              const { result } = await api.recording.queryCount(
+                this.recordingQuery()
+              );
+              if (result.count !== 0) {
+                this.recordingsCount = result.count;
+              }
+            }
+          } else {
+            this.limitedView = true;
+            await this.fetchRecordingCount();
+          }
+        } catch (e) {
+          this.recordingsCountLoading = false;
+        }
+      } else {
+        try {
           this.recordingQueryFinal = this.recordingQuery();
+          delete this.recordingQueryFinal.group;
+          this.recordingQueryFinal.device = [
+            this.devices.map((device) => device.id),
+          ];
           {
-            const { result } = await api.recording.queryCount(
-              this.recordingQuery()
-            );
+            const { result } = await api.recording.query({
+              ...this.recordingQueryFinal,
+              limit: 1,
+            });
             if (result.count !== 0) {
               this.recordingsCount = result.count;
             }
           }
+        } catch (e) {
+          this.recordingsCountLoading = false;
         }
-      } catch (e) {
-        this.recordingsCountLoading = false;
       }
 
       this.recordingsCountLoading = false;
@@ -284,12 +340,51 @@ export default {
     async fetchDevices() {
       this.devicesLoading = true;
       {
-        const { result } = await api.groups.getDevicesForGroup(this.groupName);
-        this.devices = result.devices.map((device) => ({
-          ...device,
-          isHealthy: true,
-          type: null,
-        }));
+        if (!this.limitedView) {
+          try {
+            const { result, status } = await api.groups.getDevicesForGroup(
+              this.groupName
+            );
+            if (status === 200) {
+              this.devices = result.devices.map((device) => ({
+                ...device,
+                isHealthy: true,
+                type: null,
+              }));
+            } else {
+              this.limitedView = true;
+              await this.fetchDevices();
+            }
+          } catch (e) {
+            // ...
+          }
+        } else {
+          const { result } = await api.device.getDevices();
+          const myDevices = result.devices.rows.filter((device) => {
+            return (
+              device.Users.length !== 0 &&
+              device.Users.find((user) => user.id === this.currentUser.id) !==
+                undefined
+            );
+          });
+          for (const device of myDevices) {
+            const rec = await api.recording.latestForDevice(device.id);
+            if (
+              rec.result.count &&
+              rec.result.rows[0].Group.groupname === this.groupName
+            ) {
+              device.inGroup = true;
+            }
+          }
+          this.devices = myDevices
+            .filter((device) => device.inGroup)
+            .map((device) => ({
+              ...device,
+              deviceName: device.devicename,
+              isHealthy: true,
+              type: null,
+            }));
+        }
 
         const last24Hours = new Date(
           new Date().getTime() - 60 * 1000 * 60 * 24
@@ -324,8 +419,18 @@ export default {
     async fetchStations() {
       this.stationsLoading = true;
       {
-        const { result } = await api.groups.getStationsForGroup(this.groupName);
-        this.stations = result.stations;
+        try {
+          const { result, status } = await api.groups.getStationsForGroup(
+            this.groupName
+          );
+          if (status === 200) {
+            this.stations = result.stations;
+          } else {
+            this.limitedView = true;
+          }
+        } catch (e) {
+          // ...
+        }
       }
       this.stationsLoading = false;
     },

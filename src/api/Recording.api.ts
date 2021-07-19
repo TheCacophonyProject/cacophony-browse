@@ -285,7 +285,7 @@ function makeApiQuery(query: RecordingQuery): any {
   // Map between the mismatch in video type types between frontend and backend
   if (query.type === "video") {
     apiWhere["type"] = "thermalRaw";
-  } else if (query.type !== "both") {
+  } else if (query.type && query.type !== "both") {
     apiWhere["type"] = query.type;
   }
 
@@ -320,7 +320,6 @@ function makeApiQuery(query: RecordingQuery): any {
 
   addIfSet(apiWhere, calculateFromTime(query), "recordingDateTime", "$gt");
   addIfSet(apiWhere, query.to, "recordingDateTime", "$lt");
-
   const apiParams = {};
   const whereString = JSON.stringify(apiWhere);
   if (whereString.length > 2) {

@@ -3,14 +3,23 @@
     <b-jumbotron class="jumbotron" fluid>
       <h1>
         <router-link
-          v-if="userIsMemberOfGroup"
-          :to="{
-            name: 'group',
-            params: {
-              groupName,
-              tabName: 'devices',
-            },
-          }"
+          :to="
+            userIsMemberOfGroup
+              ? {
+                  name: 'group',
+                  params: {
+                    groupName,
+                    tabName: 'devices',
+                  },
+                }
+              : {
+                  name: 'group',
+                  params: {
+                    groupName,
+                    tabName: 'limited-devices',
+                  },
+                }
+          "
         >
           <font-awesome-icon
             icon="users"
@@ -19,14 +28,6 @@
           />
           <span>{{ groupName }}</span>
         </router-link>
-        <span v-else>
-          <font-awesome-icon
-            icon="users"
-            size="xs"
-            style="color: #666; font-size: 16px"
-          />
-          <span>{{ groupName }}</span>
-        </span>
         <font-awesome-icon
           icon="chevron-right"
           size="xs"
@@ -83,7 +84,7 @@ export default {
     userIsMemberOfGroup() {
       return (
         this.userIsSuperUserAndViewingAsSuperUser ||
-        (this.group.GroupUsers &&
+        (this.group && this.group.GroupUsers &&
           this.group.GroupUsers.find(
             ({ username }) => username === this.currentUser.username
           ) !== undefined)
@@ -125,7 +126,9 @@ export default {
           api.groups.getGroup(this.groupName),
           this.fetchDevice(),
         ]);
-        this.group = result.groups[0];
+        if (result.groups.length) {
+          this.group = result.groups[0];
+        }
         if (this.device) {
           await this.getSoftwareDetails(this.device.id);
         }
