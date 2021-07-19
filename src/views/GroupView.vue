@@ -295,9 +295,7 @@ export default {
         try {
           this.recordingQueryFinal = this.recordingQuery();
           delete this.recordingQueryFinal.group;
-          this.recordingQueryFinal.device = [
-            this.devices.map((device) => device.id),
-          ];
+          this.recordingQueryFinal.device = this.devices.map((device) => device.id);
           {
             const { result } = await api.recording.query({
               ...this.recordingQueryFinal,

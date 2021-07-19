@@ -27,7 +27,7 @@
         />
       </b-col>
       <b-col cols="0" class="col-md-1"></b-col>
-      <b-col cols="3" class="col-md-2"> Start from: </b-col>
+      <b-col cols="3" class="col-md-2"> Until date: </b-col>
       <b-col cols="8" class="col-sm-8 col-md-4">
         <input v-model="date" type="date" @change="fetchEvents" />
       </b-col>

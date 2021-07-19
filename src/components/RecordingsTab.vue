@@ -14,7 +14,7 @@
       :view-recording-query="recordingsQuery"
       @load-more="requestRecordings"
     />
-    <div v-if="!loading && recordings.length === 0">
+    <div v-if="!loading && recordings && recordings.length === 0">
       No recordings found for this
       {{ `${deviceName ? "device" : stationName ? "station" : "group"}` }}
     </div>

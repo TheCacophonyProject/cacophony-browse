@@ -123,6 +123,7 @@ import GroupAdd from "@/components/Groups/GroupAdd.vue";
 
 import { LatLng, latLng, latLngBounds } from "leaflet";
 import MapWithPoints from "@/components/MapWithPoints.vue";
+import {mapState} from "vuex";
 
 interface GroupsForLocation {
   location: LatLng;
@@ -165,6 +166,9 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      currentUser: (state) => (state as any).User.userData,
+    }),
     hasGroups(): boolean {
       return this.groups.length !== 0;
     },
@@ -194,11 +198,10 @@ export default {
         const groups = {};
         try {
           const { result } = await api.device.getDevices();
-          const myUserId = 200;
           const myDevices = result.devices.rows.filter((device) => {
             return (
               device.Users.length !== 0 &&
-              device.Users.find((user) => user.id === myUserId) !== undefined
+              device.Users.find((user) => user.id === this.currentUser.id) !== undefined
             );
           });
           // FIXME(jon): Quick hack for the issue that we can't currently get the group for a deviceId via the api.
