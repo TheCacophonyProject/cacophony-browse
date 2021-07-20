@@ -40,7 +40,11 @@
           :recordings-query="recordingQuery()"
         />
       </b-tab>
-      <b-tab title="Visits" lazy v-if="!deviceType || deviceType === 'VideoRecorder'">
+      <b-tab
+        title="Visits"
+        lazy
+        v-if="!deviceType || deviceType === 'VideoRecorder'"
+      >
         <template #title>
           <TabTemplate
             title="Visits"
@@ -146,7 +150,7 @@ export default {
       get() {
         return Math.max(0, this.tabNames.indexOf(this.currentTabName));
       },
-      set(tabIndex) {;
+      set(tabIndex) {
         const nextTabName = this.tabNames[tabIndex];
         if (nextTabName !== this.currentTabName) {
           this.$router.push({
