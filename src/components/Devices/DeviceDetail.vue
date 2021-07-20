@@ -6,7 +6,7 @@
       nav-class="device-tabs-container container"
       v-model="currentTabIndex"
     >
-      <b-tab title="Current Software" lazy>
+      <b-tab title="About" lazy>
         <DeviceSoftware :software="software" />
       </b-tab>
       <b-tab title="Users" lazy>
@@ -106,9 +106,9 @@ export default {
   data() {
     return {
       tabNames: [
-        "current-software",
-        "device-users",
-        "device-events",
+        "about",
+        "users",
+        "events",
         "recordings",
         "visits",
         "schedule",

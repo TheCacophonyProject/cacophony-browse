@@ -40,7 +40,10 @@
       :fill-opacity="1"
       @click="(e) => navigateToLocation(point)"
     >
-      <l-tooltip>{{ point.name }}</l-tooltip>
+      <l-tooltip
+        >{{ point.name }}: {{ Number(point.location.lat).toFixed(5) }},
+        {{ Number(point.location.lng).toFixed(5) }}</l-tooltip
+      >
     </l-circle-marker>
   </l-map>
 </template>

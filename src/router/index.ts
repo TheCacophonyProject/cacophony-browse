@@ -172,7 +172,11 @@ function createRouter() {
       const pieces = output.split(" ");
       for (const piece of pieces) {
         if (piece.startsWith(":") && params[piece.slice(1)]) {
-          output = output.replace(piece, params[piece.slice(1)]);
+          const replaceWith = params[piece.slice(1)];
+          output = output.replace(
+            piece,
+            replaceWith[0].toUpperCase() + replaceWith.slice(1)
+          );
           foundMatch = true;
           break;
         }

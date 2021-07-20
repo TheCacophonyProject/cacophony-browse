@@ -6,6 +6,7 @@
       :radius="60"
       :can-change-base-map="false"
       :is-interactive="false"
+      :zoom="false"
       :points="[{ name: station.name, location }]"
     ></MapWithPoints>
     <b-jumbotron class="jumbotron" fluid>
