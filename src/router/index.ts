@@ -1,4 +1,4 @@
-import Router from "vue-router";
+import Router, { Route } from "vue-router";
 import store from "@/stores";
 import DeviceView from "@/views/DeviceView.vue";
 import ErrorView from "@/views/ErrorView.vue";
@@ -21,6 +21,7 @@ import AiMetricsView from "@/views/AiMetricsView.vue";
 // TODO(jon): We should be lazy loading some of these components for better code-splitting
 import MonitoringTimeline from "@/views/MonitoringTimeline.vue";
 import { CurrentViewAbortController } from "@/main";
+import Vue from "vue";
 
 const cancelPendingRequests = (to, from, next) => {
   CurrentViewAbortController.newView();
@@ -36,29 +37,34 @@ function createRouter() {
         path: "/groups/:groupName/device/:deviceName/:tabName?",
         name: "device",
         component: DeviceView,
+        meta: { title: "Device :deviceName :tabName" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/groups/:groupName/station/:stationName/:tabName?",
         name: "station",
         component: StationView,
+        meta: { title: "Station :stationName :tabName" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/error",
         component: ErrorView,
+        meta: { title: "Error" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/groups",
         name: "groups",
         component: GroupsView,
+        meta: { title: "Groups" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/groups/:groupName/:tabName?",
         name: "group",
         component: GroupView,
+        meta: { title: ":groupName :tabName" },
         beforeEnter: cancelPendingRequests,
       },
       {
@@ -72,6 +78,7 @@ function createRouter() {
         name: "login",
         component: LoginView,
         meta: {
+          title: "Login",
           noAuth: true,
         },
         beforeEnter: cancelPendingRequests,
@@ -79,21 +86,25 @@ function createRouter() {
       {
         path: "/recordings",
         component: RecordingsView,
+        meta: { title: "Search Recordings" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/monitoring",
         component: MonitoringView,
+        meta: { title: "Monitoring" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/monitoring-timeline",
         component: MonitoringTimeline,
+        meta: { title: "Monitoring Timeline" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/ai-metrics",
         component: AiMetricsView,
+        meta: { title: "AI Metrics" },
         beforeEnter: cancelPendingRequests,
       },
       {
@@ -101,12 +112,14 @@ function createRouter() {
         component: RegisterView,
         meta: {
           noAuth: true,
+          title: "Register Account",
         },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/recording/:id/:trackId?",
         component: RecordingView,
+        meta: { title: "Recording :id" },
         beforeEnter: cancelPendingRequests,
       },
       {
@@ -121,6 +134,7 @@ function createRouter() {
       {
         path: "/analysis",
         name: "analysis",
+        meta: { title: "Device Activity" },
         component: AnalysisView,
         beforeEnter: cancelPendingRequests,
       },
@@ -128,21 +142,54 @@ function createRouter() {
         path: "/visits",
         name: "visits",
         component: VisitsView,
+        meta: { title: "Visits" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/tagging",
         name: "tagging",
         component: TaggingView,
+        meta: { title: "Power Tagger" },
         beforeEnter: cancelPendingRequests,
       },
       {
         path: "/end_user_agreement",
         name: "endUserAgreement",
+        meta: { title: "EULA" },
         component: EndUserAgreementView,
         beforeEnter: cancelPendingRequests,
       },
     ],
+  });
+  const DEFAULT_TITLE = "Cacophony Browser";
+
+  const interpolateTitle = (str: string, route: Route): string => {
+    const params = route.params;
+    let foundMatch = true;
+    let output = str;
+    while (foundMatch) {
+      foundMatch = false;
+      const pieces = output.split(" ");
+      for (const piece of pieces) {
+        if (piece.startsWith(":") && params[piece.slice(1)]) {
+          output = output.replace(piece, params[piece.slice(1)]);
+          foundMatch = true;
+          break;
+        }
+      }
+    }
+    return output;
+  };
+
+  router.afterEach(async (to) => {
+    // Use next tick to handle router history correctly
+    // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
+    Vue.nextTick(() => {
+      document.title =
+        (to.meta?.title &&
+          `${interpolateTitle(to.meta.title, to)} | ${DEFAULT_TITLE}`) ||
+        DEFAULT_TITLE;
+    });
   });
   router.beforeEach(async (to, from, next) => {
     const now = new Date().getTime();
