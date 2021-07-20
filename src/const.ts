@@ -108,7 +108,7 @@ const interesting = new TrackLabel(descriptors, "interesting");
 const falsePositive = new TrackLabel(
   nothing,
   "false-positive",
-  "not an animal"
+  "false positive"
 );
 
 new TrackLabel(nothing, "none");

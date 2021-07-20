@@ -9,7 +9,7 @@
     :options="{ zoomControl: zoom, dragging: isInteractive }"
     @ready="onReady"
   >
-    <l-control-layers v-if="canChangeBaseMap" />
+    <l-control-layers v-if="canChangeBaseMap && mapLayers.length > 1" />
     <l-w-m-s-tile-layer
       v-for="layer in mapLayers"
       :key="layer.name"

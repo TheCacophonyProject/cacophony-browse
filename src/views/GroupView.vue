@@ -293,9 +293,15 @@ export default {
         }
       } else {
         try {
+          await this.fetchDevices();
           this.recordingQueryFinal = this.recordingQuery();
-          delete this.recordingQueryFinal.group;
-          this.recordingQueryFinal.device = this.devices.map((device) => device.id);
+          this.$delete(this.recordingQueryFinal, "group");
+
+          this.$set(
+            this.recordingQueryFinal,
+            "device",
+            this.devices.map((device) => device.id)
+          );
           {
             const { result } = await api.recording.query({
               ...this.recordingQueryFinal,
