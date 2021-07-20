@@ -11,6 +11,15 @@
             <b-dropdown text="Label" right variant="info" class="btn-block">
               <b-dropdown-item
                 v-b-tooltip.hover.left="
+                  'Flag this recording for review due to low confidence IDing track(s)'
+                "
+                @click="addRequiresReviewTag"
+              >
+                Flag for review
+              </b-dropdown-item>
+
+              <b-dropdown-item
+                v-b-tooltip.hover.left="
                   'An animal is in a trap in this recording'
                 "
                 @click="addTrappedTag"
@@ -196,6 +205,9 @@ export default {
     },
     addMultipleAnimalsTag: function () {
       this.addTag("multiple animals");
+    },
+    addRequiresReviewTag: function () {
+      this.addTag("requires review");
     },
     addTag: function (label) {
       this.$emit("addTag", {

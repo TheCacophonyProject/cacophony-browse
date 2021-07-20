@@ -147,6 +147,11 @@ const recordingLabelsBase = [
     text: "Cool video",
     specified: true,
   },
+  {
+    value: "requires review",
+    text: "Flagged for review",
+    specified: true,
+  },
 ];
 
 const taggingFilters = [
