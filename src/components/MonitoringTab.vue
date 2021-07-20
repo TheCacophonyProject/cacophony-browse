@@ -219,6 +219,12 @@ export default {
     };
   },
   async mounted() {
+    while (extraVisits.length) {
+      extraVisits.pop();
+    }
+    while (currentVisits.length) {
+      currentVisits.pop();
+    }
     await this.fetchVisits();
   },
   methods: {
@@ -267,7 +273,6 @@ export default {
             new Date(oldestVisit.timeStart)
           );
           // Now request again until we get a day that is less than oldestVisitDay.  Split the remaining array into before and after.
-          //debugger;
           while (
             extraVisits.length === 0 &&
             this.currentPage <= this.totalVisitsPages

@@ -84,7 +84,6 @@ export default {
       // Slice from last recordings count, so we're only processing new recordings.
       const newVisits = visits.slice(this.loadedVisitsCount);
       const items = [];
-
       // TODO(jon): Intersperse power-on/power-off events and dusk/dawn times
       if (newVisits.length && this.loadedVisitsCount !== 0) {
         items.push({

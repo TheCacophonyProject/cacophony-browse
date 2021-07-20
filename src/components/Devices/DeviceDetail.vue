@@ -55,7 +55,7 @@
         <MonitoringTab
           :group-name="groupName"
           :device-name="deviceName"
-          :visits-query="visitsQuery()"
+          :visits-query="staticVisitsQuery"
         />
       </b-tab>
       <!--      <b-tab title="Schedule">-->
@@ -137,6 +137,9 @@ export default {
     await Promise.all([this.fetchRecordingCount(), this.fetchVisitsCount()]);
   },
   computed: {
+    staticVisitsQuery() {
+      return this.visitsQuery();
+    },
     groupName() {
       return this.$route.params.groupName;
     },
