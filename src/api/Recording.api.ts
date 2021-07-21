@@ -91,7 +91,7 @@ export interface LimitedTrack {
   data: {
     start_s: number;
     end_s: number;
-    positions: [Seconds, Rectangle][];
+    positions: [Seconds, Rectangle][] | Region[];
     num_frames: number;
   };
   tags: string[];
@@ -120,7 +120,13 @@ export interface Recording {
 
 type Seconds = number;
 type Rectangle = [number, number, number, number];
-
+export interface Region {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  frame_number: number;
+}
 export interface Track {
   id: TrackId;
   data: {
