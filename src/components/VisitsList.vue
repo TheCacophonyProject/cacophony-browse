@@ -69,7 +69,6 @@ export default {
       // Keep lazy loading until we have each day, so that we can display proper summaries for each day.
 
       // Should I show periods of "no activity"? Yes, I think that makes things clearer.
-
       let prevFromDate = null;
       let prevDate = null;
       const visits = this.visits as NewVisit[];
@@ -97,6 +96,7 @@ export default {
         const fromDate = new Date(visit.timeStart);
         const toDate = new Date(visit.timeEnd);
         if (
+          newVisits.length === 1 ||
           prevFromDate === null ||
           startOfEvening(fromDate).getTime() !==
             startOfEvening(prevFromDate).getTime()
