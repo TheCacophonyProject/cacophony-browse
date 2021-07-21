@@ -43,7 +43,7 @@
             style="color: #666; font-size: 16px"
           />
           <font-awesome-icon icon="map-marker-alt" size="xs" />
-          <span>{{ stationName }}</span>
+          <span>{{ stationName }}</span> <span v-if="stationIsRetired">(retired)</span>
         </h1>
       </div>
       <div>
@@ -189,6 +189,7 @@ export default {
       recordingsQueryFinal: {},
       visitsQueryFinal: {},
       station: null,
+      stationIsRetired: false,
       group: {},
       tabNames: ["recordings", "visits"],
     };
@@ -231,6 +232,7 @@ export default {
                 new Date(b.retiredAt).getTime()
             );
             this.station = sortedByLatestRetired.pop();
+            this.stationIsRetired = true;
           }
         } else if (station.length === 1) {
           this.station = station[0];
