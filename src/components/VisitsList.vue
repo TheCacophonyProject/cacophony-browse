@@ -96,7 +96,7 @@ export default {
         const fromDate = new Date(visit.timeStart);
         const toDate = new Date(visit.timeEnd);
         if (
-          newVisits.length === 1 ||
+          (newVisits.length === 1 && this.loadedVisitsCount === 0) ||
           prevFromDate === null ||
           startOfEvening(fromDate).getTime() !==
             startOfEvening(prevFromDate).getTime()
