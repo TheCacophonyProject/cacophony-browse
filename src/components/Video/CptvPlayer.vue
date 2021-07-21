@@ -378,7 +378,34 @@ const yieldToUI = () => {
     setTimeout(resolve, 0);
   });
 };
-
+const handlePosition = (positions, padding) => {
+  const frameAtTime = (time) => {
+    return Math.round(time / this.frameTimeSeconds);
+  };
+  const timeOffset = this.timeAdjustmentForBackgroundFrame;
+  console.log("handle positions");
+  return positions.map((position) =>
+    Array.isArray(position)
+      ? [
+          frameAtTime(position[0] - timeOffset),
+          [
+            Math.max(0, position[1][0] - padding),
+            Math.max(0, position[1][1] - padding),
+            position[1][2] + padding,
+            position[1][3] + padding,
+          ],
+        ]
+      : [
+          position.frame_number,
+          [
+            Math.max(0, position.x - padding),
+            Math.max(0, position.y - padding),
+            position.x + position.width + padding,
+            position.y + position.height + padding,
+          ],
+        ]
+  );
+};
 const getAuthoritativeTagForTrack = (trackTags) => {
   const userTags = trackTags.filter(
     (tag) =>
@@ -599,7 +626,7 @@ export default {
       const frameAtTime = (time) => {
         return Math.round(time / this.frameTimeSeconds);
       };
-
+      console.log("PPPPP", this.tracks);
       // Add a bit of breathing room around our boxes
       const padding = 5;
       return this.tracks
@@ -609,17 +636,26 @@ export default {
           end_s: data.end_s - timeOffset,
           num_frames: data.num_frames + (this.hasBackgroundFrame ? -1 : 0),
           trackIndex,
-          positions: data.positions.map(
-            ([time, [left, top, right, bottom]]) => [
-              frameAtTime(time - timeOffset),
-              time - timeOffset,
-              [
-                Math.max(0, left - padding),
-                Math.max(0, top - padding),
-                right + padding,
-                bottom + padding,
-              ],
-            ]
+          positions: data.positions.map((position) =>
+            Array.isArray(position)
+              ? [
+                  frameAtTime(position[0] - timeOffset),
+                  [
+                    Math.max(0, position[1][0] - padding),
+                    Math.max(0, position[1][1] - padding),
+                    position[1][2] + padding,
+                    position[1][3] + padding,
+                  ],
+                ]
+              : [
+                  position.frame_number,
+                  [
+                    Math.max(0, position.x - padding),
+                    Math.max(0, position.y - padding),
+                    position.x + position.width + padding,
+                    position.y + position.height + padding,
+                  ],
+                ]
           ),
         }))
         .reduce((acc, item, index) => {
@@ -627,7 +663,7 @@ export default {
             acc[position[0]] = acc[position[0]] || {};
             const frame = acc[position[0]];
             frame[index] = {
-              rect: position[2],
+              rect: position[1],
               what: item.what,
             };
           }
