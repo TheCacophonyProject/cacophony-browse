@@ -217,9 +217,24 @@ export default {
           api.groups.getStationsForGroup(this.groupName),
         ]);
         this.group = group.result.groups[0];
-        this.station = stations.result.stations
-          .filter((station) => station.retiredAt === null)
-          .find((station) => station.name === this.stationName);
+        const station = stations.result.stations.filter(
+          (station) => station.name === this.stationName
+        );
+        if (station.length > 1) {
+          const nonRetired = station.find((item) => item.retiredAt === null);
+          if (nonRetired) {
+            this.station = nonRetired;
+          } else {
+            const sortedByLatestRetired = station.sort(
+              (a, b) =>
+                new Date(a.retiredAt).getTime() -
+                new Date(b.retiredAt).getTime()
+            );
+            this.station = sortedByLatestRetired.pop();
+          }
+        } else if (station.length === 1) {
+          this.station = station[0];
+        }
         this.recordingsQueryFinal = {
           tagMode: "any",
           offset: 0,
