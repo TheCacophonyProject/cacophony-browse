@@ -98,7 +98,7 @@ export default {
         if (
           (newVisits.filter((v) => v.hasOwnProperty("device")).length === 1 && // Edge case with only 1 visit
             this.loadedVisitsCount === 0 &&
-            items.length === 1) ||
+            items.length <= 1) ||
           prevFromDate === null ||
           startOfEvening(fromDate).getTime() !==
             startOfEvening(prevFromDate).getTime()
