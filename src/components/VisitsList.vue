@@ -96,7 +96,9 @@ export default {
         const fromDate = new Date(visit.timeStart);
         const toDate = new Date(visit.timeEnd);
         if (
-          (newVisits.length === 1 && this.loadedVisitsCount === 0) ||
+          (newVisits.filter((v) => v.hasOwnProperty("device")).length === 1 && // Edge case with only 1 visit
+            this.loadedVisitsCount === 0 &&
+            items.length === 1) ||
           prevFromDate === null ||
           startOfEvening(fromDate).getTime() !==
             startOfEvening(prevFromDate).getTime()

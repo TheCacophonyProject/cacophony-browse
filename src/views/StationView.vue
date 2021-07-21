@@ -43,7 +43,8 @@
             style="color: #666; font-size: 16px"
           />
           <font-awesome-icon icon="map-marker-alt" size="xs" />
-          <span>{{ stationName }}</span> <span v-if="stationIsRetired">(retired)</span>
+          <span>{{ stationName }}</span>
+          <span v-if="stationIsRetired">(retired)</span>
         </h1>
       </div>
       <div>
